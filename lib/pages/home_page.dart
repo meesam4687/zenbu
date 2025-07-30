@@ -9,15 +9,18 @@ class HomePage extends StatelessWidget {
       appBar: AppBar(
         title: const Text("Home"),
         actions: [
-          IconButton(
-            onPressed: () {},
-            icon: ClipOval(
-              child: Image(
-                height: 40,
-                width: 40,
-                fit: BoxFit.fill,
-                image: NetworkImage(
-                  "https://fujiframe.com/assets/images/_3000x2000_fit_center-center_85_none/10085/xhs2-fuji-70-300-Amazilia-Hummingbird.webp",
+          Padding(
+            padding: const EdgeInsets.only(right: 5),
+            child: IconButton(
+              onPressed: () {},
+              icon: ClipOval(
+                child: Image(
+                  height: 40,
+                  width: 40,
+                  fit: BoxFit.fill,
+                  image: NetworkImage(
+                    "https://fujiframe.com/assets/images/_3000x2000_fit_center-center_85_none/10085/xhs2-fuji-70-300-Amazilia-Hummingbird.webp",
+                  ),
                 ),
               ),
             ),

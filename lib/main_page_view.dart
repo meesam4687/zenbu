@@ -24,6 +24,7 @@ class _MainPageState extends State<MainPageView> {
   Widget build(BuildContext context) {
     return Scaffold(
       bottomNavigationBar: NavigationBar(
+        surfaceTintColor: Theme.of(context).colorScheme.surfaceTint,
         selectedIndex: selectedIdx,
         onDestinationSelected: (value) {
           setState(() {
