@@ -30,6 +30,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  dynamic_color: ^1.6.6
 
 
 dev_dependencies:
