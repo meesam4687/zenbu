@@ -31,6 +31,7 @@ dependencies:
   flutter:
     sdk: flutter
   dynamic_color: ^1.6.6
+  animations: ^2.0.11
 
 
 dev_dependencies:
