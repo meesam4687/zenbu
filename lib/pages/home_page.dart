@@ -1,3 +1,5 @@
+import 'package:al_client/components/home_page/anime_list.dart';
+import 'package:al_client/components/home_page/manga_list.dart';
 import 'package:flutter/material.dart';
 
 class HomePage extends StatelessWidget {
@@ -27,7 +29,7 @@ class HomePage extends StatelessWidget {
                     width: 40,
                     fit: BoxFit.fill,
                     image: NetworkImage(
-                      "https://fujiframe.com/assets/images/_3000x2000_fit_center-center_85_none/10085/xhs2-fuji-70-300-Amazilia-Hummingbird.webp",
+                      "https://img.freepik.com/free-vector/wall-frame-white-color_23-2147507923.jpg?semt=ais_hybrid&w=740&q=80",
                     ),
                   ),
                 ),
@@ -35,6 +37,9 @@ class HomePage extends StatelessWidget {
             ),
           ),
         ],
+      ),
+      body: SingleChildScrollView(
+        child: Column(children: [AnimeList(), MangaList()]),
       ),
     );
   }
