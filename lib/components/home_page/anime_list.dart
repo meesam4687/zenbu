@@ -2,43 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:al_client/components/global/item_card.dart';
 
 class AnimeList extends StatelessWidget {
-  const AnimeList({super.key});
+  const AnimeList({super.key, required this.items});
+  final List<dynamic> items;
 
   @override
   Widget build(BuildContext context) {
-    List<Map<String, String>> items = [
-      {
-        "title": "Ligma the First",
-        "image":
-            "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx177937-HDZQqDqXQqxs.jpg",
-        "state": "2/23",
-      },
-      {
-        "title": "Ligma the Second",
-        "image":
-            "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx177686-9CwCvp3mkDI3.jpg",
-        "state": "3/12",
-      },
-      {
-        "title": "Ligma the Third",
-        "image":
-            "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx132776-U34wk1Zbx7pU.png",
-        "state": "5/11",
-      },
-      {
-        "title": "Ligma the Fourth",
-        "image":
-            "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx186052-zq8h0Qo0O0sP.jpg",
-        "state": "7/12",
-      },
-      {
-        "title": "Ligma the Fifth",
-        "image":
-            "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx196063-hDLoZ2anG97G.png",
-        "state": "8/13",
-      },
-    ];
-
     return Container(
       margin: EdgeInsets.only(top: 40),
       width: double.infinity,
@@ -83,9 +51,13 @@ class AnimeList extends StatelessWidget {
               itemBuilder: (context, index) {
                 final item = items[index];
                 return ItemCard(
-                  title: item["title"] as String,
-                  state: item["state"] as String,
-                  image: item["image"] as String,
+                  title:
+                      ((item["media"]["title"]["romaji"] as String).length > 32)
+                      ? '${(item["media"]["title"]["romaji"] as String).substring(0, 32)}...'
+                      : item["media"]["title"]["romaji"] as String,
+                  state:
+                      "${item["media"]["mediaListEntry"]["progress"]}/${(item["media"]["episodes"] == null) ? '?' : item["media"]["episodes"]}",
+                  image: item["media"]["coverImage"]["extraLarge"] as String,
                 );
               },
             ),
