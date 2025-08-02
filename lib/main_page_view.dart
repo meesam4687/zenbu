@@ -2,6 +2,7 @@ import 'package:al_client/pages/anime_page.dart';
 import 'package:al_client/pages/home_page.dart';
 import 'package:al_client/pages/manga_page.dart';
 import 'package:flutter/material.dart';
+import 'package:animations/animations.dart';
 
 class MainPageView extends StatefulWidget {
   const MainPageView({super.key});
@@ -40,7 +41,16 @@ class _MainPageState extends State<MainPageView> {
           NavigationDestination(icon: Icon(Icons.book_rounded), label: "Manga"),
         ],
       ),
-      body: IndexedStack(index: selectedIdx, children: pages),
+      body: PageTransitionSwitcher(
+        duration: Duration(milliseconds: 400),
+        transitionBuilder: (child, animation, secondaryAnimation) =>
+            FadeThroughTransition(
+              animation: animation,
+              secondaryAnimation: secondaryAnimation,
+              child: child,
+            ),
+        child: pages[selectedIdx],
+      ),
     );
   }
 }
