@@ -24,6 +24,8 @@ Future<Map<String, dynamic>> getHomePageData() async {
                 coverImage { extraLarge }
                 episodes
                 mediaListEntry { status progress }
+                status
+                bannerImage
               }
             }
           }
@@ -39,6 +41,7 @@ Future<Map<String, dynamic>> getHomePageData() async {
                 coverImage { extraLarge }
                 chapters
                 mediaListEntry { status progress }
+                bannerImage
               }
             }
           }
@@ -54,7 +57,45 @@ Future<Map<String, dynamic>> getHomePageData() async {
       },
       body: jsonEncode({
         "query": query,
-        "variables": {"type": "ANIME", "type2": "MANGA", "userId": 5656469},
+        "variables": {"type": "ANIME", "type2": "MANGA", "userId": 7433884},
+      }),
+    );
+
+    final data = jsonDecode(res.body);
+    return data;
+  } catch (e) {
+    throw e.toString();
+  }
+}
+
+Future<Map<String, dynamic>> getAnimeData(int id) async {
+  try {
+    String authHeader = 'Bearer $anilistAuthKey';
+
+    String query = '''
+      query(\$id: Int) {
+        Media(id: \$id) {
+          title {
+            romaji 
+          } 
+          status
+          episodes
+          mediaListEntry {
+            progress
+          }
+        }
+      }
+    ''';
+
+    final res = await http.post(
+      Uri.parse('https://graphql.anilist.co'),
+      headers: {
+        "Authorization": authHeader,
+        "Content-Type": "application/json",
+      },
+      body: jsonEncode({
+        "query": query,
+        "variables": {"id": id},
       }),
     );
 

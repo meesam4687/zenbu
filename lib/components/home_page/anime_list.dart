@@ -50,7 +50,10 @@ class AnimeList extends StatelessWidget {
               itemCount: items.length,
               itemBuilder: (context, index) {
                 final item = items[index];
+                final int id = item['id'];
                 return ItemCard(
+                  type: "anime",
+                  id: id,
                   title:
                       ((item["media"]["title"]["romaji"] as String).length > 32)
                       ? '${(item["media"]["title"]["romaji"] as String).substring(0, 32)}...'

@@ -1,8 +1,8 @@
-import 'package:al_client/state_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:dynamic_color/dynamic_color.dart';
-import 'package:al_client/main_page_view.dart';
 import 'package:provider/provider.dart';
+import 'package:dynamic_color/dynamic_color.dart';
+import 'package:al_client/state_provider.dart';
+import 'package:al_client/main_page_view.dart';
 
 void main() {
   runApp(const MyApp());
