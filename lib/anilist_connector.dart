@@ -76,10 +76,39 @@ Future<Map<String, dynamic>> getAnimeData(int id) async {
       query(\$id: Int) {
         Media(id: \$id) {
           title {
-            romaji 
+            english
+            native
+            romaji
           } 
+          format
           status
           episodes
+          startDate {
+            day
+            month
+            year
+          }
+          endDate {
+            day
+            month
+            year
+          }
+          season
+          seasonYear
+          description
+          duration
+          countryOfOrigin
+          source
+          genres
+          meanScore
+          studios {
+            nodes {
+              name
+            }
+          }
+          tags {
+            name
+          }
           mediaListEntry {
             progress
           }
