@@ -6,7 +6,7 @@ class ItemCard extends StatelessWidget {
   const ItemCard({
     super.key,
     required this.title,
-    required this.state,
+    this.state,
     required this.image,
     required this.id,
     required this.type,
@@ -57,7 +57,7 @@ class ItemCard extends StatelessWidget {
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                   Text(
-                    state as String,
+                    (state != null) ? state as String : "",
                     textAlign: TextAlign.center,
                     style: TextStyle(fontWeight: FontWeight.w200),
                   ),
@@ -71,6 +71,8 @@ class ItemCard extends StatelessWidget {
         if (type == "anime") {
           return AnimeDetailsPage(id: id);
         } else if (type == "manga") {
+          return Scaffold();
+        } else if (type == "character") {
           return Scaffold();
         }
         return Scaffold();

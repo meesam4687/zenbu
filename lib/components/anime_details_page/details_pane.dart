@@ -1,5 +1,7 @@
 import 'package:al_client/anilist_connector.dart';
+import 'package:al_client/components/anime_details_page/details.dart';
 import 'package:flutter/material.dart';
+import 'package:al_client/components/global/item_card.dart';
 
 class DetailsPane extends StatefulWidget {
   const DetailsPane({super.key, required this.mediaId});
@@ -40,223 +42,43 @@ class _DetailsPaneState extends State<DetailsPane> {
           return const Center(child: CircularProgressIndicator.adaptive());
         }
         final Map data = snapshot.data!;
-
+        final List<dynamic> tags = (data['data']['Media']['tags'] as List)
+            .map((tag) => tag['name'] as String)
+            .toList();
+        final List<dynamic> genres = data['data']['Media']['genres'];
         return Container(
           width: double.infinity,
           margin: EdgeInsets.only(top: 10, left: 20, right: 20),
           child: Column(
             children: [
-              Column(
-                spacing: 5,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Mean Score",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w300,
-                        ),
-                      ),
-                      Text(
-                        "${(data["data"]["Media"]["meanScore"] as int) / 10}/10",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Studios",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w300,
-                        ),
-                      ),
-                      Text(
-                        data["data"]["Media"]["studios"]["nodes"][0]["name"],
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Source",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w300,
-                        ),
-                      ),
-                      Text(
-                        "${(data["data"]["Media"]["source"] as String).substring(0, 1).toUpperCase()}${(data["data"]["Media"]["source"] as String).substring(1).toLowerCase()}"
-                            .replaceAll("_", " "),
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Format",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w300,
-                        ),
-                      ),
-                      Text(
-                        data["data"]["Media"]["format"],
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Episodes",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w300,
-                        ),
-                      ),
-                      (data["data"]["Media"]["episodes"] == null)
-                          ? Text(
-                              "N/A",
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            )
-                          : Text(
-                              "${data["data"]["Media"]["episodes"]}",
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                    ],
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Episode Duration",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w300,
-                        ),
-                      ),
-                      Text(
-                        "${data["data"]["Media"]["duration"]}",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Status",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w300,
-                        ),
-                      ),
-                      Text(
-                        "${(data["data"]["Media"]["status"] as String).substring(0, 1).toUpperCase()}${(data["data"]["Media"]["status"] as String).substring(1).toLowerCase()}",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Start Date",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w300,
-                        ),
-                      ),
-                      Text(
-                        "${months[data["data"]["Media"]["endDate"]["month"]]} ${data["data"]["Media"]["startDate"]["day"]}, ${data["data"]["Media"]["startDate"]["year"]}",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "End Date",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w300,
-                        ),
-                      ),
-                      (data["data"]["Media"]["endDate"]["day"] == null)
-                          ? Text(
-                              "N/A",
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            )
-                          : Text(
-                              "${months[data["data"]["Media"]["endDate"]["month"]]} ${data["data"]["Media"]["endDate"]["day"]}, ${data["data"]["Media"]["endDate"]["year"]}",
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                    ],
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Season",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w300,
-                        ),
-                      ),
-                      Text(
-                        "${(data["data"]["Media"]["season"] as String).substring(0, 1).toUpperCase()}${(data["data"]["Media"]["season"] as String).substring(1).toLowerCase()}, ${data["data"]["Media"]["startDate"]["year"]}",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+              Details(
+                meanScore:
+                    "${(data["data"]["Media"]["meanScore"] as int) / 10}/10",
+
+                studios: data["data"]["Media"]["studios"]["nodes"][0]["name"],
+
+                source:
+                    "${(data["data"]["Media"]["source"] as String).substring(0, 1).toUpperCase()}${(data["data"]["Media"]["source"] as String).substring(1).toLowerCase()}"
+                        .replaceAll("_", " "),
+
+                format: data["data"]["Media"]["format"],
+
+                episodes: "${data["data"]["Media"]["episodes"]}",
+
+                episodeDuration: "${data["data"]["Media"]["duration"]}",
+
+                status:
+                    "${(data["data"]["Media"]["status"] as String).substring(0, 1).toUpperCase()}${(data["data"]["Media"]["status"] as String).substring(1).toLowerCase()}",
+
+                startDate:
+                    "${months[data["data"]["Media"]["startDate"]["month"]]} ${data["data"]["Media"]["startDate"]["day"]}, ${data["data"]["Media"]["startDate"]["year"]}",
+
+                endDate: (data["data"]["Media"]["endDate"]["day"] == null)
+                    ? "N/A"
+                    : "${months[data["data"]["Media"]["endDate"]["month"]]} ${data["data"]["Media"]["endDate"]["day"]}, ${data["data"]["Media"]["endDate"]["year"]}",
+
+                season:
+                    "${(data["data"]["Media"]["season"] as String).substring(0, 1).toUpperCase()}${(data["data"]["Media"]["season"] as String).substring(1).toLowerCase()}, ${data["data"]["Media"]["startDate"]["year"]}",
               ),
               Container(
                 margin: EdgeInsets.only(top: 20),
@@ -276,6 +98,133 @@ class _DetailsPaneState extends State<DetailsPane> {
                       child: Text(
                         (data["data"]["Media"]["description"] as String)
                             .replaceAll(RegExp(r'<[^>]*>'), ''),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                margin: EdgeInsets.only(top: 10),
+                width: double.infinity,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Genres and Tags",
+                      style: TextStyle(
+                        fontSize: 25,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(
+                      height: 60,
+                      width: double.infinity,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: (genres + tags).length,
+                        itemBuilder: (context, index) {
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 8.0),
+                            child: Chip(label: Text((genres + tags)[index])),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                margin: EdgeInsets.only(top: 10),
+                width: double.infinity,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Characters",
+                      style: TextStyle(
+                        fontSize: 25,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Container(
+                      margin: EdgeInsets.only(top: 10),
+                      height: 260,
+                      width: double.infinity,
+                      child: SizedBox(
+                        height: 260,
+                        width: double.infinity,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount:
+                              (data["data"]["Media"]["characters"]["characters"]
+                                      as List)
+                                  .length,
+                          itemBuilder: (context, index) {
+                            return ItemCard(
+                              title:
+                                  data["data"]["Media"]["characters"]["characters"][index]["node"]["name"]["full"],
+                              image:
+                                  data["data"]["Media"]["characters"]["characters"][index]["node"]["image"]["large"],
+                              id: data["data"]["Media"]["characters"]["characters"][index]["node"]["id"],
+                              type: "character",
+                              state:
+                                  data["data"]["Media"]["characters"]["characters"][index]["role"],
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                margin: EdgeInsets.only(top: 0),
+                width: double.infinity,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Relations",
+                      style: TextStyle(
+                        fontSize: 25,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Container(
+                      margin: EdgeInsets.only(top: 10),
+                      height: 260,
+                      width: double.infinity,
+                      child: SizedBox(
+                        height: 260,
+                        width: double.infinity,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount:
+                              (data["data"]["Media"]["relations"]["edges"]
+                                      as List)
+                                  .length,
+                          itemBuilder: (context, index) {
+                            return ItemCard(
+                              id: data["data"]["Media"]["relations"]["edges"][index]["node"]["id"],
+                              type:
+                                  data["data"]["Media"]["relations"]["edges"][index]["node"]["type"]
+                                      .toString()
+                                      .toLowerCase(),
+                              title:
+                                  ((data["data"]["Media"]["relations"]["edges"][index]["node"]["title"]["romaji"]
+                                              as String)
+                                          .length >
+                                      16)
+                                  ? '${(data["data"]["Media"]["relations"]["edges"][index]["node"]["title"]["romaji"] as String).substring(0, 16)}...'
+                                  : (data["data"]["Media"]["relations"]["edges"][index]["node"]["title"]["romaji"]
+                                        as String),
+                              image:
+                                  data["data"]["Media"]["relations"]["edges"][index]["node"]["coverImage"]["extraLarge"],
+                              state:
+                                  data["data"]["Media"]["relations"]["edges"][index]["relationType"],
+                            );
+                          },
+                        ),
                       ),
                     ),
                   ],

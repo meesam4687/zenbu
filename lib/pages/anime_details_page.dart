@@ -1,3 +1,4 @@
+import 'package:al_client/anilist_connector.dart';
 import 'package:al_client/components/anime_details_page/details_pane.dart';
 import 'package:al_client/state_provider.dart';
 import 'package:flutter/material.dart';
@@ -15,11 +16,11 @@ class AnimeDetailsPage extends StatefulWidget {
 class _AnimeDetailsPageState extends State<AnimeDetailsPage> {
   double scrollOffset = 0;
   final ScrollController _scrollController = ScrollController();
-
+  late Future<Map<String, dynamic>> animeData;
   @override
   void initState() {
     super.initState();
-
+    animeData = getAnimeData(widget.id as int);
     _scrollController.addListener(() {
       setState(() {
         scrollOffset = _scrollController.offset;
@@ -41,34 +42,76 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage> {
   Widget build(BuildContext context) {
     Map alData = Provider.of<StateProvider>(context).alData;
     List entries = alData["data"]["animeList"]["lists"][0]["entries"];
-    Map current = entries.firstWhere((element) => element["id"] == widget.id);
-
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        backgroundColor: (appBarOpacity == 0) ? Colors.transparent : null,
-        elevation: appBarOpacity > 0 ? 4 : 0,
-        scrolledUnderElevation: 0,
-      ),
-      body: SingleChildScrollView(
-        controller: _scrollController,
-        child: Column(
-          children: [
-            TitlePane(
-              title:
-                  ((current["media"]["title"]["romaji"] as String).length > 32)
-                  ? '${(current["media"]["title"]["romaji"] as String).substring(0, 32)}...'
-                  : (current["media"]["title"]["romaji"] as String),
-              airingStatus: "Ongoing",
-              progress:
-                  "${current["media"]["mediaListEntry"]["progress"]}/${(current["media"]["episodes"] == null) ? '?' : current["media"]["episodes"]}",
-              cover: current["media"]["coverImage"]["extraLarge"],
-              banner: current["media"]["bannerImage"],
-            ),
-            DetailsPane(mediaId: current["media"]["id"]),
-          ],
-        ),
-      ),
+    Map current = entries.firstWhere(
+      (element) => element["id"] == widget.id,
+      orElse: () => {},
     );
+    if (current.isNotEmpty) {
+      return Scaffold(
+        extendBodyBehindAppBar: true,
+        appBar: AppBar(
+          backgroundColor: (appBarOpacity == 0) ? Colors.transparent : null,
+          elevation: appBarOpacity > 0 ? 4 : 0,
+          scrolledUnderElevation: 0,
+        ),
+        body: SingleChildScrollView(
+          controller: _scrollController,
+          child: Column(
+            children: [
+              TitlePane(
+                title:
+                    ((current["media"]["title"]["romaji"] as String).length >
+                        32)
+                    ? '${(current["media"]["title"]["romaji"] as String).substring(0, 32)}...'
+                    : (current["media"]["title"]["romaji"] as String),
+                progress:
+                    "Progress: ${current["media"]["mediaListEntry"]["progress"]}/${(current["media"]["episodes"] == null) ? '?' : current["media"]["episodes"]}",
+                cover: current["media"]["coverImage"]["extraLarge"],
+                banner: current["media"]["bannerImage"],
+              ),
+              DetailsPane(mediaId: current["media"]["id"]),
+            ],
+          ),
+        ),
+      );
+    } else {
+      return FutureBuilder(
+        future: animeData,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator.adaptive());
+          }
+          final data = snapshot.data!;
+          return Scaffold(
+            extendBodyBehindAppBar: true,
+            appBar: AppBar(
+              backgroundColor: (appBarOpacity == 0) ? Colors.transparent : null,
+              elevation: appBarOpacity > 0 ? 4 : 0,
+              scrolledUnderElevation: 0,
+            ),
+            body: SingleChildScrollView(
+              controller: _scrollController,
+              child: Column(
+                children: [
+                  TitlePane(
+                    title:
+                        ((data["data"]["Media"]["title"]["romaji"] as String)
+                                .length >
+                            32)
+                        ? '${(data["data"]["Media"]["title"]["romaji"] as String).substring(0, 32)}...'
+                        : (data["data"]["Media"]["title"]["romaji"] as String),
+                    progress:
+                        "Progress: ${(data["data"]["Media"]["mediaListEntry"] != null) ? data["data"]["Media"]["mediaListEntry"]["progress"] : "0"}/${(data["data"]["Media"]["episodes"] == null) ? '?' : data["data"]["Media"]["episodes"]}",
+                    cover: data["data"]["Media"]["coverImage"]["extraLarge"],
+                    banner: data["data"]["Media"]["bannerImage"],
+                  ),
+                  DetailsPane(mediaId: widget.id as int),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+    }
   }
 }

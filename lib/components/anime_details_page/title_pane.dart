@@ -5,13 +5,11 @@ class TitlePane extends StatelessWidget {
   const TitlePane({
     super.key,
     required this.title,
-    required this.airingStatus,
     required this.progress,
     required this.cover,
     required this.banner,
   });
   final String title;
-  final String airingStatus;
   final String progress;
   final String cover;
   final String? banner;
@@ -78,7 +76,6 @@ class TitlePane extends StatelessWidget {
                             width: 250,
                             child: Text(title, style: TextStyle(fontSize: 27)),
                           ),
-                          Text(airingStatus),
                           Text(progress),
                         ],
                       ),

@@ -81,6 +81,10 @@ Future<Map<String, dynamic>> getAnimeData(int id) async {
             romaji
           } 
           format
+          coverImage {
+            extraLarge
+          }
+          bannerImage
           status
           episodes
           startDate {
@@ -108,6 +112,37 @@ Future<Map<String, dynamic>> getAnimeData(int id) async {
           }
           tags {
             name
+          }
+          relations {
+            edges {
+              relationType(version: 2)
+                node {
+                  id
+                  type
+                  title
+                  {
+                    romaji
+                  }
+                  coverImage {
+                    extraLarge
+                  }
+                }
+            }
+          }
+          characters(sort: [ROLE]) {
+            characters: edges {
+              role
+              node {
+                id
+                name { 
+                  full
+                  native
+                }
+                image {
+                  large
+                } 
+              }
+            }
           }
           mediaListEntry {
             progress
