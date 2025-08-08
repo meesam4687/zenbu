@@ -110,6 +110,36 @@ Future<Map<String, dynamic>> getAnimeData(int id) async {
               name
             }
           }
+          staff {
+            edges {
+              id
+              role
+              node {
+                name {
+                  full
+                }
+                image {
+                  large
+                }
+              }
+            }
+          }
+          recommendations {
+            edges {
+              node {
+                media: mediaRecommendation {
+                  id
+                  title {
+                    romaji
+                  }
+                  coverImage {
+                    extraLarge
+                  } 
+                  type
+                }
+              }
+            }
+          } 
           tags {
             name
           }
