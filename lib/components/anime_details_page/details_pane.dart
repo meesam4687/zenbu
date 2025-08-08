@@ -63,7 +63,7 @@ class _DetailsPaneState extends State<DetailsPane> {
 
                 format: data["data"]["Media"]["format"],
 
-                episodes: "${data["data"]["Media"]["episodes"]}",
+                episodes: data["data"]["Media"]["episodes"],
 
                 episodeDuration: "${data["data"]["Media"]["duration"]}",
 

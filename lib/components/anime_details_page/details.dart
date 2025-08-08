@@ -18,7 +18,7 @@ class Details extends StatelessWidget {
   final String studios;
   final String source;
   final String format;
-  final String? episodes;
+  final int? episodes;
   final String episodeDuration;
   final String status;
   final String startDate;
@@ -95,7 +95,7 @@ class Details extends StatelessWidget {
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   )
                 : Text(
-                    episodes as String,
+                    episodes.toString(),
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
           ],
