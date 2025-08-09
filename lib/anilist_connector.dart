@@ -199,3 +199,130 @@ Future<Map<String, dynamic>> getAnimeData(int id) async {
     throw e.toString();
   }
 }
+
+Future<Map<String, dynamic>> getMangaData(int id) async {
+  try {
+    String authHeader = 'Bearer $anilistAuthKey';
+
+    String query = '''
+      query(\$id: Int) {
+        Media(id: \$id) {
+          title {
+            english
+            native
+            romaji
+          } 
+          format
+          coverImage {
+            extraLarge
+          }
+          bannerImage
+          status
+          chapters
+          startDate {
+            day
+            month
+            year
+          }
+          endDate {
+            day
+            month
+            year
+          }
+          season
+          seasonYear
+          description
+          duration
+          countryOfOrigin
+          source
+          genres
+          meanScore
+          staff {
+            edges {
+              id
+              role
+              node {
+                name {
+                  full
+                }
+                image {
+                  large
+                }
+              }
+            }
+          }
+          recommendations {
+            edges {
+              node {
+                media: mediaRecommendation {
+                  id
+                  title {
+                    romaji
+                  }
+                  coverImage {
+                    extraLarge
+                  } 
+                  type
+                }
+              }
+            }
+          } 
+          tags {
+            name
+          }
+          relations {
+            edges {
+              relationType(version: 2)
+                node {
+                  id
+                  type
+                  title
+                  {
+                    romaji
+                  }
+                  coverImage {
+                    extraLarge
+                  }
+                }
+            }
+          }
+          characters(sort: [ROLE]) {
+            characters: edges {
+              role
+              node {
+                id
+                name { 
+                  full
+                  native
+                }
+                image {
+                  large
+                } 
+              }
+            }
+          }
+          mediaListEntry {
+            progress
+          }
+        }
+      }
+    ''';
+
+    final res = await http.post(
+      Uri.parse('https://graphql.anilist.co'),
+      headers: {
+        "Authorization": authHeader,
+        "Content-Type": "application/json",
+      },
+      body: jsonEncode({
+        "query": query,
+        "variables": {"id": id},
+      }),
+    );
+
+    final data = jsonDecode(res.body);
+    return data;
+  } catch (e) {
+    throw e.toString();
+  }
+}

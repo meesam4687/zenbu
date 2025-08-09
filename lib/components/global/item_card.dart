@@ -1,4 +1,5 @@
 import 'package:al_client/pages/anime_details_page.dart';
+import 'package:al_client/pages/manga_details_page.dart';
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 
@@ -71,7 +72,7 @@ class ItemCard extends StatelessWidget {
         if (type == "anime") {
           return AnimeDetailsPage(id: id);
         } else if (type == "manga") {
-          return Scaffold();
+          return MangaDetailsPage(id: id);
         } else if (type == "character") {
           return Scaffold();
         }
