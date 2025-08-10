@@ -77,8 +77,9 @@ class _DetailsPaneState extends State<DetailsPane> {
                     ? "N/A"
                     : "${months[data["data"]["Media"]["endDate"]["month"]]} ${data["data"]["Media"]["endDate"]["day"]}, ${data["data"]["Media"]["endDate"]["year"]}",
 
-                season:
-                    "${(data["data"]["Media"]["season"] as String).substring(0, 1).toUpperCase()}${(data["data"]["Media"]["season"] as String).substring(1).toLowerCase()}, ${data["data"]["Media"]["startDate"]["year"]}",
+                season: (data["data"]["Media"]["season"] != null)
+                    ? "${(data["data"]["Media"]["season"].toString()).substring(0, 1).toUpperCase()}${(data["data"]["Media"]["season"].toString()).substring(1).toLowerCase()}, ${data["data"]["Media"]["startDate"]["year"]}"
+                    : "N/A",
               ),
               Container(
                 margin: EdgeInsets.only(top: 20),
