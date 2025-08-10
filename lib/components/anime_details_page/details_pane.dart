@@ -96,7 +96,7 @@ class _DetailsPaneState extends State<DetailsPane> {
                     Container(
                       margin: EdgeInsets.only(top: 10),
                       child: Text(
-                        (data["data"]["Media"]["description"] as String)
+                        (data["data"]["Media"]["description"].toString())
                             .replaceAll(RegExp(r'<[^>]*>'), ''),
                       ),
                     ),
@@ -177,59 +177,61 @@ class _DetailsPaneState extends State<DetailsPane> {
                   ],
                 ),
               ),
-              Container(
-                margin: EdgeInsets.only(top: 0),
-                width: double.infinity,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Relations",
-                      style: TextStyle(
-                        fontSize: 25,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Container(
-                      margin: EdgeInsets.only(top: 10),
-                      height: 260,
+              (data["data"]["Media"]["relations"]["edges"] as List).isNotEmpty
+                  ? Container(
+                      margin: EdgeInsets.only(top: 0),
                       width: double.infinity,
-                      child: SizedBox(
-                        height: 260,
-                        width: double.infinity,
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
-                          itemCount:
-                              (data["data"]["Media"]["relations"]["edges"]
-                                      as List)
-                                  .length,
-                          itemBuilder: (context, index) {
-                            return ItemCard(
-                              id: data["data"]["Media"]["relations"]["edges"][index]["node"]["id"],
-                              type:
-                                  data["data"]["Media"]["relations"]["edges"][index]["node"]["type"]
-                                      .toString()
-                                      .toLowerCase(),
-                              title:
-                                  ((data["data"]["Media"]["relations"]["edges"][index]["node"]["title"]["romaji"]
-                                              as String)
-                                          .length >
-                                      16)
-                                  ? '${(data["data"]["Media"]["relations"]["edges"][index]["node"]["title"]["romaji"] as String).substring(0, 16)}...'
-                                  : (data["data"]["Media"]["relations"]["edges"][index]["node"]["title"]["romaji"]
-                                        as String),
-                              image:
-                                  data["data"]["Media"]["relations"]["edges"][index]["node"]["coverImage"]["extraLarge"],
-                              state:
-                                  data["data"]["Media"]["relations"]["edges"][index]["relationType"],
-                            );
-                          },
-                        ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Relations",
+                            style: TextStyle(
+                              fontSize: 25,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Container(
+                            margin: EdgeInsets.only(top: 10),
+                            height: 260,
+                            width: double.infinity,
+                            child: SizedBox(
+                              height: 260,
+                              width: double.infinity,
+                              child: ListView.builder(
+                                scrollDirection: Axis.horizontal,
+                                itemCount:
+                                    (data["data"]["Media"]["relations"]["edges"]
+                                            as List)
+                                        .length,
+                                itemBuilder: (context, index) {
+                                  return ItemCard(
+                                    id: data["data"]["Media"]["relations"]["edges"][index]["node"]["id"],
+                                    type:
+                                        data["data"]["Media"]["relations"]["edges"][index]["node"]["type"]
+                                            .toString()
+                                            .toLowerCase(),
+                                    title:
+                                        ((data["data"]["Media"]["relations"]["edges"][index]["node"]["title"]["romaji"]
+                                                    as String)
+                                                .length >
+                                            16)
+                                        ? '${(data["data"]["Media"]["relations"]["edges"][index]["node"]["title"]["romaji"] as String).substring(0, 16)}...'
+                                        : (data["data"]["Media"]["relations"]["edges"][index]["node"]["title"]["romaji"]
+                                              as String),
+                                    image:
+                                        data["data"]["Media"]["relations"]["edges"][index]["node"]["coverImage"]["extraLarge"],
+                                    state:
+                                        data["data"]["Media"]["relations"]["edges"][index]["relationType"],
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
-                ),
-              ),
+                    )
+                  : Container(),
               Container(
                 margin: EdgeInsets.only(top: 0),
                 width: double.infinity,
@@ -279,57 +281,60 @@ class _DetailsPaneState extends State<DetailsPane> {
                   ],
                 ),
               ),
-              Container(
-                margin: EdgeInsets.only(top: 0),
-                width: double.infinity,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Recommendations",
-                      style: TextStyle(
-                        fontSize: 25,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Container(
-                      margin: EdgeInsets.only(top: 10),
-                      height: 260,
+              (data["data"]["Media"]["recommendations"]["edges"] as List)
+                      .isNotEmpty
+                  ? Container(
+                      margin: EdgeInsets.only(top: 0),
                       width: double.infinity,
-                      child: SizedBox(
-                        height: 260,
-                        width: double.infinity,
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
-                          itemCount:
-                              (data["data"]["Media"]["recommendations"]["edges"]
-                                      as List)
-                                  .length,
-                          itemBuilder: (context, index) {
-                            return ItemCard(
-                              id: data["data"]["Media"]["recommendations"]["edges"][index]["node"]["media"]["id"],
-                              type:
-                                  (data["data"]["Media"]["recommendations"]["edges"][index]["node"]["media"]["type"]
-                                          as String)
-                                      .toLowerCase(),
-                              title:
-                                  ((data["data"]["Media"]["recommendations"]["edges"][index]["node"]["media"]["title"]["romaji"]
-                                              as String)
-                                          .length >
-                                      16)
-                                  ? '${(data["data"]["Media"]["recommendations"]["edges"][index]["node"]["media"]["title"]["romaji"] as String).substring(0, 16)}...'
-                                  : (data["data"]["Media"]["recommendations"]["edges"][index]["node"]["media"]["title"]["romaji"]
-                                        as String),
-                              image:
-                                  data["data"]["Media"]["recommendations"]["edges"][index]["node"]["media"]["coverImage"]["extraLarge"],
-                            );
-                          },
-                        ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Recommendations",
+                            style: TextStyle(
+                              fontSize: 25,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Container(
+                            margin: EdgeInsets.only(top: 10),
+                            height: 260,
+                            width: double.infinity,
+                            child: SizedBox(
+                              height: 260,
+                              width: double.infinity,
+                              child: ListView.builder(
+                                scrollDirection: Axis.horizontal,
+                                itemCount:
+                                    (data["data"]["Media"]["recommendations"]["edges"]
+                                            as List)
+                                        .length,
+                                itemBuilder: (context, index) {
+                                  return ItemCard(
+                                    id: data["data"]["Media"]["recommendations"]["edges"][index]["node"]["media"]["id"],
+                                    type:
+                                        (data["data"]["Media"]["recommendations"]["edges"][index]["node"]["media"]["type"]
+                                                as String)
+                                            .toLowerCase(),
+                                    title:
+                                        ((data["data"]["Media"]["recommendations"]["edges"][index]["node"]["media"]["title"]["romaji"]
+                                                    as String)
+                                                .length >
+                                            16)
+                                        ? '${(data["data"]["Media"]["recommendations"]["edges"][index]["node"]["media"]["title"]["romaji"] as String).substring(0, 16)}...'
+                                        : (data["data"]["Media"]["recommendations"]["edges"][index]["node"]["media"]["title"]["romaji"]
+                                              as String),
+                                    image:
+                                        data["data"]["Media"]["recommendations"]["edges"][index]["node"]["media"]["coverImage"]["extraLarge"],
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
-                ),
-              ),
+                    )
+                  : Container(),
             ],
           ),
         );
