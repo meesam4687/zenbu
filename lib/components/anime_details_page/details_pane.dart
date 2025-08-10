@@ -55,7 +55,11 @@ class _DetailsPaneState extends State<DetailsPane> {
                 meanScore:
                     "${(data["data"]["Media"]["meanScore"] as int) / 10}/10",
 
-                studios: data["data"]["Media"]["studios"]["nodes"][0]["name"],
+                studios:
+                    (data["data"]["Media"]["studios"]["nodes"] as List)
+                        .isNotEmpty
+                    ? data["data"]["Media"]["studios"]["nodes"][0]["name"]
+                    : "N/A",
 
                 source:
                     "${(data["data"]["Media"]["source"] as String).substring(0, 1).toUpperCase()}${(data["data"]["Media"]["source"] as String).substring(1).toLowerCase()}"
