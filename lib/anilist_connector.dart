@@ -1,9 +1,11 @@
 import 'package:al_client/secrets.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:fluttertoast/fluttertoast.dart';
 
 Future<Map<String, dynamic>> getHomePageData() async {
   try {
+    print("Network Call to Anilist for HomePage");
     String authHeader = 'Bearer $anilistAuthKey';
 
     String query = '''
@@ -62,6 +64,14 @@ Future<Map<String, dynamic>> getHomePageData() async {
     );
 
     final data = jsonDecode(res.body);
+    if (res.statusCode == 429) {
+      Fluttertoast.showToast(
+        msg: "Rate limited, try again later",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        fontSize: 16.0,
+      );
+    }
     return data;
   } catch (e) {
     throw e.toString();
@@ -69,6 +79,7 @@ Future<Map<String, dynamic>> getHomePageData() async {
 }
 
 Future<Map<String, dynamic>> getAnimeData(int id) async {
+  print("Network Call to Anilist for HomePage");
   try {
     String authHeader = 'Bearer $anilistAuthKey';
 
@@ -192,8 +203,15 @@ Future<Map<String, dynamic>> getAnimeData(int id) async {
         "variables": {"id": id},
       }),
     );
-
     final data = jsonDecode(res.body);
+    if (res.statusCode == 429) {
+      Fluttertoast.showToast(
+        msg: "Rate limited, try again later",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        fontSize: 16.0,
+      );
+    }
     return data;
   } catch (e) {
     throw e.toString();
@@ -321,6 +339,14 @@ Future<Map<String, dynamic>> getMangaData(int id) async {
     );
 
     final data = jsonDecode(res.body);
+    if (res.statusCode == 429) {
+      Fluttertoast.showToast(
+        msg: "Rate limited, try again later",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        fontSize: 16.0,
+      );
+    }
     return data;
   } catch (e) {
     throw e.toString();
