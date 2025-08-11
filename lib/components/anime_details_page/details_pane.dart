@@ -277,7 +277,13 @@ class _DetailsPaneState extends State<DetailsPane> {
                               image:
                                   data["data"]["Media"]["staff"]["edges"][index]["node"]["image"]["large"],
                               state:
-                                  data["data"]["Media"]["staff"]["edges"][index]["role"],
+                                  ((data["data"]["Media"]["staff"]["edges"][index]["role"]
+                                              as String)
+                                          .length >
+                                      16)
+                                  ? '${(data["data"]["Media"]["staff"]["edges"][index]["role"] as String).substring(0, 16)}...'
+                                  : (data["data"]["Media"]["staff"]["edges"][index]["role"]
+                                        as String),
                             );
                           },
                         ),
