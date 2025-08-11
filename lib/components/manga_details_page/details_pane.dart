@@ -76,7 +76,7 @@ class _DetailsPaneState extends State<DetailsPane> {
                     ? data["data"]["Media"]["staff"]["edges"][0]["node"]["name"]["full"]
                     : "N/A",
 
-                chapters: (data["data"]["Media"]["chapters"])
+                chapters: (data["data"]["Media"]["chapters"] != null)
                     ? data["data"]["Media"]["chapters"]
                     : "N/A",
 
