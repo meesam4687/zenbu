@@ -77,7 +77,7 @@ class _DetailsPaneState extends State<DetailsPane> {
                     : "N/A",
 
                 chapters: (data["data"]["Media"]["chapters"] != null)
-                    ? data["data"]["Media"]["chapters"]
+                    ? "${data["data"]["Media"]["chapters"]}"
                     : "N/A",
 
                 status: (data["data"]["Media"]["status"] != null)
