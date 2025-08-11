@@ -18,7 +18,7 @@ class Details extends StatelessWidget {
   final String studios;
   final String source;
   final String format;
-  final int? episodes;
+  final String? episodes;
   final String episodeDuration;
   final String status;
   final String startDate;

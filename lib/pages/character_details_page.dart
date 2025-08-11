@@ -42,9 +42,13 @@ class _CharacterDetailsPageState extends State<CharacterDetailsPage> {
                       "${data["data"]["Character"]["name"]["native"]}, ${(data["data"]["Character"]["name"]["alternative"] as List).join(", ")}",
                 ),
                 CharacterDescription(
-                  characterGender: data["data"]["Character"]["gender"],
+                  characterGender: (data["data"]["Character"]["gender"] != null)
+                      ? data["data"]["Character"]["gender"]
+                      : "N/A",
                   characterDescription:
-                      data["data"]["Character"]["description"],
+                      (data["data"]["Character"]["description"] != null)
+                      ? data["data"]["Character"]["description"]
+                      : "N/A",
                 ),
                 CharacterRelations(
                   relations:

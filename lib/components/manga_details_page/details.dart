@@ -6,7 +6,7 @@ class Details extends StatelessWidget {
     required this.meanScore,
     required this.source,
     required this.format,
-    required this.episodes,
+    required this.chapters,
     required this.status,
     required this.startDate,
     required this.endDate,
@@ -15,7 +15,7 @@ class Details extends StatelessWidget {
   final String meanScore;
   final String source;
   final String format;
-  final int? episodes;
+  final String? chapters;
   final String status;
   final String startDate;
   final String endDate;
@@ -85,13 +85,13 @@ class Details extends StatelessWidget {
               "Chapters",
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.w300),
             ),
-            (episodes == null)
+            (chapters == null)
                 ? Text(
                     "N/A",
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   )
                 : Text(
-                    episodes.toString(),
+                    chapters.toString(),
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
           ],

@@ -29,13 +29,15 @@ class CharacterRelations extends StatelessWidget {
                 scrollDirection: Axis.horizontal,
                 itemCount: relations.length,
                 itemBuilder: (context, index) {
+                  final title = (relations[index]["title"]["romaji"] != null)
+                      ? ((relations[index]["title"]["romaji"] as String)
+                                    .length >
+                                16)
+                            ? '${(relations[index]["title"]["romaji"] as String).substring(0, 16)}...'
+                            : (relations[index]["title"]["romaji"] as String)
+                      : "N/A";
                   return ItemCard(
-                    title:
-                        ((relations[index]["title"]["romaji"] as String)
-                                .length >
-                            16)
-                        ? '${(relations[index]["title"]["romaji"] as String).substring(0, 16)}...'
-                        : (relations[index]["title"]["romaji"] as String),
+                    title: title,
                     image: relations[index]["coverImage"]["extraLarge"],
                     id: relations[index]["id"],
                     type: relations[index]["type"].toString().toLowerCase(),

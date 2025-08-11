@@ -42,18 +42,25 @@ class _DetailsPaneState extends State<DetailsPane> {
           return const Center(child: CircularProgressIndicator.adaptive());
         }
         final Map data = snapshot.data!;
-        final List<dynamic> tags = (data['data']['Media']['tags'] as List)
-            .map((tag) => tag['name'] as String)
-            .toList();
-        final List<dynamic> genres = data['data']['Media']['genres'];
+        final List<dynamic> tags =
+            (data['data']['Media']['tags'] as List).isNotEmpty
+            ? (data['data']['Media']['tags'] as List)
+                  .map((tag) => tag['name'] as String)
+                  .toList()
+            : ["N/A"];
+        final List<dynamic> genres =
+            (data['data']['Media']['genres'] as List).isNotEmpty
+            ? data['data']['Media']['genres']
+            : ["N/A"];
         return Container(
           width: double.infinity,
           margin: EdgeInsets.only(top: 10, left: 20, right: 20),
           child: Column(
             children: [
               Details(
-                meanScore:
-                    "${(data["data"]["Media"]["meanScore"] as int) / 10}/10",
+                meanScore: (data["data"]["Media"]["meanScore"] != null)
+                    ? "${(data["data"]["Media"]["meanScore"] as int) / 10}/10"
+                    : "N/A",
 
                 studios:
                     (data["data"]["Media"]["studios"]["nodes"] as List)
@@ -61,21 +68,32 @@ class _DetailsPaneState extends State<DetailsPane> {
                     ? data["data"]["Media"]["studios"]["nodes"][0]["name"]
                     : "N/A",
 
-                source:
-                    "${(data["data"]["Media"]["source"] as String).substring(0, 1).toUpperCase()}${(data["data"]["Media"]["source"] as String).substring(1).toLowerCase()}"
-                        .replaceAll("_", " "),
+                source: (data["data"]["Media"]["source"] != null)
+                    ? "${(data["data"]["Media"]["source"] as String).substring(0, 1).toUpperCase()}${(data["data"]["Media"]["source"] as String).substring(1).toLowerCase()}"
+                          .replaceAll("_", " ")
+                    : "N/A",
 
-                format: data["data"]["Media"]["format"],
+                format: (data["data"]["Media"]["format"] != null)
+                    ? data["data"]["Media"]["format"]
+                    : "N/A",
 
-                episodes: data["data"]["Media"]["episodes"],
+                episodes: (data["data"]["Media"]["episodes"] != null)
+                    ? "${data["data"]["Media"]["episodes"]}"
+                    : "N/A",
 
-                episodeDuration: "${data["data"]["Media"]["duration"]}",
+                episodeDuration: (data["data"]["Media"]["duration"] != null)
+                    ? "${data["data"]["Media"]["duration"]}"
+                    : "N/A",
 
-                status:
-                    "${(data["data"]["Media"]["status"] as String).substring(0, 1).toUpperCase()}${(data["data"]["Media"]["status"] as String).substring(1).toLowerCase()}",
+                status: (data["data"]["Media"]["status"] != null)
+                    ? "${(data["data"]["Media"]["status"] as String).substring(0, 1).toUpperCase()}${(data["data"]["Media"]["status"] as String).substring(1).toLowerCase()}"
+                    : "N/A",
 
                 startDate:
-                    "${months[data["data"]["Media"]["startDate"]["month"]]} ${data["data"]["Media"]["startDate"]["day"]}, ${data["data"]["Media"]["startDate"]["year"]}",
+                    (months[data["data"]["Media"]["startDate"]["month"]] !=
+                        null)
+                    ? "${months[data["data"]["Media"]["startDate"]["month"]]} ${data["data"]["Media"]["startDate"]["day"]}, ${data["data"]["Media"]["startDate"]["year"]}"
+                    : "N/A",
 
                 endDate: (data["data"]["Media"]["endDate"]["day"] == null)
                     ? "N/A"
@@ -98,13 +116,18 @@ class _DetailsPaneState extends State<DetailsPane> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    Container(
-                      margin: EdgeInsets.only(top: 10),
-                      child: Text(
-                        (data["data"]["Media"]["description"].toString())
-                            .replaceAll(RegExp(r'<[^>]*>'), ''),
-                      ),
-                    ),
+                    (data["data"]["Media"]["description"] != null)
+                        ? Container(
+                            margin: EdgeInsets.only(top: 10),
+                            child: Text(
+                              (data["data"]["Media"]["description"].toString())
+                                  .replaceAll(RegExp(r'<[^>]*>'), ''),
+                            ),
+                          )
+                        : Container(
+                            margin: EdgeInsets.only(top: 10),
+                            child: Text("N/A"),
+                          ),
                   ],
                 ),
               ),
@@ -138,50 +161,53 @@ class _DetailsPaneState extends State<DetailsPane> {
                   ],
                 ),
               ),
-              Container(
-                margin: EdgeInsets.only(top: 10),
-                width: double.infinity,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Characters",
-                      style: TextStyle(
-                        fontSize: 25,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Container(
+              (data["data"]["Media"]["characters"]["characters"] as List)
+                      .isNotEmpty
+                  ? Container(
                       margin: EdgeInsets.only(top: 10),
-                      height: 260,
                       width: double.infinity,
-                      child: SizedBox(
-                        height: 260,
-                        width: double.infinity,
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
-                          itemCount:
-                              (data["data"]["Media"]["characters"]["characters"]
-                                      as List)
-                                  .length,
-                          itemBuilder: (context, index) {
-                            return ItemCard(
-                              title:
-                                  data["data"]["Media"]["characters"]["characters"][index]["node"]["name"]["full"],
-                              image:
-                                  data["data"]["Media"]["characters"]["characters"][index]["node"]["image"]["large"],
-                              id: data["data"]["Media"]["characters"]["characters"][index]["node"]["id"],
-                              type: "character",
-                              state:
-                                  data["data"]["Media"]["characters"]["characters"][index]["role"],
-                            );
-                          },
-                        ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Characters",
+                            style: TextStyle(
+                              fontSize: 25,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Container(
+                            margin: EdgeInsets.only(top: 10),
+                            height: 260,
+                            width: double.infinity,
+                            child: SizedBox(
+                              height: 260,
+                              width: double.infinity,
+                              child: ListView.builder(
+                                scrollDirection: Axis.horizontal,
+                                itemCount:
+                                    (data["data"]["Media"]["characters"]["characters"]
+                                            as List)
+                                        .length,
+                                itemBuilder: (context, index) {
+                                  return ItemCard(
+                                    title:
+                                        data["data"]["Media"]["characters"]["characters"][index]["node"]["name"]["full"],
+                                    image:
+                                        data["data"]["Media"]["characters"]["characters"][index]["node"]["image"]["large"],
+                                    id: data["data"]["Media"]["characters"]["characters"][index]["node"]["id"],
+                                    type: "character",
+                                    state:
+                                        data["data"]["Media"]["characters"]["characters"][index]["role"],
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
-                ),
-              ),
+                    )
+                  : Container(),
               (data["data"]["Media"]["relations"]["edges"] as List).isNotEmpty
                   ? Container(
                       margin: EdgeInsets.only(top: 0),
@@ -237,61 +263,64 @@ class _DetailsPaneState extends State<DetailsPane> {
                       ),
                     )
                   : Container(),
-              Container(
-                margin: EdgeInsets.only(top: 0),
-                width: double.infinity,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Staff",
-                      style: TextStyle(
-                        fontSize: 25,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Container(
-                      margin: EdgeInsets.only(top: 10),
-                      height: 260,
+              (data["data"]["Media"]["staff"]["edges"] as List).isNotEmpty
+                  ? Container(
+                      margin: EdgeInsets.only(top: 0),
                       width: double.infinity,
-                      child: SizedBox(
-                        height: 260,
-                        width: double.infinity,
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
-                          itemCount:
-                              (data["data"]["Media"]["staff"]["edges"] as List)
-                                  .length,
-                          itemBuilder: (context, index) {
-                            return ItemCard(
-                              id: data["data"]["Media"]["staff"]["edges"][index]["id"],
-                              type: "staff",
-                              title:
-                                  ((data["data"]["Media"]["staff"]["edges"][index]["node"]["name"]["full"]
-                                              as String)
-                                          .length >
-                                      16)
-                                  ? '${(data["data"]["Media"]["staff"]["edges"][index]["node"]["name"]["full"] as String).substring(0, 16)}...'
-                                  : (data["data"]["Media"]["staff"]["edges"][index]["node"]["name"]["full"]
-                                        as String),
-                              image:
-                                  data["data"]["Media"]["staff"]["edges"][index]["node"]["image"]["large"],
-                              state:
-                                  ((data["data"]["Media"]["staff"]["edges"][index]["role"]
-                                              as String)
-                                          .length >
-                                      16)
-                                  ? '${(data["data"]["Media"]["staff"]["edges"][index]["role"] as String).substring(0, 16)}...'
-                                  : (data["data"]["Media"]["staff"]["edges"][index]["role"]
-                                        as String),
-                            );
-                          },
-                        ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Staff",
+                            style: TextStyle(
+                              fontSize: 25,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Container(
+                            margin: EdgeInsets.only(top: 10),
+                            height: 260,
+                            width: double.infinity,
+                            child: SizedBox(
+                              height: 260,
+                              width: double.infinity,
+                              child: ListView.builder(
+                                scrollDirection: Axis.horizontal,
+                                itemCount:
+                                    (data["data"]["Media"]["staff"]["edges"]
+                                            as List)
+                                        .length,
+                                itemBuilder: (context, index) {
+                                  return ItemCard(
+                                    id: data["data"]["Media"]["staff"]["edges"][index]["id"],
+                                    type: "staff",
+                                    title:
+                                        ((data["data"]["Media"]["staff"]["edges"][index]["node"]["name"]["full"]
+                                                    as String)
+                                                .length >
+                                            16)
+                                        ? '${(data["data"]["Media"]["staff"]["edges"][index]["node"]["name"]["full"] as String).substring(0, 16)}...'
+                                        : (data["data"]["Media"]["staff"]["edges"][index]["node"]["name"]["full"]
+                                              as String),
+                                    image:
+                                        data["data"]["Media"]["staff"]["edges"][index]["node"]["image"]["large"],
+                                    state:
+                                        ((data["data"]["Media"]["staff"]["edges"][index]["role"]
+                                                    as String)
+                                                .length >
+                                            16)
+                                        ? '${(data["data"]["Media"]["staff"]["edges"][index]["role"] as String).substring(0, 16)}...'
+                                        : (data["data"]["Media"]["staff"]["edges"][index]["role"]
+                                              as String),
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
-                ),
-              ),
+                    )
+                  : Container(),
               (data["data"]["Media"]["recommendations"]["edges"] as List)
                       .isNotEmpty
                   ? Container(
