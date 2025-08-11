@@ -33,7 +33,7 @@ class MyApp extends StatelessWidget {
 
           return MaterialApp(
             debugShowCheckedModeBanner: false,
-            title: 'ALC',
+            title: 'Zenbu',
             theme: ThemeData(colorScheme: lightScheme, useMaterial3: true),
             darkTheme: ThemeData(colorScheme: darkScheme, useMaterial3: true),
             themeMode: ThemeMode.system,
