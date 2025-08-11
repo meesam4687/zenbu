@@ -352,3 +352,63 @@ Future<Map<String, dynamic>> getMangaData(int id) async {
     throw e.toString();
   }
 }
+
+Future<Map<String, dynamic>> getCharacterData(int id) async {
+  try {
+    String authHeader = 'Bearer $anilistAuthKey';
+
+    String query = '''
+      query(\$id: Int) {
+        Character(id: \$id) {
+          name { 
+            full
+            native
+            alternative
+          }
+          image {
+            large
+          } 
+          gender 
+          description 
+          media { 
+            nodes { 
+              id 
+              title { 
+                romaji 
+              } 
+              type
+              coverImage {
+                extraLarge
+              }
+            }
+          }
+        }
+      }
+    ''';
+
+    final res = await http.post(
+      Uri.parse('https://graphql.anilist.co'),
+      headers: {
+        "Authorization": authHeader,
+        "Content-Type": "application/json",
+      },
+      body: jsonEncode({
+        "query": query,
+        "variables": {"id": id},
+      }),
+    );
+
+    final data = jsonDecode(res.body);
+    if (res.statusCode == 429) {
+      Fluttertoast.showToast(
+        msg: "Rate limited, try again later",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        fontSize: 16.0,
+      );
+    }
+    return data;
+  } catch (e) {
+    throw e.toString();
+  }
+}
