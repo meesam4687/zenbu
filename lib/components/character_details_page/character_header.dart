@@ -39,8 +39,8 @@ class CharacterHeader extends StatelessWidget {
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
                 ),
                 Text(
-                  characterSecondaryNames.length > 48
-                      ? '${characterSecondaryNames.substring(0, 48)}...'
+                  characterSecondaryNames.length > 40
+                      ? '${characterSecondaryNames.substring(0, 40)}...'
                       : characterSecondaryNames,
                   style: TextStyle(fontWeight: FontWeight.w200),
                 ),
