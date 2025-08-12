@@ -39,7 +39,7 @@ class _CharacterDetailsPageState extends State<CharacterDetailsPage> {
                   characterImage: data["data"]["Character"]["image"]["large"],
                   characterName: data["data"]["Character"]["name"]["full"],
                   characterSecondaryNames:
-                      "${data["data"]["Character"]["name"]["native"]}, ${(data["data"]["Character"]["name"]["alternative"] as List).join(", ")}",
+                      "${data["data"]["Character"]["name"]["native"]}${(data["data"]["Character"]["name"]["alternative"] as List).isEmpty ? "" : ","} ${(data["data"]["Character"]["name"]["alternative"] as List).join(", ")}",
                 ),
                 CharacterDescription(
                   characterGender: (data["data"]["Character"]["gender"] != null)
