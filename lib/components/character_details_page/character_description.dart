@@ -1,5 +1,16 @@
 import 'package:flutter/material.dart';
 
+String _stripMarkdown(String s) {
+  var out = s.replaceAll(RegExp(r'__|\*\*|`'), '');
+  out = out.replaceAll(RegExp(r'~!|!~'), '');
+  out = out.replaceAllMapped(
+    RegExp(r'\[([^\]]+)\]\((.*?)\)', dotAll: true),
+    (m) => m.group(1) ?? '',
+  );
+
+  return out;
+}
+
 class CharacterDescription extends StatelessWidget {
   const CharacterDescription({
     super.key,
@@ -27,7 +38,10 @@ class CharacterDescription extends StatelessWidget {
             ],
           ),
           SizedBox(height: 5),
-          Text(characterDescription, style: TextStyle(fontSize: 16)),
+          Text(
+            _stripMarkdown(characterDescription),
+            style: TextStyle(fontSize: 16),
+          ),
         ],
       ),
     );
