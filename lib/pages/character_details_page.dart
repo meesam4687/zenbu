@@ -48,7 +48,7 @@ class _CharacterDetailsPageState extends State<CharacterDetailsPage> {
                   characterDescription:
                       (data["data"]["Character"]["description"] != null)
                       ? data["data"]["Character"]["description"]
-                      : "N/A",
+                      : "",
                 ),
                 CharacterRelations(
                   relations:
