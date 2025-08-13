@@ -1,4 +1,4 @@
-import 'package:al_client/pages/anime_page.dart';
+import 'package:al_client/pages/anime_discovery_page.dart';
 import 'package:al_client/pages/home_page.dart';
 import 'package:al_client/pages/manga_page.dart';
 import 'package:flutter/material.dart';
@@ -11,7 +11,7 @@ class MainPageView extends StatefulWidget {
   State<MainPageView> createState() => _MainPageState();
 }
 
-List<Widget> pages = [AnimePage(), HomePage(), MangaPage()];
+List<Widget> pages = [AnimeDiscoveryPage(), HomePage(), MangaPage()];
 
 class _MainPageState extends State<MainPageView> {
   late int selectedIdx;
