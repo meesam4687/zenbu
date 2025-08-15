@@ -58,11 +58,13 @@ class ItemCard extends StatelessWidget {
                     textAlign: TextAlign.center,
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  Text(
-                    (state != null) ? state as String : "",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontWeight: FontWeight.w200),
-                  ),
+                  (state != null)
+                      ? Text(
+                          state as String,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontWeight: FontWeight.w200),
+                        )
+                      : Container(),
                 ],
               ),
             ),

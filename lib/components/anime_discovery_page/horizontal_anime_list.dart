@@ -2,54 +2,56 @@ import 'package:al_client/components/global/item_card.dart';
 import 'package:flutter/material.dart';
 
 class HorizontalAnimeList extends StatelessWidget {
-  const HorizontalAnimeList({super.key});
+  const HorizontalAnimeList({
+    super.key,
+    required this.heading,
+    required this.animeArray,
+  });
+  final String heading;
+  final List animeArray;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 320,
+      height: 305,
       width: double.infinity,
-      margin: EdgeInsets.only(left: 15, right: 15, top: 10),
+      margin: EdgeInsets.only(left: 15, right: 15),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("Popular this Season", style: TextStyle(fontSize: 23)),
-          Container(
-            margin: EdgeInsets.only(top: 10),
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  ItemCard(
-                    title: "Dandadan Season 2",
-                    image:
-                        "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx185660-uB8RUMBGovGr.jpg",
-                    id: 0001,
-                    type: "anime",
-                  ),
-                  ItemCard(
-                    title: "Sono Bisque Doll wa Koi wo Suru...",
-                    image:
-                        "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx154768-DHHvNd4MjV1p.jpg",
-                    id: 0001,
-                    type: "anime",
-                  ),
-                  ItemCard(
-                    title: "Gachiakuta",
-                    image:
-                        "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx178025-cWJKEsZynkil.jpg",
-                    id: 0001,
-                    type: "anime",
-                  ),
-                  ItemCard(
-                    title: "Kaoru Hana wa Rin to Saku",
-                    image:
-                        "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx181444-Ut9DDUZdfHwg.jpg",
-                    id: 0001,
-                    type: "anime",
-                  ),
-                ],
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(heading, style: TextStyle(fontSize: 20)),
+              MaterialButton(
+                padding: EdgeInsets.only(left: 10, right: 10),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(100)),
+                ),
+                onPressed: () {},
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [Text('View All  '), Icon(Icons.arrow_forward)],
+                ),
               ),
+            ],
+          ),
+          Container(
+            margin: EdgeInsets.only(top: 12),
+            width: double.infinity,
+            height: 245,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: animeArray.length,
+              itemBuilder: (context, index) {
+                final Map anime = animeArray[index];
+                return ItemCard(
+                  title: anime["title"],
+                  image: anime["coverImage"],
+                  id: anime["id"],
+                  type: anime["type"],
+                );
+              },
             ),
           ),
         ],

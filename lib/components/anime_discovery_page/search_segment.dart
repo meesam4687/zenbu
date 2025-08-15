@@ -11,6 +11,10 @@ class SearchSegment extends StatelessWidget {
         children: [
           Expanded(
             child: SearchBar(
+              leading: Container(
+                margin: EdgeInsets.only(left: 5, right: 5),
+                child: Icon(Icons.search),
+              ),
               hintText: "Search...",
               backgroundColor: WidgetStatePropertyAll(
                 Theme.of(context).colorScheme.onInverseSurface,

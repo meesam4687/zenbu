@@ -21,11 +21,15 @@ class AiringBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final double cardRadius = 15;
     return Container(
       height: 240,
       width: double.infinity,
       margin: EdgeInsets.all(10),
       child: Card(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(cardRadius)),
+        ),
         elevation: 3,
         surfaceTintColor: Theme.of(context).colorScheme.onSurface,
         clipBehavior: Clip.antiAlias,
@@ -33,7 +37,7 @@ class AiringBanner extends StatelessWidget {
           children: [
             Positioned.fill(
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(cardRadius),
                 child: ImageFiltered(
                   imageFilter: ui.ImageFilter.blur(sigmaX: 15, sigmaY: 15),
                   child: Image.network(
@@ -55,6 +59,9 @@ class AiringBanner extends StatelessWidget {
                   SizedBox(
                     height: 190,
                     child: Card(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(14)),
+                      ),
                       elevation: 5,
                       clipBehavior: Clip.antiAlias,
                       child: Image.network(
