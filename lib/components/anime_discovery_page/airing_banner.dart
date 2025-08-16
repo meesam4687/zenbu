@@ -84,11 +84,7 @@ class AiringBanner extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 28,
                             shadows: [
-                              Shadow(
-                                offset: Offset(1.0, 1.0),
-                                blurRadius: 3.0,
-                                color: Colors.black,
-                              ),
+                              BoxShadow(blurRadius: 5.0, color: Colors.black),
                             ],
                           ),
                         ),
@@ -97,11 +93,7 @@ class AiringBanner extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 15,
                             shadows: [
-                              Shadow(
-                                offset: Offset(1.0, 1.0),
-                                blurRadius: 3.0,
-                                color: Colors.black,
-                              ),
+                              BoxShadow(blurRadius: 5.0, color: Colors.black),
                             ],
                           ),
                         ),
