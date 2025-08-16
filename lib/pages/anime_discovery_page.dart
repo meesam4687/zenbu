@@ -1,9 +1,11 @@
 import 'package:al_client/anilist_connector.dart';
+import 'package:al_client/state_provider.dart';
 import 'package:flutter/material.dart';
 
 import 'package:al_client/components/anime_discovery_page/airing_banner.dart';
 import 'package:al_client/components/anime_discovery_page/horizontal_anime_list.dart';
 import 'package:al_client/components/anime_discovery_page/search_segment.dart';
+import 'package:provider/provider.dart';
 
 class AnimeDiscoveryPage extends StatefulWidget {
   const AnimeDiscoveryPage({super.key});
@@ -16,93 +18,192 @@ class _AnimeDiscoveryPageState extends State<AnimeDiscoveryPage> {
   late final Future<Map<String, dynamic>> data;
   @override
   void initState() {
-    data = getAnimeHomePage(1, 10);
+    Map providerData = Provider.of<StateProvider>(
+      context,
+      listen: false,
+    ).animeDiscoveryData;
+    if (providerData.isEmpty) {
+      data = getAnimeHomePage(1, 10);
+    }
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+    Map providerData = Provider.of<StateProvider>(context).animeDiscoveryData;
     return Scaffold(
       appBar: AppBar(flexibleSpace: SearchSegment(), toolbarHeight: 100),
-      body: FutureBuilder(
-        future: data,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator.adaptive());
-          }
-          final data = snapshot.data!;
-          return SingleChildScrollView(
-            child: Column(
-              children: [
-                SizedBox(
-                  height: 240,
-                  child: PageView.builder(
-                    itemCount:
-                        (data["data"]["popularSeason"]["media"] as List).length,
-                    controller: PageController(viewportFraction: 1.0),
-                    itemBuilder: (context, index) {
-                      List banners = [];
-                      for (
-                        int i = 0;
-                        i <
-                            (data["data"]["popularSeason"]["media"] as List)
-                                .length;
-                        i++
-                      ) {
-                        Map media =
-                            (data["data"]["popularSeason"]["media"] as List)[i];
-                        final item = AiringBanner(
-                          bannerImage: media["bannerImage"].toString(),
-                          coverImage: media["coverImage"]["large"].toString(),
-                          title: media["title"]["romaji"].toString().length > 24
-                              ? "${media["title"]["romaji"].toString().substring(0, 24)}..."
-                              : media["title"]["romaji"].toString(),
-                          totalEpisodes: (media["episodes"] != null)
-                              ? media["episodes"].toString()
-                              : "??",
-                          airedEpisodes: (media["nextAiringEpisode"] != null)
-                              ? (media["nextAiringEpisode"]["episode"] - 1)
-                                    .toString()
-                              : "0",
-                          tagString:
-                              ((media["genres"] as List)
+      body: (providerData.isEmpty)
+          ? FutureBuilder(
+              future: data,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: CircularProgressIndicator.adaptive(),
+                  );
+                }
+                final data = snapshot.data!;
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  Provider.of<StateProvider>(
+                    context,
+                    listen: false,
+                  ).updateDiscoveryData(data);
+                });
+                return SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      SizedBox(
+                        height: 240,
+                        child: PageView.builder(
+                          itemCount:
+                              (data["data"]["popularSeason"]["media"] as List)
+                                  .length,
+                          controller: PageController(viewportFraction: 1.0),
+                          itemBuilder: (context, index) {
+                            List banners = [];
+                            for (
+                              int i = 0;
+                              i <
+                                  (data["data"]["popularSeason"]["media"]
+                                          as List)
+                                      .length;
+                              i++
+                            ) {
+                              Map media =
+                                  (data["data"]["popularSeason"]["media"]
+                                      as List)[i];
+                              final item = AiringBanner(
+                                bannerImage: media["bannerImage"].toString(),
+                                coverImage: media["coverImage"]["large"]
+                                    .toString(),
+                                title:
+                                    media["title"]["romaji"].toString().length >
+                                        24
+                                    ? "${media["title"]["romaji"].toString().substring(0, 24)}..."
+                                    : media["title"]["romaji"].toString(),
+                                totalEpisodes: (media["episodes"] != null)
+                                    ? media["episodes"].toString()
+                                    : "??",
+                                airedEpisodes:
+                                    (media["nextAiringEpisode"] != null)
+                                    ? (media["nextAiringEpisode"]["episode"] -
+                                              1)
+                                          .toString()
+                                    : "0",
+                                tagString:
+                                    ((media["genres"] as List)
+                                                .map((tag) => tag.toString())
+                                                .join(" • "))
+                                            .length >
+                                        20
+                                    ? "${((media["genres"] as List).map((tag) => tag.toString()).join(" • ")).substring(0, 20)}..."
+                                    : ((media["genres"] as List)
                                           .map((tag) => tag.toString())
-                                          .join(" • "))
-                                      .length >
-                                  20
-                              ? "${((media["genres"] as List).map((tag) => tag.toString()).join(" • ")).substring(0, 20)}..."
-                              : ((media["genres"] as List)
-                                    .map((tag) => tag.toString())
-                                    .join(" • ")),
-                        );
-                        banners.add(item);
-                      }
-                      return banners[index];
-                    },
+                                          .join(" • ")),
+                              );
+                              banners.add(item);
+                            }
+                            return banners[index];
+                          },
+                        ),
+                      ),
+                      SizedBox(height: 10),
+                      HorizontalAnimeList(
+                        heading: "Trending Now",
+                        animeArray: data["data"]["trending"]["media"],
+                      ),
+                      HorizontalAnimeList(
+                        heading: "Popular this season",
+                        animeArray: data["data"]["popularSeason"]["media"],
+                      ),
+                      HorizontalAnimeList(
+                        heading: "Upcoming",
+                        animeArray: data["data"]["upcoming"]["media"],
+                      ),
+                      HorizontalAnimeList(
+                        heading: "All Time Popular",
+                        animeArray: data["data"]["allTimePopular"]["media"],
+                      ),
+                    ],
                   ),
-                ),
-                SizedBox(height: 10),
-                HorizontalAnimeList(
-                  heading: "Trending Now",
-                  animeArray: data["data"]["trending"]["media"],
-                ),
-                HorizontalAnimeList(
-                  heading: "Popular this season",
-                  animeArray: data["data"]["popularSeason"]["media"],
-                ),
-                HorizontalAnimeList(
-                  heading: "Upcoming",
-                  animeArray: data["data"]["upcoming"]["media"],
-                ),
-                HorizontalAnimeList(
-                  heading: "All Time Popular",
-                  animeArray: data["data"]["allTimePopular"]["media"],
-                ),
-              ],
+                );
+              },
+            )
+          : SingleChildScrollView(
+              child: Column(
+                children: [
+                  SizedBox(
+                    height: 240,
+                    child: PageView.builder(
+                      itemCount:
+                          (providerData["data"]["popularSeason"]["media"]
+                                  as List)
+                              .length,
+                      controller: PageController(viewportFraction: 1.0),
+                      itemBuilder: (context, index) {
+                        List banners = [];
+                        for (
+                          int i = 0;
+                          i <
+                              (providerData["data"]["popularSeason"]["media"]
+                                      as List)
+                                  .length;
+                          i++
+                        ) {
+                          Map media =
+                              (providerData["data"]["popularSeason"]["media"]
+                                  as List)[i];
+                          final item = AiringBanner(
+                            bannerImage: media["bannerImage"].toString(),
+                            coverImage: media["coverImage"]["large"].toString(),
+                            title:
+                                media["title"]["romaji"].toString().length > 24
+                                ? "${media["title"]["romaji"].toString().substring(0, 24)}..."
+                                : media["title"]["romaji"].toString(),
+                            totalEpisodes: (media["episodes"] != null)
+                                ? media["episodes"].toString()
+                                : "??",
+                            airedEpisodes: (media["nextAiringEpisode"] != null)
+                                ? (media["nextAiringEpisode"]["episode"] - 1)
+                                      .toString()
+                                : "0",
+                            tagString:
+                                ((media["genres"] as List)
+                                            .map((tag) => tag.toString())
+                                            .join(" • "))
+                                        .length >
+                                    20
+                                ? "${((media["genres"] as List).map((tag) => tag.toString()).join(" • ")).substring(0, 20)}..."
+                                : ((media["genres"] as List)
+                                      .map((tag) => tag.toString())
+                                      .join(" • ")),
+                          );
+                          banners.add(item);
+                        }
+                        return banners[index];
+                      },
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  HorizontalAnimeList(
+                    heading: "Trending Now",
+                    animeArray: providerData["data"]["trending"]["media"],
+                  ),
+                  HorizontalAnimeList(
+                    heading: "Popular this season",
+                    animeArray: providerData["data"]["popularSeason"]["media"],
+                  ),
+                  HorizontalAnimeList(
+                    heading: "Upcoming",
+                    animeArray: providerData["data"]["upcoming"]["media"],
+                  ),
+                  HorizontalAnimeList(
+                    heading: "All Time Popular",
+                    animeArray: providerData["data"]["allTimePopular"]["media"],
+                  ),
+                ],
+              ),
             ),
-          );
-        },
-      ),
     );
   }
 }
