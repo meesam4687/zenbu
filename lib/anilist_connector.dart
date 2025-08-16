@@ -412,3 +412,124 @@ Future<Map<String, dynamic>> getCharacterData(int id) async {
     throw e.toString();
   }
 }
+
+Future<Map<String, dynamic>> getAnimeHomePage(int page, int perPage) async {
+  try {
+    String authHeader = 'Bearer $anilistAuthKey';
+    Map<int, String> seasonMapping = {
+      1: "WINTER",
+      2: "WINTER",
+      3: "WINTER",
+      4: "SPRING",
+      5: "SPRING",
+      6: "SPRING",
+      7: "SUMMER",
+      8: "SUMMER",
+      9: "SUMMER",
+      10: "FALL",
+      11: "FALL",
+      12: "FALL",
+    };
+
+    String query = '''
+      query (\$page: Int, \$perPage: Int, \$season: MediaSeason, \$seasonYear: Int) {
+        trending: Page(page: \$page, perPage: \$perPage) {
+          media(sort: TRENDING_DESC, type: ANIME) {
+            id
+            title {
+              romaji
+              english
+              native
+            }
+            coverImage {
+              large
+            }
+            type
+          }
+        }
+        popularSeason: Page(page: \$page, perPage: \$perPage) {
+          media(sort: POPULARITY_DESC, type: ANIME, season: \$season, seasonYear: \$seasonYear) {
+            id
+            title {
+              romaji
+              english
+              native
+            }
+            bannerImage
+            coverImage {
+              large
+            }
+            episodes
+            genres
+            nextAiringEpisode {
+              episode
+            }
+            type
+          }
+        }
+        upcoming: Page(page: \$page, perPage: \$perPage) {
+          media(status: NOT_YET_RELEASED, sort: POPULARITY_DESC, type: ANIME, season: FALL) {
+            id
+            title {
+              romaji
+              english
+              native
+            }
+            coverImage {
+              large
+            }
+            type
+          }
+        }
+        allTimePopular: Page(page: \$page, perPage: \$perPage) {
+          media(sort: POPULARITY_DESC, type: ANIME) {
+            id
+            title {
+              romaji
+              english
+              native
+            }
+            coverImage {
+              large
+            }
+            type
+          }
+        }
+      }
+    ''';
+
+    final res = await http.post(
+      Uri.parse('https://graphql.anilist.co'),
+      headers: {
+        "Authorization": authHeader,
+        "Content-Type": "application/json",
+      },
+      body: jsonEncode({
+        "query": query,
+        "variables": {
+          "page": page,
+          "perPage": perPage,
+          "season": seasonMapping[DateTime.now().month],
+          "nextSeason":
+              seasonMapping[(DateTime.now().month == 12)
+                  ? 1
+                  : DateTime.now().month + 1],
+          "seasonYear": DateTime.now().year,
+        },
+      }),
+    );
+
+    final data = jsonDecode(res.body);
+    if (res.statusCode == 429) {
+      Fluttertoast.showToast(
+        msg: "Rate limited, try again later",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        fontSize: 16.0,
+      );
+    }
+    return data;
+  } catch (e) {
+    throw e.toString();
+  }
+}

@@ -49,6 +49,7 @@ class AiringBanner extends StatelessWidget {
                 ),
               ),
             ),
+            Container(color: Colors.black.withValues(alpha: 0.4)),
             Container(
               margin: const EdgeInsets.all(10),
               height: 240,
@@ -78,10 +79,31 @@ class AiringBanner extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        Text(title, style: TextStyle(fontSize: 28)),
+                        Text(
+                          title,
+                          style: TextStyle(
+                            fontSize: 28,
+                            shadows: [
+                              Shadow(
+                                offset: Offset(1.0, 1.0),
+                                blurRadius: 3.0,
+                                color: Colors.black,
+                              ),
+                            ],
+                          ),
+                        ),
                         Text(
                           "Episodes: $airedEpisodes/$totalEpisodes\n$tagString",
-                          style: TextStyle(fontSize: 15),
+                          style: TextStyle(
+                            fontSize: 15,
+                            shadows: [
+                              Shadow(
+                                offset: Offset(1.0, 1.0),
+                                blurRadius: 3.0,
+                                color: Colors.black,
+                              ),
+                            ],
+                          ),
                         ),
                         SizedBox(height: 18),
                       ],

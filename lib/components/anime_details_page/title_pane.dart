@@ -73,7 +73,7 @@ class TitlePane extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           SizedBox(
-                            width: 250,
+                            width: 200,
                             child: Text(title, style: TextStyle(fontSize: 27)),
                           ),
                           Text(progress),
