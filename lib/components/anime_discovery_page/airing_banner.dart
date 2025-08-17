@@ -84,7 +84,7 @@ class AiringBanner extends StatelessWidget {
                         Text(
                           title,
                           style: TextStyle(
-                            fontSize: 28,
+                            fontSize: 24,
                             shadows: [
                               BoxShadow(blurRadius: 5.0, color: Colors.black),
                             ],
