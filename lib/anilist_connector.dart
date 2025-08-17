@@ -416,6 +416,7 @@ Future<Map<String, dynamic>> getCharacterData(int id) async {
 Future<Map<String, dynamic>> getAnimeHomePage(int page, int perPage) async {
   try {
     String authHeader = 'Bearer $anilistAuthKey';
+    List<String> seasonArray = ["WINTER", "SPRING", "SUMMER", "FALL"];
     Map<int, String> seasonMapping = {
       1: "WINTER",
       2: "WINTER",
@@ -432,7 +433,7 @@ Future<Map<String, dynamic>> getAnimeHomePage(int page, int perPage) async {
     };
 
     String query = '''
-      query (\$page: Int, \$perPage: Int, \$season: MediaSeason, \$seasonYear: Int) {
+      query (\$page: Int, \$perPage: Int, \$season: MediaSeason, \$seasonYear: Int, \$nextSeason: MediaSeason) {
         trending: Page(page: \$page, perPage: \$perPage) {
           media(sort: TRENDING_DESC, type: ANIME) {
             id
@@ -468,7 +469,7 @@ Future<Map<String, dynamic>> getAnimeHomePage(int page, int perPage) async {
           }
         }
         upcoming: Page(page: \$page, perPage: \$perPage) {
-          media(status: NOT_YET_RELEASED, sort: POPULARITY_DESC, type: ANIME, season: FALL) {
+          media(status: NOT_YET_RELEASED, sort: POPULARITY_DESC, type: ANIME, season: \$nextSeason) {
             id
             title {
               romaji
@@ -511,14 +512,85 @@ Future<Map<String, dynamic>> getAnimeHomePage(int page, int perPage) async {
           "perPage": perPage,
           "season": seasonMapping[DateTime.now().month],
           "nextSeason":
-              seasonMapping[(DateTime.now().month == 12)
-                  ? 1
-                  : DateTime.now().month + 1],
+              seasonArray[(seasonArray.indexOf(
+                        seasonMapping[DateTime.now().month].toString(),
+                      ) !=
+                      3)
+                  ? seasonArray.indexOf(
+                          seasonMapping[DateTime.now().month].toString(),
+                        ) +
+                        1
+                  : 0],
           "seasonYear": DateTime.now().year,
         },
       }),
     );
+    final data = jsonDecode(res.body);
+    if (res.statusCode == 429) {
+      Fluttertoast.showToast(
+        msg: "Rate limited, try again later",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        fontSize: 16.0,
+      );
+    }
+    return data;
+  } catch (e) {
+    throw e.toString();
+  }
+}
 
+Future<Map<String, dynamic>> getMangaHomePage(int page, int perPage) async {
+  try {
+    String authHeader = 'Bearer $anilistAuthKey';
+
+    String query = '''
+      query(\$page: Int, \$perPage: Int) {
+        trending: Page(page: \$page, perPage: \$perPage) {
+          media(sort: TRENDING_DESC, type: MANGA) {
+            id
+            title {
+              romaji
+              english
+              native
+            }
+            coverImage {
+              large
+            }
+            genres
+            bannerImage
+            chapters
+            volumes
+            type
+          }
+        }
+        allTimePopular: Page(page: \$page, perPage: \$perPage) {
+          media(sort: POPULARITY_DESC, type: MANGA) {
+            id
+            title {
+              romaji
+              english
+              native
+            }
+            coverImage {
+              large
+            }
+            type
+          }
+        }
+      }
+    ''';
+    final res = await http.post(
+      Uri.parse('https://graphql.anilist.co'),
+      headers: {
+        "Authorization": authHeader,
+        "Content-Type": "application/json",
+      },
+      body: jsonEncode({
+        "query": query,
+        "variables": {"page": page, "perPage": perPage},
+      }),
+    );
     final data = jsonDecode(res.body);
     if (res.statusCode == 429) {
       Fluttertoast.showToast(

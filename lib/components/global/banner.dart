@@ -12,8 +12,8 @@ class AiringBanner extends StatelessWidget {
     required this.bannerImage,
     required this.coverImage,
     required this.title,
-    required this.totalEpisodes,
-    required this.airedEpisodes,
+    this.totalEpisodes,
+    this.airedEpisodes,
     required this.tagString,
     required this.type,
   });
@@ -22,8 +22,8 @@ class AiringBanner extends StatelessWidget {
   final String bannerImage;
   final String coverImage;
   final String title;
-  final String totalEpisodes;
-  final String airedEpisodes;
+  final String? totalEpisodes;
+  final String? airedEpisodes;
   final String tagString;
   final String type;
 
@@ -62,7 +62,7 @@ class AiringBanner extends StatelessWidget {
                         bannerImage,
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) =>
-                            const Icon(Icons.error),
+                            Container(),
                       ),
                     ),
                   ),
@@ -111,18 +111,31 @@ class AiringBanner extends StatelessWidget {
                                 ],
                               ),
                             ),
-                            Text(
-                              "Episodes: $airedEpisodes/$totalEpisodes\n$tagString",
-                              style: TextStyle(
-                                fontSize: 15,
-                                shadows: [
-                                  BoxShadow(
-                                    blurRadius: 5.0,
-                                    color: Colors.black,
+                            (totalEpisodes != null && airedEpisodes != null)
+                                ? Text(
+                                    "Episodes: $airedEpisodes/$totalEpisodes\n$tagString",
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      shadows: [
+                                        BoxShadow(
+                                          blurRadius: 5.0,
+                                          color: Colors.black,
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                                : Text(
+                                    tagString,
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      shadows: [
+                                        BoxShadow(
+                                          blurRadius: 5.0,
+                                          color: Colors.black,
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                ],
-                              ),
-                            ),
                             SizedBox(height: 18),
                           ],
                         ),
