@@ -24,7 +24,7 @@ class ItemCard extends StatelessWidget {
     return OpenContainer(
       openElevation: 0,
       closedElevation: 0,
-      transitionType: ContainerTransitionType.fade,
+      transitionType: ContainerTransitionType.fadeThrough,
       openColor: Theme.of(context).colorScheme.surface,
       closedColor: Theme.of(context).colorScheme.surface,
       closedShape: RoundedRectangleBorder(
