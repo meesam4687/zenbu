@@ -1,8 +1,7 @@
+import 'package:flutter/material.dart';
 import 'package:al_client/anilist_connector.dart';
 import 'package:al_client/state_provider.dart';
-import 'package:flutter/material.dart';
-
-import 'package:al_client/components/anime_discovery_page/airing_banner.dart';
+import 'package:al_client/components/global/banner.dart';
 import 'package:al_client/components/anime_discovery_page/horizontal_anime_list.dart';
 import 'package:al_client/components/anime_discovery_page/search_segment.dart';
 import 'package:provider/provider.dart';
@@ -73,6 +72,7 @@ class _AnimeDiscoveryPageState extends State<AnimeDiscoveryPage> {
                                   (data["data"]["popularSeason"]["media"]
                                       as List)[i];
                               final item = AiringBanner(
+                                id: media["id"],
                                 bannerImage: media["bannerImage"].toString(),
                                 coverImage: media["coverImage"]["large"]
                                     .toString(),
@@ -100,6 +100,7 @@ class _AnimeDiscoveryPageState extends State<AnimeDiscoveryPage> {
                                     : ((media["genres"] as List)
                                           .map((tag) => tag.toString())
                                           .join(" • ")),
+                                type: media["type"].toString().toLowerCase(),
                               );
                               banners.add(item);
                             }
@@ -154,6 +155,7 @@ class _AnimeDiscoveryPageState extends State<AnimeDiscoveryPage> {
                               (providerData["data"]["popularSeason"]["media"]
                                   as List)[i];
                           final item = AiringBanner(
+                            id: media["id"],
                             bannerImage: media["bannerImage"].toString(),
                             coverImage: media["coverImage"]["large"].toString(),
                             title:
@@ -177,6 +179,7 @@ class _AnimeDiscoveryPageState extends State<AnimeDiscoveryPage> {
                                 : ((media["genres"] as List)
                                       .map((tag) => tag.toString())
                                       .join(" • ")),
+                            type: media["type"].toString().toLowerCase(),
                           );
                           banners.add(item);
                         }
