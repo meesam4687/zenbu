@@ -1,3 +1,5 @@
+import 'package:al_client/pages/list_page.dart';
+import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:al_client/components/global/item_card.dart';
 
@@ -31,7 +33,23 @@ class MangaList extends StatelessWidget {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.all(Radius.circular(100)),
                     ),
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        PageRouteBuilder(
+                          transitionDuration: const Duration(milliseconds: 600),
+                          pageBuilder:
+                              (context, animation, secondaryAnimation) {
+                                return SharedAxisTransition(
+                                  animation: animation,
+                                  secondaryAnimation: secondaryAnimation,
+                                  transitionType:
+                                      SharedAxisTransitionType.horizontal,
+                                  child: const ListPage(title: "Manga List"),
+                                );
+                              },
+                        ),
+                      );
+                    },
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [Text('View All  '), Icon(Icons.arrow_forward)],
