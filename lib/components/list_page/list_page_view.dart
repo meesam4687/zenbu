@@ -11,26 +11,24 @@ class ListPageView extends StatelessWidget {
     return Container(
       width: double.infinity,
       margin: EdgeInsets.only(top: 10, left: 10, right: 10),
-      child: Expanded(
-        child: GridView.builder(
-          itemCount: list.length,
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            childAspectRatio: 9 / 16,
-            crossAxisCount: 3,
-          ),
-          itemBuilder: (context, index) {
-            return ItemCard(
-              title:
-                  ((list[index]["media"]["title"]["romaji"] as String).length >
-                      12)
-                  ? '${(list[index]["media"]["title"]["romaji"] as String).substring(0, 12)}...'
-                  : (list[index]["media"]["title"]["romaji"] as String),
-              image: list[index]["media"]["coverImage"]["extraLarge"],
-              id: list[index]["media"]["id"],
-              type: mediaType,
-            );
-          },
+      child: GridView.builder(
+        itemCount: list.length,
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          childAspectRatio: 9 / 16,
+          crossAxisCount: 3,
         ),
+        itemBuilder: (context, index) {
+          return ItemCard(
+            title:
+                ((list[index]["media"]["title"]["romaji"] as String).length >
+                    12)
+                ? '${(list[index]["media"]["title"]["romaji"] as String).substring(0, 12)}...'
+                : (list[index]["media"]["title"]["romaji"] as String),
+            image: list[index]["media"]["coverImage"]["extraLarge"],
+            id: list[index]["media"]["id"],
+            type: mediaType,
+          );
+        },
       ),
     );
   }
