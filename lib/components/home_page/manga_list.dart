@@ -36,7 +36,7 @@ class MangaList extends StatelessWidget {
                     onPressed: () {
                       Navigator.of(context).push(
                         PageRouteBuilder(
-                          transitionDuration: const Duration(milliseconds: 600),
+                          transitionDuration: const Duration(milliseconds: 300),
                           pageBuilder:
                               (context, animation, secondaryAnimation) {
                                 return SharedAxisTransition(

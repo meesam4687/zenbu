@@ -605,3 +605,69 @@ Future<Map<String, dynamic>> getMangaHomePage(int page, int perPage) async {
     throw e.toString();
   }
 }
+
+Future<Map<String, dynamic>> getMediaLists() async {
+  try {
+    String authHeader = 'Bearer $anilistAuthKey';
+    String query = '''
+      query (\$type: MediaType!, \$type2: MediaType!, \$userId: Int!) {
+        animeList: MediaListCollection(type: \$type, userId: \$userId) {
+          lists {
+            name
+            entries {
+              id
+              media {
+                id
+                title { romaji english native }
+                coverImage { extraLarge }
+                episodes
+                mediaListEntry { status progress }
+                status
+                bannerImage
+              }
+            }
+          }
+        }
+        mangaList: MediaListCollection(type: \$type2, userId: \$userId) {
+          lists {
+            name
+            entries {
+              id
+              media {
+                id
+                title { romaji english native }
+                coverImage { extraLarge }
+                chapters
+                mediaListEntry { status progress }
+              }
+            }
+          }
+        }
+      }
+    ''';
+
+    final res = await http.post(
+      Uri.parse('https://graphql.anilist.co'),
+      headers: {
+        "Authorization": authHeader,
+        "Content-Type": "application/json",
+      },
+      body: jsonEncode({
+        "query": query,
+        "variables": {"type": "ANIME", "type2": "MANGA", "userId": 7433884},
+      }),
+    );
+    final data = jsonDecode(res.body);
+    if (res.statusCode == 429) {
+      Fluttertoast.showToast(
+        msg: "Rate limited, try again later",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        fontSize: 16.0,
+      );
+    }
+    return data;
+  } catch (e) {
+    throw e.toString();
+  }
+}
