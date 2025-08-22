@@ -5,7 +5,6 @@ import 'package:fluttertoast/fluttertoast.dart';
 
 Future<Map<String, dynamic>> getHomePageData() async {
   try {
-    print("Network Call to Anilist for HomePage");
     String authHeader = 'Bearer $anilistAuthKey';
 
     String query = '''
@@ -79,7 +78,6 @@ Future<Map<String, dynamic>> getHomePageData() async {
 }
 
 Future<Map<String, dynamic>> getAnimeData(int id) async {
-  print("Network Call to Anilist for HomePage");
   try {
     String authHeader = 'Bearer $anilistAuthKey';
 
