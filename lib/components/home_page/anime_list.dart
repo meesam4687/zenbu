@@ -44,7 +44,10 @@ class AnimeList extends StatelessWidget {
                                   secondaryAnimation: secondaryAnimation,
                                   transitionType:
                                       SharedAxisTransitionType.horizontal,
-                                  child: const ListPage(title: "Anime List"),
+                                  child: const ListPage(
+                                    title: "Anime List",
+                                    mediaListType: MediaType.anime,
+                                  ),
                                 );
                               },
                         ),

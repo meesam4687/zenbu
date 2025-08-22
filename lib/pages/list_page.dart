@@ -3,13 +3,16 @@ import 'package:al_client/components/list_page/list_page_view.dart';
 import 'package:flutter/material.dart';
 
 class ListPage extends StatefulWidget {
-  const ListPage({super.key, required this.title});
+  const ListPage({super.key, required this.title, required this.mediaListType});
 
   final String title;
+  final MediaType mediaListType;
 
   @override
   State<ListPage> createState() => _ListPageState();
 }
+
+enum MediaType { anime, manga }
 
 class _ListPageState extends State<ListPage> {
   late final Future<Map<String, dynamic>> mediaLists;
@@ -22,6 +25,9 @@ class _ListPageState extends State<ListPage> {
 
   @override
   Widget build(BuildContext context) {
+    final String list = widget.mediaListType == MediaType.anime
+        ? "animeList"
+        : "mangaList";
     return DefaultTabController(
       length: 6,
       child: Scaffold(
@@ -55,10 +61,10 @@ class _ListPageState extends State<ListPage> {
                 }
                 final data = snapshot.data!;
                 final List combinedEntries =
-                    (data["data"]["animeList"]["lists"] as List)
+                    (data["data"][list]["lists"] as List)
                         .expand((list) => list["entries"] as List)
                         .toList();
-                final lists = data["data"]["animeList"]["lists"] as List;
+                final lists = data["data"][list]["lists"] as List;
                 final Map<String, int> listNameIndexMap = {};
                 for (var i = 0; i < lists.length; i++) {
                   listNameIndexMap[lists[i]["name"]] = i;
@@ -68,30 +74,45 @@ class _ListPageState extends State<ListPage> {
                     children: [
                       ListPageView(
                         list:
-                            data["data"]["animeList"]["lists"][listNameIndexMap['Watching']]["entries"],
-                        mediaType: "anime",
+                            (listNameIndexMap[(list == "animeList")
+                                    ? "Watching"
+                                    : "Reading"] !=
+                                null)
+                            ? data["data"][list]["lists"][listNameIndexMap[(list ==
+                                      "animeList")
+                                  ? "Watching"
+                                  : "Reading"]]["entries"]
+                            : [],
+                        mediaType: (list == "animeList") ? "anime" : "manga",
                       ),
                       ListPageView(
-                        list:
-                            data["data"]["animeList"]["lists"][listNameIndexMap['Planning']]["entries"],
-                        mediaType: "anime",
+                        list: (listNameIndexMap['Planning'] != null)
+                            ? data["data"][list]["lists"][listNameIndexMap['Planning']]["entries"]
+                            : [],
+                        mediaType: (list == "animeList") ? "anime" : "manga",
                       ),
                       ListPageView(
-                        list:
-                            data["data"]["animeList"]["lists"][listNameIndexMap['Completed']]["entries"],
-                        mediaType: "anime",
+                        list: (listNameIndexMap['Completed'] != null)
+                            ? data["data"][list]["lists"][listNameIndexMap['Completed']]["entries"]
+                            : [],
+                        mediaType: (list == "animeList") ? "anime" : "manga",
                       ),
                       ListPageView(
-                        list:
-                            data["data"]["animeList"]["lists"][listNameIndexMap['Paused']]["entries"],
-                        mediaType: "anime",
+                        list: (listNameIndexMap['Paused'] != null)
+                            ? data["data"][list]["lists"][listNameIndexMap['Paused']]["entries"]
+                            : [],
+                        mediaType: (list == "animeList") ? "anime" : "manga",
                       ),
                       ListPageView(
-                        list:
-                            data["data"]["animeList"]["lists"][listNameIndexMap['Dropped']]["entries"],
-                        mediaType: "anime",
+                        list: (listNameIndexMap['Dropped'] != null)
+                            ? data["data"][list]["lists"][listNameIndexMap['Dropped']]["entries"]
+                            : [],
+                        mediaType: (list == "animeList") ? "anime" : "manga",
                       ),
-                      ListPageView(list: combinedEntries, mediaType: "anime"),
+                      ListPageView(
+                        list: combinedEntries,
+                        mediaType: (list == "animeList") ? "anime" : "manga",
+                      ),
                     ],
                   ),
                 );

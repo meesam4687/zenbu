@@ -44,7 +44,10 @@ class MangaList extends StatelessWidget {
                                   secondaryAnimation: secondaryAnimation,
                                   transitionType:
                                       SharedAxisTransitionType.horizontal,
-                                  child: const ListPage(title: "Manga List"),
+                                  child: const ListPage(
+                                    title: "Manga List",
+                                    mediaListType: MediaType.manga,
+                                  ),
                                 );
                               },
                         ),
