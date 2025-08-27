@@ -920,3 +920,108 @@ Future<Map<String, dynamic>> getPopularAllTimeAnime(
     throw e.toString();
   }
 }
+
+Future<Map<String, dynamic>> getTrendingManga(int page, int perPage) async {
+  try {
+    String authHeader = 'Bearer $anilistAuthKey';
+
+    String query = '''
+      query (\$page: Int, \$perPage: Int) {
+        list: Page(page: \$page, perPage: \$perPage) {
+          media(sort: TRENDING_DESC, type: MANGA) {
+            id
+            title {
+              romaji
+              english
+              native
+            }
+            coverImage {
+              large
+            }
+            genres
+            bannerImage
+            chapters
+            volumes
+            type
+          }
+        }
+      }
+    ''';
+
+    final res = await http.post(
+      Uri.parse('https://graphql.anilist.co'),
+      headers: {
+        "Authorization": authHeader,
+        "Content-Type": "application/json",
+      },
+      body: jsonEncode({
+        "query": query,
+        "variables": {"page": page, "perPage": perPage},
+      }),
+    );
+    final data = jsonDecode(res.body);
+    if (res.statusCode == 429) {
+      Fluttertoast.showToast(
+        msg: "Rate limited, try again later",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        fontSize: 16.0,
+      );
+    }
+    return data;
+  } catch (e) {
+    throw e.toString();
+  }
+}
+
+Future<Map<String, dynamic>> getPopularAllTimeManga(
+  int page,
+  int perPage,
+) async {
+  try {
+    String authHeader = 'Bearer $anilistAuthKey';
+
+    String query = '''
+      query (\$page: Int, \$perPage: Int) {
+        list: Page(page: \$page, perPage: \$perPage) {
+          media(sort: POPULARITY_DESC, type: MANGA) {
+            id
+            title {
+              romaji
+              english
+              native
+            }
+            coverImage {
+              large
+            }
+            type
+          }
+        }
+      }
+    ''';
+
+    final res = await http.post(
+      Uri.parse('https://graphql.anilist.co'),
+      headers: {
+        "Authorization": authHeader,
+        "Content-Type": "application/json",
+      },
+      body: jsonEncode({
+        "query": query,
+        "variables": {"page": page, "perPage": perPage},
+      }),
+    );
+    final data = jsonDecode(res.body);
+    if (res.statusCode == 429) {
+      Fluttertoast.showToast(
+        msg: "Rate limited, try again later",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        fontSize: 16.0,
+      );
+    }
+    return data;
+  } catch (e) {
+    throw e.toString();
+  }
+}

@@ -55,6 +55,10 @@ class _EntireListViewState extends State<EntireListView> {
       data = await getUpcomingAnime(page, 48);
     } else if (widget.type == PageType.popularAllTimeAnime) {
       data = await getPopularAllTimeAnime(page, 48);
+    } else if (widget.type == PageType.trendingManga) {
+      data = await getTrendingManga(page, 48);
+    } else if (widget.type == PageType.popularAllTimeManga) {
+      data = await getPopularAllTimeManga(page, 48);
     }
     setState(() {
       for (var media in (data["data"]["list"]["media"] as List)) {
