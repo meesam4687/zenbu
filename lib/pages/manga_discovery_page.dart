@@ -1,3 +1,4 @@
+import 'package:al_client/pages/entire_list_view.dart';
 import 'package:flutter/material.dart';
 import 'package:al_client/anilist_connector.dart';
 import 'package:al_client/state_provider.dart';
@@ -101,10 +102,12 @@ class _MangaDiscoveryPageState extends State<MangaDiscoveryPage> {
                       HorizontalAnimeList(
                         heading: "Trending Now",
                         animeArray: data["data"]["trending"]["media"],
+                        pagetype: PageType.trendingManga,
                       ),
                       HorizontalAnimeList(
                         heading: "All Time Popular",
                         animeArray: data["data"]["allTimePopular"]["media"],
+                        pagetype: PageType.popularAllTimeManga,
                       ),
                     ],
                   ),
@@ -164,10 +167,12 @@ class _MangaDiscoveryPageState extends State<MangaDiscoveryPage> {
                   HorizontalAnimeList(
                     heading: "Trending Now",
                     animeArray: providerData["data"]["trending"]["media"],
+                    pagetype: PageType.trendingManga,
                   ),
                   HorizontalAnimeList(
                     heading: "All Time Popular",
                     animeArray: providerData["data"]["allTimePopular"]["media"],
+                    pagetype: PageType.popularAllTimeManga,
                   ),
                 ],
               ),

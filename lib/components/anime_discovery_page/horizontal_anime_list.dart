@@ -1,4 +1,6 @@
 import 'package:al_client/components/global/item_card.dart';
+import 'package:al_client/pages/entire_list_view.dart';
+import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 
 class HorizontalAnimeList extends StatelessWidget {
@@ -6,9 +8,11 @@ class HorizontalAnimeList extends StatelessWidget {
     super.key,
     required this.heading,
     required this.animeArray,
+    required this.pagetype,
   });
   final String heading;
   final List animeArray;
+  final PageType pagetype;
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +32,24 @@ class HorizontalAnimeList extends StatelessWidget {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.all(Radius.circular(100)),
                 ),
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.of(context).push(
+                    PageRouteBuilder(
+                      transitionDuration: const Duration(milliseconds: 300),
+                      pageBuilder: (context, animation, secondaryAnimation) {
+                        return SharedAxisTransition(
+                          animation: animation,
+                          secondaryAnimation: secondaryAnimation,
+                          transitionType: SharedAxisTransitionType.horizontal,
+                          child: EntireListView(
+                            heading: heading,
+                            type: pagetype,
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                },
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [Text('View All  '), Icon(Icons.arrow_forward)],
