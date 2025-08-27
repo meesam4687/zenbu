@@ -93,13 +93,10 @@ class _EntireListViewState extends State<EntireListView> {
                   Expanded(
                     child: GridView.builder(
                       controller: _scrollController,
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 3,
-                            crossAxisSpacing: 10,
-                            mainAxisSpacing: 10,
-                            childAspectRatio: 9 / 16,
-                          ),
+                      gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                        childAspectRatio: 100 / 181,
+                        maxCrossAxisExtent: 180,
+                      ),
                       itemCount: _isLoading ? medias.length + 1 : medias.length,
                       itemBuilder: (context, index) {
                         if (index == medias.length && _isLoading == true) {
@@ -114,8 +111,8 @@ class _EntireListViewState extends State<EntireListView> {
                           title:
                               ((medias[index]["title"]["romaji"] as String)
                                       .length >
-                                  12)
-                              ? '${(medias[index]["title"]["romaji"] as String).substring(0, 12)}...'
+                                  10)
+                              ? '${(medias[index]["title"]["romaji"] as String).substring(0, 10)}...'
                               : medias[index]["title"]["romaji"] as String,
                           image: medias[index]["coverImage"]["large"] as String,
                           id: medias[index]["id"] as int,

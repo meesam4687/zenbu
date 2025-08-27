@@ -36,7 +36,7 @@ class ItemCard extends StatelessWidget {
           child: Material(
             child: Ink(
               height: 260,
-              width: 141.32,
+              width: 126.41,
               child: Column(
                 children: [
                   Card(

@@ -13,9 +13,9 @@ class ListPageView extends StatelessWidget {
       margin: EdgeInsets.only(top: 10, left: 10, right: 10),
       child: GridView.builder(
         itemCount: list.length,
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          childAspectRatio: 9 / 16,
-          crossAxisCount: 3,
+        gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+          childAspectRatio: 100 / 181,
+          maxCrossAxisExtent: 180,
         ),
         itemBuilder: (context, index) {
           return ItemCard(
