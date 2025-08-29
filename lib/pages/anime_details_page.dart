@@ -68,6 +68,9 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage> {
                     "Progress: ${current["media"]["mediaListEntry"]["progress"]}/${(current["media"]["episodes"] == null) ? '?' : current["media"]["episodes"]}",
                 cover: current["media"]["coverImage"]["extraLarge"],
                 banner: current["media"]["bannerImage"],
+                mediaState: (current["media"]["mediaListEntry"] != null)
+                    ? current["media"]["mediaListEntry"]["status"] ?? 'NONE'
+                    : 'NONE',
               ),
               DetailsPane(mediaId: current["media"]["id"]),
             ],
@@ -104,6 +107,11 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage> {
                         "Progress: ${(data["data"]["Media"]["mediaListEntry"] != null) ? data["data"]["Media"]["mediaListEntry"]["progress"] : "0"}/${(data["data"]["Media"]["episodes"] == null) ? '?' : data["data"]["Media"]["episodes"]}",
                     cover: data["data"]["Media"]["coverImage"]["extraLarge"],
                     banner: data["data"]["Media"]["bannerImage"],
+                    mediaState:
+                        (data["data"]["Media"]["mediaListEntry"] != null)
+                        ? data["data"]["Media"]["mediaListEntry"]["status"] ??
+                              'NONE'
+                        : 'NONE',
                   ),
                   DetailsPane(mediaId: widget.id as int),
                 ],

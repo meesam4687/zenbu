@@ -185,6 +185,7 @@ Future<Map<String, dynamic>> getAnimeData(int id) async {
           }
           mediaListEntry {
             progress
+            status
           }
         }
       }
@@ -319,6 +320,7 @@ Future<Map<String, dynamic>> getMangaData(int id) async {
           }
           mediaListEntry {
             progress
+            status
           }
         }
       }

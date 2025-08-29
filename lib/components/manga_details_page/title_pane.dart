@@ -8,16 +8,33 @@ class TitlePane extends StatelessWidget {
     required this.progress,
     required this.cover,
     required this.banner,
+    required this.mediaState,
   });
   final String title;
   final String progress;
   final String cover;
   final String? banner;
+  final String mediaState;
 
   @override
   Widget build(BuildContext context) {
     final surfaceColor = Theme.of(context).colorScheme.surface;
-
+    List<Widget> elementList = [];
+    if (mediaState == 'CURRENT') {
+      elementList = [Icon(Icons.edit), Text(" Reading")];
+    } else if (mediaState == 'COMPLETED') {
+      elementList = [Icon(Icons.check), Text(" Completed")];
+    } else if (mediaState == 'PLANNING') {
+      elementList = [Icon(Icons.schedule), Text(" Planning")];
+    } else if (mediaState == 'DROPPED') {
+      elementList = [Icon(Icons.cancel), Text(" Dropped")];
+    } else if (mediaState == 'PAUSED') {
+      elementList = [Icon(Icons.pause), Text(" Paused")];
+    } else if (mediaState == 'REPEATING') {
+      elementList = [Icon(Icons.loop), Text(" Repeating")];
+    } else {
+      elementList = [Icon(Icons.add), Text(" Add to List")];
+    }
     return SizedBox(
       height: 350,
       child: Stack(
@@ -90,7 +107,7 @@ class TitlePane extends StatelessWidget {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       spacing: 5,
-                      children: [Icon(Icons.add), Text("Add to List")],
+                      children: elementList,
                     ),
                   ),
                 ),

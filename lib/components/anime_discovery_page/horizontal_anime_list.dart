@@ -67,8 +67,8 @@ class HorizontalAnimeList extends StatelessWidget {
               itemBuilder: (context, index) {
                 final Map anime = animeArray[index];
                 return ItemCard(
-                  title: anime["title"]["romaji"].length > 28
-                      ? anime["title"]["romaji"].substring(0, 28) + '...'
+                  title: anime["title"]["romaji"].length > 22
+                      ? anime["title"]["romaji"].substring(0, 22) + '...'
                       : anime["title"]["romaji"],
                   image: anime["coverImage"]["large"],
                   id: anime["id"],

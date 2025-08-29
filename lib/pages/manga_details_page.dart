@@ -68,6 +68,9 @@ class _MangaDetailsPageState extends State<MangaDetailsPage> {
                     "Progress: ${current["media"]["mediaListEntry"]["progress"]}/${(current["media"]["chapters"] == null) ? '?' : current["media"]["chapters"]}",
                 cover: current["media"]["coverImage"]["extraLarge"],
                 banner: current["media"]["bannerImage"],
+                mediaState: (current["media"]["mediaListEntry"] != null)
+                    ? current["media"]["mediaListEntry"]["status"] ?? 'NONE'
+                    : 'NONE',
               ),
               DetailsPane(mediaId: current["media"]["id"]),
             ],
@@ -104,6 +107,11 @@ class _MangaDetailsPageState extends State<MangaDetailsPage> {
                         "Progress: ${(data["data"]["Media"]["mediaListEntry"] != null) ? data["data"]["Media"]["mediaListEntry"]["progress"] : "0"}/${(data["data"]["Media"]["chapters"] == null) ? '?' : data["data"]["Media"]["chapters"]}",
                     cover: data["data"]["Media"]["coverImage"]["extraLarge"],
                     banner: data["data"]["Media"]["bannerImage"],
+                    mediaState:
+                        (data["data"]["Media"]["mediaListEntry"] != null)
+                        ? data["data"]["Media"]["mediaListEntry"]["status"] ??
+                              'NONE'
+                        : 'NONE',
                   ),
                   DetailsPane(mediaId: widget.id as int),
                 ],
