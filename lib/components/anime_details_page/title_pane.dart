@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:al_client/components/anime_details_page/list_editor_bottom_sheet.dart';
 import 'package:flutter/material.dart';
 
 class TitlePane extends StatelessWidget {
@@ -105,7 +106,14 @@ class TitlePane extends StatelessWidget {
                   width: double.infinity,
                   margin: EdgeInsets.only(left: 12, right: 12, top: 10),
                   child: FilledButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      showModalBottomSheet(
+                        context: context,
+                        builder: (context) {
+                          return ListEditorBottomSheet();
+                        },
+                      );
+                    },
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       spacing: 5,
