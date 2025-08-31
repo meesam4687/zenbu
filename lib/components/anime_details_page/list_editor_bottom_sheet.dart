@@ -5,6 +5,15 @@ class ListEditorBottomSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final TextEditingController chaptersController = TextEditingController(
+      text: '12',
+    );
+    final TextEditingController scoreController = TextEditingController(
+      text: '10',
+    );
+    final TextEditingController rewatchController = TextEditingController(
+      text: '0',
+    );
     return Container(
       padding: EdgeInsets.only(top: 40, left: 20, right: 20),
       width: double.infinity,
@@ -25,7 +34,7 @@ class ListEditorBottomSheet extends StatelessWidget {
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
                   ),
                   DropdownMenu(
-                    width: 180,
+                    width: MediaQuery.of(context).size.width * 0.44,
                     label: Text("Reading"),
                     dropdownMenuEntries: [
                       DropdownMenuEntry(value: "CURRENT", label: "Watching"),
@@ -46,13 +55,11 @@ class ListEditorBottomSheet extends StatelessWidget {
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
                   ),
                   SizedBox(
-                    width: 180,
+                    width: MediaQuery.of(context).size.width * 0.44,
                     child: TextField(
                       keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        labelText: '12',
-                        border: OutlineInputBorder(),
-                      ),
+                      controller: chaptersController,
+                      decoration: InputDecoration(border: OutlineInputBorder()),
                     ),
                   ),
                 ],
@@ -73,9 +80,10 @@ class ListEditorBottomSheet extends StatelessWidget {
                   InkWell(
                     borderRadius: BorderRadius.circular(4),
                     child: SizedBox(
-                      width: 180,
-                      height: 50,
+                      width: MediaQuery.of(context).size.width * 0.44,
+                      height: 55,
                       child: Container(
+                        alignment: Alignment.centerLeft,
                         padding: EdgeInsets.all(12),
                         decoration: BoxDecoration(
                           border: Border.all(color: Colors.grey),
@@ -117,9 +125,10 @@ class ListEditorBottomSheet extends StatelessWidget {
                   InkWell(
                     borderRadius: BorderRadius.circular(4),
                     child: SizedBox(
-                      width: 180,
-                      height: 50,
+                      width: MediaQuery.of(context).size.width * 0.44,
+                      height: 55,
                       child: Container(
+                        alignment: Alignment.centerLeft,
                         padding: EdgeInsets.all(12),
                         decoration: BoxDecoration(
                           border: Border.all(color: Colors.grey),
@@ -164,13 +173,11 @@ class ListEditorBottomSheet extends StatelessWidget {
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
                   ),
                   SizedBox(
-                    width: 180,
+                    width: MediaQuery.of(context).size.width * 0.44,
                     child: TextField(
                       keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        labelText: '10/10',
-                        border: OutlineInputBorder(),
-                      ),
+                      controller: scoreController,
+                      decoration: InputDecoration(border: OutlineInputBorder()),
                     ),
                   ),
                 ],
@@ -184,13 +191,11 @@ class ListEditorBottomSheet extends StatelessWidget {
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
                   ),
                   SizedBox(
-                    width: 180,
+                    width: MediaQuery.of(context).size.width * 0.44,
                     child: TextField(
+                      controller: rewatchController,
                       keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        labelText: '0',
-                        border: OutlineInputBorder(),
-                      ),
+                      decoration: InputDecoration(border: OutlineInputBorder()),
                     ),
                   ),
                 ],
