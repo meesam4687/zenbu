@@ -107,8 +107,14 @@ class TitlePane extends StatelessWidget {
                     onPressed: () {
                       showModalBottomSheet(
                         context: context,
+                        isScrollControlled: true,
                         builder: (context) {
-                          return ListEditorBottomSheet();
+                          return Padding(
+                            padding: EdgeInsets.only(
+                              bottom: MediaQuery.of(context).viewInsets.bottom,
+                            ),
+                            child: ListEditorBottomSheet(),
+                          );
                         },
                       );
                     },

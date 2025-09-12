@@ -5,15 +5,9 @@ class ListEditorBottomSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TextEditingController chaptersController = TextEditingController(
-      text: '12',
-    );
-    final TextEditingController scoreController = TextEditingController(
-      text: '10',
-    );
-    final TextEditingController rewatchController = TextEditingController(
-      text: '0',
-    );
+    final TextEditingController chaptersController = TextEditingController();
+    final TextEditingController scoreController = TextEditingController();
+    final TextEditingController rewatchController = TextEditingController();
     return Container(
       padding: EdgeInsets.only(top: 40, left: 20, right: 20),
       width: double.infinity,
@@ -35,7 +29,7 @@ class ListEditorBottomSheet extends StatelessWidget {
                   ),
                   DropdownMenu(
                     width: MediaQuery.of(context).size.width * 0.44,
-                    label: Text("Reading"),
+                    hintText: "Watching",
                     dropdownMenuEntries: [
                       DropdownMenuEntry(value: "CURRENT", label: "Watching"),
                       DropdownMenuEntry(value: "COMPLETED", label: "Completed"),
@@ -51,7 +45,7 @@ class ListEditorBottomSheet extends StatelessWidget {
                 spacing: 10,
                 children: [
                   Text(
-                    "Chapters Read",
+                    "Episodes Watched",
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
                   ),
                   SizedBox(
@@ -59,7 +53,10 @@ class ListEditorBottomSheet extends StatelessWidget {
                     child: TextField(
                       keyboardType: TextInputType.number,
                       controller: chaptersController,
-                      decoration: InputDecoration(border: OutlineInputBorder()),
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(),
+                        hint: Text("12"),
+                      ),
                     ),
                   ),
                 ],
@@ -177,7 +174,10 @@ class ListEditorBottomSheet extends StatelessWidget {
                     child: TextField(
                       keyboardType: TextInputType.number,
                       controller: scoreController,
-                      decoration: InputDecoration(border: OutlineInputBorder()),
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(),
+                        hint: Text("10"),
+                      ),
                     ),
                   ),
                 ],
@@ -195,7 +195,10 @@ class ListEditorBottomSheet extends StatelessWidget {
                     child: TextField(
                       controller: rewatchController,
                       keyboardType: TextInputType.number,
-                      decoration: InputDecoration(border: OutlineInputBorder()),
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(),
+                        hint: Text("0"),
+                      ),
                     ),
                   ),
                 ],
