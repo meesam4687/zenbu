@@ -1,15 +1,29 @@
 import 'package:flutter/material.dart';
 
-class ListEditorBottomSheet extends StatelessWidget {
+class ListEditorBottomSheet extends StatefulWidget {
   const ListEditorBottomSheet({super.key});
 
   @override
+  State<ListEditorBottomSheet> createState() => _ListEditorBottomSheetState();
+}
+
+class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
+  final TextEditingController chaptersController = TextEditingController();
+  final TextEditingController scoreController = TextEditingController();
+  final TextEditingController rewatchController = TextEditingController();
+
+  @override
+  void dispose() {
+    chaptersController.dispose();
+    scoreController.dispose();
+    rewatchController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final TextEditingController chaptersController = TextEditingController();
-    final TextEditingController scoreController = TextEditingController();
-    final TextEditingController rewatchController = TextEditingController();
     return Container(
-      padding: EdgeInsets.only(top: 40, left: 20, right: 20),
+      padding: const EdgeInsets.only(top: 40, left: 20, right: 20),
       width: double.infinity,
       height: 470,
       child: Column(
@@ -55,7 +69,7 @@ class ListEditorBottomSheet extends StatelessWidget {
                       controller: chaptersController,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
-                        hint: Text("56"),
+                        hint: Text("12"),
                       ),
                     ),
                   ),
