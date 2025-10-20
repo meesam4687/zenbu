@@ -1,7 +1,22 @@
 import 'package:flutter/material.dart';
 
 class ListEditorBottomSheet extends StatefulWidget {
-  const ListEditorBottomSheet({super.key});
+  const ListEditorBottomSheet({
+    super.key,
+    required this.status,
+    required this.progress,
+    required this.startDate,
+    required this.endDate,
+    required this.score,
+    required this.repeatCount,
+  });
+
+  final String status;
+  final int progress;
+  final Map startDate;
+  final Map endDate;
+  final double score;
+  final int repeatCount;
 
   @override
   State<ListEditorBottomSheet> createState() => _ListEditorBottomSheetState();
@@ -22,6 +37,14 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
+    Map listStatusToText = {
+      "CURRENT": "Reading",
+      "COMPLETED": "Completed",
+      "PLANNING": "Planning",
+      "DROPPED": "Dropped",
+      "REPEATING": "Rereading",
+      "NONE": "Select",
+    };
     return Container(
       padding: const EdgeInsets.only(top: 40, left: 20, right: 20),
       width: double.infinity,
@@ -43,13 +66,13 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                   ),
                   DropdownMenu(
                     width: MediaQuery.of(context).size.width * 0.44,
-                    hintText: "Reading",
+                    hintText: listStatusToText[widget.status],
                     dropdownMenuEntries: [
                       DropdownMenuEntry(value: "CURRENT", label: "Reading"),
                       DropdownMenuEntry(value: "COMPLETED", label: "Completed"),
                       DropdownMenuEntry(value: "PLANNING", label: "Planning"),
                       DropdownMenuEntry(value: "DROPPED", label: "Dropped"),
-                      DropdownMenuEntry(value: "REPEATING", label: "Repeating"),
+                      DropdownMenuEntry(value: "REPEATING", label: "Rereading"),
                     ],
                   ),
                 ],
@@ -69,7 +92,7 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                       controller: chaptersController,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
-                        hint: Text("12"),
+                        hint: Text(widget.progress.toString()),
                       ),
                     ),
                   ),
@@ -101,7 +124,9 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
-                          '12/08/2025',
+                          (widget.startDate["day"] != -1)
+                              ? '${widget.startDate["day"]}/${widget.startDate["month"]}/${widget.startDate["year"]}'
+                              : 'Select Date',
                           style: TextStyle(fontSize: 16),
                         ),
                       ),
@@ -146,7 +171,9 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
-                          '28/08/2025',
+                          (widget.endDate["day"] != -1)
+                              ? '${widget.endDate["day"]}/${widget.endDate["month"]}/${widget.endDate["year"]}'
+                              : 'Select Date',
                           style: TextStyle(fontSize: 16),
                         ),
                       ),
@@ -190,7 +217,7 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                       controller: scoreController,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
-                        hint: Text("10"),
+                        hint: Text(widget.score.toString()),
                       ),
                     ),
                   ),
@@ -211,7 +238,7 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
-                        hint: Text("0"),
+                        hint: Text(widget.repeatCount.toString()),
                       ),
                     ),
                   ),

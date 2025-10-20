@@ -71,6 +71,7 @@ class _MangaDetailsPageState extends State<MangaDetailsPage> {
                 mediaState: (current["media"]["mediaListEntry"] != null)
                     ? current["media"]["mediaListEntry"]["status"] ?? 'NONE'
                     : 'NONE',
+                mediaListEntry: current["media"]["mediaListEntry"],
               ),
               DetailsPane(mediaId: current["media"]["id"]),
             ],
@@ -112,6 +113,7 @@ class _MangaDetailsPageState extends State<MangaDetailsPage> {
                         ? data["data"]["Media"]["mediaListEntry"]["status"] ??
                               'NONE'
                         : 'NONE',
+                    mediaListEntry: data["data"]["Media"]["mediaListEntry"],
                   ),
                   DetailsPane(mediaId: widget.id as int),
                 ],

@@ -10,12 +10,15 @@ class TitlePane extends StatelessWidget {
     required this.cover,
     required this.banner,
     required this.mediaState,
+    required this.mediaListEntry,
   });
+
   final String title;
   final String progress;
   final String cover;
   final String? banner;
   final String mediaState;
+  final Map? mediaListEntry;
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +35,7 @@ class TitlePane extends StatelessWidget {
     } else if (mediaState == 'PAUSED') {
       elementList = [Icon(Icons.pause), Text(" Paused")];
     } else if (mediaState == 'REPEATING') {
-      elementList = [Icon(Icons.loop), Text(" Repeating")];
+      elementList = [Icon(Icons.loop), Text(" Rereading")];
     } else {
       elementList = [Icon(Icons.add), Text(" Add to List")];
     }
@@ -114,7 +117,24 @@ class TitlePane extends StatelessWidget {
                             padding: EdgeInsets.only(
                               bottom: MediaQuery.of(context).viewInsets.bottom,
                             ),
-                            child: ListEditorBottomSheet(),
+                            child: ListEditorBottomSheet(
+                              status: mediaListEntry?["status"] ?? "NONE",
+                              progress: mediaListEntry?["progress"] ?? 0,
+                              startDate:
+                                  (mediaListEntry?["startedAt"]?["day"] == null)
+                                  ? {"day": -1}
+                                  : mediaListEntry?["startedAt"] ?? {"day": -1},
+                              endDate:
+                                  (mediaListEntry?["completedAt"]?["day"] ==
+                                      null)
+                                  ? {"day": -1}
+                                  : mediaListEntry?["completedAt"] ??
+                                        {"day": -1},
+                              score: (mediaListEntry?["score"] is int)
+                                  ? (mediaListEntry?["score"] as int).toDouble()
+                                  : mediaListEntry?["score"] ?? 0.0,
+                              repeatCount: mediaListEntry?["repeat"] ?? 0,
+                            ),
                           );
                         },
                       );

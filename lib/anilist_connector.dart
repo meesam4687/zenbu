@@ -186,6 +186,18 @@ Future<Map<String, dynamic>> getAnimeData(int id) async {
           mediaListEntry {
             progress
             status
+            startedAt { 
+              day 
+              month 
+              year 
+            } 
+            completedAt { 
+              day 
+              month 
+              year 
+            } 
+            score 
+            repeat
           }
         }
       }
