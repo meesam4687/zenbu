@@ -381,7 +381,7 @@ Future<Map<String, dynamic>> getCharacterData(int id) async {
             large
           } 
           gender 
-          description 
+          description(asHtml: false) 
           media { 
             nodes { 
               id 
@@ -1025,6 +1025,159 @@ Future<Map<String, dynamic>> getPopularAllTimeManga(
         "variables": {"page": page, "perPage": perPage},
       }),
     );
+    final data = jsonDecode(res.body);
+    if (res.statusCode == 429) {
+      Fluttertoast.showToast(
+        msg: "Rate limited, try again later",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        fontSize: 16.0,
+      );
+    }
+    return data;
+  } catch (e) {
+    throw e.toString();
+  }
+}
+
+Future<Map<String, dynamic>> searchAnime(
+  int page,
+  int perPage,
+  String? searchQuery,
+  List? genreIn,
+  String? season,
+  int? seasonYear,
+  String? format,
+  String? status,
+  String? countryOfOrigin,
+  String? mediaSource,
+) async {
+  Map vars = {"page": page, "perPage": perPage};
+  if (searchQuery != null) vars["search"] = searchQuery;
+  if (genreIn != null && genreIn.isNotEmpty) vars["genreIn"] = genreIn;
+  if (season != null && season.isNotEmpty) vars["season"] = season;
+  if (seasonYear != null && seasonYear != 0) vars["seasonYear"] = seasonYear;
+  if (format != null && format.isNotEmpty) vars["format"] = format;
+  if (status != null && status.isNotEmpty) vars["status"] = status;
+  if (countryOfOrigin != null && countryOfOrigin.isNotEmpty) {
+    vars["countryOfOrigin"] = countryOfOrigin;
+  }
+  if (mediaSource != null && mediaSource.isNotEmpty) {
+    vars["source"] = mediaSource;
+  }
+  try {
+    String authHeader = 'Bearer $anilistAuthKey';
+    String query =
+        '''
+      query (
+      \$page: Int,
+      \$perPage: Int${vars.containsKey("search") ? ", \$search: String" : ""}${vars.containsKey("genreIn") ? ", \$genreIn: [String]" : ""}${vars.containsKey("season") ? ", \$season: MediaSeason" : ""}${vars.containsKey("seasonYear") ? ", \$seasonYear: Int" : ""}${vars.containsKey("format") ? ", \$format: MediaFormat" : ""}${vars.containsKey("status") ? ", \$status: MediaStatus" : ""}${vars.containsKey("countryOfOrigin") ? ", \$countryOfOrigin: CountryCode" : ""}${vars.containsKey("source") ? ", \$source: MediaSource" : ""}
+      ) {
+        Page(page: \$page, perPage: \$perPage) { 
+        media(
+          type: ANIME
+          ${vars.containsKey("search") ? "search: \$search," : ""}
+          ${vars.containsKey("genreIn") ? "genre_in: \$genreIn," : ""}
+          ${vars.containsKey("season") ? "season: \$season," : ""}
+          ${vars.containsKey("seasonYear") ? "seasonYear: \$seasonYear," : ""}
+          ${vars.containsKey("format") ? "format: \$format," : ""}
+          ${vars.containsKey("status") ? "status: \$status," : ""}
+          ${vars.containsKey("countryOfOrigin") ? "countryOfOrigin: \$countryOfOrigin," : ""}
+          ${vars.containsKey("source") ? "source: \$source," : ""}
+        ) {
+          id 
+          title { romaji english native }
+          coverImage { large } 
+          type 
+          }
+        } 
+      }
+    ''';
+
+    final res = await http.post(
+      Uri.parse('https://graphql.anilist.co'),
+      headers: {
+        "Authorization": authHeader,
+        "Content-Type": "application/json",
+      },
+      body: jsonEncode({"query": query, "variables": vars}),
+    );
+
+    final data = jsonDecode(res.body);
+    if (res.statusCode == 429) {
+      Fluttertoast.showToast(
+        msg: "Rate limited, try again later",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        fontSize: 16.0,
+      );
+    }
+    return data;
+  } catch (e) {
+    throw e.toString();
+  }
+}
+
+Future<Map<String, dynamic>> searchManga(
+  int page,
+  int perPage,
+  String? searchQuery,
+  List? genreIn,
+  int? seasonYear,
+  String? format,
+  String? status,
+  String? countryOfOrigin,
+  String? mediaSource,
+) async {
+  Map vars = {"page": page, "perPage": perPage};
+  if (searchQuery != null) vars["search"] = searchQuery;
+  if (genreIn != null && genreIn.isNotEmpty) vars["genreIn"] = genreIn;
+  if (seasonYear != null && seasonYear != 0) vars["seasonYear"] = seasonYear;
+  if (format != null && format.isNotEmpty) vars["format"] = format;
+  if (status != null && status.isNotEmpty) vars["status"] = status;
+  if (countryOfOrigin != null && countryOfOrigin.isNotEmpty) {
+    vars["countryOfOrigin"] = countryOfOrigin;
+  }
+  if (mediaSource != null && mediaSource.isNotEmpty) {
+    vars["source"] = mediaSource;
+  }
+  try {
+    String authHeader = 'Bearer $anilistAuthKey';
+    String query =
+        '''
+      query (
+      \$page: Int,
+      \$perPage: Int${vars.containsKey("search") ? ", \$search: String" : ""}${vars.containsKey("genreIn") ? ", \$genreIn: [String]" : ""}${vars.containsKey("seasonYear") ? ", \$seasonYear: Int" : ""}${vars.containsKey("format") ? ", \$format: MediaFormat" : ""}${vars.containsKey("status") ? ", \$status: MediaStatus" : ""}${vars.containsKey("countryOfOrigin") ? ", \$countryOfOrigin: CountryCode" : ""}${vars.containsKey("source") ? ", \$source: MediaSource" : ""}
+      ) {
+        Page(page: \$page, perPage: \$perPage) { 
+        media(
+          type: MANGA
+          ${vars.containsKey("search") ? "search: \$search," : ""}
+          ${vars.containsKey("genreIn") ? "genre_in: \$genreIn," : ""}
+          ${vars.containsKey("seasonYear") ? "seasonYear: \$seasonYear," : ""}
+          ${vars.containsKey("format") ? "format: \$format," : ""}
+          ${vars.containsKey("status") ? "status: \$status," : ""}
+          ${vars.containsKey("countryOfOrigin") ? "countryOfOrigin: \$countryOfOrigin," : ""}
+          ${vars.containsKey("source") ? "source: \$source," : ""}
+        ) {
+          id 
+          title { romaji english native }
+          coverImage { large } 
+          type 
+          }
+        } 
+      }
+    ''';
+
+    final res = await http.post(
+      Uri.parse('https://graphql.anilist.co'),
+      headers: {
+        "Authorization": authHeader,
+        "Content-Type": "application/json",
+      },
+      body: jsonEncode({"query": query, "variables": vars}),
+    );
+
     final data = jsonDecode(res.body);
     if (res.statusCode == 429) {
       Fluttertoast.showToast(

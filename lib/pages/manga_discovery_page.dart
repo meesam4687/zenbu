@@ -4,7 +4,7 @@ import 'package:al_client/anilist_connector.dart';
 import 'package:al_client/state_provider.dart';
 import 'package:al_client/components/global/banner.dart';
 import 'package:al_client/components/anime_discovery_page/horizontal_anime_list.dart';
-import 'package:al_client/components/anime_discovery_page/search_segment.dart';
+import 'package:al_client/components/manga_discovery_page/search_segment.dart';
 import 'package:provider/provider.dart';
 
 class MangaDiscoveryPage extends StatefulWidget {
