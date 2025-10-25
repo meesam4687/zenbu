@@ -27,6 +27,22 @@ Future<Map<String, dynamic>> getHomePageData() async {
                 mediaListEntry { status progress }
                 status
                 bannerImage
+                mediaListEntry {
+                  progress
+                  status
+                  startedAt { 
+                    day 
+                    month 
+                    year 
+                  } 
+                  completedAt { 
+                    day 
+                    month 
+                    year 
+                  } 
+                  score 
+                  repeat
+                }
               }
             }
           }
@@ -43,6 +59,22 @@ Future<Map<String, dynamic>> getHomePageData() async {
                 chapters
                 mediaListEntry { status progress }
                 bannerImage
+                mediaListEntry {
+                  progress
+                  status
+                  startedAt { 
+                    day 
+                    month 
+                    year 
+                  } 
+                  completedAt { 
+                    day 
+                    month 
+                    year 
+                  } 
+                  score 
+                  repeat
+                }
               }
             }
           }
