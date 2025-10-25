@@ -70,14 +70,15 @@ class _SearchPageState extends State<SearchPage> {
         flexibleSpace: SearchSegment(searchText: widget.query),
         toolbarHeight: 100,
       ),
-      body: (medias.isEmpty)
+      body: (medias.isEmpty && _isLoading)
           ? const Center(
               child: Padding(
                 padding: EdgeInsets.all(8.0),
                 child: CircularProgressIndicator(),
               ),
             )
-          : Container(
+          : (medias.isNotEmpty)
+          ? Container(
               margin: EdgeInsets.only(left: 10, right: 10, top: 10),
               child: Column(
                 children: [
@@ -114,7 +115,8 @@ class _SearchPageState extends State<SearchPage> {
                   ),
                 ],
               ),
-            ),
+            )
+          : Center(child: Text("No Results")),
     );
   }
 }

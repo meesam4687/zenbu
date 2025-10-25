@@ -23,14 +23,31 @@ class SearchSegment extends StatelessWidget {
               ),
               controller: TextEditingController(text: (searchText) ?? ""),
               onSubmitted: (value) {
-                Navigator.of(context).push(
-                  PageRouteBuilder(
-                    transitionDuration: const Duration(milliseconds: 300),
-                    pageBuilder: (context, animation, secondaryAnimation) {
-                      return SearchPage(query: value);
-                    },
-                  ),
-                );
+                if (value.isNotEmpty) {
+                  (!Navigator.of(context).canPop())
+                      ? Navigator.of(context).push(
+                          PageRouteBuilder(
+                            transitionDuration: const Duration(
+                              milliseconds: 300,
+                            ),
+                            pageBuilder:
+                                (context, animation, secondaryAnimation) {
+                                  return SearchPage(query: value);
+                                },
+                          ),
+                        )
+                      : Navigator.of(context).pushReplacement(
+                          PageRouteBuilder(
+                            transitionDuration: const Duration(
+                              milliseconds: 300,
+                            ),
+                            pageBuilder:
+                                (context, animation, secondaryAnimation) {
+                                  return SearchPage(query: value);
+                                },
+                          ),
+                        );
+                }
               },
             ),
           ),
