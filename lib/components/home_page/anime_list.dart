@@ -76,8 +76,8 @@ class AnimeList extends StatelessWidget {
                   type: "anime",
                   id: id,
                   title:
-                      ((item["media"]["title"]["romaji"] as String).length > 32)
-                      ? '${(item["media"]["title"]["romaji"] as String).substring(0, 32)}...'
+                      ((item["media"]["title"]["romaji"] as String).length > 27)
+                      ? '${(item["media"]["title"]["romaji"] as String).substring(0, 27)}...'
                       : item["media"]["title"]["romaji"] as String,
                   state:
                       "${item["media"]["mediaListEntry"]["progress"]}/${(item["media"]["episodes"] == null) ? '?' : item["media"]["episodes"]}",

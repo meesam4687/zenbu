@@ -90,7 +90,7 @@ Future<Map<String, dynamic>> getHomePageData() async {
       },
       body: jsonEncode({
         "query": query,
-        "variables": {"type": "ANIME", "type2": "MANGA", "userId": 7433884},
+        "variables": {"type": "ANIME", "type2": "MANGA", "userId": userId},
       }),
     );
 
@@ -698,7 +698,7 @@ Future<Map<String, dynamic>> getMediaLists() async {
       },
       body: jsonEncode({
         "query": query,
-        "variables": {"type": "ANIME", "type2": "MANGA", "userId": 7433884},
+        "variables": {"type": "ANIME", "type2": "MANGA", "userId": userId},
       }),
     );
     final data = jsonDecode(res.body);

@@ -76,8 +76,8 @@ class MangaList extends StatelessWidget {
                   type: "manga",
                   id: id,
                   title:
-                      ((item["media"]["title"]["romaji"] as String).length > 32)
-                      ? '${(item["media"]["title"]["romaji"] as String).substring(0, 32)}...'
+                      ((item["media"]["title"]["romaji"] as String).length > 27)
+                      ? '${(item["media"]["title"]["romaji"] as String).substring(0, 27)}...'
                       : item["media"]["title"]["romaji"] as String,
                   state:
                       "${item["media"]["mediaListEntry"]["progress"]}/${(item["media"]["chapters"] == null) ? '?' : item["media"]["chapters"]}",
