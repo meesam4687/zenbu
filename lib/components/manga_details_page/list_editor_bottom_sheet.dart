@@ -44,6 +44,7 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
       "DROPPED": "Dropped",
       "REPEATING": "Rereading",
       "NONE": "Select",
+      "PAUSED": "Paused",
     };
     return Container(
       padding: const EdgeInsets.only(top: 40, left: 20, right: 20),

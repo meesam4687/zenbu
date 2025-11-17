@@ -42,7 +42,7 @@ class _MangaDetailsPageState extends State<MangaDetailsPage> {
   Widget build(BuildContext context) {
     Map alData = Provider.of<StateProvider>(context).alData;
     List entries = (alData["data"] != null
-        ? alData["data"]["animeList"]["lists"][0]["entries"]
+        ? alData["data"]["mangaList"]["lists"][0]["entries"]
         : [{}]);
     Map current = entries.firstWhere(
       (element) => element["id"] == widget.id,

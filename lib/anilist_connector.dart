@@ -28,6 +28,7 @@ Future<Map<String, dynamic>> getHomePageData() async {
                 status
                 bannerImage
                 mediaListEntry {
+                  id
                   progress
                   status
                   startedAt { 
@@ -60,6 +61,7 @@ Future<Map<String, dynamic>> getHomePageData() async {
                 mediaListEntry { status progress }
                 bannerImage
                 mediaListEntry {
+                  id
                   progress
                   status
                   startedAt { 
@@ -216,6 +218,7 @@ Future<Map<String, dynamic>> getAnimeData(int id) async {
             }
           }
           mediaListEntry {
+            id
             progress
             status
             startedAt { 
@@ -1208,6 +1211,84 @@ Future<Map<String, dynamic>> searchManga(
         "Content-Type": "application/json",
       },
       body: jsonEncode({"query": query, "variables": vars}),
+    );
+
+    final data = jsonDecode(res.body);
+    if (res.statusCode == 429) {
+      Fluttertoast.showToast(
+        msg: "Rate limited, try again later",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        fontSize: 16.0,
+      );
+    }
+    return data;
+  } catch (e) {
+    throw e.toString();
+  }
+}
+
+Future<Map<String, dynamic>> updateListItem(
+  int listEntryId,
+  String status,
+  int progress,
+  Map startDate,
+  Map endDate,
+  double score,
+  int repeat,
+) async {
+  try {
+    String authHeader = 'Bearer $anilistAuthKey';
+    String query = '''
+      mutation (
+        \$listEntryId: Int,
+        \$status: MediaListStatus,
+        \$progress: Int,
+        \$startDate: FuzzyDateInput,
+        \$endDate: FuzzyDateInput,
+        \$score: Float,
+        \$repeat: Int
+      ) {
+          SaveMediaListEntry(
+            id: \$listEntryId,
+            status: \$status,
+            progress: \$progress,
+            startedAt: \$startDate,
+            completedAt: \$endDate,
+            score: \$score,
+            repeat: \$repeat
+          ) { 
+              id
+              status 
+              progress 
+              startedAt {
+                year
+              } 
+              completedAt {
+                year 
+              } 
+            }
+          }
+      ''';
+
+    final res = await http.post(
+      Uri.parse('https://graphql.anilist.co'),
+      headers: {
+        "Authorization": authHeader,
+        "Content-Type": "application/json",
+      },
+      body: jsonEncode({
+        "query": query,
+        "variables": {
+          "listEntryId": listEntryId,
+          "status": status,
+          "progress": progress,
+          "startDate": startDate,
+          "endDate": endDate,
+          "score": score,
+          "repeat": repeat,
+        },
+      }),
     );
 
     final data = jsonDecode(res.body);
