@@ -41,7 +41,9 @@ class _MangaDetailsPageState extends State<MangaDetailsPage> {
   @override
   Widget build(BuildContext context) {
     Map alData = Provider.of<StateProvider>(context).alData;
-    List entries = alData["data"]["mangaList"]["lists"][0]["entries"];
+    List entries = (alData["data"] != null
+        ? alData["data"]["animeList"]["lists"][0]["entries"]
+        : [{}]);
     Map current = entries.firstWhere(
       (element) => element["id"] == widget.id,
       orElse: () => {},
