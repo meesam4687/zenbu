@@ -61,6 +61,7 @@ class _MangaDetailsPageState extends State<MangaDetailsPage> {
           child: Column(
             children: [
               TitlePane(
+                id: widget.id as int,
                 title:
                     ((current["media"]["title"]["romaji"] as String).length >
                         32)
@@ -100,6 +101,7 @@ class _MangaDetailsPageState extends State<MangaDetailsPage> {
               child: Column(
                 children: [
                   TitlePane(
+                    id: widget.id as int,
                     title:
                         ((data["data"]["Media"]["title"]["romaji"] as String)
                                 .length >

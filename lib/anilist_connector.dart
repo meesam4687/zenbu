@@ -219,6 +219,7 @@ Future<Map<String, dynamic>> getAnimeData(int id) async {
           }
           mediaListEntry {
             id
+            mediaId
             progress
             status
             startedAt { 
@@ -366,6 +367,7 @@ Future<Map<String, dynamic>> getMangaData(int id) async {
             }
           }
           mediaListEntry {
+            mediaId
             progress
             status
           }
@@ -1229,7 +1231,7 @@ Future<Map<String, dynamic>> searchManga(
 }
 
 Future<Map<String, dynamic>> updateListItem(
-  int listEntryId,
+  int mediaId,
   String status,
   int progress,
   Map startDate,
@@ -1241,7 +1243,7 @@ Future<Map<String, dynamic>> updateListItem(
     String authHeader = 'Bearer $anilistAuthKey';
     String query = '''
       mutation (
-        \$listEntryId: Int,
+        \$mediaId: Int,
         \$status: MediaListStatus,
         \$progress: Int,
         \$startDate: FuzzyDateInput,
@@ -1250,7 +1252,7 @@ Future<Map<String, dynamic>> updateListItem(
         \$repeat: Int
       ) {
           SaveMediaListEntry(
-            id: \$listEntryId,
+            mediaId: \$mediaId
             status: \$status,
             progress: \$progress,
             startedAt: \$startDate,
@@ -1280,7 +1282,7 @@ Future<Map<String, dynamic>> updateListItem(
       body: jsonEncode({
         "query": query,
         "variables": {
-          "listEntryId": listEntryId,
+          "mediaId": mediaId,
           "status": status,
           "progress": progress,
           "startDate": startDate,

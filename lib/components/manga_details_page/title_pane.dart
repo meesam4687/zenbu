@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 class TitlePane extends StatelessWidget {
   const TitlePane({
     super.key,
+    required this.id,
     required this.title,
     required this.progress,
     required this.cover,
@@ -14,6 +15,7 @@ class TitlePane extends StatelessWidget {
   });
 
   final String title;
+  final int id;
   final String progress;
   final String cover;
   final String? banner;
@@ -134,6 +136,7 @@ class TitlePane extends StatelessWidget {
                                   ? (mediaListEntry?["score"] as int).toDouble()
                                   : mediaListEntry?["score"] ?? 0.0,
                               repeatCount: mediaListEntry?["repeat"] ?? 0,
+                              mediaId: id,
                             ),
                           );
                         },

@@ -1,3 +1,4 @@
+import 'package:al_client/anilist_connector.dart';
 import 'package:flutter/material.dart';
 
 class ListEditorBottomSheet extends StatefulWidget {
@@ -9,6 +10,7 @@ class ListEditorBottomSheet extends StatefulWidget {
     required this.endDate,
     required this.score,
     required this.repeatCount,
+    required this.mediaId,
   });
 
   final String status;
@@ -17,6 +19,7 @@ class ListEditorBottomSheet extends StatefulWidget {
   final Map endDate;
   final double score;
   final int repeatCount;
+  final int mediaId;
 
   @override
   State<ListEditorBottomSheet> createState() => _ListEditorBottomSheetState();
@@ -46,6 +49,7 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
       "NONE": "Select",
       "PAUSED": "Paused",
     };
+    String selectedStatus = widget.status;
     return Container(
       padding: const EdgeInsets.only(top: 40, left: 20, right: 20),
       width: double.infinity,
@@ -78,6 +82,9 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                         label: "Rewatching",
                       ),
                     ],
+                    onSelected: (value) {
+                      selectedStatus = value as String;
+                    },
                   ),
                 ],
               ),
@@ -232,7 +239,7 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                 spacing: 10,
                 children: [
                   Text(
-                    "Total Rereads",
+                    "Total Rewatches",
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
                   ),
                   SizedBox(
@@ -253,8 +260,26 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
           SizedBox(
             width: double.infinity,
             child: FilledButton.icon(
-              onPressed: () {
-                Navigator.of(context).pop();
+              onPressed: () async {
+                await updateListItem(
+                  widget.mediaId,
+                  selectedStatus,
+                  (chaptersController.value.text.isEmpty)
+                      ? widget.progress
+                      : int.parse(chaptersController.value.text),
+                  widget.startDate,
+                  widget.endDate,
+                  (scoreController.value.text.isEmpty)
+                      ? widget.score
+                      : double.parse(scoreController.value.text),
+                  (rewatchController.value.text.isEmpty)
+                      ? widget.progress
+                      : int.parse(rewatchController.value.text),
+                );
+
+                if (mounted) {
+                  Navigator.of(context).pop();
+                }
               },
               icon: Icon(Icons.check),
               label: Text("Save"),

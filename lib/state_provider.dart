@@ -4,17 +4,17 @@ class StateProvider extends ChangeNotifier {
   Map alData = {};
   Map animeDiscoveryData = {};
   Map mangaDiscoveryData = {};
-  void updateData(newData) {
+  void updateData(Map newData) {
     alData = newData;
     notifyListeners();
   }
 
-  void updateDiscoveryData(newData) {
+  void updateDiscoveryData(Map newData) {
     animeDiscoveryData = newData;
     notifyListeners();
   }
 
-  void updateMangaDiscoveryData(newData) {
+  void updateMangaDiscoveryData(Map newData) {
     mangaDiscoveryData = newData;
     notifyListeners();
   }
