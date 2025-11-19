@@ -331,7 +331,7 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                       ),
                     )
                   : Icon(Icons.check),
-              label: isLoading ? Text("Loading...") : Text("Save"),
+              label: isLoading ? Text(" Loading...") : Text("Save"),
             ),
           ),
         ],

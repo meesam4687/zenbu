@@ -71,7 +71,7 @@ class AnimeList extends StatelessWidget {
               itemCount: items.length,
               itemBuilder: (context, index) {
                 final item = items[index];
-                final int id = item['id'];
+                final int id = item['media']['id'];
                 return ItemCard(
                   type: "anime",
                   id: id,

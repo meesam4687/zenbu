@@ -71,7 +71,7 @@ class MangaList extends StatelessWidget {
               itemCount: items.length,
               itemBuilder: (context, index) {
                 final item = items[index];
-                final int id = item['id'];
+                final int id = item['media']['id'];
                 return ItemCard(
                   type: "manga",
                   id: id,
