@@ -64,7 +64,7 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage> {
                 id: widget.id as int,
                 totalEpisodes: (current["media"]["episodes"] == null)
                     ? '?'
-                    : current["media"]["episodes"],
+                    : current["media"]["episodes"].toString(),
                 title:
                     ((current["media"]["title"]["romaji"] as String).length >
                         32)
@@ -107,7 +107,7 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage> {
                     id: widget.id as int,
                     totalEpisodes: (data["data"]["Media"]["episodes"] == null)
                         ? '?'
-                        : data["data"]["Media"]["episodes"],
+                        : data["data"]["Media"]["episodes"].toString(),
                     title:
                         ((data["data"]["Media"]["title"]["romaji"] as String)
                                 .length >

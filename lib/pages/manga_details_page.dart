@@ -64,7 +64,7 @@ class _MangaDetailsPageState extends State<MangaDetailsPage> {
                 id: widget.id as int,
                 totalEpisodes: (current["media"]["chapters"] == null)
                     ? '?'
-                    : current["media"]["chapters"],
+                    : current["media"]["chapters"].toString(),
                 title:
                     ((current["media"]["title"]["romaji"] as String).length >
                         32)
@@ -107,7 +107,7 @@ class _MangaDetailsPageState extends State<MangaDetailsPage> {
                     id: widget.id as int,
                     totalEpisodes: (data["data"]["Media"]["chapters"] == null)
                         ? '?'
-                        : data["data"]["Media"]["chapters"],
+                        : data["data"]["Media"]["chapters"].toString(),
                     title:
                         ((data["data"]["Media"]["title"]["romaji"] as String)
                                 .length >
