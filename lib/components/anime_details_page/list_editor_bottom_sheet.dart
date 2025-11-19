@@ -34,12 +34,22 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
   final TextEditingController scoreController = TextEditingController();
   final TextEditingController rewatchController = TextEditingController();
   late String selectedStatus;
+  DateTime? startDate;
+  DateTime? endDate;
+  String? startDateString;
+  String? endDateString;
   bool isLoading = false;
 
   @override
   void initState() {
     super.initState();
     selectedStatus = widget.status;
+    startDateString = (widget.startDate["day"] != -1)
+        ? '${widget.startDate["day"]}/${widget.startDate["month"]}/${widget.startDate["year"]}'
+        : 'Select Date';
+    endDateString = (widget.endDate["day"] != -1)
+        ? '${widget.endDate["day"]}/${widget.endDate["month"]}/${widget.endDate["year"]}'
+        : 'Select Date';
   }
 
   @override
@@ -146,15 +156,13 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
-                          (widget.startDate["day"] != -1)
-                              ? '${widget.startDate["day"]}/${widget.startDate["month"]}/${widget.startDate["year"]}'
-                              : 'Select Date',
+                          startDateString as String,
                           style: TextStyle(fontSize: 16),
                         ),
                       ),
                     ),
-                    onTap: () {
-                      showDatePicker(
+                    onTap: () async {
+                      startDate = await showDatePicker(
                         context: context,
                         initialDate: DateTime(
                           DateTime.now().year,
@@ -168,6 +176,10 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                           DateTime.now().day,
                         ),
                       );
+                      setState(() {
+                        startDateString =
+                            '${startDate!.day.toString()}/${startDate!.month.toString()}/${startDate!.year.toString()}';
+                      });
                     },
                   ),
                 ],
@@ -193,15 +205,13 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
-                          (widget.endDate["day"] != -1)
-                              ? '${widget.endDate["day"]}/${widget.endDate["month"]}/${widget.endDate["year"]}'
-                              : 'Select Date',
+                          endDateString as String,
                           style: TextStyle(fontSize: 16),
                         ),
                       ),
                     ),
-                    onTap: () {
-                      showDatePicker(
+                    onTap: () async {
+                      endDate = await showDatePicker(
                         context: context,
                         initialDate: DateTime(
                           DateTime.now().year,
@@ -215,6 +225,10 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                           DateTime.now().day,
                         ),
                       );
+                      setState(() {
+                        endDateString =
+                            '${endDate!.day.toString()}/${endDate!.month.toString()}/${endDate!.year.toString()}';
+                      });
                     },
                   ),
                 ],
@@ -284,13 +298,25 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                         (chaptersController.value.text.isEmpty)
                             ? widget.progress
                             : int.parse(chaptersController.value.text),
-                        widget.startDate,
-                        widget.endDate,
+                        (startDate == null)
+                            ? widget.startDate
+                            : {
+                                "day": startDate!.day,
+                                "month": startDate!.month,
+                                "year": startDate!.year,
+                              },
+                        (endDate == null)
+                            ? widget.endDate
+                            : {
+                                "day": endDate!.day,
+                                "month": endDate!.month,
+                                "year": endDate!.year,
+                              },
                         (scoreController.value.text.isEmpty)
                             ? widget.score
                             : double.parse(scoreController.value.text),
                         (rewatchController.value.text.isEmpty)
-                            ? widget.progress
+                            ? widget.repeatCount
                             : int.parse(rewatchController.value.text),
                       );
 
