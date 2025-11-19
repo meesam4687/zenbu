@@ -20,7 +20,6 @@ class ListEditorBottomSheet extends StatefulWidget {
   final double score;
   final int repeatCount;
   final int mediaId;
-
   @override
   State<ListEditorBottomSheet> createState() => _ListEditorBottomSheetState();
 }
@@ -29,6 +28,13 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
   final TextEditingController chaptersController = TextEditingController();
   final TextEditingController scoreController = TextEditingController();
   final TextEditingController rewatchController = TextEditingController();
+  late String selectedStatus;
+
+  @override
+  void initState() {
+    super.initState();
+    selectedStatus = widget.status;
+  }
 
   @override
   void dispose() {
@@ -49,7 +55,6 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
       "NONE": "Select",
       "PAUSED": "Paused",
     };
-    String selectedStatus = widget.status;
     return Container(
       padding: const EdgeInsets.only(top: 40, left: 20, right: 20),
       width: double.infinity,
