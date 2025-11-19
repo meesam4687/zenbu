@@ -62,6 +62,9 @@ class _MangaDetailsPageState extends State<MangaDetailsPage> {
             children: [
               TitlePane(
                 id: widget.id as int,
+                totalEpisodes: (current["media"]["chapters"] == null)
+                    ? '?'
+                    : current["media"]["chapters"],
                 title:
                     ((current["media"]["title"]["romaji"] as String).length >
                         32)
@@ -102,6 +105,9 @@ class _MangaDetailsPageState extends State<MangaDetailsPage> {
                 children: [
                   TitlePane(
                     id: widget.id as int,
+                    totalEpisodes: (data["data"]["Media"]["chapters"] == null)
+                        ? '?'
+                        : data["data"]["Media"]["chapters"],
                     title:
                         ((data["data"]["Media"]["title"]["romaji"] as String)
                                 .length >

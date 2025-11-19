@@ -62,6 +62,9 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage> {
             children: [
               TitlePane(
                 id: widget.id as int,
+                totalEpisodes: (current["media"]["episodes"] == null)
+                    ? '?'
+                    : current["media"]["episodes"],
                 title:
                     ((current["media"]["title"]["romaji"] as String).length >
                         32)
@@ -102,6 +105,9 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage> {
                 children: [
                   TitlePane(
                     id: widget.id as int,
+                    totalEpisodes: (data["data"]["Media"]["episodes"] == null)
+                        ? '?'
+                        : data["data"]["Media"]["episodes"],
                     title:
                         ((data["data"]["Media"]["title"]["romaji"] as String)
                                 .length >

@@ -2,7 +2,7 @@ import 'dart:ui';
 import 'package:al_client/components/anime_details_page/list_editor_bottom_sheet.dart';
 import 'package:flutter/material.dart';
 
-class TitlePane extends StatelessWidget {
+class TitlePane extends StatefulWidget {
   const TitlePane({
     super.key,
     required this.id,
@@ -12,6 +12,7 @@ class TitlePane extends StatelessWidget {
     required this.banner,
     required this.mediaState,
     required this.mediaListEntry,
+    required this.totalEpisodes,
   });
 
   final String title;
@@ -21,6 +22,36 @@ class TitlePane extends StatelessWidget {
   final String? banner;
   final String mediaState;
   final Map? mediaListEntry;
+  final String totalEpisodes;
+
+  @override
+  State<TitlePane> createState() => _TitlePaneState();
+}
+
+class _TitlePaneState extends State<TitlePane> {
+  late String mediaState;
+  late String progress;
+  late Map? mediaListEntry;
+
+  @override
+  void initState() {
+    super.initState();
+    mediaState = widget.mediaState;
+    progress = widget.progress;
+    mediaListEntry = widget.mediaListEntry;
+  }
+
+  void updateMediaDetails(
+    String newStatus,
+    int newProgress,
+    Map newMediaListData,
+  ) {
+    setState(() {
+      mediaState = newStatus;
+      progress = "Progress: $newProgress/${widget.totalEpisodes}";
+      mediaListEntry = newMediaListData;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,11 +78,14 @@ class TitlePane extends StatelessWidget {
         fit: StackFit.expand,
         children: [
           ClipRect(
-            child: (banner == null)
+            child: (widget.banner == null)
                 ? Container()
                 : ImageFiltered(
                     imageFilter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                    child: Image.network(banner as String, fit: BoxFit.cover),
+                    child: Image.network(
+                      widget.banner as String,
+                      fit: BoxFit.cover,
+                    ),
                   ),
           ),
           Scaffold(backgroundColor: surfaceColor.withAlpha(120)),
@@ -83,7 +117,7 @@ class TitlePane extends StatelessWidget {
                         ),
                         clipBehavior: Clip.antiAlias,
                         child: Image.network(
-                          cover,
+                          widget.cover,
                           fit: BoxFit.cover,
                           height: 180,
                           width: 127.38,
@@ -98,7 +132,10 @@ class TitlePane extends StatelessWidget {
                         children: [
                           SizedBox(
                             width: 200,
-                            child: Text(title, style: TextStyle(fontSize: 27)),
+                            child: Text(
+                              widget.title,
+                              style: TextStyle(fontSize: 27),
+                            ),
                           ),
                           Text(progress),
                         ],
@@ -136,7 +173,8 @@ class TitlePane extends StatelessWidget {
                                   ? (mediaListEntry?["score"] as int).toDouble()
                                   : mediaListEntry?["score"] ?? 0.0,
                               repeatCount: mediaListEntry?["repeat"] ?? 0,
-                              mediaId: id,
+                              mediaId: widget.id,
+                              onUpdate: updateMediaDetails,
                             ),
                           );
                         },

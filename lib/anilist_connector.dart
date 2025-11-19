@@ -1264,11 +1264,17 @@ Future<Map<String, dynamic>> updateListItem(
               status 
               progress 
               startedAt {
+                day
+                month
                 year
               } 
               completedAt {
+                day
+                month
                 year 
-              } 
+              }
+              score
+              repeat
             }
           }
       ''';

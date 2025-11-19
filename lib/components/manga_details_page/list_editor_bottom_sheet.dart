@@ -1,5 +1,7 @@
 import 'package:al_client/anilist_connector.dart';
+import 'package:al_client/state_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class ListEditorBottomSheet extends StatefulWidget {
   const ListEditorBottomSheet({
@@ -11,6 +13,7 @@ class ListEditorBottomSheet extends StatefulWidget {
     required this.score,
     required this.repeatCount,
     required this.mediaId,
+    required this.onUpdate,
   });
 
   final String status;
@@ -20,6 +23,8 @@ class ListEditorBottomSheet extends StatefulWidget {
   final double score;
   final int repeatCount;
   final int mediaId;
+  final Function(String, int, Map) onUpdate;
+
   @override
   State<ListEditorBottomSheet> createState() => _ListEditorBottomSheetState();
 }
@@ -29,6 +34,7 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
   final TextEditingController scoreController = TextEditingController();
   final TextEditingController rewatchController = TextEditingController();
   late String selectedStatus;
+  bool isLoading = false;
 
   @override
   void initState() {
@@ -262,29 +268,70 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
           SizedBox(
             width: double.infinity,
             child: FilledButton.icon(
-              onPressed: () async {
-                await updateListItem(
-                  widget.mediaId,
-                  selectedStatus,
-                  (chaptersController.value.text.isEmpty)
-                      ? widget.progress
-                      : int.parse(chaptersController.value.text),
-                  widget.startDate,
-                  widget.endDate,
-                  (scoreController.value.text.isEmpty)
-                      ? widget.score
-                      : double.parse(scoreController.value.text),
-                  (rewatchController.value.text.isEmpty)
-                      ? widget.progress
-                      : int.parse(rewatchController.value.text),
-                );
+              onPressed: isLoading
+                  ? null
+                  : () async {
+                      setState(() {
+                        isLoading = true;
+                      });
 
-                if (mounted) {
-                  Navigator.of(context).pop();
-                }
-              },
-              icon: Icon(Icons.check),
-              label: Text("Save"),
+                      final response = await updateListItem(
+                        widget.mediaId,
+                        selectedStatus,
+                        (chaptersController.value.text.isEmpty)
+                            ? widget.progress
+                            : int.parse(chaptersController.value.text),
+                        widget.startDate,
+                        widget.endDate,
+                        (scoreController.value.text.isEmpty)
+                            ? widget.score
+                            : double.parse(scoreController.value.text),
+                        (rewatchController.value.text.isEmpty)
+                            ? widget.progress
+                            : int.parse(rewatchController.value.text),
+                      );
+
+                      if (response["data"] != null &&
+                          response["data"]["SaveMediaListEntry"] != null) {
+                        final newStatus =
+                            response["data"]["SaveMediaListEntry"]["status"];
+                        final newProgress =
+                            response["data"]["SaveMediaListEntry"]["progress"];
+                        final newMediaListData =
+                            response["data"]["SaveMediaListEntry"];
+
+                        widget.onUpdate(
+                          newStatus,
+                          newProgress,
+                          newMediaListData,
+                        );
+                      }
+
+                      Map newAlData = await getHomePageData();
+                      Provider.of<StateProvider>(
+                        context,
+                        listen: false,
+                      ).updateData(newAlData);
+
+                      if (mounted) {
+                        Navigator.of(context).pop();
+                      }
+
+                      setState(() {
+                        isLoading = false;
+                      });
+                    },
+              icon: isLoading
+                  ? SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
+                    )
+                  : Icon(Icons.check),
+              label: isLoading ? Text("Loading...") : Text("Save"),
             ),
           ),
         ],
