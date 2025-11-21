@@ -2,7 +2,10 @@ import 'package:al_client/secrets.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 
+Map<String, dynamic> decodedToken = JwtDecoder.decode(anilistAuthKey);
+String userId = decodedToken["sub"];
 Future<Map<String, dynamic>> getHomePageData() async {
   try {
     String authHeader = 'Bearer $anilistAuthKey';
