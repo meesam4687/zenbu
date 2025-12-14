@@ -17,7 +17,7 @@ Future<Map<String, dynamic>> getHomePageData() async {
           name
           avatar { large }
         }
-        animeList: MediaListCollection(type: \$type, userId: \$userId, status_in: CURRENT) {
+        animeList: MediaListCollection(type: \$type, userId: \$userId, status_in: CURRENT, sort: UPDATED_TIME_DESC) {
           lists {
             name
             entries {
@@ -51,7 +51,7 @@ Future<Map<String, dynamic>> getHomePageData() async {
             }
           }
         }
-        mangaList: MediaListCollection(type: \$type2, userId: \$userId, status_in: CURRENT) {
+        mangaList: MediaListCollection(type: \$type2, userId: \$userId, status_in: CURRENT, sort: UPDATED_TIME_DESC) {
           lists {
             name
             entries {
