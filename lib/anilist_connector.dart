@@ -370,9 +370,22 @@ Future<Map<String, dynamic>> getMangaData(int id) async {
             }
           }
           mediaListEntry {
+            id
             mediaId
             progress
             status
+            startedAt { 
+              day 
+              month 
+              year 
+            } 
+            completedAt { 
+              day 
+              month 
+              year 
+            } 
+            score 
+            repeat
           }
         }
       }
