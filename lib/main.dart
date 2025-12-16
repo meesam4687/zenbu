@@ -3,8 +3,13 @@ import 'package:provider/provider.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:al_client/state_provider.dart';
 import 'package:al_client/main_page_view.dart';
+import 'package:al_client/pages/authentication_page.dart';
+import 'package:al_client/authentication_token_controller.dart';
 
-void main() {
+String? token;
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  token = await TokenStorage.getAccessToken();
   runApp(const MyApp());
 }
 
@@ -37,7 +42,7 @@ class MyApp extends StatelessWidget {
             theme: ThemeData(colorScheme: lightScheme, useMaterial3: true),
             darkTheme: ThemeData(colorScheme: darkScheme, useMaterial3: true),
             themeMode: ThemeMode.system,
-            home: const MainPageView(),
+            home: (token == null) ? AuthenticationPage() : MainPageView(),
           );
         },
       ),

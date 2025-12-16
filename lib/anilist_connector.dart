@@ -1,14 +1,17 @@
-import 'package:al_client/secrets.dart';
+import 'package:al_client/authentication_token_controller.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 
-Map<String, dynamic> decodedToken = JwtDecoder.decode(anilistAuthKey);
-String userId = decodedToken["sub"];
 Future<Map<String, dynamic>> getHomePageData() async {
   try {
-    String authHeader = 'Bearer $anilistAuthKey';
+    String? token = await TokenStorage.getAccessToken();
+    if (token == null) throw 'No authentication token';
+
+    String authHeader = 'Bearer $token';
+    Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
+    String userId = decodedToken["sub"];
 
     String query = '''
       query (\$type: MediaType!, \$type2: MediaType!, \$userId: Int!) {
@@ -116,7 +119,10 @@ Future<Map<String, dynamic>> getHomePageData() async {
 
 Future<Map<String, dynamic>> getAnimeData(int id) async {
   try {
-    String authHeader = 'Bearer $anilistAuthKey';
+    String? token = await TokenStorage.getAccessToken();
+    if (token == null) throw 'No authentication token';
+
+    String authHeader = 'Bearer $token';
 
     String query = '''
       query(\$id: Int) {
@@ -270,7 +276,10 @@ Future<Map<String, dynamic>> getAnimeData(int id) async {
 
 Future<Map<String, dynamic>> getMangaData(int id) async {
   try {
-    String authHeader = 'Bearer $anilistAuthKey';
+    String? token = await TokenStorage.getAccessToken();
+    if (token == null) throw 'No authentication token';
+
+    String authHeader = 'Bearer $token';
 
     String query = '''
       query(\$id: Int) {
@@ -420,7 +429,10 @@ Future<Map<String, dynamic>> getMangaData(int id) async {
 
 Future<Map<String, dynamic>> getCharacterData(int id) async {
   try {
-    String authHeader = 'Bearer $anilistAuthKey';
+    String? token = await TokenStorage.getAccessToken();
+    if (token == null) throw 'No authentication token';
+
+    String authHeader = 'Bearer $token';
 
     String query = '''
       query(\$id: Int) {
@@ -480,7 +492,10 @@ Future<Map<String, dynamic>> getCharacterData(int id) async {
 
 Future<Map<String, dynamic>> getAnimeHomePage(int page, int perPage) async {
   try {
-    String authHeader = 'Bearer $anilistAuthKey';
+    String? token = await TokenStorage.getAccessToken();
+    if (token == null) throw 'No authentication token';
+
+    String authHeader = 'Bearer $token';
     List<String> seasonArray = ["WINTER", "SPRING", "SUMMER", "FALL"];
     Map<int, String> seasonMapping = {
       1: "WINTER",
@@ -607,7 +622,10 @@ Future<Map<String, dynamic>> getAnimeHomePage(int page, int perPage) async {
 
 Future<Map<String, dynamic>> getMangaHomePage(int page, int perPage) async {
   try {
-    String authHeader = 'Bearer $anilistAuthKey';
+    String? token = await TokenStorage.getAccessToken();
+    if (token == null) throw 'No authentication token';
+
+    String authHeader = 'Bearer $token';
 
     String query = '''
       query(\$page: Int, \$perPage: Int) {
@@ -673,7 +691,12 @@ Future<Map<String, dynamic>> getMangaHomePage(int page, int perPage) async {
 
 Future<Map<String, dynamic>> getMediaLists() async {
   try {
-    String authHeader = 'Bearer $anilistAuthKey';
+    String? token = await TokenStorage.getAccessToken();
+    if (token == null) throw 'No authentication token';
+
+    String authHeader = 'Bearer $token';
+    Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
+    String userId = decodedToken["sub"];
     String query = '''
       query (\$type: MediaType!, \$type2: MediaType!, \$userId: Int!) {
         animeList: MediaListCollection(type: \$type, userId: \$userId) {
@@ -739,7 +762,10 @@ Future<Map<String, dynamic>> getMediaLists() async {
 
 Future<Map<String, dynamic>> getTrendingAnime(int page, int perPage) async {
   try {
-    String authHeader = 'Bearer $anilistAuthKey';
+    String? token = await TokenStorage.getAccessToken();
+    if (token == null) throw 'No authentication token';
+
+    String authHeader = 'Bearer $token';
 
     String query = '''
       query (\$page: Int, \$perPage: Int) {
@@ -788,7 +814,10 @@ Future<Map<String, dynamic>> getTrendingAnime(int page, int perPage) async {
 
 Future<Map<String, dynamic>> getPopularSeason(int page, int perPage) async {
   try {
-    String authHeader = 'Bearer $anilistAuthKey';
+    String? token = await TokenStorage.getAccessToken();
+    if (token == null) throw 'No authentication token';
+
+    String authHeader = 'Bearer $token';
     Map<int, String> seasonMapping = {
       1: "WINTER",
       2: "WINTER",
@@ -862,7 +891,10 @@ Future<Map<String, dynamic>> getPopularSeason(int page, int perPage) async {
 
 Future<Map<String, dynamic>> getUpcomingAnime(int page, int perPage) async {
   try {
-    String authHeader = 'Bearer $anilistAuthKey';
+    String? token = await TokenStorage.getAccessToken();
+    if (token == null) throw 'No authentication token';
+
+    String authHeader = 'Bearer $token';
     List<String> seasonArray = ["WINTER", "SPRING", "SUMMER", "FALL"];
     Map<int, String> seasonMapping = {
       1: "WINTER",
@@ -941,7 +973,10 @@ Future<Map<String, dynamic>> getPopularAllTimeAnime(
   int perPage,
 ) async {
   try {
-    String authHeader = 'Bearer $anilistAuthKey';
+    String? token = await TokenStorage.getAccessToken();
+    if (token == null) throw 'No authentication token';
+
+    String authHeader = 'Bearer $token';
 
     String query = '''
       query (\$page: Int, \$perPage: Int) {
@@ -990,7 +1025,10 @@ Future<Map<String, dynamic>> getPopularAllTimeAnime(
 
 Future<Map<String, dynamic>> getTrendingManga(int page, int perPage) async {
   try {
-    String authHeader = 'Bearer $anilistAuthKey';
+    String? token = await TokenStorage.getAccessToken();
+    if (token == null) throw 'No authentication token';
+
+    String authHeader = 'Bearer $token';
 
     String query = '''
       query (\$page: Int, \$perPage: Int) {
@@ -1046,7 +1084,10 @@ Future<Map<String, dynamic>> getPopularAllTimeManga(
   int perPage,
 ) async {
   try {
-    String authHeader = 'Bearer $anilistAuthKey';
+    String? token = await TokenStorage.getAccessToken();
+    if (token == null) throw 'No authentication token';
+
+    String authHeader = 'Bearer $token';
 
     String query = '''
       query (\$page: Int, \$perPage: Int) {
@@ -1119,7 +1160,10 @@ Future<Map<String, dynamic>> searchAnime(
     vars["source"] = mediaSource;
   }
   try {
-    String authHeader = 'Bearer $anilistAuthKey';
+    String? token = await TokenStorage.getAccessToken();
+    if (token == null) throw 'No authentication token';
+
+    String authHeader = 'Bearer $token';
     String query =
         '''
       query (
@@ -1195,7 +1239,10 @@ Future<Map<String, dynamic>> searchManga(
     vars["source"] = mediaSource;
   }
   try {
-    String authHeader = 'Bearer $anilistAuthKey';
+    String? token = await TokenStorage.getAccessToken();
+    if (token == null) throw 'No authentication token';
+
+    String authHeader = 'Bearer $token';
     String query =
         '''
       query (
@@ -1256,7 +1303,10 @@ Future<Map<String, dynamic>> updateListItem(
   int repeat,
 ) async {
   try {
-    String authHeader = 'Bearer $anilistAuthKey';
+    String? token = await TokenStorage.getAccessToken();
+    if (token == null) throw 'No authentication token';
+
+    String authHeader = 'Bearer $token';
     String query = '''
       mutation (
         \$mediaId: Int,

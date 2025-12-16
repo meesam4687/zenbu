@@ -4,6 +4,7 @@ class StateProvider extends ChangeNotifier {
   Map alData = {};
   Map animeDiscoveryData = {};
   Map mangaDiscoveryData = {};
+  String? loginToken;
   void updateData(Map newData) {
     alData = newData;
     notifyListeners();
@@ -16,6 +17,11 @@ class StateProvider extends ChangeNotifier {
 
   void updateMangaDiscoveryData(Map newData) {
     mangaDiscoveryData = newData;
+    notifyListeners();
+  }
+
+  void updateAuthToken(String? token) {
+    loginToken = token;
     notifyListeners();
   }
 }
