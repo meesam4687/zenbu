@@ -164,9 +164,9 @@ Future<Map<String, dynamic>> getAnimeData(int id) async {
           }
           staff {
             edges {
-              id
               role
               node {
+                id
                 name {
                   full
                 }
@@ -316,9 +316,9 @@ Future<Map<String, dynamic>> getMangaData(int id) async {
           meanScore
           staff {
             edges {
-              id
               role
               node {
+                id
                 name {
                   full
                 }
@@ -448,6 +448,69 @@ Future<Map<String, dynamic>> getCharacterData(int id) async {
           gender 
           description(asHtml: false) 
           media { 
+            nodes { 
+              id 
+              title { 
+                romaji 
+              } 
+              type
+              coverImage {
+                extraLarge
+              }
+            }
+          }
+        }
+      }
+    ''';
+
+    final res = await http.post(
+      Uri.parse('https://graphql.anilist.co'),
+      headers: {
+        "Authorization": authHeader,
+        "Content-Type": "application/json",
+      },
+      body: jsonEncode({
+        "query": query,
+        "variables": {"id": id},
+      }),
+    );
+
+    final data = jsonDecode(res.body);
+    if (res.statusCode == 429) {
+      Fluttertoast.showToast(
+        msg: "Rate limited, try again later",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        fontSize: 16.0,
+      );
+    }
+    return data;
+  } catch (e) {
+    throw e.toString();
+  }
+}
+
+Future<Map<String, dynamic>> getStaffData(int id) async {
+  try {
+    String? token = await TokenStorage.getAccessToken();
+    if (token == null) throw 'No authentication token';
+
+    String authHeader = 'Bearer $token';
+
+    String query = '''
+      query(\$id: Int) {
+        Staff(id: \$id) {
+          name { 
+            full
+            native
+            alternative
+          }
+          image {
+            large
+          } 
+          gender 
+          description(asHtml: false) 
+          staffMedia { 
             nodes { 
               id 
               title { 
@@ -1139,6 +1202,7 @@ Future<Map<String, dynamic>> searchAnime(
   int perPage,
   String? searchQuery,
   List? genreIn,
+  List? tagIn,
   String? season,
   int? seasonYear,
   String? format,
@@ -1149,6 +1213,7 @@ Future<Map<String, dynamic>> searchAnime(
   Map vars = {"page": page, "perPage": perPage};
   if (searchQuery != null) vars["search"] = searchQuery;
   if (genreIn != null && genreIn.isNotEmpty) vars["genreIn"] = genreIn;
+  if (tagIn != null && tagIn.isNotEmpty) vars["tagIn"] = tagIn;
   if (season != null && season.isNotEmpty) vars["season"] = season;
   if (seasonYear != null && seasonYear != 0) vars["seasonYear"] = seasonYear;
   if (format != null && format.isNotEmpty) vars["format"] = format;
@@ -1168,19 +1233,21 @@ Future<Map<String, dynamic>> searchAnime(
         '''
       query (
       \$page: Int,
-      \$perPage: Int${vars.containsKey("search") ? ", \$search: String" : ""}${vars.containsKey("genreIn") ? ", \$genreIn: [String]" : ""}${vars.containsKey("season") ? ", \$season: MediaSeason" : ""}${vars.containsKey("seasonYear") ? ", \$seasonYear: Int" : ""}${vars.containsKey("format") ? ", \$format: MediaFormat" : ""}${vars.containsKey("status") ? ", \$status: MediaStatus" : ""}${vars.containsKey("countryOfOrigin") ? ", \$countryOfOrigin: CountryCode" : ""}${vars.containsKey("source") ? ", \$source: MediaSource" : ""}
+      \$perPage: Int${vars.containsKey("search") ? ", \$search: String" : ""}${vars.containsKey("genreIn") ? ", \$genreIn: [String]" : ""}${vars.containsKey("tagIn") ? ", \$tagIn: [String]" : ""}${vars.containsKey("season") ? ", \$season: MediaSeason" : ""}${vars.containsKey("seasonYear") ? ", \$seasonYear: Int" : ""}${vars.containsKey("format") ? ", \$format: MediaFormat" : ""}${vars.containsKey("status") ? ", \$status: MediaStatus" : ""}${vars.containsKey("countryOfOrigin") ? ", \$countryOfOrigin: CountryCode" : ""}${vars.containsKey("source") ? ", \$source: MediaSource" : ""}
       ) {
         Page(page: \$page, perPage: \$perPage) { 
         media(
-          type: ANIME
+          type: ANIME,
           ${vars.containsKey("search") ? "search: \$search," : ""}
           ${vars.containsKey("genreIn") ? "genre_in: \$genreIn," : ""}
+          ${vars.containsKey("tagIn") ? "tag_in: \$tagIn," : ""}
           ${vars.containsKey("season") ? "season: \$season," : ""}
           ${vars.containsKey("seasonYear") ? "seasonYear: \$seasonYear," : ""}
           ${vars.containsKey("format") ? "format: \$format," : ""}
           ${vars.containsKey("status") ? "status: \$status," : ""}
           ${vars.containsKey("countryOfOrigin") ? "countryOfOrigin: \$countryOfOrigin," : ""}
           ${vars.containsKey("source") ? "source: \$source," : ""}
+          sort: POPULARITY_DESC,
         ) {
           id 
           title { romaji english native }
@@ -1220,6 +1287,7 @@ Future<Map<String, dynamic>> searchManga(
   int perPage,
   String? searchQuery,
   List? genreIn,
+  List? tagIn,
   int? seasonYear,
   String? format,
   String? status,
@@ -1229,6 +1297,7 @@ Future<Map<String, dynamic>> searchManga(
   Map vars = {"page": page, "perPage": perPage};
   if (searchQuery != null) vars["search"] = searchQuery;
   if (genreIn != null && genreIn.isNotEmpty) vars["genreIn"] = genreIn;
+  if (tagIn != null && tagIn.isNotEmpty) vars["tagIn"] = tagIn;
   if (seasonYear != null && seasonYear != 0) vars["seasonYear"] = seasonYear;
   if (format != null && format.isNotEmpty) vars["format"] = format;
   if (status != null && status.isNotEmpty) vars["status"] = status;
@@ -1247,18 +1316,20 @@ Future<Map<String, dynamic>> searchManga(
         '''
       query (
       \$page: Int,
-      \$perPage: Int${vars.containsKey("search") ? ", \$search: String" : ""}${vars.containsKey("genreIn") ? ", \$genreIn: [String]" : ""}${vars.containsKey("seasonYear") ? ", \$seasonYear: Int" : ""}${vars.containsKey("format") ? ", \$format: MediaFormat" : ""}${vars.containsKey("status") ? ", \$status: MediaStatus" : ""}${vars.containsKey("countryOfOrigin") ? ", \$countryOfOrigin: CountryCode" : ""}${vars.containsKey("source") ? ", \$source: MediaSource" : ""}
+      \$perPage: Int${vars.containsKey("search") ? ", \$search: String" : ""}${vars.containsKey("genreIn") ? ", \$genreIn: [String]" : ""}${vars.containsKey("tagIn") ? ", \$tagIn: [String]" : ""}${vars.containsKey("seasonYear") ? ", \$seasonYear: Int" : ""}${vars.containsKey("format") ? ", \$format: MediaFormat" : ""}${vars.containsKey("status") ? ", \$status: MediaStatus" : ""}${vars.containsKey("countryOfOrigin") ? ", \$countryOfOrigin: CountryCode" : ""}${vars.containsKey("source") ? ", \$source: MediaSource" : ""}
       ) {
         Page(page: \$page, perPage: \$perPage) { 
         media(
-          type: MANGA
+          type: MANGA,
           ${vars.containsKey("search") ? "search: \$search," : ""}
           ${vars.containsKey("genreIn") ? "genre_in: \$genreIn," : ""}
+          ${vars.containsKey("tagIn") ? "tag_in: \$tagIn," : ""}
           ${vars.containsKey("seasonYear") ? "seasonYear: \$seasonYear," : ""}
           ${vars.containsKey("format") ? "format: \$format," : ""}
           ${vars.containsKey("status") ? "status: \$status," : ""}
           ${vars.containsKey("countryOfOrigin") ? "countryOfOrigin: \$countryOfOrigin," : ""}
           ${vars.containsKey("source") ? "source: \$source," : ""}
+          sort: POPULARITY_DESC,
         ) {
           id 
           title { romaji english native }

@@ -26,6 +26,7 @@ class CharacterHeader extends StatelessWidget {
             clipBehavior: Clip.antiAlias,
             child: Image.network(
               height: 280,
+              width: 186.66,
               characterImage,
               fit: BoxFit.cover,
             ),

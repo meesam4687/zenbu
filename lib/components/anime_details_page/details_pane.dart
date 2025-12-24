@@ -292,7 +292,7 @@ class _DetailsPaneState extends State<DetailsPane> {
                                         .length,
                                 itemBuilder: (context, index) {
                                   return ItemCard(
-                                    id: data["data"]["Media"]["staff"]["edges"][index]["id"],
+                                    id: data["data"]["Media"]["staff"]["edges"][index]["node"]["id"],
                                     type: "staff",
                                     title:
                                         ((data["data"]["Media"]["staff"]["edges"][index]["node"]["name"]["full"]

@@ -4,20 +4,20 @@ import 'package:al_client/components/character_details_page/character_header.dar
 import 'package:al_client/components/character_details_page/character_relations.dart';
 import 'package:flutter/material.dart';
 
-class CharacterDetailsPage extends StatefulWidget {
-  const CharacterDetailsPage({super.key, required this.id});
+class StaffDetailsPage extends StatefulWidget {
+  const StaffDetailsPage({super.key, required this.id});
 
   final int id;
 
   @override
-  State<CharacterDetailsPage> createState() => _CharacterDetailsPageState();
+  State<StaffDetailsPage> createState() => _StaffDetailsPageState();
 }
 
-class _CharacterDetailsPageState extends State<CharacterDetailsPage> {
+class _StaffDetailsPageState extends State<StaffDetailsPage> {
   late Future<Map<String, dynamic>> characterData;
   @override
   void initState() {
-    characterData = getCharacterData(widget.id);
+    characterData = getStaffData(widget.id);
     super.initState();
   }
 
@@ -31,9 +31,9 @@ class _CharacterDetailsPageState extends State<CharacterDetailsPage> {
         }
         final data = snapshot.data!;
         final secondaryNames = [
-          if (data["data"]["Character"]["name"]["native"] != null)
-            data["data"]["Character"]["name"]["native"],
-          ...((data["data"]["Character"]["name"]["alternative"] as List)),
+          if (data["data"]["Staff"]["name"]["native"] != null)
+            data["data"]["Staff"]["name"]["native"],
+          ...((data["data"]["Staff"]["name"]["alternative"] as List)),
         ];
         return Scaffold(
           appBar: AppBar(),
@@ -41,22 +41,22 @@ class _CharacterDetailsPageState extends State<CharacterDetailsPage> {
             child: Column(
               children: [
                 CharacterHeader(
-                  characterImage: data["data"]["Character"]["image"]["large"],
-                  characterName: data["data"]["Character"]["name"]["full"],
+                  characterImage: data["data"]["Staff"]["image"]["large"],
+                  characterName: data["data"]["Staff"]["name"]["full"],
                   characterSecondaryNames: (secondaryNames).join(', '),
                 ),
                 CharacterDescription(
-                  characterGender: (data["data"]["Character"]["gender"] != null)
-                      ? data["data"]["Character"]["gender"]
+                  characterGender: (data["data"]["Staff"]["gender"] != null)
+                      ? data["data"]["Staff"]["gender"]
                       : "N/A",
                   characterDescription:
-                      (data["data"]["Character"]["description"] != null)
-                      ? data["data"]["Character"]["description"]
+                      (data["data"]["Staff"]["description"] != null)
+                      ? data["data"]["Staff"]["description"]
                       : "",
                 ),
                 CharacterRelations(
                   relations:
-                      data["data"]["Character"]["media"]["nodes"] as List,
+                      data["data"]["Staff"]["staffMedia"]["nodes"] as List,
                 ),
               ],
             ),
