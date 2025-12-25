@@ -1,3 +1,4 @@
+import 'package:al_client/components/home_page/user_info_modal_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:al_client/anilist_connector.dart';
@@ -39,7 +40,21 @@ class _HomePageState extends State<HomePage> {
           Padding(
             padding: const EdgeInsets.only(right: 5),
             child: IconButton(
-              onPressed: () {},
+              onPressed: () {
+                if (providerData.isNotEmpty) {
+                  showModalBottomSheet(
+                    context: context,
+                    builder: (context) {
+                      return UserInfoModalSheet(
+                        profileImage:
+                            providerData['data']['Viewer']['avatar']['large'],
+                        username: providerData['data']['Viewer']['name'],
+                        userId: providerData['data']['Viewer']['id'],
+                      );
+                    },
+                  );
+                }
+              },
               icon: Container(
                 decoration: BoxDecoration(
                   border: Border.all(
