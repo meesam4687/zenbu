@@ -1,4 +1,5 @@
 import 'package:al_client/pages/entire_list_view.dart';
+import 'package:al_client/pages/error_page.dart';
 import 'package:flutter/material.dart';
 import 'package:al_client/anilist_connector.dart';
 import 'package:al_client/state_provider.dart';
@@ -15,7 +16,14 @@ class MangaDiscoveryPage extends StatefulWidget {
 }
 
 class _MangaDiscoveryPageState extends State<MangaDiscoveryPage> {
-  late final Future<Map<String, dynamic>> data;
+  late Future<Map<String, dynamic>> data;
+
+  void _loadData() {
+    setState(() {
+      data = getMangaHomePage(1, 10);
+    });
+  }
+
   @override
   void initState() {
     Map providerData = Provider.of<StateProvider>(
@@ -41,6 +49,9 @@ class _MangaDiscoveryPageState extends State<MangaDiscoveryPage> {
                   return const Center(
                     child: CircularProgressIndicator.adaptive(),
                   );
+                }
+                if (snapshot.hasError) {
+                  return ErrorPage(scaffold: false, onReload: _loadData);
                 }
                 final data = snapshot.data!;
                 WidgetsBinding.instance.addPostFrameCallback((_) {

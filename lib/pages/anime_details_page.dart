@@ -1,5 +1,6 @@
 import 'package:al_client/anilist_connector.dart';
 import 'package:al_client/components/anime_details_page/details_pane.dart';
+import 'package:al_client/pages/error_page.dart';
 import 'package:al_client/state_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:al_client/components/anime_details_page/title_pane.dart';
@@ -45,7 +46,7 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage> {
         ? alData["data"]["animeList"]["lists"][0]["entries"]
         : [{}]);
     Map current = entries.firstWhere(
-      (element) => element["id"] == widget.id,
+      (element) => element["media"]["id"] == widget.id,
       orElse: () => {},
     );
     if (current.isNotEmpty) {
@@ -90,6 +91,16 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage> {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator.adaptive());
+          }
+          if (snapshot.hasError) {
+            return ErrorPage(
+              scaffold: true,
+              onReload: () {
+                setState(() {
+                  animeData = getAnimeData(widget.id as int);
+                });
+              },
+            );
           }
           final data = snapshot.data!;
           return Scaffold(

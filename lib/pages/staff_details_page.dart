@@ -2,6 +2,7 @@ import 'package:al_client/anilist_connector.dart';
 import 'package:al_client/components/character_details_page/character_description.dart';
 import 'package:al_client/components/character_details_page/character_header.dart';
 import 'package:al_client/components/character_details_page/character_relations.dart';
+import 'package:al_client/pages/error_page.dart';
 import 'package:flutter/material.dart';
 
 class StaffDetailsPage extends StatefulWidget {
@@ -28,6 +29,16 @@ class _StaffDetailsPageState extends State<StaffDetailsPage> {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator.adaptive());
+        }
+        if (snapshot.hasError) {
+          return ErrorPage(
+            scaffold: true,
+            onReload: () {
+              setState(() {
+                characterData = getStaffData(widget.id);
+              });
+            },
+          );
         }
         final data = snapshot.data!;
         final secondaryNames = [

@@ -1,4 +1,5 @@
 import 'package:al_client/components/home_page/user_info_modal_sheet.dart';
+import 'package:al_client/pages/error_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:al_client/anilist_connector.dart';
@@ -75,6 +76,13 @@ class _HomePageState extends State<HomePage> {
                                 child: Icon(Icons.face),
                               );
                             }
+                            if (snapshot.hasError) {
+                              return const SizedBox(
+                                height: 40,
+                                width: 40,
+                                child: Icon(Icons.face),
+                              );
+                            }
                             final data = snapshot.data!;
                             return Image(
                               height: 40,
@@ -107,6 +115,16 @@ class _HomePageState extends State<HomePage> {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(
                     child: CircularProgressIndicator.adaptive(),
+                  );
+                }
+                if (snapshot.hasError) {
+                  return ErrorPage(
+                    scaffold: false,
+                    onReload: () {
+                      setState(() {
+                        alData = getHomePageData();
+                      });
+                    },
                   );
                 }
                 final data = snapshot.data!;

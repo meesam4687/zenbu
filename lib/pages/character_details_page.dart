@@ -2,6 +2,7 @@ import 'package:al_client/anilist_connector.dart';
 import 'package:al_client/components/character_details_page/character_description.dart';
 import 'package:al_client/components/character_details_page/character_header.dart';
 import 'package:al_client/components/character_details_page/character_relations.dart';
+import 'package:al_client/pages/error_page.dart';
 import 'package:flutter/material.dart';
 
 class CharacterDetailsPage extends StatefulWidget {
@@ -28,6 +29,16 @@ class _CharacterDetailsPageState extends State<CharacterDetailsPage> {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator.adaptive());
+        }
+        if (snapshot.hasError) {
+          return ErrorPage(
+            scaffold: true,
+            onReload: () {
+              setState(() {
+                characterData = getCharacterData(widget.id);
+              });
+            },
+          );
         }
         final data = snapshot.data!;
         final secondaryNames = [

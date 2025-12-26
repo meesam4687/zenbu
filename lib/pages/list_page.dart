@@ -1,5 +1,6 @@
 import 'package:al_client/anilist_connector.dart';
 import 'package:al_client/components/list_page/list_page_view.dart';
+import 'package:al_client/pages/error_page.dart';
 import 'package:flutter/material.dart';
 
 class ListPage extends StatefulWidget {
@@ -15,12 +16,18 @@ class ListPage extends StatefulWidget {
 enum MediaType { anime, manga }
 
 class _ListPageState extends State<ListPage> {
-  late final Future<Map<String, dynamic>> mediaLists;
+  late Future<Map<String, dynamic>> mediaLists;
 
   @override
   void initState() {
     mediaLists = getMediaLists();
     super.initState();
+  }
+
+  void _reloadData() {
+    setState(() {
+      mediaLists = getMediaLists();
+    });
   }
 
   @override
@@ -58,6 +65,9 @@ class _ListPageState extends State<ListPage> {
                       ),
                     ),
                   );
+                }
+                if (snapshot.hasError) {
+                  return Expanded(child: Error(reload: _reloadData));
                 }
                 final data = snapshot.data!;
                 final List combinedEntries =

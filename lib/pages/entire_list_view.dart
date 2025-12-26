@@ -1,5 +1,6 @@
 import 'package:al_client/anilist_connector.dart';
 import 'package:al_client/components/global/item_card.dart';
+import 'package:al_client/pages/error_page.dart';
 import 'package:flutter/material.dart';
 
 enum PageType {
@@ -26,6 +27,7 @@ class _EntireListViewState extends State<EntireListView> {
   int page = 1;
   final ScrollController _scrollController = ScrollController();
   bool _isLoading = false;
+  bool _hasError = false;
 
   @override
   void initState() {
@@ -45,28 +47,45 @@ class _EntireListViewState extends State<EntireListView> {
   void _loadMore() async {
     setState(() {
       _isLoading = true;
+      _hasError = false;
     });
-    dynamic data;
-    if (widget.type == PageType.trendingAnime) {
-      data = await getTrendingAnime(page, 48);
-    } else if (widget.type == PageType.popularSeasonAnime) {
-      data = await getPopularSeason(page, 48);
-    } else if (widget.type == PageType.upcomingAnime) {
-      data = await getUpcomingAnime(page, 48);
-    } else if (widget.type == PageType.popularAllTimeAnime) {
-      data = await getPopularAllTimeAnime(page, 48);
-    } else if (widget.type == PageType.trendingManga) {
-      data = await getTrendingManga(page, 48);
-    } else if (widget.type == PageType.popularAllTimeManga) {
-      data = await getPopularAllTimeManga(page, 48);
-    }
-    setState(() {
-      for (var media in (data["data"]["list"]["media"] as List)) {
-        medias.add(media);
+    try {
+      dynamic data;
+      if (widget.type == PageType.trendingAnime) {
+        data = await getTrendingAnime(page, 48);
+      } else if (widget.type == PageType.popularSeasonAnime) {
+        data = await getPopularSeason(page, 48);
+      } else if (widget.type == PageType.upcomingAnime) {
+        data = await getUpcomingAnime(page, 48);
+      } else if (widget.type == PageType.popularAllTimeAnime) {
+        data = await getPopularAllTimeAnime(page, 48);
+      } else if (widget.type == PageType.trendingManga) {
+        data = await getTrendingManga(page, 48);
+      } else if (widget.type == PageType.popularAllTimeManga) {
+        data = await getPopularAllTimeManga(page, 48);
       }
-      page++;
-      _isLoading = false;
+      setState(() {
+        for (var media in (data["data"]["list"]["media"] as List)) {
+          medias.add(media);
+        }
+        page++;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _hasError = true;
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _reload() {
+    setState(() {
+      medias.clear();
+      page = 1;
+      _hasError = false;
     });
+    _loadMore();
   }
 
   @override
@@ -79,7 +98,9 @@ class _EntireListViewState extends State<EntireListView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text(widget.heading)),
-      body: (medias.isEmpty)
+      body: _hasError
+          ? Error(reload: _reload)
+          : (medias.isEmpty)
           ? const Center(
               child: Padding(
                 padding: EdgeInsets.all(8.0),

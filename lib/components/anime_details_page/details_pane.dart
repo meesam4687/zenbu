@@ -1,5 +1,6 @@
 import 'package:al_client/anilist_connector.dart';
 import 'package:al_client/components/anime_details_page/details.dart';
+import 'package:al_client/pages/error_page.dart';
 import 'package:flutter/material.dart';
 import 'package:al_client/components/global/item_card.dart';
 
@@ -40,6 +41,16 @@ class _DetailsPaneState extends State<DetailsPane> {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator.adaptive());
+        }
+        if (snapshot.hasError) {
+          return ErrorPage(
+            scaffold: false,
+            onReload: () {
+              setState(() {
+                animeData = getAnimeData(widget.mediaId);
+              });
+            },
+          );
         }
         final Map data = snapshot.data!;
         final List<dynamic> tags =
