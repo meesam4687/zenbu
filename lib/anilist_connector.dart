@@ -20,7 +20,7 @@ Future<Map<String, dynamic>> getHomePageData() async {
           name
           avatar { large }
         }
-        animeList: MediaListCollection(type: \$type, userId: \$userId, status_in: CURRENT, sort: UPDATED_TIME_DESC) {
+        animeList: MediaListCollection(type: \$type, userId: \$userId, status_in: [CURRENT, REPEATING], sort: UPDATED_TIME_DESC) {
           lists {
             name
             entries {
@@ -54,7 +54,7 @@ Future<Map<String, dynamic>> getHomePageData() async {
             }
           }
         }
-        mangaList: MediaListCollection(type: \$type2, userId: \$userId, status_in: CURRENT, sort: UPDATED_TIME_DESC) {
+        mangaList: MediaListCollection(type: \$type2, userId: \$userId, status_in: [CURRENT, REPEATING], sort: UPDATED_TIME_DESC) {
           lists {
             name
             entries {
@@ -1436,6 +1436,123 @@ Future<Map<String, dynamic>> updateListItem(
       }),
     );
 
+    final data = jsonDecode(res.body);
+    if (res.statusCode == 429) {
+      Fluttertoast.showToast(
+        msg: "Rate limited, try again later",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        fontSize: 16.0,
+      );
+    }
+    return data;
+  } catch (e) {
+    throw e.toString();
+  }
+}
+
+Future<Map<String, dynamic>> getNotifications(int page, int perPage) async {
+  try {
+    String? token = await TokenStorage.getAccessToken();
+    if (token == null) throw 'No authentication token';
+
+    String authHeader = 'Bearer $token';
+
+    String query = '''
+      query {
+        Page {
+          notifications {
+            ... on AiringNotification {
+              id
+              type 
+              createdAt
+              episode
+              media {
+                id
+                title {
+                  romaji
+                  english
+                }
+                coverImage {
+                  large
+                }
+              }
+            }
+            ... on RelatedMediaAdditionNotification {
+              id
+              type
+              createdAt
+              media {
+                id
+                title {
+                  romaji 
+                  english
+                }
+                coverImage {
+                  large
+                }
+              }
+            }
+            ... on MediaDataChangeNotification {
+              id
+              type
+              createdAt
+              media {
+                id
+                title {
+                  romaji 
+                  english
+                }
+                coverImage {
+                  large
+                }
+              }
+            }
+            ... on MediaMergeNotification {
+              id
+              type
+              createdAt
+              deletedMediaTitles
+              media {
+                id
+                title {
+                  romaji 
+                  english
+                }
+                coverImage {
+                  large
+                }
+              }
+            }
+            ... on MediaMergeNotification {
+              id
+              type
+              createdAt
+              deletedMediaTitles
+              media {
+                id
+                title {
+                  romaji 
+                  english
+                }
+                coverImage {
+                  large
+                }
+              }
+            }
+          }
+        } 
+      }
+    ''';
+
+    final res = await http.post(
+      Uri.parse('https://graphql.anilist.co'),
+      headers: {
+        "Authorization": authHeader,
+        "Content-Type": "application/json",
+      },
+      body: jsonEncode({"query": query, "variables": {}}),
+    );
     final data = jsonDecode(res.body);
     if (res.statusCode == 429) {
       Fluttertoast.showToast(

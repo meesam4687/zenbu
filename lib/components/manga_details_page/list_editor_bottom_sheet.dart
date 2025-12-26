@@ -99,6 +99,7 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                       DropdownMenuEntry(value: "PLANNING", label: "Planning"),
                       DropdownMenuEntry(value: "DROPPED", label: "Dropped"),
                       DropdownMenuEntry(value: "REPEATING", label: "Rereading"),
+                      DropdownMenuEntry(value: "PAUSED", label: "Paused"),
                     ],
                     onSelected: (value) {
                       selectedStatus = value as String;

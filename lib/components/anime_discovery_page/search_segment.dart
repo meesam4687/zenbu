@@ -1,3 +1,4 @@
+import 'package:al_client/components/anime_discovery_page/filter_sheet.dart';
 import 'package:al_client/pages/anime_search_page.dart';
 import 'package:flutter/material.dart';
 
@@ -67,7 +68,14 @@ class SearchSegment extends StatelessWidget {
                   Theme.of(context).colorScheme.outlineVariant,
                 ),
               ),
-              onPressed: () {},
+              onPressed: () {
+                showModalBottomSheet(
+                  context: context,
+                  builder: (context) {
+                    return FilterSheet();
+                  },
+                );
+              },
               child: Icon(Icons.tune, size: 27),
             ),
           ),

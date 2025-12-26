@@ -36,7 +36,7 @@ class _ListPageState extends State<ListPage> {
         ? "animeList"
         : "mangaList";
     return DefaultTabController(
-      length: 6,
+      length: 7,
       child: Scaffold(
         appBar: AppBar(title: Text(widget.title)),
         body: Column(
@@ -48,6 +48,7 @@ class _ListPageState extends State<ListPage> {
                 Tab(text: "Current"),
                 Tab(text: "Planning"),
                 Tab(text: "Completed"),
+                Tab(text: "Repeating"),
                 Tab(text: "Paused"),
                 Tab(text: "Dropped"),
                 Tab(text: "All"),
@@ -79,6 +80,7 @@ class _ListPageState extends State<ListPage> {
                 for (var i = 0; i < lists.length; i++) {
                   listNameIndexMap[lists[i]["name"]] = i;
                 }
+                print(listNameIndexMap);
                 return Expanded(
                   child: TabBarView(
                     children: [
@@ -104,6 +106,19 @@ class _ListPageState extends State<ListPage> {
                       ListPageView(
                         list: (listNameIndexMap['Completed'] != null)
                             ? data["data"][list]["lists"][listNameIndexMap['Completed']]["entries"]
+                            : [],
+                        mediaType: (list == "animeList") ? "anime" : "manga",
+                      ),
+                      ListPageView(
+                        list:
+                            (listNameIndexMap[(list == "animeList")
+                                    ? "Rewatching"
+                                    : "Rereading"] !=
+                                null)
+                            ? data["data"][list]["lists"][listNameIndexMap[(list ==
+                                      "animeList")
+                                  ? "Rewatching"
+                                  : "Rereading"]]["entries"]
                             : [],
                         mediaType: (list == "animeList") ? "anime" : "manga",
                       ),

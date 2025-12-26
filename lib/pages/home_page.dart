@@ -16,7 +16,6 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   late Future<Map<String, dynamic>> alData;
-
   @override
   void initState() {
     super.initState();
@@ -33,6 +32,28 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     Map providerData = Provider.of<StateProvider>(context).alData;
+    late List palist1;
+    late List palist2;
+    late List pmlist1;
+    late List pmlist2;
+    if (providerData.isNotEmpty) {
+      palist1 =
+          ((providerData["data"]["animeList"]["lists"] as List).isNotEmpty)
+          ? providerData["data"]["animeList"]["lists"][0]["entries"]
+          : [];
+      palist2 =
+          ((providerData["data"]["animeList"]["lists"] as List).length > 1)
+          ? providerData["data"]["animeList"]["lists"][1]["entries"]
+          : [];
+      pmlist1 =
+          ((providerData["data"]["mangaList"]["lists"] as List).isNotEmpty)
+          ? providerData["data"]["mangaList"]["lists"][0]["entries"]
+          : [];
+      pmlist2 =
+          ((providerData["data"]["mangaList"]["lists"] as List).length > 1)
+          ? providerData["data"]["mangaList"]["lists"][1]["entries"]
+          : [];
+    }
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 60,
@@ -134,10 +155,26 @@ class _HomePageState extends State<HomePage> {
                     listen: false,
                   ).updateData(data);
                 });
-                final animeData =
-                    data["data"]["animeList"]["lists"][0]["entries"];
-                final mangaData =
-                    data["data"]["mangaList"]["lists"][0]["entries"];
+                final alist1 =
+                    ((data["data"]["animeList"]["lists"] as List).isNotEmpty)
+                    ? data["data"]["animeList"]["lists"][0]["entries"]
+                    : [];
+                final alist2 =
+                    ((data["data"]["animeList"]["lists"] as List).length > 1)
+                    ? data["data"]["animeList"]["lists"][1]["entries"]
+                    : [];
+                final animeData = [...alist1, ...alist2];
+                final mlist1 =
+                    ((data["data"]["mangaList"]["lists"] as List).isNotEmpty)
+                    ? data["data"]["mangaList"]["lists"][0]["entries"]
+                    : [];
+                final mlist2 =
+                    ((data["data"]["mangaList"]["lists"] as List).length > 1)
+                    ? data["data"]["mangaList"]["lists"][1]["entries"]
+                    : [];
+                final mangaData = [...mlist1, ...mlist2];
+                print(mangaData);
+                print(animeData);
                 return SingleChildScrollView(
                   child: Column(
                     children: [
@@ -151,14 +188,8 @@ class _HomePageState extends State<HomePage> {
           : SingleChildScrollView(
               child: Column(
                 children: [
-                  AnimeList(
-                    items:
-                        providerData["data"]["animeList"]["lists"][0]["entries"],
-                  ),
-                  MangaList(
-                    items:
-                        providerData["data"]["mangaList"]["lists"][0]["entries"],
-                  ),
+                  AnimeList(items: [...palist1, ...palist2]),
+                  MangaList(items: [...pmlist1, ...pmlist2]),
                 ],
               ),
             ),

@@ -1,5 +1,6 @@
 # TODOS
+
 - [ ] Filters
-- [ ] Account handling
+- [x] Account handling
 - [ ] Icon
 - [ ] Watch and Reviews Tab
