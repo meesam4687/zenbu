@@ -1,6 +1,5 @@
 import 'package:al_client/components/global/item_card.dart';
 import 'package:al_client/pages/entire_list_view.dart';
-import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 
 class HorizontalAnimeList extends StatelessWidget {
@@ -34,18 +33,9 @@ class HorizontalAnimeList extends StatelessWidget {
                 ),
                 onPressed: () {
                   Navigator.of(context).push(
-                    PageRouteBuilder(
-                      transitionDuration: const Duration(milliseconds: 300),
-                      pageBuilder: (context, animation, secondaryAnimation) {
-                        return SharedAxisTransition(
-                          animation: animation,
-                          secondaryAnimation: secondaryAnimation,
-                          transitionType: SharedAxisTransitionType.horizontal,
-                          child: EntireListView(
-                            heading: heading,
-                            type: pagetype,
-                          ),
-                        );
+                    MaterialPageRoute(
+                      builder: (context) {
+                        return EntireListView(heading: heading, type: pagetype);
                       },
                     ),
                   );
