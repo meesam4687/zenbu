@@ -1459,8 +1459,8 @@ Future<Map<String, dynamic>> getNotifications(int page, int perPage) async {
     String authHeader = 'Bearer $token';
 
     String query = '''
-      query {
-        Page {
+      query(\$page: Int, \$perPage: Int) {
+        Page(page: \$page, perPage: \$perPage) {
           notifications {
             ... on AiringNotification {
               id
@@ -1469,6 +1469,7 @@ Future<Map<String, dynamic>> getNotifications(int page, int perPage) async {
               episode
               media {
                 id
+                type
                 title {
                   romaji
                   english
@@ -1484,6 +1485,7 @@ Future<Map<String, dynamic>> getNotifications(int page, int perPage) async {
               createdAt
               media {
                 id
+                type
                 title {
                   romaji 
                   english
@@ -1499,6 +1501,7 @@ Future<Map<String, dynamic>> getNotifications(int page, int perPage) async {
               createdAt
               media {
                 id
+                type
                 title {
                   romaji 
                   english
@@ -1515,22 +1518,7 @@ Future<Map<String, dynamic>> getNotifications(int page, int perPage) async {
               deletedMediaTitles
               media {
                 id
-                title {
-                  romaji 
-                  english
-                }
-                coverImage {
-                  large
-                }
-              }
-            }
-            ... on MediaMergeNotification {
-              id
-              type
-              createdAt
-              deletedMediaTitles
-              media {
-                id
+                type
                 title {
                   romaji 
                   english
@@ -1551,7 +1539,10 @@ Future<Map<String, dynamic>> getNotifications(int page, int perPage) async {
         "Authorization": authHeader,
         "Content-Type": "application/json",
       },
-      body: jsonEncode({"query": query, "variables": {}}),
+      body: jsonEncode({
+        "query": query,
+        "variables": {"page": page, "perPage": perPage},
+      }),
     );
     final data = jsonDecode(res.body);
     if (res.statusCode == 429) {

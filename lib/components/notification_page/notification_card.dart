@@ -1,10 +1,109 @@
+import 'package:al_client/pages/anime_details_page.dart';
+import 'package:al_client/pages/manga_details_page.dart';
 import 'package:flutter/material.dart';
+import 'package:animations/animations.dart';
 
 class NotificationCard extends StatelessWidget {
-  const NotificationCard({super.key});
+  const NotificationCard({super.key, required this.notificationData});
+  final Map notificationData;
 
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    String notificationText = "";
+    if (notificationData["type"] == "AIRING") {
+      notificationText =
+          "Episode ${notificationData["episode"].toString()} of ${notificationData["media"]["title"]["romaji"]} aired";
+    } else if (notificationData["type"] == "RELATED_MEDIA_ADDITION") {
+      notificationText =
+          "${notificationData["media"]["title"]["romaji"]} was recently added to the site.";
+    } else if (notificationData["type"] == "MEDIA_DATA_CHANGE") {
+      notificationText =
+          "${notificationData["media"]["title"]["romaji"]} received site data changes";
+    } else if (notificationData["type"] == "MEDIA_MERGE") {
+      notificationText =
+          "${notificationData["deletedMediaTitles"][0]} was merged with ${notificationData["media"]["title"]["romaji"]}";
+    }
+    return OpenContainer(
+      openElevation: 0,
+      closedElevation: 0,
+      transitionType: ContainerTransitionType.fadeThrough,
+      openColor: Theme.of(context).colorScheme.surface,
+      closedColor: Theme.of(context).colorScheme.surface,
+      closedShape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+      closedBuilder: (context, openContainer) {
+        return Container(
+          margin: EdgeInsets.all(5),
+          child: Stack(
+            children: [
+              SizedBox(
+                height: 250,
+                child: Card(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                    side: BorderSide(
+                      color: Theme.of(context).colorScheme.onSecondaryFixed,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        height: 160,
+                        width: 110,
+                        child: Card(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(10)),
+                          ),
+                          elevation: 5,
+                          clipBehavior: Clip.antiAlias,
+                          child: Image.network(
+                            notificationData["media"]["coverImage"]["large"],
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) =>
+                                const Icon(Icons.error),
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        width: 200,
+                        child: Text(
+                          notificationText,
+                          style: TextStyle(fontSize: 16),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Positioned.fill(
+                child: Padding(
+                  padding: EdgeInsetsGeometry.all(5),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      borderRadius: BorderRadius.all(Radius.circular(10)),
+                      onTap: () {
+                        openContainer();
+                      },
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+      openBuilder: (context, closeContainer) {
+        if (notificationData["media"]["type"] == "ANIME") {
+          return AnimeDetailsPage(id: notificationData["media"]["id"]);
+        } else if (notificationData["media"]["type"] == "CHARACTER") {
+          return MangaDetailsPage(id: notificationData["media"]["id"]);
+        }
+        return Placeholder();
+      },
+    );
   }
 }
