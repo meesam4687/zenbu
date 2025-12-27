@@ -77,52 +77,59 @@ class _HomePageState extends State<HomePage> {
                   );
                 }
               },
-              icon: Container(
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: Theme.of(context).colorScheme.onSecondary,
+              icon: Badge(
+                isLabelVisible: (providerData.isNotEmpty)
+                    ? (providerData["data"]["Viewer"]["unreadNotificationCount"] >
+                          0)
+                    : false,
+                smallSize: 12,
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: Theme.of(context).colorScheme.onSecondary,
+                    ),
+                    borderRadius: BorderRadius.all(Radius.circular(360)),
                   ),
-                  borderRadius: BorderRadius.all(Radius.circular(360)),
-                ),
-                child: ClipOval(
-                  child: (providerData.isEmpty)
-                      ? FutureBuilder(
-                          future: alData,
-                          builder: (context, snapshot) {
-                            if (snapshot.connectionState ==
-                                ConnectionState.waiting) {
-                              return const SizedBox(
+                  child: ClipOval(
+                    child: (providerData.isEmpty)
+                        ? FutureBuilder(
+                            future: alData,
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return const SizedBox(
+                                  height: 40,
+                                  width: 40,
+                                  child: Icon(Icons.face),
+                                );
+                              }
+                              if (snapshot.hasError) {
+                                return const SizedBox(
+                                  height: 40,
+                                  width: 40,
+                                  child: Icon(Icons.face),
+                                );
+                              }
+                              final data = snapshot.data!;
+                              return Image(
                                 height: 40,
                                 width: 40,
-                                child: Icon(Icons.face),
+                                fit: BoxFit.fill,
+                                image: NetworkImage(
+                                  data['data']['Viewer']['avatar']['large'],
+                                ),
                               );
-                            }
-                            if (snapshot.hasError) {
-                              return const SizedBox(
-                                height: 40,
-                                width: 40,
-                                child: Icon(Icons.face),
-                              );
-                            }
-                            final data = snapshot.data!;
-                            return Image(
-                              height: 40,
-                              width: 40,
-                              fit: BoxFit.fill,
-                              image: NetworkImage(
-                                data['data']['Viewer']['avatar']['large'],
-                              ),
-                            );
-                          },
-                        )
-                      : Image(
-                          height: 40,
-                          width: 40,
-                          fit: BoxFit.fill,
-                          image: NetworkImage(
-                            providerData['data']['Viewer']['avatar']['large'],
+                            },
+                          )
+                        : Image(
+                            height: 40,
+                            width: 40,
+                            fit: BoxFit.fill,
+                            image: NetworkImage(
+                              providerData['data']['Viewer']['avatar']['large'],
+                            ),
                           ),
-                        ),
+                  ),
                 ),
               ),
             ),
