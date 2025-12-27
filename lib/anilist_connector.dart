@@ -19,6 +19,7 @@ Future<Map<String, dynamic>> getHomePageData() async {
           id
           name
           avatar { large }
+          unreadNotificationCount
         }
         animeList: MediaListCollection(type: \$type, userId: \$userId, status_in: [CURRENT, REPEATING], sort: UPDATED_TIME_DESC) {
           lists {
@@ -1461,7 +1462,7 @@ Future<Map<String, dynamic>> getNotifications(int page, int perPage) async {
     String query = '''
       query(\$page: Int, \$perPage: Int) {
         Page(page: \$page, perPage: \$perPage) {
-          notifications {
+          notifications (resetNotificationCount: true) {
             ... on AiringNotification {
               id
               type 
