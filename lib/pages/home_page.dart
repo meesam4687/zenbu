@@ -173,8 +173,6 @@ class _HomePageState extends State<HomePage> {
                     ? data["data"]["mangaList"]["lists"][1]["entries"]
                     : [];
                 final mangaData = [...mlist1, ...mlist2];
-                print(mangaData);
-                print(animeData);
                 return SingleChildScrollView(
                   child: Column(
                     children: [

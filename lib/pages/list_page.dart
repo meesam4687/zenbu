@@ -80,7 +80,6 @@ class _ListPageState extends State<ListPage> {
                 for (var i = 0; i < lists.length; i++) {
                   listNameIndexMap[lists[i]["name"]] = i;
                 }
-                print(listNameIndexMap);
                 return Expanded(
                   child: TabBarView(
                     children: [
