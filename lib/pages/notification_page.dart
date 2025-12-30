@@ -1,6 +1,6 @@
-import 'package:al_client/anilist_connector.dart';
-import 'package:al_client/components/notification_page/notification_card.dart';
-import 'package:al_client/pages/error_page.dart';
+import 'package:zenbu/anilist_connector.dart';
+import 'package:zenbu/components/notification_page/notification_card.dart';
+import 'package:zenbu/pages/error_page.dart';
 import 'package:flutter/material.dart';
 
 class NotificationPage extends StatefulWidget {

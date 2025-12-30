@@ -1,11 +1,11 @@
-import 'package:al_client/components/home_page/user_info_modal_sheet.dart';
-import 'package:al_client/pages/error_page.dart';
+import 'package:zenbu/components/home_page/user_info_modal_sheet.dart';
+import 'package:zenbu/pages/error_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:al_client/anilist_connector.dart';
-import 'package:al_client/state_provider.dart';
-import 'package:al_client/components/home_page/anime_list.dart';
-import 'package:al_client/components/home_page/manga_list.dart';
+import 'package:zenbu/anilist_connector.dart';
+import 'package:zenbu/state_provider.dart';
+import 'package:zenbu/components/home_page/anime_list.dart';
+import 'package:zenbu/components/home_page/manga_list.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});

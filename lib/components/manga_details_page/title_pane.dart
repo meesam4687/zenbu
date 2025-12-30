@@ -1,5 +1,5 @@
 import 'dart:ui';
-import 'package:al_client/components/manga_details_page/list_editor_bottom_sheet.dart';
+import 'package:zenbu/components/manga_details_page/list_editor_bottom_sheet.dart';
 import 'package:flutter/material.dart';
 
 class TitlePane extends StatefulWidget {

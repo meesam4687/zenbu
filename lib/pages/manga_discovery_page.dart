@@ -1,11 +1,11 @@
-import 'package:al_client/pages/entire_list_view.dart';
-import 'package:al_client/pages/error_page.dart';
+import 'package:zenbu/pages/entire_list_view.dart';
+import 'package:zenbu/pages/error_page.dart';
 import 'package:flutter/material.dart';
-import 'package:al_client/anilist_connector.dart';
-import 'package:al_client/state_provider.dart';
-import 'package:al_client/components/global/banner.dart';
-import 'package:al_client/components/anime_discovery_page/horizontal_anime_list.dart';
-import 'package:al_client/components/manga_discovery_page/search_segment.dart';
+import 'package:zenbu/anilist_connector.dart';
+import 'package:zenbu/state_provider.dart';
+import 'package:zenbu/components/global/banner.dart';
+import 'package:zenbu/components/anime_discovery_page/horizontal_anime_list.dart';
+import 'package:zenbu/components/manga_discovery_page/search_segment.dart';
 import 'package:provider/provider.dart';
 
 class MangaDiscoveryPage extends StatefulWidget {

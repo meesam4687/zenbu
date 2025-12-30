@@ -1,4 +1,4 @@
-import 'package:al_client/pages/manga_search_page.dart';
+import 'package:zenbu/pages/manga_search_page.dart';
 import 'package:flutter/material.dart';
 
 class SearchSegment extends StatelessWidget {

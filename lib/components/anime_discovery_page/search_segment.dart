@@ -1,5 +1,5 @@
-import 'package:al_client/components/anime_discovery_page/filter_sheet.dart';
-import 'package:al_client/pages/anime_search_page.dart';
+import 'package:zenbu/components/anime_discovery_page/filter_sheet.dart';
+import 'package:zenbu/pages/anime_search_page.dart';
 import 'package:flutter/material.dart';
 
 class SearchSegment extends StatelessWidget {

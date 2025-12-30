@@ -1,7 +1,7 @@
 import 'dart:ui' as ui;
-import 'package:al_client/pages/anime_details_page.dart';
-import 'package:al_client/pages/character_details_page.dart';
-import 'package:al_client/pages/manga_details_page.dart';
+import 'package:zenbu/pages/anime_details_page.dart';
+import 'package:zenbu/pages/character_details_page.dart';
+import 'package:zenbu/pages/manga_details_page.dart';
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 

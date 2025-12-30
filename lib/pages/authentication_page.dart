@@ -1,9 +1,9 @@
-import 'package:al_client/main_page_view.dart';
+import 'package:zenbu/main_page_view.dart';
 import 'package:flutter/material.dart';
 import 'package:app_links/app_links.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:al_client/authentication_token_controller.dart';
+import 'package:zenbu/authentication_token_controller.dart';
 
 final AppLinks _appLinks = AppLinks();
 late String authToken;

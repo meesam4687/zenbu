@@ -1,8 +1,8 @@
-import 'package:al_client/pages/authentication_page.dart';
-import 'package:al_client/pages/notification_page.dart';
-import 'package:al_client/state_provider.dart';
+import 'package:zenbu/pages/authentication_page.dart';
+import 'package:zenbu/pages/notification_page.dart';
+import 'package:zenbu/state_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:al_client/authentication_token_controller.dart';
+import 'package:zenbu/authentication_token_controller.dart';
 import 'package:provider/provider.dart';
 
 class UserInfoModalSheet extends StatelessWidget {

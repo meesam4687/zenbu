@@ -1,8 +1,8 @@
-import 'package:al_client/anilist_connector.dart';
-import 'package:al_client/components/manga_details_page/details.dart';
-import 'package:al_client/pages/error_page.dart';
+import 'package:zenbu/anilist_connector.dart';
+import 'package:zenbu/components/manga_details_page/details.dart';
+import 'package:zenbu/pages/error_page.dart';
 import 'package:flutter/material.dart';
-import 'package:al_client/components/global/item_card.dart';
+import 'package:zenbu/components/global/item_card.dart';
 
 class DetailsPane extends StatefulWidget {
   const DetailsPane({super.key, required this.mediaId});

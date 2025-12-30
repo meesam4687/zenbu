@@ -1,8 +1,8 @@
-import 'package:al_client/anilist_connector.dart';
-import 'package:al_client/components/anime_details_page/details_pane.dart';
-import 'package:al_client/pages/error_page.dart';
+import 'package:zenbu/anilist_connector.dart';
+import 'package:zenbu/components/anime_details_page/details_pane.dart';
+import 'package:zenbu/pages/error_page.dart';
 import 'package:flutter/material.dart';
-import 'package:al_client/components/anime_details_page/title_pane.dart';
+import 'package:zenbu/components/anime_details_page/title_pane.dart';
 
 class AnimeDetailsPage extends StatefulWidget {
   const AnimeDetailsPage({super.key, required this.id});

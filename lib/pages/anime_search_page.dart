@@ -1,7 +1,7 @@
-import 'package:al_client/anilist_connector.dart';
-import 'package:al_client/components/global/item_card.dart';
+import 'package:zenbu/anilist_connector.dart';
+import 'package:zenbu/components/global/item_card.dart';
 import 'package:flutter/material.dart';
-import 'package:al_client/components/anime_discovery_page/search_segment.dart';
+import 'package:zenbu/components/anime_discovery_page/search_segment.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key, required this.query});
@@ -40,6 +40,7 @@ class _SearchPageState extends State<SearchPage> {
       page,
       48,
       widget.query,
+      null,
       null,
       null,
       null,

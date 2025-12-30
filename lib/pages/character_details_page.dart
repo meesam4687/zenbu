@@ -1,8 +1,8 @@
-import 'package:al_client/anilist_connector.dart';
-import 'package:al_client/components/character_details_page/character_description.dart';
-import 'package:al_client/components/character_details_page/character_header.dart';
-import 'package:al_client/components/character_details_page/character_relations.dart';
-import 'package:al_client/pages/error_page.dart';
+import 'package:zenbu/anilist_connector.dart';
+import 'package:zenbu/components/character_details_page/character_description.dart';
+import 'package:zenbu/components/character_details_page/character_header.dart';
+import 'package:zenbu/components/character_details_page/character_relations.dart';
+import 'package:zenbu/pages/error_page.dart';
 import 'package:flutter/material.dart';
 
 class CharacterDetailsPage extends StatefulWidget {

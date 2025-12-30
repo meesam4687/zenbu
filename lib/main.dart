@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:dynamic_color/dynamic_color.dart';
-import 'package:al_client/state_provider.dart';
-import 'package:al_client/main_page_view.dart';
-import 'package:al_client/pages/authentication_page.dart';
-import 'package:al_client/authentication_token_controller.dart';
+import 'package:zenbu/state_provider.dart';
+import 'package:zenbu/main_page_view.dart';
+import 'package:zenbu/pages/authentication_page.dart';
+import 'package:zenbu/authentication_token_controller.dart';
 
 String? token;
 void main() async {

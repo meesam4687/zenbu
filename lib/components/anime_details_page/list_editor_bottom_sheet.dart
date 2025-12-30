@@ -1,5 +1,5 @@
-import 'package:al_client/anilist_connector.dart';
-import 'package:al_client/state_provider.dart';
+import 'package:zenbu/anilist_connector.dart';
+import 'package:zenbu/state_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

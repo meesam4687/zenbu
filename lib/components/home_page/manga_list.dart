@@ -1,6 +1,6 @@
-import 'package:al_client/pages/list_page.dart';
+import 'package:zenbu/pages/list_page.dart';
 import 'package:flutter/material.dart';
-import 'package:al_client/components/global/item_card.dart';
+import 'package:zenbu/components/global/item_card.dart';
 
 class MangaList extends StatelessWidget {
   const MangaList({super.key, required this.items});

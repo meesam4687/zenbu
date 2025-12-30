@@ -1,6 +1,6 @@
-import 'package:al_client/pages/anime_discovery_page.dart';
-import 'package:al_client/pages/home_page.dart';
-import 'package:al_client/pages/manga_discovery_page.dart';
+import 'package:zenbu/pages/anime_discovery_page.dart';
+import 'package:zenbu/pages/home_page.dart';
+import 'package:zenbu/pages/manga_discovery_page.dart';
 import 'package:flutter/material.dart';
 import 'package:animations/animations.dart';
 

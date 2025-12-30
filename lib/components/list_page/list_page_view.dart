@@ -1,4 +1,4 @@
-import 'package:al_client/components/global/item_card.dart';
+import 'package:zenbu/components/global/item_card.dart';
 import 'package:flutter/material.dart';
 
 class ListPageView extends StatelessWidget {

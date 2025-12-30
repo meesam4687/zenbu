@@ -1,5 +1,5 @@
-import 'package:al_client/pages/anime_details_page.dart';
-import 'package:al_client/pages/manga_details_page.dart';
+import 'package:zenbu/pages/anime_details_page.dart';
+import 'package:zenbu/pages/manga_details_page.dart';
 import 'package:flutter/material.dart';
 import 'package:animations/animations.dart';
 
