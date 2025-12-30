@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class CharacterHeader extends StatelessWidget {
   const CharacterHeader({
@@ -35,9 +37,21 @@ class CharacterHeader extends StatelessWidget {
             margin: EdgeInsets.only(top: 10),
             child: Column(
               children: [
-                Text(
-                  characterName,
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+                GestureDetector(
+                  onLongPress: () {
+                    Clipboard.setData(ClipboardData(text: characterName));
+                    HapticFeedback.mediumImpact();
+                    Fluttertoast.showToast(
+                      msg: "Copied title to clipboard",
+                      toastLength: Toast.LENGTH_SHORT,
+                      gravity: ToastGravity.BOTTOM,
+                      fontSize: 16.0,
+                    );
+                  },
+                  child: Text(
+                    characterName,
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+                  ),
                 ),
                 Text(
                   characterSecondaryNames.length > 40

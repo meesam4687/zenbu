@@ -1,4 +1,6 @@
 import 'dart:ui';
+import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:zenbu/components/manga_details_page/list_editor_bottom_sheet.dart';
 import 'package:flutter/material.dart';
 
@@ -13,6 +15,7 @@ class TitlePane extends StatefulWidget {
     required this.mediaState,
     required this.mediaListEntry,
     required this.totalEpisodes,
+    required this.fullTitle,
   });
 
   final String title;
@@ -23,6 +26,7 @@ class TitlePane extends StatefulWidget {
   final String mediaState;
   final Map? mediaListEntry;
   final String totalEpisodes;
+  final String fullTitle;
 
   @override
   State<TitlePane> createState() => _TitlePaneState();
@@ -130,11 +134,25 @@ class _TitlePaneState extends State<TitlePane> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          SizedBox(
-                            width: 200,
-                            child: Text(
-                              widget.title,
-                              style: TextStyle(fontSize: 27),
+                          GestureDetector(
+                            onLongPress: () {
+                              Clipboard.setData(
+                                ClipboardData(text: widget.fullTitle),
+                              );
+                              HapticFeedback.mediumImpact();
+                              Fluttertoast.showToast(
+                                msg: "Copied title to clipboard",
+                                toastLength: Toast.LENGTH_SHORT,
+                                gravity: ToastGravity.BOTTOM,
+                                fontSize: 16.0,
+                              );
+                            },
+                            child: SizedBox(
+                              width: 200,
+                              child: Text(
+                                widget.title,
+                                style: TextStyle(fontSize: 27),
+                              ),
                             ),
                           ),
                           Text(progress),

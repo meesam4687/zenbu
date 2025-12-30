@@ -87,6 +87,8 @@ class _MangaDetailsPageState extends State<MangaDetailsPage> {
                             'NONE'
                       : 'NONE',
                   mediaListEntry: data["data"]["Media"]["mediaListEntry"],
+                  fullTitle:
+                      (data["data"]["Media"]["title"]["romaji"] as String),
                 ),
                 DetailsPane(mediaId: widget.id as int),
               ],
