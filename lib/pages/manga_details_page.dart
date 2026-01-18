@@ -73,11 +73,7 @@ class _MangaDetailsPageState extends State<MangaDetailsPage> {
                       ? '?'
                       : data["data"]["Media"]["chapters"].toString(),
                   title:
-                      ((data["data"]["Media"]["title"]["romaji"] as String)
-                              .length >
-                          32)
-                      ? '${(data["data"]["Media"]["title"]["romaji"] as String).substring(0, 32)}...'
-                      : (data["data"]["Media"]["title"]["romaji"] as String),
+                      (data["data"]["Media"]["title"]["romaji"] as String),
                   progress:
                       "Progress: ${(data["data"]["Media"]["mediaListEntry"] != null) ? data["data"]["Media"]["mediaListEntry"]["progress"] : "0"}/${(data["data"]["Media"]["chapters"] == null) ? '?' : data["data"]["Media"]["chapters"]}",
                   cover: data["data"]["Media"]["coverImage"]["extraLarge"],

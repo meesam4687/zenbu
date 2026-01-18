@@ -63,16 +63,17 @@ class AnimeList extends StatelessWidget {
               itemBuilder: (context, index) {
                 final item = items[index];
                 final int id = item['media']['id'];
-                return ItemCard(
-                  type: "anime",
-                  id: id,
-                  title:
-                      ((item["media"]["title"]["romaji"] as String).length > 27)
-                      ? '${(item["media"]["title"]["romaji"] as String).substring(0, 27)}...'
-                      : item["media"]["title"]["romaji"] as String,
-                  state:
-                      "${item["media"]["mediaListEntry"]["progress"]}/${(item["media"]["episodes"] == null) ? '?' : item["media"]["episodes"]}",
-                  image: item["media"]["coverImage"]["extraLarge"] as String,
+                return Padding(
+                  padding: const EdgeInsets.only(left: 3),
+                  child: ItemCard(
+                    type: "anime",
+                    id: id,
+                    title:
+                        item["media"]["title"]["romaji"] as String,
+                    state:
+                        "${item["media"]["mediaListEntry"]["progress"]}/${(item["media"]["episodes"] == null) ? '?' : item["media"]["episodes"]}",
+                    image: item["media"]["coverImage"]["extraLarge"] as String,
+                  ),
                 );
               },
             ),

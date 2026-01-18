@@ -94,52 +94,61 @@ class AiringBanner extends StatelessWidget {
                       ),
                       const SizedBox(width: 10),
                       Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            Text(
-                              title,
-                              style: TextStyle(
-                                fontSize: 24,
-                                shadows: [
-                                  BoxShadow(
-                                    blurRadius: 5.0,
-                                    color: Colors.black,
-                                  ),
-                                ],
-                                color: Color.fromRGBO(227, 226, 233, 1),
+                        child: Container(
+                          margin: EdgeInsets.only(right: 10),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              Text(
+                                title,
+                                style: TextStyle(
+                                  fontSize: 24,
+                                  shadows: [
+                                    BoxShadow(
+                                      blurRadius: 5.0,
+                                      color: Colors.black,
+                                    ),
+                                  ],
+                                  color: Color.fromRGBO(227, 226, 233, 1),
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
                               ),
-                            ),
-                            (totalEpisodes != null && airedEpisodes != null)
-                                ? Text(
-                                    "Episodes: $airedEpisodes/$totalEpisodes\n$tagString",
-                                    style: TextStyle(
-                                      fontSize: 15,
-                                      shadows: [
-                                        BoxShadow(
-                                          blurRadius: 5.0,
-                                          color: Colors.black,
-                                        ),
-                                      ],
-                                      color: Color.fromRGBO(227, 226, 233, 1),
+                              (totalEpisodes != null && airedEpisodes != null)
+                                  ? Text(
+                                      "Episodes: $airedEpisodes/$totalEpisodes\n$tagString",
+                                      style: TextStyle(
+                                        fontSize: 15,
+                                        shadows: [
+                                          BoxShadow(
+                                            blurRadius: 5.0,
+                                            color: Colors.black,
+                                          ),
+                                        ],
+                                        color: Color.fromRGBO(227, 226, 233, 1),
+                                      ),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    )
+                                  : Text(
+                                      tagString,
+                                      style: TextStyle(
+                                        fontSize: 15,
+                                        shadows: [
+                                          BoxShadow(
+                                            blurRadius: 5.0,
+                                            color: Colors.black,
+                                          ),
+                                        ],
+                                        color: Color.fromRGBO(227, 226, 233, 1),
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                  )
-                                : Text(
-                                    tagString,
-                                    style: TextStyle(
-                                      fontSize: 15,
-                                      shadows: [
-                                        BoxShadow(
-                                          blurRadius: 5.0,
-                                          color: Colors.black,
-                                        ),
-                                      ],
-                                      color: Color.fromRGBO(227, 226, 233, 1),
-                                    ),
-                                  ),
-                            SizedBox(height: 18),
-                          ],
+                              SizedBox(height: 18),
+                            ],
+                          ),
                         ),
                       ),
                     ],

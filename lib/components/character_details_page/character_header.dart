@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 
 class CharacterHeader extends StatelessWidget {
   const CharacterHeader({
@@ -41,12 +40,6 @@ class CharacterHeader extends StatelessWidget {
                   onLongPress: () {
                     Clipboard.setData(ClipboardData(text: characterName));
                     HapticFeedback.mediumImpact();
-                    Fluttertoast.showToast(
-                      msg: "Copied title to clipboard",
-                      toastLength: Toast.LENGTH_SHORT,
-                      gravity: ToastGravity.BOTTOM,
-                      fontSize: 16.0,
-                    );
                   },
                   child: Text(
                     characterName,

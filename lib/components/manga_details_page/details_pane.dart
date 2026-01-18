@@ -189,15 +189,18 @@ class _DetailsPaneState extends State<DetailsPane> {
                                             as List)
                                         .length,
                                 itemBuilder: (context, index) {
-                                  return ItemCard(
-                                    title:
-                                        data["data"]["Media"]["characters"]["characters"][index]["node"]["name"]["full"],
-                                    image:
-                                        data["data"]["Media"]["characters"]["characters"][index]["node"]["image"]["large"],
-                                    id: data["data"]["Media"]["characters"]["characters"][index]["node"]["id"],
-                                    type: "character",
-                                    state:
-                                        data["data"]["Media"]["characters"]["characters"][index]["role"],
+                                  return Padding(
+                                    padding: const EdgeInsets.only(right: 3.0),
+                                    child: ItemCard(
+                                      title:
+                                          data["data"]["Media"]["characters"]["characters"][index]["node"]["name"]["full"],
+                                      image:
+                                          data["data"]["Media"]["characters"]["characters"][index]["node"]["image"]["large"],
+                                      id: data["data"]["Media"]["characters"]["characters"][index]["node"]["id"],
+                                      type: "character",
+                                      state:
+                                          data["data"]["Media"]["characters"]["characters"][index]["role"],
+                                    ),
                                   );
                                 },
                               ),
@@ -235,24 +238,22 @@ class _DetailsPaneState extends State<DetailsPane> {
                                             as List)
                                         .length,
                                 itemBuilder: (context, index) {
-                                  return ItemCard(
-                                    id: data["data"]["Media"]["relations"]["edges"][index]["node"]["id"],
-                                    type:
-                                        data["data"]["Media"]["relations"]["edges"][index]["node"]["type"]
-                                            .toString()
-                                            .toLowerCase(),
-                                    title:
-                                        ((data["data"]["Media"]["relations"]["edges"][index]["node"]["title"]["romaji"]
-                                                    as String)
-                                                .length >
-                                            16)
-                                        ? '${(data["data"]["Media"]["relations"]["edges"][index]["node"]["title"]["romaji"] as String).substring(0, 16)}...'
-                                        : (data["data"]["Media"]["relations"]["edges"][index]["node"]["title"]["romaji"]
+                                  return Padding(
+                                    padding: const EdgeInsets.only(right: 3.0),
+                                    child: ItemCard(
+                                      id: data["data"]["Media"]["relations"]["edges"][index]["node"]["id"],
+                                      type:
+                                          data["data"]["Media"]["relations"]["edges"][index]["node"]["type"]
+                                              .toString()
+                                              .toLowerCase(),
+                                      title:
+                                          (data["data"]["Media"]["relations"]["edges"][index]["node"]["title"]["romaji"]
                                               as String),
-                                    image:
-                                        data["data"]["Media"]["relations"]["edges"][index]["node"]["coverImage"]["extraLarge"],
-                                    state:
-                                        data["data"]["Media"]["relations"]["edges"][index]["relationType"],
+                                      image:
+                                          data["data"]["Media"]["relations"]["edges"][index]["node"]["coverImage"]["extraLarge"],
+                                      state:
+                                          data["data"]["Media"]["relations"]["edges"][index]["relationType"],
+                                    ),
                                   );
                                 },
                               ),
@@ -290,21 +291,19 @@ class _DetailsPaneState extends State<DetailsPane> {
                                             as List)
                                         .length,
                                 itemBuilder: (context, index) {
-                                  return ItemCard(
-                                    id: data["data"]["Media"]["staff"]["edges"][index]["node"]["id"],
-                                    type: "staff",
-                                    title:
-                                        ((data["data"]["Media"]["staff"]["edges"][index]["node"]["name"]["full"]
-                                                    as String)
-                                                .length >
-                                            16)
-                                        ? '${(data["data"]["Media"]["staff"]["edges"][index]["node"]["name"]["full"] as String).substring(0, 16)}...'
-                                        : (data["data"]["Media"]["staff"]["edges"][index]["node"]["name"]["full"]
+                                  return Padding(
+                                    padding: const EdgeInsets.only(right: 3.0),
+                                    child: ItemCard(
+                                      id: data["data"]["Media"]["staff"]["edges"][index]["node"]["id"],
+                                      type: "staff",
+                                      title:
+                                          (data["data"]["Media"]["staff"]["edges"][index]["node"]["name"]["full"]
                                               as String),
-                                    image:
-                                        data["data"]["Media"]["staff"]["edges"][index]["node"]["image"]["large"],
-                                    state:
-                                        data["data"]["Media"]["staff"]["edges"][index]["role"],
+                                      image:
+                                          data["data"]["Media"]["staff"]["edges"][index]["node"]["image"]["large"],
+                                      state:
+                                          data["data"]["Media"]["staff"]["edges"][index]["role"],
+                                    ),
                                   );
                                 },
                               ),
@@ -343,22 +342,20 @@ class _DetailsPaneState extends State<DetailsPane> {
                                             as List)
                                         .length,
                                 itemBuilder: (context, index) {
-                                  return ItemCard(
-                                    id: data["data"]["Media"]["recommendations"]["edges"][index]["node"]["media"]["id"],
-                                    type:
-                                        (data["data"]["Media"]["recommendations"]["edges"][index]["node"]["media"]["type"]
-                                                as String)
-                                            .toLowerCase(),
-                                    title:
-                                        ((data["data"]["Media"]["recommendations"]["edges"][index]["node"]["media"]["title"]["romaji"]
-                                                    as String)
-                                                .length >
-                                            16)
-                                        ? '${(data["data"]["Media"]["recommendations"]["edges"][index]["node"]["media"]["title"]["romaji"] as String).substring(0, 16)}...'
-                                        : (data["data"]["Media"]["recommendations"]["edges"][index]["node"]["media"]["title"]["romaji"]
+                                  return Padding(
+                                    padding: const EdgeInsets.only(right: 3.0),
+                                    child: ItemCard(
+                                      id: data["data"]["Media"]["recommendations"]["edges"][index]["node"]["media"]["id"],
+                                      type:
+                                          (data["data"]["Media"]["recommendations"]["edges"][index]["node"]["media"]["type"]
+                                                  as String)
+                                              .toLowerCase(),
+                                      title:
+                                          (data["data"]["Media"]["recommendations"]["edges"][index]["node"]["media"]["title"]["romaji"]
                                               as String),
-                                    image:
-                                        data["data"]["Media"]["recommendations"]["edges"][index]["node"]["media"]["coverImage"]["extraLarge"],
+                                      image:
+                                          data["data"]["Media"]["recommendations"]["edges"][index]["node"]["media"]["coverImage"]["extraLarge"],
+                                    ),
                                   );
                                 },
                               ),

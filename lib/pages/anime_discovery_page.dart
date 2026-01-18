@@ -89,10 +89,7 @@ class _AnimeDiscoveryPageState extends State<AnimeDiscoveryPage> {
                                 coverImage: media["coverImage"]["large"]
                                     .toString(),
                                 title:
-                                    media["title"]["romaji"].toString().length >
-                                        24
-                                    ? "${media["title"]["romaji"].toString().substring(0, 24)}..."
-                                    : media["title"]["romaji"].toString(),
+                                    media["title"]["romaji"].toString(),
                                 totalEpisodes: (media["episodes"] != null)
                                     ? media["episodes"].toString()
                                     : "??",
@@ -175,9 +172,7 @@ class _AnimeDiscoveryPageState extends State<AnimeDiscoveryPage> {
                             bannerImage: media["bannerImage"].toString(),
                             coverImage: media["coverImage"]["large"].toString(),
                             title:
-                                media["title"]["romaji"].toString().length > 24
-                                ? "${media["title"]["romaji"].toString().substring(0, 24)}..."
-                                : media["title"]["romaji"].toString(),
+                                media["title"]["romaji"].toString(),
                             totalEpisodes: (media["episodes"] != null)
                                 ? media["episodes"].toString()
                                 : "??",
@@ -187,12 +182,6 @@ class _AnimeDiscoveryPageState extends State<AnimeDiscoveryPage> {
                                 : "0",
                             tagString:
                                 ((media["genres"] as List)
-                                            .map((tag) => tag.toString())
-                                            .join(" • "))
-                                        .length >
-                                    20
-                                ? "${((media["genres"] as List).map((tag) => tag.toString()).join(" • ")).substring(0, 20)}..."
-                                : ((media["genres"] as List)
                                       .map((tag) => tag.toString())
                                       .join(" • ")),
                             type: media["type"].toString().toLowerCase(),

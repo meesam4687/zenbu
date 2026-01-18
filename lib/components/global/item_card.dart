@@ -58,12 +58,16 @@ class ItemCard extends StatelessWidget {
                     title as String,
                     textAlign: TextAlign.center,
                     style: TextStyle(fontWeight: FontWeight.bold),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
                   (state != null)
                       ? Text(
                           state as String,
                           textAlign: TextAlign.center,
                           style: TextStyle(fontWeight: FontWeight.w200),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         )
                       : Container(),
                 ],

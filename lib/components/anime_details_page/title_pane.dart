@@ -1,5 +1,4 @@
 import 'dart:ui';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:zenbu/components/anime_details_page/list_editor_bottom_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -140,18 +139,14 @@ class _TitlePaneState extends State<TitlePane> {
                                 ClipboardData(text: widget.fullTitle),
                               );
                               HapticFeedback.mediumImpact();
-                              Fluttertoast.showToast(
-                                msg: "Copied title to clipboard",
-                                toastLength: Toast.LENGTH_SHORT,
-                                gravity: ToastGravity.BOTTOM,
-                                fontSize: 16.0,
-                              );
                             },
                             child: SizedBox(
                               width: 200,
                               child: Text(
                                 widget.title,
                                 style: TextStyle(fontSize: 27),
+                                maxLines: 3,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
                           ),
