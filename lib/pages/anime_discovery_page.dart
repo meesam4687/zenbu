@@ -88,8 +88,7 @@ class _AnimeDiscoveryPageState extends State<AnimeDiscoveryPage> {
                                 bannerImage: media["bannerImage"].toString(),
                                 coverImage: media["coverImage"]["large"]
                                     .toString(),
-                                title:
-                                    media["title"]["romaji"].toString(),
+                                title: media["title"]["romaji"].toString(),
                                 totalEpisodes: (media["episodes"] != null)
                                     ? media["episodes"].toString()
                                     : "??",
@@ -138,6 +137,11 @@ class _AnimeDiscoveryPageState extends State<AnimeDiscoveryPage> {
                         animeArray: data["data"]["allTimePopular"]["media"],
                         pagetype: PageType.popularAllTimeAnime,
                       ),
+                      HorizontalAnimeList(
+                        heading: "Highest Rated",
+                        animeArray: data["data"]["highestRated"]["media"],
+                        pagetype: PageType.highestRatedAnime,
+                      ),
                     ],
                   ),
                 );
@@ -171,8 +175,7 @@ class _AnimeDiscoveryPageState extends State<AnimeDiscoveryPage> {
                             id: media["id"],
                             bannerImage: media["bannerImage"].toString(),
                             coverImage: media["coverImage"]["large"].toString(),
-                            title:
-                                media["title"]["romaji"].toString(),
+                            title: media["title"]["romaji"].toString(),
                             totalEpisodes: (media["episodes"] != null)
                                 ? media["episodes"].toString()
                                 : "??",
@@ -180,10 +183,9 @@ class _AnimeDiscoveryPageState extends State<AnimeDiscoveryPage> {
                                 ? (media["nextAiringEpisode"]["episode"] - 1)
                                       .toString()
                                 : "0",
-                            tagString:
-                                ((media["genres"] as List)
-                                      .map((tag) => tag.toString())
-                                      .join(" • ")),
+                            tagString: ((media["genres"] as List)
+                                .map((tag) => tag.toString())
+                                .join(" • ")),
                             type: media["type"].toString().toLowerCase(),
                           );
                           banners.add(item);
@@ -212,6 +214,11 @@ class _AnimeDiscoveryPageState extends State<AnimeDiscoveryPage> {
                     heading: "All Time Popular",
                     animeArray: providerData["data"]["allTimePopular"]["media"],
                     pagetype: PageType.popularAllTimeAnime,
+                  ),
+                  HorizontalAnimeList(
+                    heading: "Highest Rated",
+                    animeArray: providerData["data"]["highestRated"]["media"],
+                    pagetype: PageType.highestRatedAnime,
                   ),
                 ],
               ),

@@ -111,6 +111,11 @@ class _MangaDiscoveryPageState extends State<MangaDiscoveryPage> {
                         animeArray: data["data"]["allTimePopular"]["media"],
                         pagetype: PageType.popularAllTimeManga,
                       ),
+                      HorizontalAnimeList(
+                        heading: "Highst Rated",
+                        animeArray: data["data"]["highestRated"]["media"],
+                        pagetype: PageType.highestRatedManga,
+                      ),
                     ],
                   ),
                 );
@@ -167,6 +172,11 @@ class _MangaDiscoveryPageState extends State<MangaDiscoveryPage> {
                     heading: "All Time Popular",
                     animeArray: providerData["data"]["allTimePopular"]["media"],
                     pagetype: PageType.popularAllTimeManga,
+                  ),
+                  HorizontalAnimeList(
+                    heading: "Highest Rated",
+                    animeArray: providerData["data"]["highestRated"]["media"],
+                    pagetype: PageType.highestRatedManga,
                   ),
                 ],
               ),

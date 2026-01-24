@@ -640,6 +640,20 @@ Future<Map<String, dynamic>> getAnimeHomePage(int page, int perPage) async {
             type
           }
         }
+        highestRated: Page(page: \$page, perPage: \$perPage) {
+          media(sort: SCORE_DESC, type: ANIME) {
+            id
+            title {
+              romaji
+              english
+              native
+            }
+            coverImage {
+              large
+            }
+            type
+          }
+        }
       }
     ''';
 
@@ -713,6 +727,20 @@ Future<Map<String, dynamic>> getMangaHomePage(int page, int perPage) async {
         }
         allTimePopular: Page(page: \$page, perPage: \$perPage) {
           media(sort: POPULARITY_DESC, type: MANGA) {
+            id
+            title {
+              romaji
+              english
+              native
+            }
+            coverImage {
+              large
+            }
+            type
+          }
+        }
+        highestRated: Page(page: \$page, perPage: \$perPage) {
+          media(sort: SCORE_DESC, type: MANGA) {
             id
             title {
               romaji
@@ -1087,6 +1115,61 @@ Future<Map<String, dynamic>> getPopularAllTimeAnime(
   }
 }
 
+Future<Map<String, dynamic>> getHighestRatedAnime(
+  int page,
+  int perPage,
+) async {
+  try {
+    String? token = await TokenStorage.getAccessToken();
+    if (token == null) throw 'No authentication token';
+
+    String authHeader = 'Bearer $token';
+
+    String query = '''
+      query (\$page: Int, \$perPage: Int) {
+        list: Page(page: \$page, perPage: \$perPage) {
+          media(sort: SCORE_DESC, type: ANIME) {
+            id
+            title {
+              romaji
+              english
+              native
+            }
+            coverImage {
+              large
+            }
+            type
+          }
+        }
+      }
+    ''';
+
+    final res = await http.post(
+      Uri.parse('https://graphql.anilist.co'),
+      headers: {
+        "Authorization": authHeader,
+        "Content-Type": "application/json",
+      },
+      body: jsonEncode({
+        "query": query,
+        "variables": {"page": page, "perPage": perPage},
+      }),
+    );
+    final data = jsonDecode(res.body);
+    if (res.statusCode == 429) {
+      Fluttertoast.showToast(
+        msg: "Rate limited, try again later",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        fontSize: 16.0,
+      );
+    }
+    return data;
+  } catch (e) {
+    throw e.toString();
+  }
+}
+
 Future<Map<String, dynamic>> getTrendingManga(int page, int perPage) async {
   try {
     String? token = await TokenStorage.getAccessToken();
@@ -1142,6 +1225,62 @@ Future<Map<String, dynamic>> getTrendingManga(int page, int perPage) async {
     throw e.toString();
   }
 }
+
+Future<Map<String, dynamic>> getHighestRatedManga(
+  int page,
+  int perPage,
+) async {
+  try {
+    String? token = await TokenStorage.getAccessToken();
+    if (token == null) throw 'No authentication token';
+
+    String authHeader = 'Bearer $token';
+
+    String query = '''
+      query (\$page: Int, \$perPage: Int) {
+        list: Page(page: \$page, perPage: \$perPage) {
+          media(sort: SCORE_DESC, type: MANGA) {
+            id
+            title {
+              romaji
+              english
+              native
+            }
+            coverImage {
+              large
+            }
+            type
+          }
+        }
+      }
+    ''';
+
+    final res = await http.post(
+      Uri.parse('https://graphql.anilist.co'),
+      headers: {
+        "Authorization": authHeader,
+        "Content-Type": "application/json",
+      },
+      body: jsonEncode({
+        "query": query,
+        "variables": {"page": page, "perPage": perPage},
+      }),
+    );
+    final data = jsonDecode(res.body);
+    if (res.statusCode == 429) {
+      Fluttertoast.showToast(
+        msg: "Rate limited, try again later",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        fontSize: 16.0,
+      );
+    }
+    return data;
+  } catch (e) {
+    throw e.toString();
+  }
+}
+
 
 Future<Map<String, dynamic>> getPopularAllTimeManga(
   int page,

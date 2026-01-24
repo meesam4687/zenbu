@@ -10,6 +10,8 @@ enum PageType {
   popularAllTimeAnime,
   trendingManga,
   popularAllTimeManga,
+  highestRatedAnime,
+  highestRatedManga
 }
 
 class EntireListView extends StatefulWidget {
@@ -63,6 +65,10 @@ class _EntireListViewState extends State<EntireListView> {
         data = await getTrendingManga(page, 48);
       } else if (widget.type == PageType.popularAllTimeManga) {
         data = await getPopularAllTimeManga(page, 48);
+      } else if (widget.type == PageType.highestRatedAnime) {
+        data = await getHighestRatedAnime(page, 48);
+      } else if (widget.type == PageType.highestRatedManga) {
+        data = await getHighestRatedManga(page, 48);
       }
       setState(() {
         for (var media in (data["data"]["list"]["media"] as List)) {
