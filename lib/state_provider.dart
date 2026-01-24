@@ -18,4 +18,12 @@ class StateProvider extends ChangeNotifier {
     mangaDiscoveryData = newData;
     notifyListeners();
   }
+
+  void clearNotifications() {
+    final viewer = (alData["data"] is Map) ? alData["data"]["Viewer"] : null;
+    if (viewer is Map && viewer.containsKey("unreadNotificationCount")) {
+      viewer["unreadNotificationCount"] = 0;
+      notifyListeners();
+    }
+  }
 }

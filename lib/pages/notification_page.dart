@@ -1,7 +1,9 @@
+import 'package:provider/provider.dart';
 import 'package:zenbu/anilist_connector.dart';
 import 'package:zenbu/components/notification_page/notification_card.dart';
 import 'package:zenbu/pages/error_page.dart';
 import 'package:flutter/material.dart';
+import 'package:zenbu/state_provider.dart';
 
 class NotificationPage extends StatefulWidget {
   const NotificationPage({super.key});
@@ -13,6 +15,7 @@ class NotificationPage extends StatefulWidget {
 class _NotificationPageState extends State<NotificationPage> {
   List<Map> items = [];
   int page = 1;
+  bool _clearedUnread = false;
   final ScrollController _scrollController = ScrollController();
   bool _isLoading = false;
   bool _hasError = false;
@@ -48,6 +51,14 @@ class _NotificationPageState extends State<NotificationPage> {
         page++;
         _isLoading = false;
       });
+
+      if (!_clearedUnread && mounted) {
+        Provider.of<StateProvider>(
+          context,
+          listen: false,
+        ).clearNotifications();
+        _clearedUnread = true;
+      }
     } catch (e) {
       setState(() {
         _hasError = true;
