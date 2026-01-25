@@ -1115,10 +1115,7 @@ Future<Map<String, dynamic>> getPopularAllTimeAnime(
   }
 }
 
-Future<Map<String, dynamic>> getHighestRatedAnime(
-  int page,
-  int perPage,
-) async {
+Future<Map<String, dynamic>> getHighestRatedAnime(int page, int perPage) async {
   try {
     String? token = await TokenStorage.getAccessToken();
     if (token == null) throw 'No authentication token';
@@ -1226,10 +1223,7 @@ Future<Map<String, dynamic>> getTrendingManga(int page, int perPage) async {
   }
 }
 
-Future<Map<String, dynamic>> getHighestRatedManga(
-  int page,
-  int perPage,
-) async {
+Future<Map<String, dynamic>> getHighestRatedManga(int page, int perPage) async {
   try {
     String? token = await TokenStorage.getAccessToken();
     if (token == null) throw 'No authentication token';
@@ -1280,7 +1274,6 @@ Future<Map<String, dynamic>> getHighestRatedManga(
     throw e.toString();
   }
 }
-
 
 Future<Map<String, dynamic>> getPopularAllTimeManga(
   int page,
