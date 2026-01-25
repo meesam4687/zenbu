@@ -121,11 +121,12 @@ class _EntireListViewState extends State<EntireListView> {
                     child: GridView.builder(
                       controller: _scrollController,
                       gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                        childAspectRatio: 100 / 181,
-                        maxCrossAxisExtent: 150,
+                        maxCrossAxisExtent: 137.142,
+                        childAspectRatio: 100 / 200,
                       ),
                       itemCount: _isLoading ? medias.length + 1 : medias.length,
                       itemBuilder: (context, index) {
+                        //print(MediaQuery.of(context).size.width);
                         if (index == medias.length && _isLoading == true) {
                           return const Center(
                             child: Padding(

@@ -87,8 +87,8 @@ class _SearchPageState extends State<SearchPage> {
                     child: GridView.builder(
                       controller: _scrollController,
                       gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                        childAspectRatio: 100 / 181,
-                        maxCrossAxisExtent: 180,
+                        maxCrossAxisExtent: 137.142,
+                        childAspectRatio: 100 / 200,
                       ),
                       itemCount: _isLoading ? medias.length + 1 : medias.length,
                       itemBuilder: (context, index) {
@@ -100,16 +100,16 @@ class _SearchPageState extends State<SearchPage> {
                             ),
                           );
                         }
-                        return ItemCard(
-                          title:
-                              ((medias[index]["title"]["romaji"] as String)
-                                      .length >
-                                  10)
-                              ? '${(medias[index]["title"]["romaji"] as String).substring(0, 10)}...'
-                              : medias[index]["title"]["romaji"] as String,
-                          image: medias[index]["coverImage"]["large"] as String,
-                          id: medias[index]["id"] as int,
-                          type: (medias[index]["type"] as String).toLowerCase(),
+                        return Padding(
+                          padding: const EdgeInsets.only(left: 3.0),
+                          child: ItemCard(
+                            title: medias[index]["title"]["romaji"] as String,
+                            image:
+                                medias[index]["coverImage"]["large"] as String,
+                            id: medias[index]["id"] as int,
+                            type: (medias[index]["type"] as String)
+                                .toLowerCase(),
+                          ),
                         );
                       },
                     ),
