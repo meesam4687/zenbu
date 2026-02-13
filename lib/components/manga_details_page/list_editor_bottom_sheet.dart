@@ -1,6 +1,6 @@
 import 'package:zenbu/anilist_connector.dart';
 import 'package:zenbu/state_provider.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 
 class ListEditorBottomSheet extends StatefulWidget {
@@ -90,20 +90,58 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                     "Status",
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
                   ),
-                  DropdownMenu(
-                    width: MediaQuery.of(context).size.width * 0.44,
-                    hintText: listStatusToText[widget.status],
-                    dropdownMenuEntries: [
-                      DropdownMenuEntry(value: "CURRENT", label: "Reading"),
-                      DropdownMenuEntry(value: "COMPLETED", label: "Completed"),
-                      DropdownMenuEntry(value: "PLANNING", label: "Planning"),
-                      DropdownMenuEntry(value: "DROPPED", label: "Dropped"),
-                      DropdownMenuEntry(value: "REPEATING", label: "Rereading"),
-                      DropdownMenuEntry(value: "PAUSED", label: "Paused"),
-                    ],
-                    onSelected: (value) {
-                      selectedStatus = value as String;
+                  GestureDetector(
+                    onTap: () {
+                      final statusList = ["CURRENT", "COMPLETED", "PLANNING", "DROPPED", "REPEATING", "PAUSED"];
+                      final statusLabels = ["Reading", "Completed", "Planning", "Dropped", "Rereading", "Paused"];
+                      int initialIndex = statusList.indexOf(selectedStatus);
+                      if (initialIndex == -1) initialIndex = 0;
+                      
+                      showCupertinoModalPopup(
+                        context: context,
+                        builder: (context) => Container(
+                          height: 250,
+                          color: CupertinoColors.systemBackground.resolveFrom(context),
+                          child: Column(
+                            children: [
+                              Container(
+                                height: 44,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    CupertinoButton(
+                                      child: Text('Done'),
+                                      onPressed: () => Navigator.pop(context),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Expanded(
+                                child: CupertinoPicker(
+                                  scrollController: FixedExtentScrollController(initialItem: initialIndex),
+                                  itemExtent: 32,
+                                  onSelectedItemChanged: (index) {
+                                    setState(() {
+                                      selectedStatus = statusList[index];
+                                    });
+                                  },
+                                  children: statusLabels.map((label) => Center(child: Text(label))).toList(),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
                     },
+                    child: Container(
+                      width: MediaQuery.of(context).size.width * 0.44,
+                      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: CupertinoColors.systemGrey4),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(listStatusToText[selectedStatus] ?? "Select"),
+                    ),
                   ),
                 ],
               ),
@@ -117,13 +155,11 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                   ),
                   SizedBox(
                     width: MediaQuery.of(context).size.width * 0.44,
-                    child: TextField(
+                    child: CupertinoTextField(
                       keyboardType: TextInputType.number,
                       controller: chaptersController,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        hint: Text(widget.progress.toString()),
-                      ),
+                      placeholder: widget.progress.toString(),
+                      padding: EdgeInsets.all(12),
                     ),
                   ),
                 ],
@@ -141,8 +177,7 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                     "Start Date",
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
                   ),
-                  InkWell(
-                    borderRadius: BorderRadius.circular(4),
+                  GestureDetector(
                     child: SizedBox(
                       width: MediaQuery.of(context).size.width * 0.44,
                       height: 55,
@@ -150,8 +185,8 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                         alignment: Alignment.centerLeft,
                         padding: EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey),
-                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(color: CupertinoColors.systemGrey4),
+                          borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
                           startDateString as String,
@@ -160,24 +195,44 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                       ),
                     ),
                     onTap: () async {
-                      startDate = await showDatePicker(
+                      await showCupertinoModalPopup(
                         context: context,
-                        initialDate: DateTime(
-                          DateTime.now().year,
-                          DateTime.now().month,
-                          DateTime.now().day,
-                        ),
-                        firstDate: DateTime(1970),
-                        lastDate: DateTime(
-                          DateTime.now().year,
-                          DateTime.now().month,
-                          DateTime.now().day,
+                        builder: (context) => Container(
+                          height: 250,
+                          color: CupertinoColors.systemBackground.resolveFrom(context),
+                          child: Column(
+                            children: [
+                              Container(
+                                height: 44,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    CupertinoButton(
+                                      child: Text('Done'),
+                                      onPressed: () => Navigator.pop(context),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Expanded(
+                                child: CupertinoDatePicker(
+                                  mode: CupertinoDatePickerMode.date,
+                                  initialDateTime: DateTime.now(),
+                                  minimumDate: DateTime(1970),
+                                  maximumDate: DateTime.now(),
+                                  onDateTimeChanged: (DateTime value) {
+                                    startDate = value;
+                                    setState(() {
+                                      startDateString =
+                                          '${value.day.toString()}/${value.month.toString()}/${value.year.toString()}';
+                                    });
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       );
-                      setState(() {
-                        startDateString =
-                            '${startDate!.day.toString()}/${startDate!.month.toString()}/${startDate!.year.toString()}';
-                      });
                     },
                   ),
                 ],
@@ -190,8 +245,7 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                     "End Date",
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
                   ),
-                  InkWell(
-                    borderRadius: BorderRadius.circular(4),
+                  GestureDetector(
                     child: SizedBox(
                       width: MediaQuery.of(context).size.width * 0.44,
                       height: 55,
@@ -199,8 +253,8 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                         alignment: Alignment.centerLeft,
                         padding: EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey),
-                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(color: CupertinoColors.systemGrey4),
+                          borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
                           endDateString as String,
@@ -209,24 +263,44 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                       ),
                     ),
                     onTap: () async {
-                      endDate = await showDatePicker(
+                      await showCupertinoModalPopup(
                         context: context,
-                        initialDate: DateTime(
-                          DateTime.now().year,
-                          DateTime.now().month,
-                          DateTime.now().day,
-                        ),
-                        firstDate: DateTime(1970),
-                        lastDate: DateTime(
-                          DateTime.now().year,
-                          DateTime.now().month,
-                          DateTime.now().day,
+                        builder: (context) => Container(
+                          height: 250,
+                          color: CupertinoColors.systemBackground.resolveFrom(context),
+                          child: Column(
+                            children: [
+                              Container(
+                                height: 44,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    CupertinoButton(
+                                      child: Text('Done'),
+                                      onPressed: () => Navigator.pop(context),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Expanded(
+                                child: CupertinoDatePicker(
+                                  mode: CupertinoDatePickerMode.date,
+                                  initialDateTime: DateTime.now(),
+                                  minimumDate: DateTime(1970),
+                                  maximumDate: DateTime.now(),
+                                  onDateTimeChanged: (DateTime value) {
+                                    endDate = value;
+                                    setState(() {
+                                      endDateString =
+                                          '${value.day.toString()}/${value.month.toString()}/${value.year.toString()}';
+                                    });
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       );
-                      setState(() {
-                        endDateString =
-                            '${endDate!.day.toString()}/${endDate!.month.toString()}/${endDate!.year.toString()}';
-                      });
                     },
                   ),
                 ],
@@ -246,13 +320,11 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                   ),
                   SizedBox(
                     width: MediaQuery.of(context).size.width * 0.44,
-                    child: TextField(
+                    child: CupertinoTextField(
                       keyboardType: TextInputType.number,
                       controller: scoreController,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        hint: Text(widget.score.toString()),
-                      ),
+                      placeholder: widget.score.toString(),
+                      padding: EdgeInsets.all(12),
                     ),
                   ),
                 ],
@@ -267,13 +339,11 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                   ),
                   SizedBox(
                     width: MediaQuery.of(context).size.width * 0.44,
-                    child: TextField(
+                    child: CupertinoTextField(
                       controller: rewatchController,
                       keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        hint: Text(widget.repeatCount.toString()),
-                      ),
+                      placeholder: widget.repeatCount.toString(),
+                      padding: EdgeInsets.all(12),
                     ),
                   ),
                 ],
@@ -282,7 +352,9 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
           ),
           SizedBox(
             width: double.infinity,
-            child: FilledButton.icon(
+            child: CupertinoButton(
+              color: CupertinoColors.activeBlue,
+              padding: EdgeInsets.symmetric(vertical: 12),
               onPressed: isLoading
                   ? null
                   : () async {
@@ -348,17 +420,20 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                         isLoading = false;
                       });
                     },
-              icon: isLoading
+              child: isLoading
                   ? SizedBox(
                       width: 20,
                       height: 20,
-                      child: CircularProgressIndicator(
-                        color: Colors.white,
-                        strokeWidth: 2,
-                      ),
+                      child: CupertinoActivityIndicator(color: CupertinoColors.white),
                     )
-                  : Icon(Icons.check),
-              label: isLoading ? Text(" Loading...") : Text("Save"),
+                  : Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(CupertinoIcons.check_mark, size: 20),
+                        SizedBox(width: 8),
+                        Text("Save"),
+                      ],
+                    ),
             ),
           ),
         ],

@@ -1,7 +1,7 @@
 import 'package:zenbu/anilist_connector.dart';
 import 'package:zenbu/components/anime_details_page/details.dart';
 import 'package:zenbu/pages/error_page.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:zenbu/components/global/item_card.dart';
 
 class DetailsPane extends StatefulWidget {
@@ -164,7 +164,14 @@ class _DetailsPaneState extends State<DetailsPane> {
                         itemBuilder: (context, index) {
                           return Padding(
                             padding: const EdgeInsets.only(right: 8.0),
-                            child: Chip(label: Text((genres + tags)[index])),
+                            child: Container(
+                              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: CupertinoColors.systemGrey5,
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Text((genres + tags)[index]),
+                            ),
                           );
                         },
                       ),
