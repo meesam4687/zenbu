@@ -30,8 +30,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  dynamic_color: ^1.6.6
-  animations: ^2.0.11
   http: ^1.4.0
   provider: ^6.1.5
   fluttertoast: ^9.0.0
@@ -57,10 +55,8 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
-  # The following line ensures that the Material Icons font is
-  # included with your application, so that you can use the icons in
-  # the material Icons class.
-  uses-material-design: true
+  # Note: Material design icons are not used in this Cupertino app
+  uses-material-design: false
 
   # To add assets to your application, add an assets section, like this:
   assets:
