@@ -1,6 +1,6 @@
 import 'package:zenbu/anilist_connector.dart';
 import 'package:zenbu/components/global/item_card.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:zenbu/components/anime_discovery_page/search_segment.dart';
 
 class SearchPage extends StatefulWidget {
@@ -66,17 +66,17 @@ class _SearchPageState extends State<SearchPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
+    return CupertinoPageScaffold(
+      navigationBar: CupertinoNavigationBar(
         automaticallyImplyLeading: false,
-        flexibleSpace: SearchSegment(searchText: widget.query),
-        toolbarHeight: 100,
+        middle: SearchSegment(searchText: widget.query),
       ),
-      body: (medias.isEmpty && _isLoading)
+      child: SafeArea(
+        child: (medias.isEmpty && _isLoading)
           ? const Center(
               child: Padding(
                 padding: EdgeInsets.all(8.0),
-                child: CircularProgressIndicator(),
+                child: CupertinoActivityIndicator(),
               ),
             )
           : (medias.isNotEmpty)
@@ -97,7 +97,7 @@ class _SearchPageState extends State<SearchPage> {
                           return const Center(
                             child: Padding(
                               padding: EdgeInsets.all(8.0),
-                              child: CircularProgressIndicator(),
+                              child: CupertinoActivityIndicator(),
                             ),
                           );
                         }
@@ -119,6 +119,7 @@ class _SearchPageState extends State<SearchPage> {
               ),
             )
           : Center(child: Text("No Results")),
+      ),
     );
   }
 }

@@ -1,7 +1,7 @@
 import 'package:zenbu/anilist_connector.dart';
 import 'package:zenbu/components/list_page/list_page_view.dart';
 import 'package:zenbu/pages/error_page.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 
 class ListPage extends StatefulWidget {
   const ListPage({super.key, required this.title, required this.mediaListType});
@@ -37,9 +37,10 @@ class _ListPageState extends State<ListPage> {
         : "mangaList";
     return DefaultTabController(
       length: 7,
-      child: Scaffold(
-        appBar: AppBar(title: Text(widget.title)),
-        body: Column(
+      child: CupertinoPageScaffold(
+        navigationBar: CupertinoNavigationBar(middle: Text(widget.title)),
+        child: SafeArea(
+          child: Column(
           children: [
             TabBar(
               tabAlignment: TabAlignment.start,
@@ -62,7 +63,7 @@ class _ListPageState extends State<ListPage> {
                     child: SizedBox(
                       width: double.infinity,
                       child: const Center(
-                        child: CircularProgressIndicator.adaptive(),
+                        child: CupertinoActivityIndicator(),
                       ),
                     ),
                   );
@@ -143,6 +144,7 @@ class _ListPageState extends State<ListPage> {
               },
             ),
           ],
+          ),
         ),
       ),
     );

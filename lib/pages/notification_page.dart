@@ -2,7 +2,7 @@ import 'package:provider/provider.dart';
 import 'package:zenbu/anilist_connector.dart';
 import 'package:zenbu/components/notification_page/notification_card.dart';
 import 'package:zenbu/pages/error_page.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:zenbu/state_provider.dart';
 
 class NotificationPage extends StatefulWidget {
@@ -84,15 +84,16 @@ class _NotificationPageState extends State<NotificationPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text("Notifications")),
-      body: _hasError
+    return CupertinoPageScaffold(
+      navigationBar: CupertinoNavigationBar(middle: Text("Notifications")),
+      child: SafeArea(
+        child: _hasError
           ? Error(reload: _reload)
           : (items.isEmpty)
           ? const Center(
               child: Padding(
                 padding: EdgeInsets.all(8.0),
-                child: CircularProgressIndicator(),
+                child: CupertinoActivityIndicator(),
               ),
             )
           : Container(
@@ -112,7 +113,7 @@ class _NotificationPageState extends State<NotificationPage> {
                           return const Center(
                             child: Padding(
                               padding: EdgeInsets.all(8.0),
-                              child: CircularProgressIndicator(),
+                              child: CupertinoActivityIndicator(),
                             ),
                           );
                         }
@@ -123,6 +124,7 @@ class _NotificationPageState extends State<NotificationPage> {
                 ],
               ),
             ),
+      ),
     );
   }
 }

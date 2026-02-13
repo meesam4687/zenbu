@@ -1,7 +1,7 @@
 import 'package:zenbu/anilist_connector.dart';
 import 'package:zenbu/components/global/item_card.dart';
 import 'package:zenbu/pages/error_page.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 
 enum PageType {
   trendingAnime,
@@ -102,15 +102,16 @@ class _EntireListViewState extends State<EntireListView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(widget.heading)),
-      body: _hasError
+    return CupertinoPageScaffold(
+      navigationBar: CupertinoNavigationBar(middle: Text(widget.heading)),
+      child: SafeArea(
+        child: _hasError
           ? Error(reload: _reload)
           : (medias.isEmpty)
           ? const Center(
               child: Padding(
                 padding: EdgeInsets.all(8.0),
-                child: CircularProgressIndicator(),
+                child: CupertinoActivityIndicator(),
               ),
             )
           : Container(
@@ -130,7 +131,7 @@ class _EntireListViewState extends State<EntireListView> {
                           return const Center(
                             child: Padding(
                               padding: EdgeInsets.all(8.0),
-                              child: CircularProgressIndicator(),
+                              child: CupertinoActivityIndicator(),
                             ),
                           );
                         }
@@ -151,6 +152,7 @@ class _EntireListViewState extends State<EntireListView> {
                 ],
               ),
             ),
+      ),
     );
   }
 }
