@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:zenbu/components/global/tags_genres_list.dart';
 
 class FilterSheet extends StatefulWidget {

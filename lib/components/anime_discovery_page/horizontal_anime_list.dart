@@ -1,7 +1,6 @@
 import 'package:zenbu/components/global/item_card.dart';
 import 'package:zenbu/pages/entire_list_view.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 
 class HorizontalAnimeList extends StatelessWidget {
   const HorizontalAnimeList({

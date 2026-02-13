@@ -1,6 +1,5 @@
 import 'package:zenbu/pages/manga_search_page.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 
 class SearchSegment extends StatelessWidget {
   const SearchSegment({super.key, this.searchText});
