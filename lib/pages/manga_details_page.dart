@@ -1,7 +1,7 @@
 import 'package:zenbu/anilist_connector.dart';
 import 'package:zenbu/components/manga_details_page/details_pane.dart';
 import 'package:zenbu/pages/error_page.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:zenbu/components/manga_details_page/title_pane.dart';
 
 class MangaDetailsPage extends StatefulWidget {
@@ -43,7 +43,7 @@ class _MangaDetailsPageState extends State<MangaDetailsPage> {
       future: mangaData,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator.adaptive());
+          return const Center(child: CupertinoActivityIndicator());
         }
         if (snapshot.hasError) {
           return ErrorPage(
@@ -56,14 +56,12 @@ class _MangaDetailsPageState extends State<MangaDetailsPage> {
           );
         }
         final data = snapshot.data!;
-        return Scaffold(
-          extendBodyBehindAppBar: true,
-          appBar: AppBar(
-            backgroundColor: (appBarOpacity == 0) ? Colors.transparent : null,
-            elevation: appBarOpacity > 0 ? 4 : 0,
-            scrolledUnderElevation: 0,
+        return CupertinoPageScaffold(
+          navigationBar: CupertinoNavigationBar(
+            backgroundColor: (appBarOpacity == 0) ? CupertinoColors.transparent : null,
+            border: appBarOpacity > 0 ? null : Border(),
           ),
-          body: SingleChildScrollView(
+          child: SingleChildScrollView(
             controller: _scrollController,
             child: Column(
               children: [

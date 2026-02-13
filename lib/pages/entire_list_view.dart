@@ -1,7 +1,7 @@
 import 'package:zenbu/anilist_connector.dart';
 import 'package:zenbu/components/global/item_card.dart';
 import 'package:zenbu/pages/error_page.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 
 enum PageType {
   trendingAnime,
@@ -102,55 +102,57 @@ class _EntireListViewState extends State<EntireListView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(widget.heading)),
-      body: _hasError
-          ? Error(reload: _reload)
-          : (medias.isEmpty)
-          ? const Center(
-              child: Padding(
-                padding: EdgeInsets.all(8.0),
-                child: CircularProgressIndicator(),
-              ),
-            )
-          : Container(
-              margin: EdgeInsets.only(left: 10, right: 10, top: 10),
-              child: Column(
-                children: [
-                  Expanded(
-                    child: GridView.builder(
-                      controller: _scrollController,
-                      gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                        childAspectRatio: 100 / 181,
-                        maxCrossAxisExtent: 180,
-                      ),
-                      itemCount: _isLoading ? medias.length + 1 : medias.length,
-                      itemBuilder: (context, index) {
-                        if (index == medias.length && _isLoading == true) {
-                          return const Center(
-                            child: Padding(
-                              padding: EdgeInsets.all(8.0),
-                              child: CircularProgressIndicator(),
-                            ),
+    return CupertinoPageScaffold(
+      navigationBar: CupertinoNavigationBar(middle: Text(widget.heading)),
+      child: SafeArea(
+        child: _hasError
+            ? Error(reload: _reload)
+            : (medias.isEmpty)
+            ? const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: CupertinoActivityIndicator(),
+                ),
+              )
+            : Container(
+                margin: EdgeInsets.only(left: 10, right: 10, top: 10),
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: GridView.builder(
+                        controller: _scrollController,
+                        gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                          childAspectRatio: 100 / 181,
+                          maxCrossAxisExtent: 180,
+                        ),
+                        itemCount: _isLoading ? medias.length + 1 : medias.length,
+                        itemBuilder: (context, index) {
+                          if (index == medias.length && _isLoading == true) {
+                            return const Center(
+                              child: Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: CupertinoActivityIndicator(),
+                              ),
+                            );
+                          }
+                          return ItemCard(
+                            title:
+                                ((medias[index]["title"]["romaji"] as String)
+                                        .length >
+                                    10)
+                                ? '${(medias[index]["title"]["romaji"] as String).substring(0, 10)}...'
+                                : medias[index]["title"]["romaji"] as String,
+                            image: medias[index]["coverImage"]["large"] as String,
+                            id: medias[index]["id"] as int,
+                            type: (medias[index]["type"] as String).toLowerCase(),
                           );
-                        }
-                        return ItemCard(
-                          title:
-                              ((medias[index]["title"]["romaji"] as String)
-                                      .length >
-                                  10)
-                              ? '${(medias[index]["title"]["romaji"] as String).substring(0, 10)}...'
-                              : medias[index]["title"]["romaji"] as String,
-                          image: medias[index]["coverImage"]["large"] as String,
-                          id: medias[index]["id"] as int,
-                          type: (medias[index]["type"] as String).toLowerCase(),
-                        );
-                      },
+                        },
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
+      ),
     );
   }
 }

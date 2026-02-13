@@ -1,6 +1,7 @@
 import 'package:zenbu/anilist_connector.dart';
 import 'package:zenbu/components/list_page/list_page_view.dart';
 import 'package:zenbu/pages/error_page.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class ListPage extends StatefulWidget {
@@ -37,36 +38,37 @@ class _ListPageState extends State<ListPage> {
         : "mangaList";
     return DefaultTabController(
       length: 7,
-      child: Scaffold(
-        appBar: AppBar(title: Text(widget.title)),
-        body: Column(
-          children: [
-            TabBar(
-              tabAlignment: TabAlignment.start,
-              isScrollable: true,
-              tabs: const [
-                Tab(text: "Current"),
-                Tab(text: "Planning"),
-                Tab(text: "Completed"),
-                Tab(text: "Repeating"),
-                Tab(text: "Paused"),
-                Tab(text: "Dropped"),
-                Tab(text: "All"),
-              ],
-            ),
-            FutureBuilder(
-              future: mediaLists,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Expanded(
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: const Center(
-                        child: CircularProgressIndicator.adaptive(),
+      child: CupertinoPageScaffold(
+        navigationBar: CupertinoNavigationBar(middle: Text(widget.title)),
+        child: SafeArea(
+          child: Column(
+            children: [
+              TabBar(
+                tabAlignment: TabAlignment.start,
+                isScrollable: true,
+                tabs: const [
+                  Tab(text: "Current"),
+                  Tab(text: "Planning"),
+                  Tab(text: "Completed"),
+                  Tab(text: "Repeating"),
+                  Tab(text: "Paused"),
+                  Tab(text: "Dropped"),
+                  Tab(text: "All"),
+                ],
+              ),
+              FutureBuilder(
+                future: mediaLists,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Expanded(
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: const Center(
+                          child: CupertinoActivityIndicator(),
+                        ),
                       ),
-                    ),
-                  );
-                }
+                    );
+                  }
                 if (snapshot.hasError) {
                   return Expanded(child: Error(reload: _reloadData));
                 }
@@ -140,9 +142,10 @@ class _ListPageState extends State<ListPage> {
                     ],
                   ),
                 );
-              },
-            ),
-          ],
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );

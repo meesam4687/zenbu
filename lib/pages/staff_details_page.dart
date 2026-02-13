@@ -3,7 +3,7 @@ import 'package:zenbu/components/character_details_page/character_description.da
 import 'package:zenbu/components/character_details_page/character_header.dart';
 import 'package:zenbu/components/character_details_page/character_relations.dart';
 import 'package:zenbu/pages/error_page.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 
 class StaffDetailsPage extends StatefulWidget {
   const StaffDetailsPage({super.key, required this.id});
@@ -28,7 +28,7 @@ class _StaffDetailsPageState extends State<StaffDetailsPage> {
       future: characterData,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator.adaptive());
+          return const Center(child: CupertinoActivityIndicator());
         }
         if (snapshot.hasError) {
           return ErrorPage(
@@ -46,30 +46,32 @@ class _StaffDetailsPageState extends State<StaffDetailsPage> {
             data["data"]["Staff"]["name"]["native"],
           ...((data["data"]["Staff"]["name"]["alternative"] as List)),
         ];
-        return Scaffold(
-          appBar: AppBar(),
-          body: SingleChildScrollView(
-            child: Column(
-              children: [
-                CharacterHeader(
-                  characterImage: data["data"]["Staff"]["image"]["large"],
-                  characterName: data["data"]["Staff"]["name"]["full"],
-                  characterSecondaryNames: (secondaryNames).join(', '),
-                ),
-                CharacterDescription(
-                  characterGender: (data["data"]["Staff"]["gender"] != null)
-                      ? data["data"]["Staff"]["gender"]
-                      : "N/A",
-                  characterDescription:
-                      (data["data"]["Staff"]["description"] != null)
-                      ? data["data"]["Staff"]["description"]
-                      : "",
-                ),
-                CharacterRelations(
-                  relations:
-                      data["data"]["Staff"]["staffMedia"]["nodes"] as List,
-                ),
-              ],
+        return CupertinoPageScaffold(
+          navigationBar: CupertinoNavigationBar(),
+          child: SafeArea(
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  CharacterHeader(
+                    characterImage: data["data"]["Staff"]["image"]["large"],
+                    characterName: data["data"]["Staff"]["name"]["full"],
+                    characterSecondaryNames: (secondaryNames).join(', '),
+                  ),
+                  CharacterDescription(
+                    characterGender: (data["data"]["Staff"]["gender"] != null)
+                        ? data["data"]["Staff"]["gender"]
+                        : "N/A",
+                    characterDescription:
+                        (data["data"]["Staff"]["description"] != null)
+                        ? data["data"]["Staff"]["description"]
+                        : "",
+                  ),
+                  CharacterRelations(
+                    relations:
+                        data["data"]["Staff"]["staffMedia"]["nodes"] as List,
+                  ),
+                ],
+              ),
             ),
           ),
         );
