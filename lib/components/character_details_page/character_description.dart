@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 
 String _stripMarkdown(String s) {
   var out = s.replaceAll(RegExp(r'__|\*\*|`'), '');

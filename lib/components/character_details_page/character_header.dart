@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 
 class CharacterHeader extends StatelessWidget {
@@ -20,8 +20,8 @@ class CharacterHeader extends StatelessWidget {
       width: double.infinity,
       child: Column(
         children: [
-          Card(
-            shape: RoundedRectangleBorder(
+          Container(
+            decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(18),
             ),
             clipBehavior: Clip.antiAlias,

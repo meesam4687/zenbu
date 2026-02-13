@@ -1,6 +1,6 @@
 import 'package:zenbu/pages/anime_details_page.dart';
 import 'package:zenbu/pages/manga_details_page.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:animations/animations.dart';
 
 class NotificationCard extends StatelessWidget {
@@ -27,72 +27,54 @@ class NotificationCard extends StatelessWidget {
       openElevation: 0,
       closedElevation: 0,
       transitionType: ContainerTransitionType.fadeThrough,
-      openColor: Theme.of(context).colorScheme.surface,
-      closedColor: Theme.of(context).colorScheme.surface,
+      openColor: CupertinoTheme.of(context).scaffoldBackgroundColor,
+      closedColor: CupertinoTheme.of(context).scaffoldBackgroundColor,
       closedShape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10),
       ),
       closedBuilder: (context, openContainer) {
         return Container(
           margin: EdgeInsets.all(5),
-          child: Stack(
-            children: [
-              SizedBox(
-                height: 250,
-                child: Card(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(10)),
-                    side: BorderSide(
-                      color: Theme.of(context).colorScheme.onSecondaryFixed,
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      SizedBox(
-                        height: 160,
-                        width: 110,
-                        child: Card(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(10)),
-                          ),
-                          elevation: 5,
-                          clipBehavior: Clip.antiAlias,
-                          child: Image.network(
-                            notificationData["media"]["coverImage"]["large"],
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) =>
-                                const Icon(Icons.error),
-                          ),
-                        ),
-                      ),
-                      SizedBox(
-                        width: 200,
-                        child: Text(
-                          notificationText,
-                          style: TextStyle(fontSize: 16),
-                        ),
-                      ),
-                    ],
-                  ),
+          child: GestureDetector(
+            onTap: openContainer,
+            child: Container(
+              height: 250,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.all(Radius.circular(10)),
+                border: Border.all(
+                  color: CupertinoColors.separator,
                 ),
               ),
-              Positioned.fill(
-                child: Padding(
-                  padding: EdgeInsetsGeometry.all(5),
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      borderRadius: BorderRadius.all(Radius.circular(10)),
-                      onTap: () {
-                        openContainer();
-                      },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    height: 160,
+                    width: 110,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(10)),
+                      ),
+                      clipBehavior: Clip.antiAlias,
+                      child: Image.network(
+                        notificationData["media"]["coverImage"]["large"],
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) =>
+                            const Icon(CupertinoIcons.exclamationmark_triangle),
+                      ),
                     ),
                   ),
-                ),
+                  SizedBox(
+                    width: 200,
+                    child: Text(
+                      notificationText,
+                      style: TextStyle(fontSize: 16),
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         );
       },
