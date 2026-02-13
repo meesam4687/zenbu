@@ -1,6 +1,6 @@
 import 'package:zenbu/components/anime_discovery_page/filter_sheet.dart';
 import 'package:zenbu/pages/anime_search_page.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 
 class SearchSegment extends StatelessWidget {
   const SearchSegment({super.key, this.searchText});
@@ -13,15 +13,7 @@ class SearchSegment extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: SearchBar(
-              leading: Container(
-                margin: EdgeInsets.only(left: 5, right: 5),
-                child: Icon(Icons.search),
-              ),
-              hintText: "Search...",
-              backgroundColor: WidgetStatePropertyAll(
-                Theme.of(context).colorScheme.onInverseSurface,
-              ),
+            child: CupertinoSearchTextField(
               controller: TextEditingController(text: (searchText) ?? ""),
               onSubmitted: (value) {
                 if (value.isNotEmpty) {
@@ -54,29 +46,29 @@ class SearchSegment extends StatelessWidget {
           ),
           Padding(
             padding: const EdgeInsets.only(left: 8.0),
-            child: FilledButton(
-              style: ButtonStyle(
-                elevation: WidgetStatePropertyAll(6),
-                backgroundColor: WidgetStatePropertyAll(
-                  Theme.of(context).colorScheme.onInverseSurface,
-                ),
-                foregroundColor: WidgetStatePropertyAll(
-                  Theme.of(context).colorScheme.onSurface,
-                ),
-                fixedSize: WidgetStatePropertyAll(Size(80, 56)),
-                overlayColor: WidgetStatePropertyAll(
-                  Theme.of(context).colorScheme.outlineVariant,
-                ),
-              ),
+            child: CupertinoButton.filled(
+              padding: EdgeInsets.zero,
+              minSize: 56,
               onPressed: () {
-                showModalBottomSheet(
+                showCupertinoModalPopup(
                   context: context,
                   builder: (context) {
-                    return FilterSheet();
+                    return Container(
+                      decoration: BoxDecoration(
+                        color: CupertinoTheme.of(context).scaffoldBackgroundColor,
+                        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                      ),
+                      child: FilterSheet(),
+                    );
                   },
                 );
               },
-              child: Icon(Icons.tune, size: 27),
+              child: Container(
+                width: 80,
+                height: 56,
+                alignment: Alignment.center,
+                child: Icon(CupertinoIcons.slider_horizontal_3, size: 27),
+              ),
             ),
           ),
         ],

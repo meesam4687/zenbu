@@ -1,5 +1,5 @@
 import 'package:zenbu/components/global/item_card.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 
 class ListPageView extends StatelessWidget {
   const ListPageView({super.key, required this.list, required this.mediaType});

@@ -1,6 +1,6 @@
 import 'package:zenbu/pages/anime_details_page.dart';
 import 'package:zenbu/pages/manga_details_page.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:animations/animations.dart';
 
 class NotificationCard extends StatelessWidget {
@@ -27,8 +27,8 @@ class NotificationCard extends StatelessWidget {
       openElevation: 0,
       closedElevation: 0,
       transitionType: ContainerTransitionType.fadeThrough,
-      openColor: Theme.of(context).colorScheme.surface,
-      closedColor: Theme.of(context).colorScheme.surface,
+      openColor: CupertinoTheme.of(context).scaffoldBackgroundColor,
+      closedColor: CupertinoTheme.of(context).scaffoldBackgroundColor,
       closedShape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10),
       ),
@@ -39,12 +39,20 @@ class NotificationCard extends StatelessWidget {
             children: [
               SizedBox(
                 height: 250,
-                child: Card(
-                  shape: RoundedRectangleBorder(
+                child: Container(
+                  decoration: BoxDecoration(
                     borderRadius: BorderRadius.all(Radius.circular(10)),
-                    side: BorderSide(
-                      color: Theme.of(context).colorScheme.onSecondaryFixed,
+                    border: Border.all(
+                      color: CupertinoColors.systemGrey,
                     ),
+                    color: CupertinoTheme.of(context).scaffoldBackgroundColor,
+                    boxShadow: [
+                      BoxShadow(
+                        color: CupertinoColors.systemGrey.withOpacity(0.3),
+                        blurRadius: 4,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -53,17 +61,24 @@ class NotificationCard extends StatelessWidget {
                       SizedBox(
                         height: 160,
                         width: 110,
-                        child: Card(
-                          shape: RoundedRectangleBorder(
+                        child: Container(
+                          decoration: BoxDecoration(
                             borderRadius: BorderRadius.all(Radius.circular(10)),
+                            color: CupertinoColors.systemGrey,
+                            boxShadow: [
+                              BoxShadow(
+                                color: CupertinoColors.systemGrey.withOpacity(0.4),
+                                blurRadius: 10,
+                                offset: Offset(0, 5),
+                              ),
+                            ],
                           ),
-                          elevation: 5,
                           clipBehavior: Clip.antiAlias,
                           child: Image.network(
                             notificationData["media"]["coverImage"]["large"],
                             fit: BoxFit.cover,
                             errorBuilder: (context, error, stackTrace) =>
-                                const Icon(Icons.error),
+                                const Icon(CupertinoIcons.exclamationmark_triangle),
                           ),
                         ),
                       ),
@@ -79,17 +94,10 @@ class NotificationCard extends StatelessWidget {
                 ),
               ),
               Positioned.fill(
-                child: Padding(
-                  padding: EdgeInsetsGeometry.all(5),
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      borderRadius: BorderRadius.all(Radius.circular(10)),
-                      onTap: () {
-                        openContainer();
-                      },
-                    ),
-                  ),
+                child: GestureDetector(
+                  onTap: () {
+                    openContainer();
+                  },
                 ),
               ),
             ],

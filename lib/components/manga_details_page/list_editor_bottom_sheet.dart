@@ -1,6 +1,6 @@
 import 'package:zenbu/anilist_connector.dart';
 import 'package:zenbu/state_provider.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 
 class ListEditorBottomSheet extends StatefulWidget {
@@ -90,20 +90,48 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                     "Status",
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
                   ),
-                  DropdownMenu(
-                    width: MediaQuery.of(context).size.width * 0.44,
-                    hintText: listStatusToText[widget.status],
-                    dropdownMenuEntries: [
-                      DropdownMenuEntry(value: "CURRENT", label: "Reading"),
-                      DropdownMenuEntry(value: "COMPLETED", label: "Completed"),
-                      DropdownMenuEntry(value: "PLANNING", label: "Planning"),
-                      DropdownMenuEntry(value: "DROPPED", label: "Dropped"),
-                      DropdownMenuEntry(value: "REPEATING", label: "Rereading"),
-                      DropdownMenuEntry(value: "PAUSED", label: "Paused"),
-                    ],
-                    onSelected: (value) {
-                      selectedStatus = value as String;
+                  GestureDetector(
+                    onTap: () {
+                      showCupertinoModalPopup(
+                        context: context,
+                        builder: (context) => Container(
+                          height: 250,
+                          color: CupertinoColors.systemBackground,
+                          child: CupertinoPicker(
+                            itemExtent: 32,
+                            onSelectedItemChanged: (index) {
+                              setState(() {
+                                selectedStatus = [
+                                  "CURRENT",
+                                  "COMPLETED",
+                                  "PLANNING",
+                                  "DROPPED",
+                                  "REPEATING",
+                                  "PAUSED"
+                                ][index];
+                              });
+                            },
+                            children: [
+                              Text("Reading"),
+                              Text("Completed"),
+                              Text("Planning"),
+                              Text("Dropped"),
+                              Text("Rereading"),
+                              Text("Paused"),
+                            ],
+                          ),
+                        ),
+                      );
                     },
+                    child: Container(
+                      width: MediaQuery.of(context).size.width * 0.44,
+                      padding: EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: CupertinoColors.systemGrey),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(listStatusToText[selectedStatus] ?? "Select"),
+                    ),
                   ),
                 ],
               ),
@@ -117,13 +145,10 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                   ),
                   SizedBox(
                     width: MediaQuery.of(context).size.width * 0.44,
-                    child: TextField(
+                    child: CupertinoTextField(
                       keyboardType: TextInputType.number,
                       controller: chaptersController,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        hint: Text(widget.progress.toString()),
-                      ),
+                      placeholder: widget.progress.toString(),
                     ),
                   ),
                 ],
@@ -141,8 +166,7 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                     "Start Date",
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
                   ),
-                  InkWell(
-                    borderRadius: BorderRadius.circular(4),
+                  GestureDetector(
                     child: SizedBox(
                       width: MediaQuery.of(context).size.width * 0.44,
                       height: 55,
@@ -150,8 +174,8 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                         alignment: Alignment.centerLeft,
                         padding: EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey),
-                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(color: CupertinoColors.systemGrey),
+                          borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
                           startDateString as String,
@@ -190,8 +214,7 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                     "End Date",
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
                   ),
-                  InkWell(
-                    borderRadius: BorderRadius.circular(4),
+                  GestureDetector(
                     child: SizedBox(
                       width: MediaQuery.of(context).size.width * 0.44,
                       height: 55,
@@ -199,8 +222,8 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                         alignment: Alignment.centerLeft,
                         padding: EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey),
-                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(color: CupertinoColors.systemGrey),
+                          borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
                           endDateString as String,
@@ -246,13 +269,10 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                   ),
                   SizedBox(
                     width: MediaQuery.of(context).size.width * 0.44,
-                    child: TextField(
+                    child: CupertinoTextField(
                       keyboardType: TextInputType.number,
                       controller: scoreController,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        hint: Text(widget.score.toString()),
-                      ),
+                      placeholder: widget.score.toString(),
                     ),
                   ),
                 ],
@@ -267,13 +287,10 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                   ),
                   SizedBox(
                     width: MediaQuery.of(context).size.width * 0.44,
-                    child: TextField(
+                    child: CupertinoTextField(
                       controller: rewatchController,
                       keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        hint: Text(widget.repeatCount.toString()),
-                      ),
+                      placeholder: widget.repeatCount.toString(),
                     ),
                   ),
                 ],
@@ -282,7 +299,7 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
           ),
           SizedBox(
             width: double.infinity,
-            child: FilledButton.icon(
+            child: CupertinoButton.filled(
               onPressed: isLoading
                   ? null
                   : () async {
@@ -348,17 +365,27 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                         isLoading = false;
                       });
                     },
-              icon: isLoading
-                  ? SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        color: Colors.white,
-                        strokeWidth: 2,
-                      ),
+              child: isLoading
+                  ? Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CupertinoActivityIndicator(),
+                        ),
+                        SizedBox(width: 8),
+                        Text("Loading..."),
+                      ],
                     )
-                  : Icon(Icons.check),
-              label: isLoading ? Text(" Loading...") : Text("Save"),
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(CupertinoIcons.check_mark),
+                        SizedBox(width: 8),
+                        Text("Save"),
+                      ],
+                    ),
             ),
           ),
         ],

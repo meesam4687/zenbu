@@ -3,7 +3,7 @@ import 'package:zenbu/pages/character_details_page.dart';
 import 'package:zenbu/pages/manga_details_page.dart';
 import 'package:zenbu/pages/staff_details_page.dart';
 import 'package:animations/animations.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 
 class ItemCard extends StatelessWidget {
   const ItemCard({
@@ -26,52 +26,57 @@ class ItemCard extends StatelessWidget {
       openElevation: 0,
       closedElevation: 0,
       transitionType: ContainerTransitionType.fadeThrough,
-      openColor: Theme.of(context).colorScheme.surface,
-      closedColor: Theme.of(context).colorScheme.surface,
+      openColor: CupertinoTheme.of(context).scaffoldBackgroundColor,
+      closedColor: CupertinoTheme.of(context).scaffoldBackgroundColor,
       closedShape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10),
       ),
       closedBuilder: (context, openContainer) {
         return GestureDetector(
           onTap: openContainer,
-          child: Material(
-            child: Ink(
-              height: 260,
-              width: 126.41,
-              child: Column(
-                children: [
-                  Card(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    clipBehavior: Clip.antiAlias,
-                    child: Ink.image(
-                      image: NetworkImage(image as String),
-                      height: 180,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                      child: InkWell(onTap: openContainer),
-                    ),
+          child: SizedBox(
+            height: 260,
+            width: 126.41,
+            child: Column(
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: CupertinoColors.systemGrey,
+                    boxShadow: [
+                      BoxShadow(
+                        color: CupertinoColors.systemGrey.withOpacity(0.3),
+                        blurRadius: 4,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    title as String,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
+                  clipBehavior: Clip.antiAlias,
+                  child: Image.network(
+                    image as String,
+                    height: 180,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
                   ),
-                  (state != null)
-                      ? Text(
-                          state as String,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(fontWeight: FontWeight.w200),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        )
-                      : Container(),
-                ],
-              ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  title as String,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                (state != null)
+                    ? Text(
+                        state as String,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontWeight: FontWeight.w200),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      )
+                    : Container(),
+              ],
             ),
           ),
         );

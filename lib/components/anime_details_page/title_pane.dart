@@ -1,6 +1,6 @@
 import 'dart:ui';
 import 'package:zenbu/components/anime_details_page/list_editor_bottom_sheet.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 
 class TitlePane extends StatefulWidget {
@@ -58,22 +58,22 @@ class _TitlePaneState extends State<TitlePane> {
 
   @override
   Widget build(BuildContext context) {
-    final surfaceColor = Theme.of(context).colorScheme.surface;
+    final surfaceColor = CupertinoTheme.of(context).scaffoldBackgroundColor;
     List<Widget> elementList = [];
     if (mediaState == 'CURRENT') {
-      elementList = [Icon(Icons.edit), Text(" Watching")];
+      elementList = [Icon(CupertinoIcons.pencil), Text(" Watching")];
     } else if (mediaState == 'COMPLETED') {
-      elementList = [Icon(Icons.check), Text(" Completed")];
+      elementList = [Icon(CupertinoIcons.check_mark), Text(" Completed")];
     } else if (mediaState == 'PLANNING') {
-      elementList = [Icon(Icons.schedule), Text(" Planning")];
+      elementList = [Icon(CupertinoIcons.time), Text(" Planning")];
     } else if (mediaState == 'DROPPED') {
-      elementList = [Icon(Icons.cancel), Text(" Dropped")];
+      elementList = [Icon(CupertinoIcons.xmark_circle), Text(" Dropped")];
     } else if (mediaState == 'PAUSED') {
-      elementList = [Icon(Icons.pause), Text(" Paused")];
+      elementList = [Icon(CupertinoIcons.pause), Text(" Paused")];
     } else if (mediaState == 'REPEATING') {
-      elementList = [Icon(Icons.loop), Text(" Rewatching")];
+      elementList = [Icon(CupertinoIcons.repeat), Text(" Rewatching")];
     } else {
-      elementList = [Icon(Icons.add), Text(" Add to List")];
+      elementList = [Icon(CupertinoIcons.add), Text(" Add to List")];
     }
     return SizedBox(
       height: 350,
@@ -91,7 +91,7 @@ class _TitlePaneState extends State<TitlePane> {
                     ),
                   ),
           ),
-          Scaffold(backgroundColor: surfaceColor.withAlpha(120)),
+          Container(color: surfaceColor.withAlpha(120)),
           Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -114,9 +114,17 @@ class _TitlePaneState extends State<TitlePane> {
                       ),
                       height: 180,
                       width: 127.38,
-                      child: Card(
-                        shape: RoundedRectangleBorder(
+                      child: Container(
+                        decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(10),
+                          color: CupertinoColors.systemGrey,
+                          boxShadow: [
+                            BoxShadow(
+                              color: CupertinoColors.systemGrey.withOpacity(0.3),
+                              blurRadius: 4,
+                              offset: Offset(0, 2),
+                            ),
+                          ],
                         ),
                         clipBehavior: Clip.antiAlias,
                         child: Image.network(
@@ -159,35 +167,40 @@ class _TitlePaneState extends State<TitlePane> {
                 Container(
                   width: double.infinity,
                   margin: EdgeInsets.only(left: 12, right: 12, top: 10),
-                  child: FilledButton(
+                  child: CupertinoButton.filled(
                     onPressed: () {
-                      showModalBottomSheet(
+                      showCupertinoModalPopup(
                         context: context,
-                        isScrollControlled: true,
                         builder: (context) {
-                          return Padding(
-                            padding: EdgeInsets.only(
-                              bottom: MediaQuery.of(context).viewInsets.bottom,
+                          return Container(
+                            decoration: BoxDecoration(
+                              color: CupertinoTheme.of(context).scaffoldBackgroundColor,
+                              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
                             ),
-                            child: ListEditorBottomSheet(
-                              status: mediaListEntry?["status"] ?? "NONE",
-                              progress: mediaListEntry?["progress"] ?? 0,
-                              startDate:
-                                  (mediaListEntry?["startedAt"]?["day"] == null)
-                                  ? {"day": -1}
-                                  : mediaListEntry?["startedAt"] ?? {"day": -1},
-                              endDate:
-                                  (mediaListEntry?["completedAt"]?["day"] ==
-                                      null)
-                                  ? {"day": -1}
-                                  : mediaListEntry?["completedAt"] ??
-                                        {"day": -1},
-                              score: (mediaListEntry?["score"] is int)
-                                  ? (mediaListEntry?["score"] as int).toDouble()
-                                  : mediaListEntry?["score"] ?? 0.0,
-                              repeatCount: mediaListEntry?["repeat"] ?? 0,
-                              mediaId: widget.id,
-                              onUpdate: updateMediaDetails,
+                            child: Padding(
+                              padding: EdgeInsets.only(
+                                bottom: MediaQuery.of(context).viewInsets.bottom,
+                              ),
+                              child: ListEditorBottomSheet(
+                                status: mediaListEntry?["status"] ?? "NONE",
+                                progress: mediaListEntry?["progress"] ?? 0,
+                                startDate:
+                                    (mediaListEntry?["startedAt"]?["day"] == null)
+                                    ? {"day": -1}
+                                    : mediaListEntry?["startedAt"] ?? {"day": -1},
+                                endDate:
+                                    (mediaListEntry?["completedAt"]?["day"] ==
+                                        null)
+                                    ? {"day": -1}
+                                    : mediaListEntry?["completedAt"] ??
+                                          {"day": -1},
+                                score: (mediaListEntry?["score"] is int)
+                                    ? (mediaListEntry?["score"] as int).toDouble()
+                                    : mediaListEntry?["score"] ?? 0.0,
+                                repeatCount: mediaListEntry?["repeat"] ?? 0,
+                                mediaId: widget.id,
+                                onUpdate: updateMediaDetails,
+                              ),
                             ),
                           );
                         },
@@ -195,8 +208,12 @@ class _TitlePaneState extends State<TitlePane> {
                     },
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      spacing: 5,
-                      children: elementList,
+                      children: [
+                        ...elementList.map((w) => Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 2.5),
+                          child: w,
+                        )),
+                      ],
                     ),
                   ),
                 ),

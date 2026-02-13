@@ -1,7 +1,7 @@
 import 'package:zenbu/anilist_connector.dart';
 import 'package:zenbu/components/anime_details_page/details.dart';
 import 'package:zenbu/pages/error_page.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:zenbu/components/global/item_card.dart';
 
 class DetailsPane extends StatefulWidget {
@@ -40,7 +40,7 @@ class _DetailsPaneState extends State<DetailsPane> {
       future: animeData,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator.adaptive());
+          return const Center(child: CupertinoActivityIndicator());
         }
         if (snapshot.hasError) {
           return ErrorPage(

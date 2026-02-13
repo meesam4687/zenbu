@@ -1,5 +1,5 @@
 import 'package:zenbu/pages/list_page.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:zenbu/components/global/item_card.dart';
 
 class AnimeList extends StatelessWidget {
@@ -27,14 +27,11 @@ class AnimeList extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text("Currently Watching", style: TextStyle(fontSize: 20)),
-                  MaterialButton(
-                    padding: EdgeInsets.only(left: 10, right: 10),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(100)),
-                    ),
+                  CupertinoButton(
+                    padding: EdgeInsets.symmetric(horizontal: 10),
                     onPressed: () {
                       Navigator.of(context).push(
-                        MaterialPageRoute(
+                        CupertinoPageRoute(
                           builder: (context) {
                             return const ListPage(
                               title: "Anime List",
@@ -46,7 +43,7 @@ class AnimeList extends StatelessWidget {
                     },
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [Text('View All  '), Icon(Icons.arrow_forward)],
+                      children: [Text('View All  '), Icon(CupertinoIcons.arrow_right)],
                     ),
                   ),
                 ],
