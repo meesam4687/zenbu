@@ -1,6 +1,6 @@
 import 'package:zenbu/pages/entire_list_view.dart';
 import 'package:zenbu/pages/error_page.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:zenbu/anilist_connector.dart';
 import 'package:zenbu/state_provider.dart';
 import 'package:zenbu/components/global/banner.dart';
@@ -39,15 +39,18 @@ class _MangaDiscoveryPageState extends State<MangaDiscoveryPage> {
   @override
   Widget build(BuildContext context) {
     Map providerData = Provider.of<StateProvider>(context).mangaDiscoveryData;
-    return Scaffold(
-      appBar: AppBar(flexibleSpace: SearchSegment(), toolbarHeight: 100),
-      body: (providerData.isEmpty)
+    return CupertinoPageScaffold(
+      navigationBar: CupertinoNavigationBar(
+        middle: SearchSegment(),
+      ),
+      child: SafeArea(
+        child: (providerData.isEmpty)
           ? FutureBuilder(
               future: data,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(
-                    child: CircularProgressIndicator.adaptive(),
+                    child: CupertinoActivityIndicator(),
                   );
                 }
                 if (snapshot.hasError) {
@@ -181,6 +184,7 @@ class _MangaDiscoveryPageState extends State<MangaDiscoveryPage> {
                 ],
               ),
             ),
+      ),
     );
   }
 }
