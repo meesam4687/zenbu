@@ -41,7 +41,7 @@ class _MangaDiscoveryPageState extends State<MangaDiscoveryPage> {
     Map providerData = Provider.of<StateProvider>(context).mangaDiscoveryData;
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
-        middle: SearchSegment(),
+        middle: Text("Manga Discovery"),
       ),
       child: SafeArea(
         child: (providerData.isEmpty)
@@ -66,6 +66,7 @@ class _MangaDiscoveryPageState extends State<MangaDiscoveryPage> {
                 return SingleChildScrollView(
                   child: Column(
                     children: [
+                      SearchSegment(),
                       SizedBox(
                         height: 240,
                         child: PageView.builder(
@@ -127,6 +128,7 @@ class _MangaDiscoveryPageState extends State<MangaDiscoveryPage> {
           : SingleChildScrollView(
               child: Column(
                 children: [
+                  SearchSegment(),
                   SizedBox(
                     height: 240,
                     child: PageView.builder(
