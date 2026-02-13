@@ -67,58 +67,64 @@ class _SearchPageState extends State<SearchPage> {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      navigationBar: CupertinoNavigationBar(
+      navigationBar: const CupertinoNavigationBar(
         automaticallyImplyLeading: false,
-        middle: SearchSegment(searchText: widget.query),
       ),
       child: SafeArea(
-        child: (medias.isEmpty && _isLoading)
-          ? const Center(
-              child: Padding(
-                padding: EdgeInsets.all(8.0),
-                child: CupertinoActivityIndicator(),
-              ),
-            )
-          : (medias.isNotEmpty)
-          ? Container(
-              margin: EdgeInsets.only(left: 10, right: 10, top: 10),
-              child: Column(
-                children: [
-                  Expanded(
-                    child: GridView.builder(
-                      controller: _scrollController,
-                      gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                        childAspectRatio: 100 / 181,
-                        maxCrossAxisExtent: 180,
-                      ),
-                      itemCount: _isLoading ? medias.length + 1 : medias.length,
-                      itemBuilder: (context, index) {
-                        if (index == medias.length && _isLoading == true) {
-                          return const Center(
-                            child: Padding(
-                              padding: EdgeInsets.all(8.0),
-                              child: CupertinoActivityIndicator(),
-                            ),
-                          );
-                        }
-                        return ItemCard(
-                          title:
-                              ((medias[index]["title"]["romaji"] as String)
-                                      .length >
-                                  10)
-                              ? '${(medias[index]["title"]["romaji"] as String).substring(0, 10)}...'
-                              : medias[index]["title"]["romaji"] as String,
-                          image: medias[index]["coverImage"]["large"] as String,
-                          id: medias[index]["id"] as int,
-                          type: (medias[index]["type"] as String).toLowerCase(),
-                        );
-                      },
+        child: Column(
+          children: [
+            SearchSegment(searchText: widget.query),
+            Expanded(
+              child: (medias.isEmpty && _isLoading)
+                ? const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: CupertinoActivityIndicator(),
                     ),
-                  ),
-                ],
-              ),
-            )
-          : Center(child: Text("No Results")),
+                  )
+                : (medias.isNotEmpty)
+                ? Container(
+                    margin: EdgeInsets.only(left: 10, right: 10, top: 10),
+                    child: Column(
+                      children: [
+                        Expanded(
+                          child: GridView.builder(
+                            controller: _scrollController,
+                            gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                              childAspectRatio: 100 / 181,
+                              maxCrossAxisExtent: 180,
+                            ),
+                            itemCount: _isLoading ? medias.length + 1 : medias.length,
+                            itemBuilder: (context, index) {
+                              if (index == medias.length && _isLoading == true) {
+                                return const Center(
+                                  child: Padding(
+                                    padding: EdgeInsets.all(8.0),
+                                    child: CupertinoActivityIndicator(),
+                                  ),
+                                );
+                              }
+                              return ItemCard(
+                                title:
+                                    ((medias[index]["title"]["romaji"] as String)
+                                            .length >
+                                        10)
+                                    ? '${(medias[index]["title"]["romaji"] as String).substring(0, 10)}...'
+                                    : medias[index]["title"]["romaji"] as String,
+                                image: medias[index]["coverImage"]["large"] as String,
+                                id: medias[index]["id"] as int,
+                                type: (medias[index]["type"] as String).toLowerCase(),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : Center(child: Text("No Results")),
+            ),
+          ],
+        ),
       ),
     );
   }
