@@ -1,8 +1,7 @@
 import 'package:zenbu/pages/anime_discovery_page.dart';
 import 'package:zenbu/pages/home_page.dart';
 import 'package:zenbu/pages/manga_discovery_page.dart';
-import 'package:flutter/material.dart';
-import 'package:animations/animations.dart';
+import 'package:flutter/cupertino.dart';
 
 class MainPageView extends StatefulWidget {
   const MainPageView({super.key});
@@ -10,8 +9,6 @@ class MainPageView extends StatefulWidget {
   @override
   State<MainPageView> createState() => _MainPageState();
 }
-
-List<Widget> pages = [AnimeDiscoveryPage(), HomePage(), MangaDiscoveryPage()];
 
 class _MainPageState extends State<MainPageView> {
   late int selectedIdx;
@@ -23,34 +20,41 @@ class _MainPageState extends State<MainPageView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      bottomNavigationBar: NavigationBar(
-        surfaceTintColor: Theme.of(context).colorScheme.surfaceTint,
-        selectedIndex: selectedIdx,
-        onDestinationSelected: (value) {
+    return CupertinoTabScaffold(
+      tabBar: CupertinoTabBar(
+        currentIndex: selectedIdx,
+        onTap: (value) {
           setState(() {
             selectedIdx = value;
           });
         },
-        destinations: [
-          NavigationDestination(
-            icon: Icon(Icons.video_collection),
+        items: [
+          BottomNavigationBarItem(
+            icon: Icon(CupertinoIcons.film),
             label: "Anime",
           ),
-          NavigationDestination(icon: Icon(Icons.home), label: "Home"),
-          NavigationDestination(icon: Icon(Icons.book_rounded), label: "Manga"),
+          BottomNavigationBarItem(
+            icon: Icon(CupertinoIcons.home),
+            label: "Home",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(CupertinoIcons.book),
+            label: "Manga",
+          ),
         ],
       ),
-      body: PageTransitionSwitcher(
-        duration: Duration(milliseconds: 400),
-        transitionBuilder: (child, animation, secondaryAnimation) =>
-            FadeThroughTransition(
-              animation: animation,
-              secondaryAnimation: secondaryAnimation,
-              child: child,
-            ),
-        child: pages[selectedIdx],
-      ),
+      tabBuilder: (context, index) {
+        switch (index) {
+          case 0:
+            return AnimeDiscoveryPage();
+          case 1:
+            return HomePage();
+          case 2:
+            return MangaDiscoveryPage();
+          default:
+            return HomePage();
+        }
+      },
     );
   }
 }
