@@ -59,7 +59,7 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage> {
         return CupertinoPageScaffold(
           navigationBar: CupertinoNavigationBar(
             backgroundColor: (appBarOpacity == 0) ? CupertinoColors.transparent : null,
-            border: appBarOpacity > 0 ? null : Border(),
+            border: appBarOpacity > 0 ? null : const Border(),
           ),
           child: SingleChildScrollView(
             controller: _scrollController,
