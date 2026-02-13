@@ -2,6 +2,7 @@ import 'package:zenbu/anilist_connector.dart';
 import 'package:zenbu/components/list_page/list_page_view.dart';
 import 'package:zenbu/pages/error_page.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 class ListPage extends StatefulWidget {
   const ListPage({super.key, required this.title, required this.mediaListType});
