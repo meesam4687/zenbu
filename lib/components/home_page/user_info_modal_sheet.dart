@@ -42,7 +42,7 @@ class UserInfoModalSheet extends StatelessWidget {
                     ),
                   ),
                 ),
-                Padding(padding: EdgeInsetsGeometry.all(10)),
+                Padding(padding: EdgeInsets.all(10)),
                 Text(
                   username,
                   style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
@@ -50,7 +50,7 @@ class UserInfoModalSheet extends StatelessWidget {
               ],
             ),
           ),
-          Padding(padding: EdgeInsetsGeometry.all(15)),
+          Padding(padding: EdgeInsets.all(15)),
           CupertinoButton(
             padding: EdgeInsets.zero,
             onPressed: () {
@@ -66,7 +66,7 @@ class UserInfoModalSheet extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Icon(CupertinoIcons.bell),
-                  Padding(padding: EdgeInsetsGeometry.only(left: 20)),
+                  Padding(padding: EdgeInsets.only(left: 20)),
                   Text("Notifications", style: TextStyle(fontSize: 18)),
                 ],
               ),
@@ -125,7 +125,7 @@ class UserInfoModalSheet extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Icon(CupertinoIcons.square_arrow_right),
-                  Padding(padding: EdgeInsetsGeometry.only(left: 20)),
+                  Padding(padding: EdgeInsets.only(left: 20)),
                   Text("Logout", style: TextStyle(fontSize: 18)),
                 ],
               ),
