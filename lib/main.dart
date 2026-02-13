@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:zenbu/state_provider.dart';
@@ -16,9 +16,7 @@ void main() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  static final defaultColorScheme = ColorScheme.fromSeed(
-    seedColor: Colors.deepPurple,
-  );
+  static const defaultPrimaryColor = CupertinoColors.systemPurple;
 
   @override
   Widget build(BuildContext context) {
@@ -28,21 +26,19 @@ class MyApp extends StatelessWidget {
       },
       child: DynamicColorBuilder(
         builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
-          ColorScheme lightScheme = lightDynamic ?? defaultColorScheme;
-          ColorScheme darkScheme =
-              darkDynamic ??
-              ColorScheme.fromSeed(
-                seedColor: Colors.deepPurple,
-                brightness: Brightness.dark,
-              );
+          // Extract primary color from dynamic color if available
+          final primaryColor = lightDynamic?.primary != null 
+              ? Color(lightDynamic!.primary.value) 
+              : defaultPrimaryColor;
 
-          return MaterialApp(
+          return CupertinoApp(
             debugShowCheckedModeBanner: false,
             title: 'Zenbu',
-            theme: ThemeData(colorScheme: lightScheme, useMaterial3: true),
-            darkTheme: ThemeData(colorScheme: darkScheme, useMaterial3: true),
-            themeMode: ThemeMode.system,
-            home: (token == null) ? AuthenticationPage() : MainPageView(),
+            theme: CupertinoThemeData(
+              primaryColor: primaryColor,
+              brightness: Brightness.light,
+            ),
+            home: (token == null) ? const AuthenticationPage() : const MainPageView(),
           );
         },
       ),

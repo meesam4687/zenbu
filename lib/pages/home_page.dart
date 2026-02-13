@@ -1,6 +1,6 @@
 import 'package:zenbu/components/home_page/user_info_modal_sheet.dart';
 import 'package:zenbu/pages/error_page.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 import 'package:zenbu/anilist_connector.dart';
 import 'package:zenbu/state_provider.dart';
@@ -54,41 +54,36 @@ class _HomePageState extends State<HomePage> {
           ? providerData["data"]["mangaList"]["lists"][1]["entries"]
           : [];
     }
-    return Scaffold(
-      appBar: AppBar(
-        toolbarHeight: 60,
-        title: const Text("Home"),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 5),
-            child: IconButton(
-              onPressed: () {
-                if (providerData.isNotEmpty) {
-                  showModalBottomSheet(
-                    context: context,
-                    builder: (context) {
-                      return UserInfoModalSheet(
-                        profileImage:
-                            providerData['data']['Viewer']['avatar']['large'],
-                        username: providerData['data']['Viewer']['name'],
-                        userId: providerData['data']['Viewer']['id'],
-                      );
-                    },
-                  );
-                }
-              },
-              icon: Badge(
-                isLabelVisible: (providerData.isNotEmpty)
-                    ? (providerData["data"]["Viewer"]["unreadNotificationCount"] >
-                          0)
-                    : false,
-                smallSize: 12,
-                child: Container(
+    return CupertinoPageScaffold(
+      navigationBar: CupertinoNavigationBar(
+        middle: const Text("Home"),
+        trailing: Padding(
+          padding: const EdgeInsets.only(right: 5),
+          child: CupertinoButton(
+            padding: EdgeInsets.zero,
+            onPressed: () {
+              if (providerData.isNotEmpty) {
+                showCupertinoModalPopup(
+                  context: context,
+                  builder: (context) {
+                    return UserInfoModalSheet(
+                      profileImage:
+                          providerData['data']['Viewer']['avatar']['large'],
+                      username: providerData['data']['Viewer']['name'],
+                      userId: providerData['data']['Viewer']['id'],
+                    );
+                  },
+                );
+              }
+            },
+            child: Stack(
+              children: [
+                Container(
                   decoration: BoxDecoration(
                     border: Border.all(
-                      color: Theme.of(context).colorScheme.onSecondary,
+                      color: CupertinoColors.systemGrey,
                     ),
-                    borderRadius: BorderRadius.all(Radius.circular(360)),
+                    borderRadius: const BorderRadius.all(Radius.circular(360)),
                   ),
                   child: ClipOval(
                     child: (providerData.isEmpty)
@@ -100,14 +95,14 @@ class _HomePageState extends State<HomePage> {
                                 return const SizedBox(
                                   height: 40,
                                   width: 40,
-                                  child: Icon(Icons.face),
+                                  child: Icon(CupertinoIcons.person),
                                 );
                               }
                               if (snapshot.hasError) {
                                 return const SizedBox(
                                   height: 40,
                                   width: 40,
-                                  child: Icon(Icons.face),
+                                  child: Icon(CupertinoIcons.person),
                                 );
                               }
                               final data = snapshot.data!;
@@ -131,18 +126,32 @@ class _HomePageState extends State<HomePage> {
                           ),
                   ),
                 ),
-              ),
+                if (providerData.isNotEmpty &&
+                    providerData["data"]["Viewer"]["unreadNotificationCount"] > 0)
+                  Positioned(
+                    right: 0,
+                    top: 0,
+                    child: Container(
+                      width: 12,
+                      height: 12,
+                      decoration: const BoxDecoration(
+                        color: CupertinoColors.systemRed,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ),
-        ],
+        ),
       ),
-      body: (providerData.isEmpty)
+      child: (providerData.isEmpty)
           ? FutureBuilder(
               future: alData,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(
-                    child: CircularProgressIndicator.adaptive(),
+                    child: CupertinoActivityIndicator(),
                   );
                 }
                 if (snapshot.hasError) {

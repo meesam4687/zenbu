@@ -1,5 +1,5 @@
 import 'package:zenbu/main_page_view.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:app_links/app_links.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -31,7 +31,7 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
       await TokenStorage.saveTokens(accessToken: authToken);
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => MainPageView()),
+        CupertinoPageRoute(builder: (context) => const MainPageView()),
       );
     });
   }
@@ -44,23 +44,23 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
+    return CupertinoPageScaffold(
+      child: Center(
         child: SizedBox(
           width: 150,
           height: 200,
           child: Column(
             children: [
-              Text(
+              const Text(
                 "Zenbu",
                 style: TextStyle(fontSize: 50, fontWeight: FontWeight.w100),
               ),
-              Text(
+              const Text(
                 "*insert some line here*",
                 style: TextStyle(fontWeight: FontWeight.w200),
               ),
-              Padding(padding: EdgeInsetsGeometry.all(10)),
-              FilledButton(
+              const Padding(padding: EdgeInsets.all(10)),
+              CupertinoButton.filled(
                 onPressed: () {
                   final uri = Uri.tryParse(
                     'https://anilist.co/api/v2/oauth/authorize?client_id=29014&response_type=token',
@@ -69,20 +69,20 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
                     launchUrl(uri, mode: LaunchMode.externalApplication);
                   }
                 },
-                style: ButtonStyle(
-                  padding: WidgetStatePropertyAll(EdgeInsets.all(20)),
-                  minimumSize: WidgetStatePropertyAll(Size.fromHeight(10)),
-                ),
+                padding: const EdgeInsets.all(20),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text("Login with", style: TextStyle(fontSize: 16)),
-                    Padding(padding: EdgeInsetsGeometry.all(2)),
+                    const Text("Login with", style: TextStyle(fontSize: 16)),
+                    const Padding(padding: EdgeInsets.all(2)),
                     SvgPicture.asset(
                       'assets/alLogo.svg',
                       width: 18,
                       height: 18,
-                      color: Theme.of(context).colorScheme.onSecondary,
+                      colorFilter: const ColorFilter.mode(
+                        CupertinoColors.white,
+                        BlendMode.srcIn,
+                      ),
                     ),
                   ],
                 ),
