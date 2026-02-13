@@ -1,7 +1,7 @@
 import 'package:zenbu/anilist_connector.dart';
 import 'package:zenbu/components/anime_details_page/details_pane.dart';
 import 'package:zenbu/pages/error_page.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:zenbu/components/anime_details_page/title_pane.dart';
 
 class AnimeDetailsPage extends StatefulWidget {
@@ -43,7 +43,7 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage> {
       future: animeData,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator.adaptive());
+          return const Center(child: CupertinoActivityIndicator());
         }
         if (snapshot.hasError) {
           return ErrorPage(
@@ -56,37 +56,38 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage> {
           );
         }
         final data = snapshot.data!;
-        return Scaffold(
-          extendBodyBehindAppBar: true,
-          appBar: AppBar(
-            backgroundColor: (appBarOpacity == 0) ? Colors.transparent : null,
-            elevation: appBarOpacity > 0 ? 4 : 0,
-            scrolledUnderElevation: 0,
+        return CupertinoPageScaffold(
+          navigationBar: CupertinoNavigationBar(
+            backgroundColor: (appBarOpacity == 0) ? CupertinoColors.transparent : null,
+            border: appBarOpacity > 0 ? null : const Border(),
           ),
-          body: SingleChildScrollView(
-            controller: _scrollController,
-            child: Column(
-              children: [
-                TitlePane(
-                  id: widget.id as int,
-                  totalEpisodes: (data["data"]["Media"]["episodes"] == null)
-                      ? '?'
-                      : data["data"]["Media"]["episodes"].toString(),
-                  title:
-                      (data["data"]["Media"]["title"]["romaji"] as String),
-                  progress:
-                      "Progress: ${(data["data"]["Media"]["mediaListEntry"] != null) ? data["data"]["Media"]["mediaListEntry"]["progress"] : "0"}/${(data["data"]["Media"]["episodes"] == null) ? '?' : data["data"]["Media"]["episodes"]}",
-                  cover: data["data"]["Media"]["coverImage"]["extraLarge"],
-                  banner: data["data"]["Media"]["bannerImage"],
-                  mediaState: (data["data"]["Media"]["mediaListEntry"] != null)
-                      ? data["data"]["Media"]["mediaListEntry"]["status"] ??
-                            'NONE'
-                      : 'NONE',
-                  mediaListEntry: data["data"]["Media"]["mediaListEntry"],
-                  fullTitle: data["data"]["Media"]["title"]["romaji"] as String,
-                ),
-                DetailsPane(mediaId: widget.id as int),
-              ],
+          child: SafeArea(
+            top: false,
+            child: SingleChildScrollView(
+              controller: _scrollController,
+              child: Column(
+                children: [
+                  TitlePane(
+                    id: widget.id as int,
+                    totalEpisodes: (data["data"]["Media"]["episodes"] == null)
+                        ? '?'
+                        : data["data"]["Media"]["episodes"].toString(),
+                    title:
+                        (data["data"]["Media"]["title"]["romaji"] as String),
+                    progress:
+                        "Progress: ${(data["data"]["Media"]["mediaListEntry"] != null) ? data["data"]["Media"]["mediaListEntry"]["progress"] : "0"}/${(data["data"]["Media"]["episodes"] == null) ? '?' : data["data"]["Media"]["episodes"]}",
+                    cover: data["data"]["Media"]["coverImage"]["extraLarge"],
+                    banner: data["data"]["Media"]["bannerImage"],
+                    mediaState: (data["data"]["Media"]["mediaListEntry"] != null)
+                        ? data["data"]["Media"]["mediaListEntry"]["status"] ??
+                              'NONE'
+                        : 'NONE',
+                    mediaListEntry: data["data"]["Media"]["mediaListEntry"],
+                    fullTitle: data["data"]["Media"]["title"]["romaji"] as String,
+                  ),
+                  DetailsPane(mediaId: widget.id as int),
+                ],
+              ),
             ),
           ),
         );
