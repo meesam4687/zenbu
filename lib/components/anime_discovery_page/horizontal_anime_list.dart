@@ -1,5 +1,6 @@
 import 'package:zenbu/components/global/item_card.dart';
 import 'package:zenbu/pages/entire_list_view.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class HorizontalAnimeList extends StatelessWidget {
@@ -26,14 +27,12 @@ class HorizontalAnimeList extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(heading, style: TextStyle(fontSize: 20)),
-              MaterialButton(
+              CupertinoButton(
                 padding: EdgeInsets.only(left: 10, right: 10),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(100)),
-                ),
+                borderRadius: BorderRadius.all(Radius.circular(100)),
                 onPressed: () {
                   Navigator.of(context).push(
-                    MaterialPageRoute(
+                    CupertinoPageRoute(
                       builder: (context) {
                         return EntireListView(heading: heading, type: pagetype);
                       },
@@ -42,7 +41,7 @@ class HorizontalAnimeList extends StatelessWidget {
                 },
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [Text('View All  '), Icon(Icons.arrow_forward)],
+                  children: [Text('View All  '), Icon(CupertinoIcons.arrow_right)],
                 ),
               ),
             ],

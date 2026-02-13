@@ -1,5 +1,6 @@
 import 'package:zenbu/components/anime_discovery_page/filter_sheet.dart';
 import 'package:zenbu/pages/anime_search_page.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class SearchSegment extends StatelessWidget {
@@ -13,39 +14,26 @@ class SearchSegment extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: SearchBar(
-              leading: Container(
-                margin: EdgeInsets.only(left: 5, right: 5),
-                child: Icon(Icons.search),
-              ),
-              hintText: "Search...",
-              backgroundColor: WidgetStatePropertyAll(
-                Theme.of(context).colorScheme.onInverseSurface,
-              ),
+            child: CupertinoSearchTextField(
+              prefixIcon: Icon(CupertinoIcons.search),
+              placeholder: "Search...",
+              backgroundColor: CupertinoTheme.of(context).barBackgroundColor,
               controller: TextEditingController(text: (searchText) ?? ""),
               onSubmitted: (value) {
                 if (value.isNotEmpty) {
                   (!Navigator.of(context).canPop())
                       ? Navigator.of(context).push(
-                          PageRouteBuilder(
-                            transitionDuration: const Duration(
-                              milliseconds: 300,
-                            ),
-                            pageBuilder:
-                                (context, animation, secondaryAnimation) {
-                                  return SearchPage(query: value);
-                                },
+                          CupertinoPageRoute(
+                            builder: (context) {
+                              return SearchPage(query: value);
+                            },
                           ),
                         )
                       : Navigator.of(context).pushReplacement(
-                          PageRouteBuilder(
-                            transitionDuration: const Duration(
-                              milliseconds: 300,
-                            ),
-                            pageBuilder:
-                                (context, animation, secondaryAnimation) {
-                                  return SearchPage(query: value);
-                                },
+                          CupertinoPageRoute(
+                            builder: (context) {
+                              return SearchPage(query: value);
+                            },
                           ),
                         );
                 }
@@ -54,29 +42,25 @@ class SearchSegment extends StatelessWidget {
           ),
           Padding(
             padding: const EdgeInsets.only(left: 8.0),
-            child: FilledButton(
-              style: ButtonStyle(
-                elevation: WidgetStatePropertyAll(6),
-                backgroundColor: WidgetStatePropertyAll(
-                  Theme.of(context).colorScheme.onInverseSurface,
-                ),
-                foregroundColor: WidgetStatePropertyAll(
-                  Theme.of(context).colorScheme.onSurface,
-                ),
-                fixedSize: WidgetStatePropertyAll(Size(80, 56)),
-                overlayColor: WidgetStatePropertyAll(
-                  Theme.of(context).colorScheme.outlineVariant,
-                ),
-              ),
+            child: CupertinoButton(
+              padding: EdgeInsets.zero,
               onPressed: () {
-                showModalBottomSheet(
+                showCupertinoModalPopup(
                   context: context,
                   builder: (context) {
                     return FilterSheet();
                   },
                 );
               },
-              child: Icon(Icons.tune, size: 27),
+              child: Container(
+                width: 80,
+                height: 56,
+                decoration: BoxDecoration(
+                  color: CupertinoTheme.of(context).barBackgroundColor,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(CupertinoIcons.slider_horizontal_3, size: 27),
+              ),
             ),
           ),
         ],

@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:zenbu/components/global/tags_genres_list.dart';
 
@@ -26,7 +27,7 @@ class _FilterSheetState extends State<FilterSheet> {
         width: double.infinity,
         child: Column(
           children: [
-            Padding(padding: EdgeInsetsGeometry.all(10)),
+            Padding(padding: EdgeInsets.all(10)),
             Container(
               margin: EdgeInsets.all(15),
               width: double.infinity,
@@ -37,20 +38,29 @@ class _FilterSheetState extends State<FilterSheet> {
                     "Genre",
                     style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
                   ),
-                  Padding(padding: EdgeInsetsGeometry.all(10)),
+                  Padding(padding: EdgeInsets.all(10)),
                   Wrap(
                     spacing: 8,
                     children: genres.map((genre) {
-                      return FilterChip(
-                        label: Text(genre),
-                        selected: selectedGenres.contains(genre),
-                        onSelected: (selected) {
+                      final isSelected = selectedGenres.contains(genre);
+                      return CupertinoButton(
+                        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        minSize: 0,
+                        color: isSelected ? CupertinoColors.activeBlue : null,
+                        borderRadius: BorderRadius.circular(20),
+                        onPressed: () {
                           setState(() {
-                            selected
-                                ? selectedGenres.add(genre)
-                                : selectedGenres.remove(genre);
+                            isSelected
+                                ? selectedGenres.remove(genre)
+                                : selectedGenres.add(genre);
                           });
                         },
+                        child: Text(
+                          genre,
+                          style: TextStyle(
+                            color: isSelected ? CupertinoColors.white : CupertinoColors.label,
+                          ),
+                        ),
                       );
                     }).toList(),
                   ),
