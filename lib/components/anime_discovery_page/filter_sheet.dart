@@ -26,7 +26,7 @@ class _FilterSheetState extends State<FilterSheet> {
         width: double.infinity,
         child: Column(
           children: [
-            Padding(padding: EdgeInsetsGeometry.all(10)),
+            Padding(padding: EdgeInsets.all(10)),
             Container(
               margin: EdgeInsets.all(15),
               width: double.infinity,
@@ -37,7 +37,7 @@ class _FilterSheetState extends State<FilterSheet> {
                     "Genre",
                     style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
                   ),
-                  Padding(padding: EdgeInsetsGeometry.all(10)),
+                  Padding(padding: EdgeInsets.all(10)),
                   Wrap(
                     spacing: 8,
                     children: genres.map((genre) {
