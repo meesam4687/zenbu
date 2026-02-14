@@ -1691,3 +1691,62 @@ Future<Map<String, dynamic>> getNotifications(int page, int perPage) async {
     throw e.toString();
   }
 }
+
+Future<Map<String, dynamic>> getSimulcasts(
+  int epochLower,
+  int epochUpper,
+) async {
+  try {
+    String? token = await TokenStorage.getAccessToken();
+    if (token == null) throw 'No authentication token';
+
+    String authHeader = 'Bearer $token';
+
+    String query = '''
+      query (\$startStamp: Int, \$endStamp: Int) {
+        Page(page: 1, perPage: 100) {
+          airingSchedules(sort: TIME, airingAt_greater: \$startStamp, airingAt_lesser: \$endStamp) {
+            episode
+            media {
+              id
+              title { 
+                romaji
+                english
+                native 
+              } 
+              coverImage {
+                large
+              } 
+              type 
+            } 
+            airingAt
+          }
+        }
+      }
+    ''';
+
+    final res = await http.post(
+      Uri.parse('https://graphql.anilist.co'),
+      headers: {
+        "Authorization": authHeader,
+        "Content-Type": "application/json",
+      },
+      body: jsonEncode({
+        "query": query,
+        "variables": {"startStamp": epochLower, "endStamp": epochUpper},
+      }),
+    );
+    final data = jsonDecode(res.body);
+    if (res.statusCode == 429) {
+      Fluttertoast.showToast(
+        msg: "Rate limited, try again later",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        fontSize: 16.0,
+      );
+    }
+    return data;
+  } catch (e) {
+    throw e.toString();
+  }
+}

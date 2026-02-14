@@ -1,3 +1,4 @@
+import 'package:zenbu/components/anime_discovery_page/simulcasts_button.dart';
 import 'package:zenbu/pages/entire_list_view.dart';
 import 'package:zenbu/pages/error_page.dart';
 import 'package:flutter/material.dart';
@@ -116,6 +117,9 @@ class _AnimeDiscoveryPageState extends State<AnimeDiscoveryPage> {
                           },
                         ),
                       ),
+                      SimulcastsButton(
+                        medias: data["data"]["popularSeason"]["media"],
+                      ),
                       SizedBox(height: 10),
                       HorizontalAnimeList(
                         heading: "Trending Now",
@@ -193,6 +197,9 @@ class _AnimeDiscoveryPageState extends State<AnimeDiscoveryPage> {
                         return banners[index];
                       },
                     ),
+                  ),
+                  SimulcastsButton(
+                    medias: providerData["data"]["popularSeason"]["media"],
                   ),
                   SizedBox(height: 10),
                   HorizontalAnimeList(

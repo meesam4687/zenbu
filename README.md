@@ -2,6 +2,6 @@
 
 - [ ] Filters
 - [x] Account handling
-- [ ] AniChart Integration
+- [x] AniChart Integration
 - [ ] Icon
 - [ ] Watch and Reviews Tab
