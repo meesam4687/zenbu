@@ -44,7 +44,7 @@ class _SimulcastPageViewState extends State<SimulcastPageView>
             itemCount: (data["data"]["Page"]["airingSchedules"] as List).length,
             gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
               maxCrossAxisExtent: 137.142,
-              childAspectRatio: 100 / 200,
+              childAspectRatio: 100 / 228,
             ),
             itemBuilder: (context, index) {
               return Padding(
