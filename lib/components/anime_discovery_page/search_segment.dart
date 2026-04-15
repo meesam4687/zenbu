@@ -72,7 +72,7 @@ class SearchSegment extends StatelessWidget {
                 showModalBottomSheet(
                   context: context,
                   builder: (context) {
-                    return FilterSheet();
+                    return FilterSheet(maxYear: 2027);
                   },
                 );
               },
