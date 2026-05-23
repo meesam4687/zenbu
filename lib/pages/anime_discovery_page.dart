@@ -27,6 +27,7 @@ class _AnimeDiscoveryPageState extends State<AnimeDiscoveryPage> {
 
   @override
   void initState() {
+    super.initState();
     Map providerData = Provider.of<StateProvider>(
       context,
       listen: false,
@@ -34,7 +35,6 @@ class _AnimeDiscoveryPageState extends State<AnimeDiscoveryPage> {
     if (providerData.isEmpty) {
       data = getAnimeHomePage(1, 10);
     }
-    super.initState();
   }
 
   @override

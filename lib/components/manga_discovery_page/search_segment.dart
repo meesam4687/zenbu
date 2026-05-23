@@ -1,5 +1,8 @@
+import 'package:zenbu/components/manga_discovery_page/filter_sheet.dart';
 import 'package:zenbu/pages/manga_search_page.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:zenbu/state_provider.dart';
 
 class SearchSegment extends StatelessWidget {
   const SearchSegment({super.key, this.searchText});
@@ -32,7 +35,42 @@ class SearchSegment extends StatelessWidget {
                             ),
                             pageBuilder:
                                 (context, animation, secondaryAnimation) {
-                                  return SearchPage(query: value);
+                                  Map filters = Provider.of<StateProvider>(
+                                    context,
+                                    listen: false,
+                                  ).currentMangaFilters;
+                                  return SearchPage(
+                                    query: value,
+                                    genres:
+                                        (filters["selectedGenres"] as Set)
+                                            .toList()
+                                            .isNotEmpty
+                                        ? (filters["selectedGenres"] as Set)
+                                              .toList()
+                                        : null,
+                                    tags:
+                                        (filters["selectedTags"] as Set)
+                                            .toList()
+                                            .isNotEmpty
+                                        ? (filters["selectedTags"] as Set)
+                                              .toList()
+                                        : null,
+                                    countryOfOrigin:
+                                        filters["countryOfOrigin"] != ""
+                                        ? filters["countryOfOrigin"]
+                                        : null,
+                                    releaseYear: filters["releaseYear"],
+                                    format: filters["format"] != ""
+                                        ? filters["format"]
+                                        : null,
+                                    airingStatus: filters["airingStatus"] != ""
+                                        ? filters["airingStatus"]
+                                        : null,
+                                    sourceMaterial:
+                                        filters["sourceMaterial"] != ""
+                                        ? filters["sourceMaterial"]
+                                        : null,
+                                  );
                                 },
                           ),
                         )
@@ -43,7 +81,42 @@ class SearchSegment extends StatelessWidget {
                             ),
                             pageBuilder:
                                 (context, animation, secondaryAnimation) {
-                                  return SearchPage(query: value);
+                                  Map filters = Provider.of<StateProvider>(
+                                    context,
+                                    listen: false,
+                                  ).currentMangaFilters;
+                                  return SearchPage(
+                                    query: value,
+                                    genres:
+                                        (filters["selectedGenres"] as Set)
+                                            .toList()
+                                            .isNotEmpty
+                                        ? (filters["selectedGenres"] as Set)
+                                              .toList()
+                                        : null,
+                                    tags:
+                                        (filters["selectedTags"] as Set)
+                                            .toList()
+                                            .isNotEmpty
+                                        ? (filters["selectedTags"] as Set)
+                                              .toList()
+                                        : null,
+                                    countryOfOrigin:
+                                        filters["countryOfOrigin"] != ""
+                                        ? filters["countryOfOrigin"]
+                                        : null,
+                                    releaseYear: filters["releaseYear"],
+                                    format: filters["format"] != ""
+                                        ? filters["format"]
+                                        : null,
+                                    airingStatus: filters["airingStatus"] != ""
+                                        ? filters["airingStatus"]
+                                        : null,
+                                    sourceMaterial:
+                                        filters["sourceMaterial"] != ""
+                                        ? filters["sourceMaterial"]
+                                        : null,
+                                  );
                                 },
                           ),
                         );
@@ -67,7 +140,15 @@ class SearchSegment extends StatelessWidget {
                   Theme.of(context).colorScheme.outlineVariant,
                 ),
               ),
-              onPressed: () {},
+              onPressed: () {
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  builder: (context) {
+                    return FilterSheet(maxYear: DateTime.now().year + 1);
+                  },
+                );
+              },
               child: Icon(Icons.tune, size: 27),
             ),
           ),

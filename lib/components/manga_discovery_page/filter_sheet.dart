@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:provider/provider.dart';
 import 'package:zenbu/components/global/tags_genres_list.dart';
-import 'package:zenbu/pages/anime_search_page.dart';
+import 'package:zenbu/pages/manga_search_page.dart';
 import 'package:zenbu/state_provider.dart';
 
 class FilterSheet extends StatefulWidget {
@@ -37,36 +37,35 @@ class _FilterSheetState extends State<FilterSheet> {
     selectedGenres = Provider.of<StateProvider>(
       context,
       listen: false,
-    ).currentAnimeFilters["selectedGenres"];
+    ).currentMangaFilters["selectedGenres"];
     selectedtags = Provider.of<StateProvider>(
       context,
       listen: false,
-    ).currentAnimeFilters["selectedTags"];
+    ).currentMangaFilters["selectedTags"];
     countryOfOrigin = Provider.of<StateProvider>(
       context,
       listen: false,
-    ).currentAnimeFilters["countryOfOrigin"];
+    ).currentMangaFilters["countryOfOrigin"];
     releaseYear = Provider.of<StateProvider>(
       context,
       listen: false,
-    ).currentAnimeFilters["releaseYear"];
-    season = Provider.of<StateProvider>(
-      context,
-      listen: false,
-    ).currentAnimeFilters["season"];
+    ).currentMangaFilters["releaseYear"];
     format = Provider.of<StateProvider>(
       context,
       listen: false,
-    ).currentAnimeFilters["format"];
+    ).currentMangaFilters["format"];
     airingStatus = Provider.of<StateProvider>(
       context,
       listen: false,
-    ).currentAnimeFilters["airingStatus"];
+    ).currentMangaFilters["airingStatus"];
     sourceMaterial = Provider.of<StateProvider>(
       context,
       listen: false,
-    ).currentAnimeFilters["sourceMaterial"];
+    ).currentMangaFilters["sourceMaterial"];
     releaseYearController = TextEditingController();
+    if (releaseYear != null) {
+      releaseYearController.text = releaseYear.toString();
+    }
   }
 
   late final TextEditingController releaseYearController;
@@ -87,7 +86,7 @@ class _FilterSheetState extends State<FilterSheet> {
       child: SingleChildScrollView(
         child: SizedBox(
           width: double.infinity,
-          height: 670,
+          height: 600,
           child: Column(
             children: [
               Padding(padding: EdgeInsetsGeometry.all(10)),
@@ -200,19 +199,7 @@ class _FilterSheetState extends State<FilterSheet> {
                                     controller: releaseYearController,
                                     focusNode: focusNode,
                                     decoration: InputDecoration(
-                                      hint: Text(
-                                        Provider.of<StateProvider>(
-                                                  context,
-                                                  listen: false,
-                                                ).currentAnimeFilters["releaseYear"] !=
-                                                null
-                                            ? (Provider.of<StateProvider>(
-                                                    context,
-                                                    listen: false,
-                                                  ).currentAnimeFilters["releaseYear"])
-                                                  .toString()
-                                            : "Select year",
-                                      ),
+                                      hint: Text("Select year"),
                                       border: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(4),
                                       ),
@@ -230,7 +217,7 @@ class _FilterSheetState extends State<FilterSheet> {
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             Text(
-                              "Season",
+                              "Country of Origin",
                               style: TextStyle(
                                 fontSize: 22,
                                 fontWeight: FontWeight.bold,
@@ -243,31 +230,21 @@ class _FilterSheetState extends State<FilterSheet> {
                                   Provider.of<StateProvider>(
                                         context,
                                         listen: false,
-                                      ).currentAnimeFilters["season"] !=
+                                      ).currentMangaFilters["countryOfOrigin"] !=
                                       ""
                                   ? Provider.of<StateProvider>(
                                       context,
                                       listen: false,
-                                    ).currentAnimeFilters["season"]
+                                    ).currentMangaFilters["countryOfOrigin"]
                                   : "Any",
                               dropdownMenuEntries: [
-                                DropdownMenuEntry(
-                                  value: "SPRING",
-                                  label: "Spring",
-                                ),
-                                DropdownMenuEntry(
-                                  value: "SUMMER",
-                                  label: "Summer",
-                                ),
-                                DropdownMenuEntry(value: "FALL", label: "Fall"),
-                                DropdownMenuEntry(
-                                  value: "WINTER",
-                                  label: "Winter",
-                                ),
+                                DropdownMenuEntry(value: "CN", label: "China"),
+                                DropdownMenuEntry(value: "JP", label: "Japan"),
+                                DropdownMenuEntry(value: "KR", label: "Korea"),
                                 DropdownMenuEntry(value: "", label: "Any"),
                               ],
                               onSelected: (value) {
-                                season = value as String;
+                                countryOfOrigin = value as String;
                               },
                             ),
                           ],
@@ -295,32 +272,25 @@ class _FilterSheetState extends State<FilterSheet> {
                                   Provider.of<StateProvider>(
                                         context,
                                         listen: false,
-                                      ).currentAnimeFilters["format"] !=
+                                      ).currentMangaFilters["format"] !=
                                       ""
                                   ? Provider.of<StateProvider>(
                                       context,
                                       listen: false,
-                                    ).currentAnimeFilters["format"]
+                                    ).currentMangaFilters["format"]
                                   : "Any",
                               dropdownMenuEntries: [
-                                DropdownMenuEntry(value: "TV", label: "TV"),
                                 DropdownMenuEntry(
-                                  value: "TV_SHORT",
-                                  label: "TV Short",
+                                  value: "MANGA",
+                                  label: "Manga",
                                 ),
                                 DropdownMenuEntry(
-                                  value: "MOVIE",
-                                  label: "Movie",
+                                  value: "NOVEL",
+                                  label: "Novel",
                                 ),
                                 DropdownMenuEntry(
-                                  value: "SPECIAL",
-                                  label: "Special",
-                                ),
-                                DropdownMenuEntry(value: "OVA", label: "OVA"),
-                                DropdownMenuEntry(value: "ONA", label: "ONA"),
-                                DropdownMenuEntry(
-                                  value: "MUSIC",
-                                  label: "Music",
+                                  value: "ONE_SHOT",
+                                  label: "One Shot",
                                 ),
                                 DropdownMenuEntry(value: "", label: "Any"),
                               ],
@@ -334,7 +304,7 @@ class _FilterSheetState extends State<FilterSheet> {
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             Text(
-                              "Airing Status",
+                              "Status",
                               style: TextStyle(
                                 fontSize: 22,
                                 fontWeight: FontWeight.bold,
@@ -347,12 +317,12 @@ class _FilterSheetState extends State<FilterSheet> {
                                   Provider.of<StateProvider>(
                                         context,
                                         listen: false,
-                                      ).currentAnimeFilters["airingStatus"] !=
+                                      ).currentMangaFilters["airingStatus"] !=
                                       ""
                                   ? Provider.of<StateProvider>(
                                       context,
                                       listen: false,
-                                    ).currentAnimeFilters["airingStatus"]
+                                    ).currentMangaFilters["airingStatus"]
                                   : "Any",
                               dropdownMenuEntries: [
                                 DropdownMenuEntry(
@@ -406,12 +376,12 @@ class _FilterSheetState extends State<FilterSheet> {
                                   Provider.of<StateProvider>(
                                         context,
                                         listen: false,
-                                      ).currentAnimeFilters["sourceMaterial"] !=
+                                      ).currentMangaFilters["sourceMaterial"] !=
                                       ""
                                   ? Provider.of<StateProvider>(
                                       context,
                                       listen: false,
-                                    ).currentAnimeFilters["sourceMaterial"]
+                                    ).currentMangaFilters["sourceMaterial"]
                                   : "Any",
                               dropdownMenuEntries: [
                                 DropdownMenuEntry(
@@ -479,240 +449,163 @@ class _FilterSheetState extends State<FilterSheet> {
                             ),
                           ],
                         ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(
-                              "Country of Origin",
-                              style: TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.bold,
+                        Container(
+                          height: 100,
+                          width: MediaQuery.of(context).size.width * 0.44,
+                          alignment: AlignmentGeometry.bottomEnd,
+                          child: FilledButton(
+                            style: FilledButton.styleFrom(
+                              minimumSize: const Size(180, 56),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 24,
+                                vertical: 16,
                               ),
                             ),
-                            Padding(padding: EdgeInsetsGeometry.all(5)),
-                            DropdownMenu(
-                              width: MediaQuery.of(context).size.width * 0.44,
-                              hintText:
-                                  Provider.of<StateProvider>(
-                                        context,
-                                        listen: false,
-                                      ).currentAnimeFilters["countryOfOrigin"] !=
-                                      ""
-                                  ? Provider.of<StateProvider>(
-                                      context,
-                                      listen: false,
-                                    ).currentAnimeFilters["countryOfOrigin"]
-                                  : "Any",
-                              dropdownMenuEntries: [
-                                DropdownMenuEntry(value: "CN", label: "China"),
-                                DropdownMenuEntry(value: "JP", label: "Japan"),
-                                DropdownMenuEntry(value: "KR", label: "Korea"),
-                                DropdownMenuEntry(value: "", label: "Any"),
-                              ],
-                              onSelected: (value) {
-                                countryOfOrigin = value as String;
-                              },
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    Padding(padding: EdgeInsetsGeometry.all(10)),
-                    Container(
-                      alignment: AlignmentGeometry.bottomEnd,
-                      child: FilledButton(
-                        style: FilledButton.styleFrom(
-                          minimumSize: const Size(180, 56),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 24,
-                            vertical: 16,
+                            onPressed: () {
+                              releaseYear = releaseYearController.text != ""
+                                  ? int.parse(releaseYearController.text)
+                                  : null;
+                              Provider.of<StateProvider>(
+                                context,
+                                listen: false,
+                              ).currentMangaFilters = {
+                                "selectedGenres": selectedGenres,
+                                "selectedTags": selectedtags,
+                                "releaseYear": releaseYear,
+                                "countryOfOrigin": countryOfOrigin,
+                                "format": format,
+                                "airingStatus": airingStatus,
+                                "sourceMaterial": sourceMaterial,
+                              };
+                              if (mounted) {
+                                Navigator.of(context).pop();
+                              }
+                              (!Navigator.of(context).canPop())
+                                  ? Navigator.of(context).push(
+                                      PageRouteBuilder(
+                                        transitionDuration: const Duration(
+                                          milliseconds: 300,
+                                        ),
+                                        pageBuilder:
+                                            (
+                                              context,
+                                              animation,
+                                              secondaryAnimation,
+                                            ) {
+                                              Map filters =
+                                                  Provider.of<StateProvider>(
+                                                    context,
+                                                    listen: false,
+                                                  ).currentMangaFilters;
+                                              return SearchPage(
+                                                query: null,
+                                                genres:
+                                                    (filters["selectedGenres"]
+                                                            as Set)
+                                                        .toList()
+                                                        .isNotEmpty
+                                                    ? (filters["selectedGenres"]
+                                                              as Set)
+                                                          .toList()
+                                                    : null,
+                                                tags:
+                                                    (filters["selectedTags"]
+                                                            as Set)
+                                                        .toList()
+                                                        .isNotEmpty
+                                                    ? (filters["selectedTags"]
+                                                              as Set)
+                                                          .toList()
+                                                    : null,
+                                                countryOfOrigin:
+                                                    filters["countryOfOrigin"] !=
+                                                        ""
+                                                    ? filters["countryOfOrigin"]
+                                                    : null,
+                                                releaseYear:
+                                                    filters["releaseYear"],
+                                                format: filters["format"] != ""
+                                                    ? filters["format"]
+                                                    : null,
+                                                airingStatus:
+                                                    filters["airingStatus"] !=
+                                                        ""
+                                                    ? filters["airingStatus"]
+                                                    : null,
+                                                sourceMaterial:
+                                                    filters["sourceMaterial"] !=
+                                                        ""
+                                                    ? filters["sourceMaterial"]
+                                                    : null,
+                                              );
+                                            },
+                                      ),
+                                    )
+                                  : Navigator.of(context).pushReplacement(
+                                      PageRouteBuilder(
+                                        transitionDuration: const Duration(
+                                          milliseconds: 300,
+                                        ),
+                                        pageBuilder:
+                                            (
+                                              context,
+                                              animation,
+                                              secondaryAnimation,
+                                            ) {
+                                              Map filters =
+                                                  Provider.of<StateProvider>(
+                                                    context,
+                                                    listen: false,
+                                                  ).currentMangaFilters;
+                                              return SearchPage(
+                                                query: null,
+                                                genres:
+                                                    (filters["selectedGenres"]
+                                                            as Set)
+                                                        .toList()
+                                                        .isNotEmpty
+                                                    ? (filters["selectedGenres"]
+                                                              as Set)
+                                                          .toList()
+                                                    : null,
+                                                tags:
+                                                    (filters["selectedTags"]
+                                                            as Set)
+                                                        .toList()
+                                                        .isNotEmpty
+                                                    ? (filters["selectedTags"]
+                                                              as Set)
+                                                          .toList()
+                                                    : null,
+                                                countryOfOrigin:
+                                                    filters["countryOfOrigin"] !=
+                                                        ""
+                                                    ? filters["countryOfOrigin"]
+                                                    : null,
+                                                releaseYear:
+                                                    filters["releaseYear"],
+                                                format: filters["format"] != ""
+                                                    ? filters["format"]
+                                                    : null,
+                                                airingStatus:
+                                                    filters["airingStatus"] !=
+                                                        ""
+                                                    ? filters["airingStatus"]
+                                                    : null,
+                                                sourceMaterial:
+                                                    filters["sourceMaterial"] !=
+                                                        ""
+                                                    ? filters["sourceMaterial"]
+                                                    : null,
+                                              );
+                                            },
+                                      ),
+                                    );
+                            },
+                            child: Text("Apply Filters"),
                           ),
                         ),
-                        onPressed: () {
-                          releaseYear = releaseYearController.text != ""
-                              ? int.parse(releaseYearController.text)
-                              : null;
-                          if (mounted) {
-                            Navigator.of(context).pop();
-                          }
-                          (!Navigator.of(context).canPop())
-                              ? Navigator.of(context).push(
-                                  PageRouteBuilder(
-                                    transitionDuration: const Duration(
-                                      milliseconds: 300,
-                                    ),
-                                    pageBuilder: (context, animation, secondaryAnimation) {
-                                      Provider.of<StateProvider>(
-                                            context,
-                                            listen: false,
-                                          ).currentAnimeFilters["selectedGenres"] =
-                                          selectedGenres;
-                                      Provider.of<StateProvider>(
-                                            context,
-                                            listen: false,
-                                          ).currentAnimeFilters["selectedTags"] =
-                                          selectedtags;
-                                      Provider.of<StateProvider>(
-                                            context,
-                                            listen: false,
-                                          ).currentAnimeFilters["releaseYear"] =
-                                          releaseYear;
-                                      Provider.of<StateProvider>(
-                                            context,
-                                            listen: false,
-                                          ).currentAnimeFilters["countryOfOrigin"] =
-                                          countryOfOrigin;
-                                      Provider.of<StateProvider>(
-                                        context,
-                                        listen: false,
-                                      ).currentAnimeFilters["season"] = season;
-                                      Provider.of<StateProvider>(
-                                        context,
-                                        listen: false,
-                                      ).currentAnimeFilters["format"] = format;
-                                      Provider.of<StateProvider>(
-                                            context,
-                                            listen: false,
-                                          ).currentAnimeFilters["airingStatus"] =
-                                          airingStatus;
-                                      Provider.of<StateProvider>(
-                                            context,
-                                            listen: false,
-                                          ).currentAnimeFilters["sourceMaterial"] =
-                                          sourceMaterial;
-                                      Map filters = Provider.of<StateProvider>(
-                                        context,
-                                        listen: false,
-                                      ).currentAnimeFilters;
-                                      return SearchPage(
-                                        query: null,
-                                        genres:
-                                            (filters["selectedGenres"] as Set)
-                                                .toList()
-                                                .isNotEmpty
-                                            ? (filters["selectedGenres"] as Set)
-                                                  .toList()
-                                            : null,
-                                        tags:
-                                            (filters["selectedTags"] as Set)
-                                                .toList()
-                                                .isNotEmpty
-                                            ? (filters["selectedTags"] as Set)
-                                                  .toList()
-                                            : null,
-                                        countryOfOrigin:
-                                            filters["countryOfOrigin"] != ""
-                                            ? filters["countryOfOrigin"]
-                                            : null,
-                                        releaseYear: filters["releaseYear"],
-                                        season: filters["season"] != ""
-                                            ? filters["season"]
-                                            : null,
-                                        format: filters["format"] != ""
-                                            ? filters["format"]
-                                            : null,
-                                        airingStatus:
-                                            filters["airingStatus"] != ""
-                                            ? filters["airingStatus"]
-                                            : null,
-                                        sourceMaterial:
-                                            filters["sourceMaterial"] != ""
-                                            ? filters["sourceMaterial"]
-                                            : null,
-                                      );
-                                    },
-                                  ),
-                                )
-                              : Navigator.of(context).pushReplacement(
-                                  PageRouteBuilder(
-                                    transitionDuration: const Duration(
-                                      milliseconds: 300,
-                                    ),
-                                    pageBuilder: (context, animation, secondaryAnimation) {
-                                      Provider.of<StateProvider>(
-                                            context,
-                                            listen: false,
-                                          ).currentAnimeFilters["selectedGenres"] =
-                                          selectedGenres;
-                                      Provider.of<StateProvider>(
-                                            context,
-                                            listen: false,
-                                          ).currentAnimeFilters["selectedTags"] =
-                                          selectedtags;
-                                      Provider.of<StateProvider>(
-                                            context,
-                                            listen: false,
-                                          ).currentAnimeFilters["releaseYear"] =
-                                          releaseYear;
-                                      Provider.of<StateProvider>(
-                                            context,
-                                            listen: false,
-                                          ).currentAnimeFilters["countryOfOrigin"] =
-                                          countryOfOrigin;
-                                      Provider.of<StateProvider>(
-                                        context,
-                                        listen: false,
-                                      ).currentAnimeFilters["season"] = season;
-                                      Provider.of<StateProvider>(
-                                        context,
-                                        listen: false,
-                                      ).currentAnimeFilters["format"] = format;
-                                      Provider.of<StateProvider>(
-                                            context,
-                                            listen: false,
-                                          ).currentAnimeFilters["airingStatus"] =
-                                          airingStatus;
-                                      Provider.of<StateProvider>(
-                                            context,
-                                            listen: false,
-                                          ).currentAnimeFilters["sourceMaterial"] =
-                                          sourceMaterial;
-                                      Map filters = Provider.of<StateProvider>(
-                                        context,
-                                        listen: false,
-                                      ).currentAnimeFilters;
-                                      return SearchPage(
-                                        query: null,
-                                        genres:
-                                            (filters["selectedGenres"] as Set)
-                                                .toList()
-                                                .isNotEmpty
-                                            ? (filters["selectedGenres"] as Set)
-                                                  .toList()
-                                            : null,
-                                        tags:
-                                            (filters["selectedTags"] as Set)
-                                                .toList()
-                                                .isNotEmpty
-                                            ? (filters["selectedTags"] as Set)
-                                                  .toList()
-                                            : null,
-                                        countryOfOrigin:
-                                            filters["countryOfOrigin"] != ""
-                                            ? filters["countryOfOrigin"]
-                                            : null,
-                                        releaseYear: filters["releaseYear"],
-                                        season: filters["season"] != ""
-                                            ? filters["season"]
-                                            : null,
-                                        format: filters["format"] != ""
-                                            ? filters["format"]
-                                            : null,
-                                        airingStatus:
-                                            filters["airingStatus"] != ""
-                                            ? filters["airingStatus"]
-                                            : null,
-                                        sourceMaterial:
-                                            filters["sourceMaterial"] != ""
-                                            ? filters["sourceMaterial"]
-                                            : null,
-                                      );
-                                    },
-                                  ),
-                                );
-                        },
-                        child: Text("Apply Filters"),
-                      ),
+                      ],
                     ),
                   ],
                 ),

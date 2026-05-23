@@ -4,8 +4,54 @@ class StateProvider extends ChangeNotifier {
   Map alData = {};
   Map animeDiscoveryData = {};
   Map mangaDiscoveryData = {};
+  Map currentAnimeFilters = {
+    "selectedGenres": <String>{},
+    "selectedTags": <String>{},
+    "releaseYear": null,
+    "countryOfOrigin": "",
+    "season": "",
+    "format": "",
+    "airingStatus": "",
+    "sourceMaterial": "",
+  };
+  Map currentMangaFilters = {
+    "selectedGenres": <String>{},
+    "selectedTags": <String>{},
+    "releaseYear": null,
+    "countryOfOrigin": "",
+    "format": "",
+    "airingStatus": "",
+    "sourceMaterial": "",
+  };
   void updateData(Map newData) {
     alData = newData;
+    notifyListeners();
+  }
+
+  void clearAnimeFilters() {
+    currentAnimeFilters = {
+      "selectedGenres": <String>{},
+      "selectedTags": <String>{},
+      "releaseYear": null,
+      "countryOfOrigin": "",
+      "season": "",
+      "format": "",
+      "airingStatus": "",
+      "sourceMaterial": "",
+    };
+    notifyListeners();
+  }
+
+  void clearMangaFilters() {
+    currentMangaFilters = {
+      "selectedGenres": <String>{},
+      "selectedTags": <String>{},
+      "releaseYear": null,
+      "countryOfOrigin": "",
+      "format": "",
+      "airingStatus": "",
+      "sourceMaterial": "",
+    };
     notifyListeners();
   }
 

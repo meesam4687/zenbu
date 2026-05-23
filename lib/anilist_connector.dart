@@ -1431,7 +1431,12 @@ Future<Map<String, dynamic>> searchManga(
   if (searchQuery != null) vars["search"] = searchQuery;
   if (genreIn != null && genreIn.isNotEmpty) vars["genreIn"] = genreIn;
   if (tagIn != null && tagIn.isNotEmpty) vars["tagIn"] = tagIn;
-  if (seasonYear != null && seasonYear != 0) vars["seasonYear"] = seasonYear;
+  if (seasonYear != null && seasonYear != 0) {
+    vars["startDate_greater"] = "${seasonYear}0000";
+  }
+  if (seasonYear != null && seasonYear != 0) {
+    vars["startDate_lesser"] = "${seasonYear}9999";
+  }
   if (format != null && format.isNotEmpty) vars["format"] = format;
   if (status != null && status.isNotEmpty) vars["status"] = status;
   if (countryOfOrigin != null && countryOfOrigin.isNotEmpty) {
@@ -1449,7 +1454,7 @@ Future<Map<String, dynamic>> searchManga(
         '''
       query (
       \$page: Int,
-      \$perPage: Int${vars.containsKey("search") ? ", \$search: String" : ""}${vars.containsKey("genreIn") ? ", \$genreIn: [String]" : ""}${vars.containsKey("tagIn") ? ", \$tagIn: [String]" : ""}${vars.containsKey("seasonYear") ? ", \$seasonYear: Int" : ""}${vars.containsKey("format") ? ", \$format: MediaFormat" : ""}${vars.containsKey("status") ? ", \$status: MediaStatus" : ""}${vars.containsKey("countryOfOrigin") ? ", \$countryOfOrigin: CountryCode" : ""}${vars.containsKey("source") ? ", \$source: MediaSource" : ""}
+      \$perPage: Int${vars.containsKey("search") ? ", \$search: String" : ""}${vars.containsKey("genreIn") ? ", \$genreIn: [String]" : ""}${vars.containsKey("tagIn") ? ", \$tagIn: [String]" : ""}${vars.containsKey("startDate_greater") ? ", \$startDate_greater: FuzzyDateInt, \$startDate_lesser: FuzzyDateInt" : ""}${vars.containsKey("format") ? ", \$format: MediaFormat" : ""}${vars.containsKey("status") ? ", \$status: MediaStatus" : ""}${vars.containsKey("countryOfOrigin") ? ", \$countryOfOrigin: CountryCode" : ""}${vars.containsKey("source") ? ", \$source: MediaSource" : ""}
       ) {
         Page(page: \$page, perPage: \$perPage) { 
         media(
@@ -1457,7 +1462,7 @@ Future<Map<String, dynamic>> searchManga(
           ${vars.containsKey("search") ? "search: \$search," : ""}
           ${vars.containsKey("genreIn") ? "genre_in: \$genreIn," : ""}
           ${vars.containsKey("tagIn") ? "tag_in: \$tagIn," : ""}
-          ${vars.containsKey("seasonYear") ? "seasonYear: \$seasonYear," : ""}
+          ${vars.containsKey("startDate_greater") ? "startDate_greater: \$startDate_greater, startDate_lesser: \$startDate_lesser," : ""}
           ${vars.containsKey("format") ? "format: \$format," : ""}
           ${vars.containsKey("status") ? "status: \$status," : ""}
           ${vars.containsKey("countryOfOrigin") ? "countryOfOrigin: \$countryOfOrigin," : ""}
@@ -1472,7 +1477,6 @@ Future<Map<String, dynamic>> searchManga(
         } 
       }
     ''';
-
     final res = await http.post(
       Uri.parse('https://graphql.anilist.co'),
       headers: {
