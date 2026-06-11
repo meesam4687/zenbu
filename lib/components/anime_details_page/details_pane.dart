@@ -12,8 +12,12 @@ class DetailsPane extends StatefulWidget {
   State<DetailsPane> createState() => _DetailsPaneState();
 }
 
-class _DetailsPaneState extends State<DetailsPane> {
+class _DetailsPaneState extends State<DetailsPane>
+    with AutomaticKeepAliveClientMixin {
   late Future<Map<String, dynamic>> animeData;
+
+  @override
+  bool get wantKeepAlive => true;
   @override
   void initState() {
     super.initState();
@@ -22,6 +26,7 @@ class _DetailsPaneState extends State<DetailsPane> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     Map<int, String> months = {
       1: "January",
       2: "February",

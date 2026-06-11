@@ -61,32 +61,51 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage> {
           appBar: AppBar(
             backgroundColor: (appBarOpacity == 0) ? Colors.transparent : null,
             elevation: appBarOpacity > 0 ? 4 : 0,
-            scrolledUnderElevation: 0,
           ),
-          body: SingleChildScrollView(
-            controller: _scrollController,
-            child: Column(
-              children: [
-                TitlePane(
-                  id: widget.id as int,
-                  totalEpisodes: (data["data"]["Media"]["episodes"] == null)
-                      ? '?'
-                      : data["data"]["Media"]["episodes"].toString(),
-                  title:
-                      (data["data"]["Media"]["title"]["romaji"] as String),
-                  progress:
-                      "Progress: ${(data["data"]["Media"]["mediaListEntry"] != null) ? data["data"]["Media"]["mediaListEntry"]["progress"] : "0"}/${(data["data"]["Media"]["episodes"] == null) ? '?' : data["data"]["Media"]["episodes"]}",
-                  cover: data["data"]["Media"]["coverImage"]["extraLarge"],
-                  banner: data["data"]["Media"]["bannerImage"],
-                  mediaState: (data["data"]["Media"]["mediaListEntry"] != null)
-                      ? data["data"]["Media"]["mediaListEntry"]["status"] ??
-                            'NONE'
-                      : 'NONE',
-                  mediaListEntry: data["data"]["Media"]["mediaListEntry"],
-                  fullTitle: data["data"]["Media"]["title"]["romaji"] as String,
+          body: DefaultTabController(
+            length: 3,
+            child: NestedScrollView(
+              controller: _scrollController,
+              headerSliverBuilder: (context, innerBoxIsScrolled) => [
+                SliverToBoxAdapter(
+                  child: TitlePane(
+                    id: widget.id as int,
+                    totalEpisodes: (data["data"]["Media"]["episodes"] == null)
+                        ? '?'
+                        : data["data"]["Media"]["episodes"].toString(),
+                    title: data["data"]["Media"]["title"]["romaji"],
+                    progress:
+                        "Progress: ${(data["data"]["Media"]["mediaListEntry"] != null) ? data["data"]["Media"]["mediaListEntry"]["progress"] : "0"}/${(data["data"]["Media"]["episodes"] == null) ? '?' : data["data"]["Media"]["episodes"]}",
+                    cover: data["data"]["Media"]["coverImage"]["extraLarge"],
+                    banner: data["data"]["Media"]["bannerImage"],
+                    mediaState:
+                        (data["data"]["Media"]["mediaListEntry"] != null)
+                        ? data["data"]["Media"]["mediaListEntry"]["status"] ??
+                              'NONE'
+                        : 'NONE',
+                    mediaListEntry: data["data"]["Media"]["mediaListEntry"],
+                    fullTitle: data["data"]["Media"]["title"]["romaji"],
+                  ),
                 ),
-                DetailsPane(mediaId: widget.id as int),
+                SliverToBoxAdapter(
+                  child: TabBar(
+                    tabs: [
+                      Tab(text: "About"),
+                      Tab(text: "Watch"),
+                      Tab(text: "Reviews"),
+                    ],
+                  ),
+                ),
               ],
+              body: TabBarView(
+                children: [
+                  SingleChildScrollView(
+                    child: DetailsPane(mediaId: widget.id as int),
+                  ),
+                  SingleChildScrollView(child: Placeholder()),
+                  SingleChildScrollView(child: Placeholder()),
+                ],
+              ),
             ),
           ),
         );
