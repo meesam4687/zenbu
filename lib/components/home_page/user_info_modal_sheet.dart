@@ -4,6 +4,7 @@ import 'package:zenbu/state_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:zenbu/authentication_token_controller.dart';
 import 'package:provider/provider.dart';
+import 'package:zenbu/pages/extensions_page.dart';
 
 class UserInfoModalSheet extends StatelessWidget {
   const UserInfoModalSheet({
@@ -19,7 +20,7 @@ class UserInfoModalSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 340,
+      height: 410,
       child: Column(
         children: [
           Container(
@@ -67,6 +68,27 @@ class UserInfoModalSheet extends StatelessWidget {
                   Icon(Icons.notifications),
                   Padding(padding: EdgeInsetsGeometry.only(left: 20)),
                   Text("Notifications", style: TextStyle(fontSize: 18)),
+                ],
+              ),
+            ),
+          ),
+          InkWell(
+            onTap: () {
+              Navigator.of(context).pop(); // Dismiss bottom sheet first
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => const ExtensionsPage()),
+              );
+            },
+            child: Container(
+              height: 70,
+              margin: EdgeInsets.only(left: 45),
+              width: double.infinity,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Icon(Icons.extension),
+                  Padding(padding: EdgeInsetsGeometry.only(left: 20)),
+                  Text("Extensions", style: TextStyle(fontSize: 18)),
                 ],
               ),
             ),

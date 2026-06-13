@@ -41,6 +41,13 @@ dependencies:
   url_launcher: ^6.3.0
   flutter_secure_storage: ^9.0.0
   flutter_typeahead: ^6.0.0
+  flutter_js: ^0.8.0
+  video_player: ^2.8.1
+  chewie: ^1.7.5
+  cached_network_image: ^3.3.1
+  shared_preferences: ^2.2.2
+  html: ^0.15.4
+  flutter_spinkit: ^5.2.0
 
 dev_dependencies:
   flutter_test:

@@ -3,6 +3,7 @@ import 'package:zenbu/components/anime_details_page/details_pane.dart';
 import 'package:zenbu/pages/error_page.dart';
 import 'package:flutter/material.dart';
 import 'package:zenbu/components/anime_details_page/title_pane.dart';
+import 'package:zenbu/components/anime_details_page/watch_pane.dart';
 
 class AnimeDetailsPage extends StatefulWidget {
   const AnimeDetailsPage({super.key, required this.id});
@@ -102,7 +103,14 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage> {
                   SingleChildScrollView(
                     child: DetailsPane(mediaId: widget.id as int),
                   ),
-                  SingleChildScrollView(child: Placeholder()),
+                  AnimeWatchPane(
+                    mediaId: widget.id as int,
+                    animeTitle: data["data"]["Media"]["title"]["romaji"] ?? '',
+                    coverImage:
+                        data["data"]["Media"]["coverImage"]["extraLarge"],
+                    streamingEpisodes:
+                        data["data"]["Media"]["streamingEpisodes"] as List?,
+                  ),
                   SingleChildScrollView(child: Placeholder()),
                 ],
               ),

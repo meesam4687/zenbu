@@ -140,6 +140,10 @@ Future<Map<String, dynamic>> getAnimeData(int id) async {
           bannerImage
           status
           episodes
+          streamingEpisodes {
+            title
+            thumbnail
+          }
           startDate {
             day
             month
