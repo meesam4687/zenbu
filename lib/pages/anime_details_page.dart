@@ -1,9 +1,9 @@
+import 'package:flutter/material.dart';
 import 'package:zenbu/anilist_connector.dart';
 import 'package:zenbu/components/anime_details_page/details_pane.dart';
-import 'package:zenbu/pages/error_page.dart';
-import 'package:flutter/material.dart';
 import 'package:zenbu/components/anime_details_page/title_pane.dart';
 import 'package:zenbu/components/anime_details_page/watch_pane.dart';
+import 'package:zenbu/pages/error_page.dart';
 
 class AnimeDetailsPage extends StatefulWidget {
   const AnimeDetailsPage({super.key, required this.id});
@@ -13,29 +13,14 @@ class AnimeDetailsPage extends StatefulWidget {
   State<AnimeDetailsPage> createState() => _AnimeDetailsPageState();
 }
 
-class _AnimeDetailsPageState extends State<AnimeDetailsPage> {
-  double scrollOffset = 0;
-  final ScrollController _scrollController = ScrollController();
+class _AnimeDetailsPageState extends State<AnimeDetailsPage>
+    with TickerProviderStateMixin {
   late Future<Map<String, dynamic>> animeData;
+
   @override
   void initState() {
     super.initState();
     animeData = getAnimeData(widget.id as int);
-    _scrollController.addListener(() {
-      setState(() {
-        scrollOffset = _scrollController.offset;
-      });
-    });
-  }
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  double get appBarOpacity {
-    return (scrollOffset <= 0) ? 0.0 : 1.0;
   }
 
   @override
@@ -44,8 +29,11 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage> {
       future: animeData,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator.adaptive());
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator.adaptive()),
+          );
         }
+
         if (snapshot.hasError) {
           return ErrorPage(
             scaffold: true,
@@ -56,62 +44,76 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage> {
             },
           );
         }
-        final data = snapshot.data!;
-        return Scaffold(
-          extendBodyBehindAppBar: true,
-          appBar: AppBar(
-            backgroundColor: (appBarOpacity == 0) ? Colors.transparent : null,
-            elevation: appBarOpacity > 0 ? 4 : 0,
-          ),
-          body: DefaultTabController(
-            length: 3,
-            child: NestedScrollView(
-              controller: _scrollController,
+
+        final media = snapshot.data!["data"]["Media"];
+
+        return DefaultTabController(
+          length: 3,
+          child: Scaffold(
+            body: NestedScrollView(
+              floatHeaderSlivers: true,
               headerSliverBuilder: (context, innerBoxIsScrolled) => [
-                SliverToBoxAdapter(
-                  child: TitlePane(
-                    id: widget.id as int,
-                    totalEpisodes: (data["data"]["Media"]["episodes"] == null)
-                        ? '?'
-                        : data["data"]["Media"]["episodes"].toString(),
-                    title: data["data"]["Media"]["title"]["romaji"],
-                    progress:
-                        "Progress: ${(data["data"]["Media"]["mediaListEntry"] != null) ? data["data"]["Media"]["mediaListEntry"]["progress"] : "0"}/${(data["data"]["Media"]["episodes"] == null) ? '?' : data["data"]["Media"]["episodes"]}",
-                    cover: data["data"]["Media"]["coverImage"]["extraLarge"],
-                    banner: data["data"]["Media"]["bannerImage"],
-                    mediaState:
-                        (data["data"]["Media"]["mediaListEntry"] != null)
-                        ? data["data"]["Media"]["mediaListEntry"]["status"] ??
-                              'NONE'
-                        : 'NONE',
-                    mediaListEntry: data["data"]["Media"]["mediaListEntry"],
-                    fullTitle: data["data"]["Media"]["title"]["romaji"],
+                SliverAppBar(
+                  expandedHeight: 320,
+                  pinned: true,
+                  floating: false,
+                  snap: false,
+                  elevation: innerBoxIsScrolled ? 4 : 0,
+                  flexibleSpace: FlexibleSpaceBar(
+                    collapseMode: CollapseMode.parallax,
+                    background: TitlePane(
+                      id: widget.id as int,
+                      totalEpisodes: media["episodes"]?.toString() ?? '?',
+                      title: media["title"]["romaji"],
+                      progress:
+                          "Progress: ${(media["mediaListEntry"]?["progress"] ?? "0")}/${media["episodes"] ?? "?"}",
+                      cover: media["coverImage"]["extraLarge"],
+                      banner: media["bannerImage"],
+                      mediaState: media["mediaListEntry"]?["status"] ?? 'NONE',
+                      mediaListEntry: media["mediaListEntry"],
+                      fullTitle: media["title"]["romaji"],
+                    ),
                   ),
                 ),
-                SliverToBoxAdapter(
-                  child: TabBar(
-                    tabs: [
-                      Tab(text: "About"),
-                      Tab(text: "Watch"),
-                      Tab(text: "Reviews"),
-                    ],
+
+                SliverPersistentHeader(
+                  pinned: true,
+                  delegate: _TabBarDelegate(
+                    const TabBar(
+                      tabs: [
+                        Tab(text: "About"),
+                        Tab(text: "Watch"),
+                        Tab(text: "Reviews"),
+                      ],
+                    ),
                   ),
                 ),
               ],
+
               body: TabBarView(
                 children: [
-                  SingleChildScrollView(
-                    child: DetailsPane(mediaId: widget.id as int),
+                  _KeepAliveWrapper(
+                    child: SingleChildScrollView(
+                      key: const PageStorageKey('about'),
+                      physics: const ClampingScrollPhysics(),
+                      child: DetailsPane(mediaId: widget.id as int),
+                    ),
                   ),
-                  AnimeWatchPane(
-                    mediaId: widget.id as int,
-                    animeTitle: data["data"]["Media"]["title"]["romaji"] ?? '',
-                    coverImage:
-                        data["data"]["Media"]["coverImage"]["extraLarge"],
-                    streamingEpisodes:
-                        data["data"]["Media"]["streamingEpisodes"] as List?,
+
+                  _KeepAliveWrapper(
+                    child: SizedBox(
+                      child: AnimeWatchPane(
+                        mediaId: widget.id as int,
+                        animeTitle: media["title"]["romaji"] ?? '',
+                        coverImage: media["coverImage"]["extraLarge"],
+                        streamingEpisodes: media["streamingEpisodes"] as List?,
+                      ),
+                    ),
                   ),
-                  SingleChildScrollView(child: Placeholder()),
+
+                  const _KeepAliveWrapper(
+                    child: Center(child: Text("Reviews coming soon")),
+                  ),
                 ],
               ),
             ),
@@ -119,5 +121,48 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage> {
         );
       },
     );
+  }
+}
+
+class _TabBarDelegate extends SliverPersistentHeaderDelegate {
+  final TabBar tabBar;
+
+  _TabBarDelegate(this.tabBar);
+
+  @override
+  double get minExtent => tabBar.preferredSize.height;
+
+  @override
+  double get maxExtent => tabBar.preferredSize.height;
+
+  @override
+  Widget build(context, shrinkOffset, overlapsContent) {
+    return Container(
+      color: Theme.of(context).scaffoldBackgroundColor,
+      child: tabBar,
+    );
+  }
+
+  @override
+  bool shouldRebuild(_) => false;
+}
+
+class _KeepAliveWrapper extends StatefulWidget {
+  final Widget child;
+  const _KeepAliveWrapper({required this.child});
+
+  @override
+  State<_KeepAliveWrapper> createState() => _KeepAliveWrapperState();
+}
+
+class _KeepAliveWrapperState extends State<_KeepAliveWrapper>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  Widget build(context) {
+    super.build(context);
+    return widget.child;
   }
 }

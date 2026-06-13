@@ -106,6 +106,7 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
       _isLoadingPage = true;
     });
 
+    //TODO: Remove this and see what happens
     Future.delayed(const Duration(milliseconds: 150), () {
       if (!mounted) return;
 
@@ -391,7 +392,7 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
                             ),
                           )
                         : ListView.builder(
-                            padding: EdgeInsets.zero,
+                            padding: EdgeInsets.only(bottom: 20),
                             itemCount: _rawEpisodes.length,
                             itemBuilder: (context, index) {
                               final rawEp = _rawEpisodes[index];
