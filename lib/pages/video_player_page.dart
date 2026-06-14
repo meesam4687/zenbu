@@ -375,11 +375,27 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   Future<void> _loadSubtitle(ExtSubtitle sub) async {
     try {
       debugPrint('Loading subtitle: ${sub.label} from ${sub.file}');
-      final res = await http.get(Uri.parse(sub.file));
+
+      final headers = Map<String, String>.from(_selectedVideo?.headers ?? {});
+
+      headers.removeWhere((k, _) => k.toLowerCase() == 'user-agent');
+      headers['User-Agent'] =
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
+          'AppleWebKit/537.36 (KHTML, like Gecko) '
+          'Chrome/120.0.0.0 Safari/537.36';
+
+      debugPrint('Subtitle headers: $headers');
+
+      final resolvedUrl = await _resolveRedirects(sub.file, headers);
+      debugPrint('Resolved subtitle URL: $resolvedUrl');
+
+      final res = await http.get(Uri.parse(resolvedUrl), headers: headers);
+
       if (res.statusCode != 200) {
         debugPrint('Failed to download subtitle (HTTP ${res.statusCode})');
         return;
       }
+
       final body = utf8.decode(res.bodyBytes);
 
       final SubtitleFormat format = body.trimLeft().startsWith('WEBVTT')
@@ -387,8 +403,10 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
           : SubtitleFormat.srt;
 
       final ctrl = SubtitleController.string(body, format: format);
+
       debugPrint(
-        'Subtitle parsed: ${sub.label} (${format.name}, ${ctrl.subtitles.length} cues)',
+        'Subtitle parsed: ${sub.label} '
+        '(${format.name}, ${ctrl.subtitles.length} cues)',
       );
 
       if (mounted) {
