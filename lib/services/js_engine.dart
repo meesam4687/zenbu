@@ -98,10 +98,6 @@ class JsEngine {
       try {
         final key = args[0] as String;
         final value = args[1];
-        // TODO: FIGURE THIS OUT
-        // final prefs = await http.get(
-        //   Uri.parse(''),
-        // ); // just to make import/type resolution compile if needed, but SharedPreferences is imported
         final sp = await SharedPreferences.getInstance();
         await sp.setString('ext_pref_${sourceId}_$key', json.encode(value));
       } catch (e) {

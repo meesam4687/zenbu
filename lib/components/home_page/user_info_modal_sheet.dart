@@ -74,7 +74,7 @@ class UserInfoModalSheet extends StatelessWidget {
           ),
           InkWell(
             onTap: () {
-              Navigator.of(context).pop(); // Dismiss bottom sheet first
+              Navigator.of(context).pop();
               Navigator.of(context).push(
                 MaterialPageRoute(builder: (context) => const ExtensionsPage()),
               );

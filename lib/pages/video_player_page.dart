@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_subtitle/flutter_subtitle.dart' hide Subtitle;
 import 'package:http/http.dart' as http;
 import 'package:video_player/video_player.dart';
 import 'package:zenbu/models/extensions_models.dart';
@@ -17,6 +19,75 @@ class SkipTime {
     required this.endTime,
     required this.skipType,
   });
+}
+
+class _BufferedSeekBarPainter extends CustomPainter {
+  final double played;
+  final double buffered;
+  final Color playedColor;
+  final Color bufferedColor;
+  final Color trackColor;
+  final double trackHeight;
+  final double thumbRadius;
+
+  _BufferedSeekBarPainter({
+    required this.played,
+    required this.buffered,
+    required this.playedColor,
+    required this.bufferedColor,
+    required this.trackColor,
+    required this.trackHeight,
+    required this.thumbRadius,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final double cy = size.height / 2;
+    final double startX = thumbRadius;
+    final double endX = size.width - thumbRadius;
+    final double totalWidth = endX - startX;
+
+    final trackPaint = Paint()
+      ..color = trackColor
+      ..strokeWidth = trackHeight
+      ..strokeCap = StrokeCap.round;
+
+    final bufferedPaint = Paint()
+      ..color = bufferedColor
+      ..strokeWidth = trackHeight
+      ..strokeCap = StrokeCap.round;
+
+    final playedPaint = Paint()
+      ..color = playedColor
+      ..strokeWidth = trackHeight
+      ..strokeCap = StrokeCap.round;
+
+    canvas.drawLine(Offset(startX, cy), Offset(endX, cy), trackPaint);
+
+    final double bufX = startX + buffered.clamp(0.0, 1.0) * totalWidth;
+    if (bufX > startX) {
+      canvas.drawLine(Offset(startX, cy), Offset(bufX, cy), bufferedPaint);
+    }
+
+    final double playX = startX + played.clamp(0.0, 1.0) * totalWidth;
+    if (playX > startX) {
+      canvas.drawLine(Offset(startX, cy), Offset(playX, cy), playedPaint);
+    }
+
+    canvas.drawCircle(
+      Offset(playX, cy),
+      thumbRadius,
+      Paint()..color = playedColor,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_BufferedSeekBarPainter old) =>
+      old.played != played ||
+      old.buffered != buffered ||
+      old.playedColor != playedColor ||
+      old.bufferedColor != bufferedColor ||
+      old.trackColor != trackColor;
 }
 
 class VideoPlayerPage extends StatefulWidget {
@@ -40,7 +111,10 @@ class VideoPlayerPage extends StatefulWidget {
 class _VideoPlayerPageState extends State<VideoPlayerPage> {
   List<ExtVideo> _videos = [];
   ExtVideo? _selectedVideo;
+
   VideoPlayerController? _videoPlayerController;
+  ChewieController? _chewieController;
+
   bool _isLoading = true;
   String _loadingText = 'Resolving stream links...';
   String? _errorMessage;
@@ -50,7 +124,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
       ValueNotifier<SkipTime?>(null);
   List<SkipTime> _skipTimes = [];
 
-  // Controls UI state
+  ExtSubtitle? _selectedSubtitle;
+  SubtitleController? _activeSubtitleCtrl;
+
   bool _isFullScreen = false;
   bool _showControls = true;
   Timer? _controlsTimer;
@@ -67,8 +143,6 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   void dispose() {
     _activeSkipTimeNotifier.dispose();
     _disposePlayer();
-
-    // Restore orientation and system overlays when closing the page
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     super.dispose();
@@ -76,7 +150,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
 
   void _disposePlayer() {
     _videoPlayerController?.removeListener(_onPlayerPositionChanged);
+    _chewieController?.dispose();
     _videoPlayerController?.dispose();
+    _chewieController = null;
     _videoPlayerController = null;
   }
 
@@ -84,27 +160,18 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     _controlsTimer?.cancel();
     _controlsTimer = Timer(const Duration(seconds: 4), () {
       if (mounted) {
-        setState(() {
-          _showControls = false;
-        });
+        setState(() => _showControls = false);
       }
     });
   }
 
   void _toggleControlsVisibility() {
-    setState(() {
-      _showControls = !_showControls;
-    });
-    if (_showControls) {
-      _startControlsTimer();
-    }
+    setState(() => _showControls = !_showControls);
+    if (_showControls) _startControlsTimer();
   }
 
   void _toggleFullScreen() {
-    setState(() {
-      _isFullScreen = !_isFullScreen;
-    });
-
+    setState(() => _isFullScreen = !_isFullScreen);
     if (_isFullScreen) {
       SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
       SystemChrome.setPreferredOrientations([
@@ -143,10 +210,11 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
         return;
       }
 
-      debugPrint("Fetched video streams count: ${list.length}");
+      debugPrint('Fetched video streams count: ${list.length}');
       for (int i = 0; i < list.length; i++) {
         debugPrint("  Video $i quality: '${list[i].quality}'");
       }
+
       setState(() {
         _videos = list;
         _selectedVideo = list.first;
@@ -171,9 +239,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
       final client = http.Client();
       var request = http.Request('GET', Uri.parse(currentUrl))
         ..followRedirects = false;
-      headers.forEach((k, v) {
-        request.headers[k] = v;
-      });
+      headers.forEach((k, v) => request.headers[k] = v);
 
       var response = await client.send(request);
       await response.stream.listen((_) {}).cancel();
@@ -186,15 +252,12 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
         if (location == null) break;
 
         final uri = Uri.parse(currentUrl);
-        final resolvedUri = uri.resolve(location);
-        currentUrl = resolvedUri.toString();
+        currentUrl = uri.resolve(location).toString();
         redirectCount++;
 
         request = http.Request('GET', Uri.parse(currentUrl))
           ..followRedirects = false;
-        headers.forEach((k, v) {
-          request.headers[k] = v;
-        });
+        headers.forEach((k, v) => request.headers[k] = v);
         response = await client.send(request);
         await response.stream.listen((_) {}).cancel();
       }
@@ -206,7 +269,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     if (_selectedVideo == null) return;
 
     debugPrint(
-      "Initializing player for stream: ${_selectedVideo!.quality} (URL: ${_selectedVideo!.url})",
+      'Initializing player for stream: ${_selectedVideo!.quality} (URL: ${_selectedVideo!.url})',
     );
 
     if (!mounted) return;
@@ -235,7 +298,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
       if (!mounted) return;
 
       final resolvedUrl = await _resolveRedirects(_selectedVideo!.url, headers);
-      debugPrint("Resolved stream redirect URL: $resolvedUrl");
+      debugPrint('Resolved stream redirect URL: $resolvedUrl');
 
       if (!mounted) return;
 
@@ -245,35 +308,52 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
       );
 
       await _videoPlayerController!.initialize();
-      debugPrint("VideoPlayerController successfully initialized");
+      debugPrint('VideoPlayerController successfully initialized');
 
       if (!mounted) return;
+
+      _chewieController = ChewieController(
+        videoPlayerController: _videoPlayerController!,
+        autoPlay: false,
+        looping: false,
+        showControls: false,
+        allowFullScreen: false,
+        allowMuting: false,
+        showOptions: false,
+        deviceOrientationsAfterFullScreen: [DeviceOrientation.portraitUp],
+      );
+
+      if (_selectedVideo!.subtitles.isNotEmpty) {
+        await _loadSubtitle(_selectedVideo!.subtitles.first);
+        if (!mounted) return;
+      } else {
+        _selectedSubtitle = null;
+      }
 
       if (_currentPosition != Duration.zero) {
         await _videoPlayerController!.seekTo(_currentPosition);
         if (!mounted) return;
       }
 
-      debugPrint("Checking AniSkip skip-times conditions...");
-      debugPrint("  widget.malId: ${widget.malId}");
+      debugPrint('Checking AniSkip skip-times conditions...');
+      debugPrint('  widget.malId: ${widget.malId}');
       if (widget.malId != null) {
         final double? epNum = parseEpisodeNumber(widget.episode);
-        debugPrint("  Parsed episode number: $epNum");
+        debugPrint('  Parsed episode number: $epNum');
         if (epNum != null) {
           final durationSec = _videoPlayerController!.value.duration.inSeconds;
-          debugPrint("  Episode duration: $durationSec seconds");
+          debugPrint('  Episode duration: $durationSec seconds');
           await _fetchSkipTimes(widget.malId!, epNum, durationSec);
           if (!mounted) return;
         } else {
           debugPrint(
-            "  Failed to parse episode number from: ${widget.episode.url} / ${widget.episode.name}",
+            '  Failed to parse episode number from: ${widget.episode.url} / ${widget.episode.name}',
           );
         }
       }
 
       _videoPlayerController!.addListener(_onPlayerPositionChanged);
 
-      // Auto-start video playback
       await _videoPlayerController!.play();
 
       if (!mounted) return;
@@ -283,13 +363,122 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
       });
       _startControlsTimer();
     } catch (e) {
-      debugPrint("Player initialization failed: $e");
+      debugPrint('Player initialization failed: $e');
       if (!mounted) return;
       setState(() {
         _errorMessage = 'Failed to play video stream: $e';
         _isLoading = false;
       });
     }
+  }
+
+  Future<void> _loadSubtitle(ExtSubtitle sub) async {
+    try {
+      debugPrint('Loading subtitle: ${sub.label} from ${sub.file}');
+      final res = await http.get(Uri.parse(sub.file));
+      if (res.statusCode != 200) {
+        debugPrint('Failed to download subtitle (HTTP ${res.statusCode})');
+        return;
+      }
+      final body = utf8.decode(res.bodyBytes);
+
+      final SubtitleFormat format = body.trimLeft().startsWith('WEBVTT')
+          ? SubtitleFormat.webvtt
+          : SubtitleFormat.srt;
+
+      final ctrl = SubtitleController.string(body, format: format);
+      debugPrint(
+        'Subtitle parsed: ${sub.label} (${format.name}, ${ctrl.subtitles.length} cues)',
+      );
+
+      if (mounted) {
+        setState(() {
+          _selectedSubtitle = sub;
+          _activeSubtitleCtrl = ctrl;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading subtitle ${sub.label}: $e');
+    }
+  }
+
+  void _disableSubtitles() {
+    setState(() {
+      _selectedSubtitle = null;
+      _activeSubtitleCtrl = null;
+    });
+  }
+
+  void _showSubtitleSelector() {
+    final subtitles = _selectedVideo?.subtitles ?? [];
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return Container(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                child: Text(
+                  'Select Subtitles',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ),
+              const Divider(),
+              Flexible(
+                child: ListView(
+                  shrinkWrap: true,
+                  children: [
+                    ListTile(
+                      title: const Text('Off'),
+                      trailing: _selectedSubtitle == null
+                          ? Icon(
+                              Icons.check,
+                              color: Theme.of(context).colorScheme.primary,
+                            )
+                          : null,
+                      onTap: () {
+                        Navigator.of(context).pop();
+                        _disableSubtitles();
+                      },
+                    ),
+                    ...subtitles.map((sub) {
+                      final isSelected = _selectedSubtitle?.file == sub.file;
+                      return ListTile(
+                        title: Text(
+                          sub.label,
+                          style: TextStyle(
+                            fontWeight: isSelected
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                            color: isSelected
+                                ? Theme.of(context).colorScheme.primary
+                                : null,
+                          ),
+                        ),
+                        trailing: isSelected
+                            ? Icon(
+                                Icons.check,
+                                color: Theme.of(context).colorScheme.primary,
+                              )
+                            : null,
+                        onTap: () {
+                          Navigator.of(context).pop();
+                          if (!isSelected) _loadSubtitle(sub);
+                        },
+                      );
+                    }),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   void _showQualitySelector() {
@@ -341,9 +530,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                           _currentPosition =
                               _videoPlayerController?.value.position ??
                               Duration.zero;
-                          setState(() {
-                            _selectedVideo = video;
-                          });
+                          setState(() => _selectedVideo = video);
                           _initializePlayer();
                         }
                       },
@@ -366,10 +553,10 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     try {
       final url =
           'https://api.aniskip.com/v2/skip-times/$malId/$episodeNum?types[]=op&types[]=ed&types[]=mixed-op&types[]=mixed-ed&types[]=recap&episodeLength=$durationSeconds';
-      debugPrint("Fetching AniSkip skip times from URL: $url");
+      debugPrint('Fetching AniSkip skip times from URL: $url');
       final res = await http.get(Uri.parse(url));
-      debugPrint("AniSkip Response status: ${res.statusCode}");
-      debugPrint("AniSkip Response body: ${res.body}");
+      debugPrint('AniSkip Response status: ${res.statusCode}');
+      debugPrint('AniSkip Response body: ${res.body}');
       if (res.statusCode == 200) {
         final data = jsonDecode(res.body);
         if (data is Map && data['found'] == true && data['results'] is List) {
@@ -392,41 +579,37 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
             }
           }
           debugPrint(
-            "Successfully parsed ${parsedSkips.length} AniSkip segments: "
+            'Successfully parsed ${parsedSkips.length} AniSkip segments: '
             "${parsedSkips.map((s) => '${s.skipType}: ${s.startTime}-${s.endTime}s').join(', ')}",
           );
           if (mounted) {
-            setState(() {
-              _skipTimes = parsedSkips;
-            });
+            setState(() => _skipTimes = parsedSkips);
           }
         } else {
-          debugPrint("AniSkip returned found=false or invalid results schema");
+          debugPrint('AniSkip returned found=false or invalid results schema');
         }
       } else {
         debugPrint(
-          "Failed to fetch AniSkip skip times (HTTP ${res.statusCode})",
+          'Failed to fetch AniSkip skip times (HTTP ${res.statusCode})',
         );
       }
     } catch (e) {
-      debugPrint("Error fetching skip times: $e");
+      debugPrint('Error fetching skip times: $e');
     }
   }
 
   void _onPlayerPositionChanged() {
     if (_videoPlayerController == null ||
-        !_videoPlayerController!.value.isInitialized)
+        !_videoPlayerController!.value.isInitialized) {
       return;
+    }
 
-    final currentPos = _videoPlayerController!.value.position;
-    final currentSec = currentPos.inMilliseconds / 1000.0;
-
-    // Trigger state rebuild for seek bar and duration text if controls are visible and we are not dragging
     if (_showControls && !_isDraggingSlider) {
       setState(() {});
     }
 
-    // Skip times matching
+    final currentSec =
+        _videoPlayerController!.value.position.inMilliseconds / 1000.0;
     SkipTime? matchingSkip;
     for (final skip in _skipTimes) {
       if (currentSec >= skip.startTime && currentSec <= skip.endTime) {
@@ -434,10 +617,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
         break;
       }
     }
-
     if (matchingSkip != _activeSkipTimeNotifier.value) {
       debugPrint(
-        "Player position: $currentSec s. Active skip segment changed to ${matchingSkip?.skipType}",
+        'Player position: $currentSec s. Active skip segment changed to ${matchingSkip?.skipType}',
       );
       _activeSkipTimeNotifier.value = matchingSkip;
     }
@@ -448,77 +630,139 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     final minutes = twoDigits(duration.inMinutes.remainder(60));
     final seconds = twoDigits(duration.inSeconds.remainder(60));
     if (duration.inHours > 0) {
-      return "${twoDigits(duration.inHours)}:$minutes:$seconds";
+      return '${twoDigits(duration.inHours)}:$minutes:$seconds';
     }
-    return "$minutes:$seconds";
+    return '$minutes:$seconds';
   }
+
+  Widget _buildSeekBar(
+    Duration currentPosition,
+    Duration totalDuration,
+    Color primaryColor,
+  ) {
+    final double totalSec = totalDuration.inSeconds.toDouble();
+    final double currentSec = currentPosition.inSeconds.toDouble().clamp(
+      0.0,
+      totalSec == 0 ? 1.0 : totalSec,
+    );
+
+    double bufferedSec = 0.0;
+    if (_videoPlayerController != null) {
+      for (final range in _videoPlayerController!.value.buffered) {
+        bufferedSec = bufferedSec > range.end.inSeconds.toDouble()
+            ? bufferedSec
+            : range.end.inSeconds.toDouble();
+      }
+    }
+
+    final double played = totalSec > 0 ? currentSec / totalSec : 0.0;
+    final double buffered = totalSec > 0
+        ? bufferedSec.clamp(0.0, totalSec) / totalSec
+        : 0.0;
+
+    double fractionFromGlobalX(double globalX) {
+      final RenderBox? seekBox =
+          _seekBarKey.currentContext?.findRenderObject() as RenderBox?;
+      if (seekBox == null) return 0.0;
+      const double thumbR = 8.0;
+      final double trackWidth = seekBox.size.width - thumbR * 2;
+      final double localX = seekBox.globalToLocal(Offset(globalX, 0)).dx;
+      return ((localX - thumbR) / trackWidth).clamp(0.0, 1.0);
+    }
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTapDown: (details) {
+        final fraction = fractionFromGlobalX(details.globalPosition.dx);
+        final targetSec = (fraction * totalSec).toInt();
+        _videoPlayerController?.seekTo(Duration(seconds: targetSec));
+        _startControlsTimer();
+      },
+      onHorizontalDragStart: (details) {
+        setState(() => _isDraggingSlider = true);
+      },
+      onHorizontalDragUpdate: (details) {
+        final fraction = fractionFromGlobalX(details.globalPosition.dx);
+        setState(() {
+          _sliderDragValue = fraction * totalSec;
+        });
+      },
+      onHorizontalDragEnd: (_) {
+        _videoPlayerController?.seekTo(
+          Duration(seconds: _sliderDragValue.toInt()),
+        );
+        setState(() => _isDraggingSlider = false);
+        _startControlsTimer();
+      },
+      child: SizedBox(
+        key: _seekBarKey,
+        height: 28,
+        child: CustomPaint(
+          painter: _BufferedSeekBarPainter(
+            played: played,
+            buffered: buffered,
+            playedColor: primaryColor,
+            bufferedColor: primaryColor.withAlpha(100),
+            trackColor: Colors.white24,
+            trackHeight: 4.0,
+            thumbRadius: 8.0,
+          ),
+          child: const SizedBox.expand(),
+        ),
+      ),
+    );
+  }
+
+  final GlobalKey _seekBarKey = GlobalKey();
 
   Widget _buildPlayerUI() {
     if (_videoPlayerController == null ||
-        !_videoPlayerController!.value.isInitialized) {
+        !_videoPlayerController!.value.isInitialized ||
+        _chewieController == null) {
       return const SizedBox.shrink();
     }
 
     final totalDuration = _videoPlayerController!.value.duration;
+    final isBuffering = _videoPlayerController!.value.isBuffering;
     final currentPosition = _isDraggingSlider
         ? Duration(seconds: _sliderDragValue.toInt())
         : _videoPlayerController!.value.position;
 
+    final primaryColor = Theme.of(context).colorScheme.primary;
+
     return Stack(
       alignment: Alignment.center,
       children: [
-        // 1. Video Player
         GestureDetector(
           onTap: _toggleControlsVisibility,
           child: Center(
             child: AspectRatio(
               aspectRatio: _videoPlayerController!.value.aspectRatio,
-              child: VideoPlayer(_videoPlayerController!),
+              child: Chewie(controller: _chewieController!),
             ),
           ),
         ),
 
-        // 2. Double tap zones to seek (covers video area underneath other overlay buttons)
-        Positioned.fill(
-          child: Row(
-            children: [
-              Expanded(
-                child: GestureDetector(
-                  behavior: HitTestBehavior.translucent,
-                  onTap: _toggleControlsVisibility,
-                  onDoubleTap: () {
-                    final newPos =
-                        _videoPlayerController!.value.position -
-                        const Duration(seconds: 10);
-                    final targetPos = newPos < Duration.zero
-                        ? Duration.zero
-                        : newPos;
-                    _videoPlayerController!.seekTo(targetPos);
-                  },
+        if (isBuffering)
+          Center(
+            child: Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: Colors.black54,
+                borderRadius: BorderRadius.circular(28),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: CircularProgressIndicator(
+                  strokeWidth: 3,
+                  valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
                 ),
               ),
-              Expanded(
-                child: GestureDetector(
-                  behavior: HitTestBehavior.translucent,
-                  onTap: _toggleControlsVisibility,
-                  onDoubleTap: () {
-                    final newPos =
-                        _videoPlayerController!.value.position +
-                        const Duration(seconds: 10);
-                    final targetPos = newPos > totalDuration
-                        ? totalDuration
-                        : newPos;
-                    _videoPlayerController!.seekTo(targetPos);
-                  },
-                ),
-              ),
-            ],
+            ),
           ),
-        ),
 
-        // 3. Controls Overlay
         if (_showControls) ...[
-          // Dim background
           Positioned.fill(
             child: GestureDetector(
               onTap: _toggleControlsVisibility,
@@ -526,7 +770,6 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
             ),
           ),
 
-          // Top Row: Back button, Title, Settings action button
           Positioned(
             top: _isFullScreen ? 24.0 : 0.0,
             left: 8.0,
@@ -562,6 +805,20 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                 ],
               ),
               actions: [
+                if ((_selectedVideo?.subtitles ?? []).isNotEmpty)
+                  IconButton(
+                    icon: Icon(
+                      Icons.closed_caption,
+                      color: _selectedSubtitle != null
+                          ? Theme.of(context).colorScheme.primary
+                          : Colors.white,
+                    ),
+                    tooltip: 'Subtitles',
+                    onPressed: () {
+                      _startControlsTimer();
+                      _showSubtitleSelector();
+                    },
+                  ),
                 if (_videos.length > 1)
                   IconButton(
                     icon: const Icon(Icons.settings, color: Colors.white),
@@ -575,7 +832,6 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
             ),
           ),
 
-          // Center Controls: Play/Pause
           Center(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -588,10 +844,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                     final newPos =
                         _videoPlayerController!.value.position -
                         const Duration(seconds: 10);
-                    final targetPos = newPos < Duration.zero
-                        ? Duration.zero
-                        : newPos;
-                    _videoPlayerController!.seekTo(targetPos);
+                    _videoPlayerController!.seekTo(
+                      newPos < Duration.zero ? Duration.zero : newPos,
+                    );
                   },
                 ),
                 const SizedBox(width: 32),
@@ -622,17 +877,15 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                     final newPos =
                         _videoPlayerController!.value.position +
                         const Duration(seconds: 10);
-                    final targetPos = newPos > totalDuration
-                        ? totalDuration
-                        : newPos;
-                    _videoPlayerController!.seekTo(targetPos);
+                    _videoPlayerController!.seekTo(
+                      newPos > totalDuration ? totalDuration : newPos,
+                    );
                   },
                 ),
               ],
             ),
           ),
 
-          // Bottom Bar: Progress seekbar, durations, fullscreen
           Positioned(
             bottom: _isFullScreen ? 16.0 : 8.0,
             left: 16.0,
@@ -640,51 +893,21 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Seekbar slider
                 Row(
                   children: [
                     Text(
                       _formatDuration(currentPosition),
                       style: const TextStyle(color: Colors.white, fontSize: 12),
                     ),
+                    const SizedBox(width: 8),
                     Expanded(
-                      child: SliderTheme(
-                        data: SliderTheme.of(context).copyWith(
-                          activeTrackColor: Theme.of(
-                            context,
-                          ).colorScheme.primary,
-                          inactiveTrackColor: Colors.white24,
-                          thumbColor: Theme.of(context).colorScheme.primary,
-                          trackHeight: 4.0,
-                          thumbShape: const RoundSliderThumbShape(
-                            enabledThumbRadius: 6.0,
-                          ),
-                        ),
-                        child: Slider(
-                          value: currentPosition.inSeconds.toDouble().clamp(
-                            0.0,
-                            totalDuration.inSeconds.toDouble(),
-                          ),
-                          min: 0.0,
-                          max: totalDuration.inSeconds.toDouble(),
-                          onChanged: (val) {
-                            setState(() {
-                              _isDraggingSlider = true;
-                              _sliderDragValue = val;
-                            });
-                          },
-                          onChangeEnd: (val) {
-                            _videoPlayerController!.seekTo(
-                              Duration(seconds: val.toInt()),
-                            );
-                            setState(() {
-                              _isDraggingSlider = false;
-                            });
-                            _startControlsTimer();
-                          },
-                        ),
+                      child: _buildSeekBar(
+                        currentPosition,
+                        totalDuration,
+                        primaryColor,
                       ),
                     ),
+                    const SizedBox(width: 8),
                     Text(
                       _formatDuration(totalDuration),
                       style: const TextStyle(color: Colors.white, fontSize: 12),
@@ -692,7 +915,6 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                   ],
                 ),
 
-                // Controls row: Fullscreen button only
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
@@ -713,7 +935,33 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
           ),
         ],
 
-        // 4. Skip intro/outro buttons (placed at the top-most level of the Stack, always clickable when active)
+        if (_activeSubtitleCtrl != null && _videoPlayerController != null)
+          Positioned(
+            bottom: _isFullScreen ? 72.0 : 80.0,
+            left: 16.0,
+            right: 16.0,
+            child: IgnorePointer(
+              child: Builder(
+                builder: (context) {
+                  final posMs =
+                      _videoPlayerController!.value.position.inMilliseconds;
+                  final text = _activeSubtitleCtrl!.textFromMilliseconds(
+                    posMs,
+                    _activeSubtitleCtrl!.subtitles,
+                  );
+                  if (text.isEmpty) return const SizedBox.shrink();
+                  return SubtitleView(
+                    text: text,
+                    subtitleStyle: SubtitleStyle(
+                      fontSize: _isFullScreen ? 20.0 : 16.0,
+                      bordered: true,
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+
         Positioned(
           bottom: _isFullScreen ? 90.0 : 100.0,
           right: 24.0,
@@ -739,7 +987,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                     seconds: activeSkip.endTime.toInt(),
                   );
                   debugPrint(
-                    "Skip button clicked! Seeking to ${seekTarget.inSeconds}s",
+                    'Skip button clicked! Seeking to ${seekTarget.inSeconds}s',
                   );
                   _videoPlayerController!.seekTo(seekTarget);
                 },
@@ -767,9 +1015,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
       canPop: !_isFullScreen,
       onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
-        if (_isFullScreen) {
-          _toggleFullScreen();
-        }
+        if (_isFullScreen) _toggleFullScreen();
       },
       child: Scaffold(
         backgroundColor: Colors.black,
@@ -836,15 +1082,13 @@ double? parseEpisodeNumber(ExtEpisode episode) {
 
   if (episode.url.contains('/')) {
     final parts = episode.url.split('/');
-    final epNumStr = parts.last;
-    final parsed = double.tryParse(epNumStr);
+    final parsed = double.tryParse(parts.last);
     if (parsed != null) return parsed;
   }
 
   if (episode.url.contains('|')) {
     final parts = episode.url.split('|');
-    final epNumStr = parts.last;
-    final parsed = double.tryParse(epNumStr);
+    final parsed = double.tryParse(parts.last);
     if (parsed != null) return parsed;
   }
 
@@ -852,14 +1096,10 @@ double? parseEpisodeNumber(ExtEpisode episode) {
     r'(?:episode|ep|e)\.?\s*(\d+(?:\.\d+)?)',
     caseSensitive: false,
   ).firstMatch(episode.name);
-  if (match != null) {
-    return double.tryParse(match.group(1)!);
-  }
+  if (match != null) return double.tryParse(match.group(1)!);
 
   final matchAny = RegExp(r'(\d+(?:\.\d+)?)').firstMatch(episode.name);
-  if (matchAny != null) {
-    return double.tryParse(matchAny.group(1)!);
-  }
+  if (matchAny != null) return double.tryParse(matchAny.group(1)!);
 
   return null;
 }
