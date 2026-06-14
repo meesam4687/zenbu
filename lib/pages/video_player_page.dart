@@ -1,20 +1,36 @@
+import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:video_player/video_player.dart';
-import 'package:chewie/chewie.dart';
 import 'package:zenbu/models/extensions_models.dart';
 import 'package:zenbu/services/repo_service.dart';
+
+class SkipTime {
+  final double startTime;
+  final double endTime;
+  final String skipType;
+
+  SkipTime({
+    required this.startTime,
+    required this.endTime,
+    required this.skipType,
+  });
+}
 
 class VideoPlayerPage extends StatefulWidget {
   final ExtEpisode episode;
   final ExtSource source;
   final String animeTitle;
+  final int? malId;
 
   const VideoPlayerPage({
     super.key,
     required this.episode,
     required this.source,
     required this.animeTitle,
+    this.malId,
   });
 
   @override
@@ -25,11 +41,21 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   List<ExtVideo> _videos = [];
   ExtVideo? _selectedVideo;
   VideoPlayerController? _videoPlayerController;
-  ChewieController? _chewieController;
   bool _isLoading = true;
   String _loadingText = 'Resolving stream links...';
   String? _errorMessage;
   Duration _currentPosition = Duration.zero;
+
+  final ValueNotifier<SkipTime?> _activeSkipTimeNotifier =
+      ValueNotifier<SkipTime?>(null);
+  List<SkipTime> _skipTimes = [];
+
+  // Controls UI state
+  bool _isFullScreen = false;
+  bool _showControls = true;
+  Timer? _controlsTimer;
+  bool _isDraggingSlider = false;
+  double _sliderDragValue = 0.0;
 
   @override
   void initState() {
@@ -39,15 +65,56 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
 
   @override
   void dispose() {
+    _activeSkipTimeNotifier.dispose();
     _disposePlayer();
+
+    // Restore orientation and system overlays when closing the page
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     super.dispose();
   }
 
   void _disposePlayer() {
-    _chewieController?.dispose();
+    _videoPlayerController?.removeListener(_onPlayerPositionChanged);
     _videoPlayerController?.dispose();
-    _chewieController = null;
     _videoPlayerController = null;
+  }
+
+  void _startControlsTimer() {
+    _controlsTimer?.cancel();
+    _controlsTimer = Timer(const Duration(seconds: 4), () {
+      if (mounted) {
+        setState(() {
+          _showControls = false;
+        });
+      }
+    });
+  }
+
+  void _toggleControlsVisibility() {
+    setState(() {
+      _showControls = !_showControls;
+    });
+    if (_showControls) {
+      _startControlsTimer();
+    }
+  }
+
+  void _toggleFullScreen() {
+    setState(() {
+      _isFullScreen = !_isFullScreen;
+    });
+
+    if (_isFullScreen) {
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.landscapeLeft,
+        DeviceOrientation.landscapeRight,
+      ]);
+    } else {
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+      SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+    }
   }
 
   Future<void> _fetchVideoList() async {
@@ -76,6 +143,10 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
         return;
       }
 
+      debugPrint("Fetched video streams count: ${list.length}");
+      for (int i = 0; i < list.length; i++) {
+        debugPrint("  Video $i quality: '${list[i].quality}'");
+      }
       setState(() {
         _videos = list;
         _selectedVideo = list.first;
@@ -134,6 +205,12 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   Future<void> _initializePlayer() async {
     if (_selectedVideo == null) return;
 
+    debugPrint(
+      "Initializing player for stream: ${_selectedVideo!.quality} (URL: ${_selectedVideo!.url})",
+    );
+
+    if (!mounted) return;
+
     setState(() {
       _isLoading = true;
       _loadingText = 'Initializing player...';
@@ -142,8 +219,10 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     try {
       _disposePlayer();
 
-      final headers = Map<String, String>.from(_selectedVideo!.headers);
+      _skipTimes = [];
+      _activeSkipTimeNotifier.value = null;
 
+      final headers = Map<String, String>.from(_selectedVideo!.headers);
       final keysToRemove = headers.keys
           .where((k) => k.toLowerCase() == 'user-agent')
           .toList();
@@ -153,7 +232,12 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
       headers['User-Agent'] =
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
 
+      if (!mounted) return;
+
       final resolvedUrl = await _resolveRedirects(_selectedVideo!.url, headers);
+      debugPrint("Resolved stream redirect URL: $resolvedUrl");
+
+      if (!mounted) return;
 
       _videoPlayerController = VideoPlayerController.networkUrl(
         Uri.parse(resolvedUrl),
@@ -161,70 +245,45 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
       );
 
       await _videoPlayerController!.initialize();
+      debugPrint("VideoPlayerController successfully initialized");
+
+      if (!mounted) return;
 
       if (_currentPosition != Duration.zero) {
         await _videoPlayerController!.seekTo(_currentPosition);
+        if (!mounted) return;
       }
 
-      _chewieController = ChewieController(
-        videoPlayerController: _videoPlayerController!,
-        autoPlay: true,
-        looping: false,
-        aspectRatio: _videoPlayerController!.value.aspectRatio,
-        allowFullScreen: true,
-        fullScreenByDefault: true,
-        additionalOptions: (context) {
-          return [
-            OptionItem(
-              onTap: (ctx) {
-                Navigator.of(ctx).pop();
-                _showQualitySelector();
-              },
-              iconData: Icons.settings,
-              title: 'Quality',
-            ),
-          ];
-        },
-        errorBuilder: (context, errorMessage) {
-          return Center(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(
-                    Icons.error_outline,
-                    size: 42,
-                    color: Colors.white,
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    errorMessage,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(color: Colors.white, fontSize: 14),
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () {
-                      _currentPosition =
-                          _videoPlayerController?.value.position ??
-                          Duration.zero;
-                      _initializePlayer();
-                    },
-                    child: const Text('Retry'),
-                  ),
-                ],
-              ),
-            ),
+      debugPrint("Checking AniSkip skip-times conditions...");
+      debugPrint("  widget.malId: ${widget.malId}");
+      if (widget.malId != null) {
+        final double? epNum = parseEpisodeNumber(widget.episode);
+        debugPrint("  Parsed episode number: $epNum");
+        if (epNum != null) {
+          final durationSec = _videoPlayerController!.value.duration.inSeconds;
+          debugPrint("  Episode duration: $durationSec seconds");
+          await _fetchSkipTimes(widget.malId!, epNum, durationSec);
+          if (!mounted) return;
+        } else {
+          debugPrint(
+            "  Failed to parse episode number from: ${widget.episode.url} / ${widget.episode.name}",
           );
-        },
-      );
+        }
+      }
+
+      _videoPlayerController!.addListener(_onPlayerPositionChanged);
+
+      // Auto-start video playback
+      await _videoPlayerController!.play();
 
       if (!mounted) return;
       setState(() {
         _isLoading = false;
+        _showControls = true;
       });
+      _startControlsTimer();
     } catch (e) {
+      debugPrint("Player initialization failed: $e");
       if (!mounted) return;
       setState(() {
         _errorMessage = 'Failed to play video stream: $e';
@@ -299,89 +358,508 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        foregroundColor: Colors.white,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              widget.animeTitle,
-              style: const TextStyle(fontSize: 14, color: Colors.white70),
+  Future<void> _fetchSkipTimes(
+    int malId,
+    double episodeNum,
+    int durationSeconds,
+  ) async {
+    try {
+      final url =
+          'https://api.aniskip.com/v2/skip-times/$malId/$episodeNum?types[]=op&types[]=ed&types[]=mixed-op&types[]=mixed-ed&types[]=recap&episodeLength=$durationSeconds';
+      debugPrint("Fetching AniSkip skip times from URL: $url");
+      final res = await http.get(Uri.parse(url));
+      debugPrint("AniSkip Response status: ${res.statusCode}");
+      debugPrint("AniSkip Response body: ${res.body}");
+      if (res.statusCode == 200) {
+        final data = jsonDecode(res.body);
+        if (data is Map && data['found'] == true && data['results'] is List) {
+          final List<SkipTime> parsedSkips = [];
+          for (final item in data['results']) {
+            final interval = item['interval'];
+            if (interval is Map) {
+              final startTime =
+                  double.tryParse(interval['startTime'].toString()) ?? 0.0;
+              final endTime =
+                  double.tryParse(interval['endTime'].toString()) ?? 0.0;
+              final skipType = item['skipType']?.toString() ?? 'op';
+              parsedSkips.add(
+                SkipTime(
+                  startTime: startTime,
+                  endTime: endTime,
+                  skipType: skipType,
+                ),
+              );
+            }
+          }
+          debugPrint(
+            "Successfully parsed ${parsedSkips.length} AniSkip segments: "
+            "${parsedSkips.map((s) => '${s.skipType}: ${s.startTime}-${s.endTime}s').join(', ')}",
+          );
+          if (mounted) {
+            setState(() {
+              _skipTimes = parsedSkips;
+            });
+          }
+        } else {
+          debugPrint("AniSkip returned found=false or invalid results schema");
+        }
+      } else {
+        debugPrint(
+          "Failed to fetch AniSkip skip times (HTTP ${res.statusCode})",
+        );
+      }
+    } catch (e) {
+      debugPrint("Error fetching skip times: $e");
+    }
+  }
+
+  void _onPlayerPositionChanged() {
+    if (_videoPlayerController == null ||
+        !_videoPlayerController!.value.isInitialized)
+      return;
+
+    final currentPos = _videoPlayerController!.value.position;
+    final currentSec = currentPos.inMilliseconds / 1000.0;
+
+    // Trigger state rebuild for seek bar and duration text if controls are visible and we are not dragging
+    if (_showControls && !_isDraggingSlider) {
+      setState(() {});
+    }
+
+    // Skip times matching
+    SkipTime? matchingSkip;
+    for (final skip in _skipTimes) {
+      if (currentSec >= skip.startTime && currentSec <= skip.endTime) {
+        matchingSkip = skip;
+        break;
+      }
+    }
+
+    if (matchingSkip != _activeSkipTimeNotifier.value) {
+      debugPrint(
+        "Player position: $currentSec s. Active skip segment changed to ${matchingSkip?.skipType}",
+      );
+      _activeSkipTimeNotifier.value = matchingSkip;
+    }
+  }
+
+  String _formatDuration(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
+    final minutes = twoDigits(duration.inMinutes.remainder(60));
+    final seconds = twoDigits(duration.inSeconds.remainder(60));
+    if (duration.inHours > 0) {
+      return "${twoDigits(duration.inHours)}:$minutes:$seconds";
+    }
+    return "$minutes:$seconds";
+  }
+
+  Widget _buildPlayerUI() {
+    if (_videoPlayerController == null ||
+        !_videoPlayerController!.value.isInitialized) {
+      return const SizedBox.shrink();
+    }
+
+    final totalDuration = _videoPlayerController!.value.duration;
+    final currentPosition = _isDraggingSlider
+        ? Duration(seconds: _sliderDragValue.toInt())
+        : _videoPlayerController!.value.position;
+
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        // 1. Video Player
+        GestureDetector(
+          onTap: _toggleControlsVisibility,
+          child: Center(
+            child: AspectRatio(
+              aspectRatio: _videoPlayerController!.value.aspectRatio,
+              child: VideoPlayer(_videoPlayerController!),
             ),
-            Text(
-              widget.episode.name,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-          ],
+          ),
         ),
-        actions: [
-          if (_videos.length > 1 && !_isLoading)
-            IconButton(
-              icon: const Icon(Icons.settings),
-              tooltip: 'Select Quality',
-              onPressed: _showQualitySelector,
+
+        // 2. Double tap zones to seek (covers video area underneath other overlay buttons)
+        Positioned.fill(
+          child: Row(
+            children: [
+              Expanded(
+                child: GestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  onTap: _toggleControlsVisibility,
+                  onDoubleTap: () {
+                    final newPos =
+                        _videoPlayerController!.value.position -
+                        const Duration(seconds: 10);
+                    final targetPos = newPos < Duration.zero
+                        ? Duration.zero
+                        : newPos;
+                    _videoPlayerController!.seekTo(targetPos);
+                  },
+                ),
+              ),
+              Expanded(
+                child: GestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  onTap: _toggleControlsVisibility,
+                  onDoubleTap: () {
+                    final newPos =
+                        _videoPlayerController!.value.position +
+                        const Duration(seconds: 10);
+                    final targetPos = newPos > totalDuration
+                        ? totalDuration
+                        : newPos;
+                    _videoPlayerController!.seekTo(targetPos);
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        // 3. Controls Overlay
+        if (_showControls) ...[
+          // Dim background
+          Positioned.fill(
+            child: GestureDetector(
+              onTap: _toggleControlsVisibility,
+              child: Container(color: Colors.black45),
             ),
-        ],
-      ),
-      body: Center(
-        child: _isLoading
-            ? Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+          ),
+
+          // Top Row: Back button, Title, Settings action button
+          Positioned(
+            top: _isFullScreen ? 24.0 : 0.0,
+            left: 8.0,
+            right: 8.0,
+            child: AppBar(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back, color: Colors.white),
+                onPressed: () {
+                  if (_isFullScreen) {
+                    _toggleFullScreen();
+                  } else {
+                    Navigator.of(context).pop();
+                  }
+                },
+              ),
+              title: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  CircularProgressIndicator.adaptive(
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      Theme.of(context).colorScheme.primary,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
                   Text(
-                    _loadingText,
-                    style: const TextStyle(color: Colors.white, fontSize: 16),
+                    widget.animeTitle,
+                    style: const TextStyle(fontSize: 12, color: Colors.white70),
+                  ),
+                  Text(
+                    widget.episode.name,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
                 ],
-              )
-            : _errorMessage != null
-            ? Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+              ),
+              actions: [
+                if (_videos.length > 1)
+                  IconButton(
+                    icon: const Icon(Icons.settings, color: Colors.white),
+                    tooltip: 'Quality',
+                    onPressed: () {
+                      _startControlsTimer();
+                      _showQualitySelector();
+                    },
+                  ),
+              ],
+            ),
+          ),
+
+          // Center Controls: Play/Pause
+          Center(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                IconButton(
+                  iconSize: 42,
+                  icon: const Icon(Icons.replay_10, color: Colors.white),
+                  onPressed: () {
+                    _startControlsTimer();
+                    final newPos =
+                        _videoPlayerController!.value.position -
+                        const Duration(seconds: 10);
+                    final targetPos = newPos < Duration.zero
+                        ? Duration.zero
+                        : newPos;
+                    _videoPlayerController!.seekTo(targetPos);
+                  },
+                ),
+                const SizedBox(width: 32),
+                IconButton(
+                  iconSize: 64,
+                  icon: Icon(
+                    _videoPlayerController!.value.isPlaying
+                        ? Icons.pause_circle_filled
+                        : Icons.play_circle_filled,
+                    color: Colors.white,
+                  ),
+                  onPressed: () {
+                    _startControlsTimer();
+                    if (_videoPlayerController!.value.isPlaying) {
+                      _videoPlayerController!.pause();
+                    } else {
+                      _videoPlayerController!.play();
+                    }
+                    setState(() {});
+                  },
+                ),
+                const SizedBox(width: 32),
+                IconButton(
+                  iconSize: 42,
+                  icon: const Icon(Icons.forward_10, color: Colors.white),
+                  onPressed: () {
+                    _startControlsTimer();
+                    final newPos =
+                        _videoPlayerController!.value.position +
+                        const Duration(seconds: 10);
+                    final targetPos = newPos > totalDuration
+                        ? totalDuration
+                        : newPos;
+                    _videoPlayerController!.seekTo(targetPos);
+                  },
+                ),
+              ],
+            ),
+          ),
+
+          // Bottom Bar: Progress seekbar, durations, fullscreen
+          Positioned(
+            bottom: _isFullScreen ? 16.0 : 8.0,
+            left: 16.0,
+            right: 16.0,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Seekbar slider
+                Row(
                   children: [
-                    const Icon(
-                      Icons.error_outline,
-                      size: 54,
-                      color: Colors.red,
-                    ),
-                    const SizedBox(height: 16),
                     Text(
-                      _errorMessage!,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        color: Colors.white70,
-                        fontSize: 14,
+                      _formatDuration(currentPosition),
+                      style: const TextStyle(color: Colors.white, fontSize: 12),
+                    ),
+                    Expanded(
+                      child: SliderTheme(
+                        data: SliderTheme.of(context).copyWith(
+                          activeTrackColor: Theme.of(
+                            context,
+                          ).colorScheme.primary,
+                          inactiveTrackColor: Colors.white24,
+                          thumbColor: Theme.of(context).colorScheme.primary,
+                          trackHeight: 4.0,
+                          thumbShape: const RoundSliderThumbShape(
+                            enabledThumbRadius: 6.0,
+                          ),
+                        ),
+                        child: Slider(
+                          value: currentPosition.inSeconds.toDouble().clamp(
+                            0.0,
+                            totalDuration.inSeconds.toDouble(),
+                          ),
+                          min: 0.0,
+                          max: totalDuration.inSeconds.toDouble(),
+                          onChanged: (val) {
+                            setState(() {
+                              _isDraggingSlider = true;
+                              _sliderDragValue = val;
+                            });
+                          },
+                          onChangeEnd: (val) {
+                            _videoPlayerController!.seekTo(
+                              Duration(seconds: val.toInt()),
+                            );
+                            setState(() {
+                              _isDraggingSlider = false;
+                            });
+                            _startControlsTimer();
+                          },
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 24),
-                    FilledButton(
-                      onPressed: _fetchVideoList,
-                      child: const Text('Retry'),
+                    Text(
+                      _formatDuration(totalDuration),
+                      style: const TextStyle(color: Colors.white, fontSize: 12),
                     ),
                   ],
                 ),
-              )
-            : _chewieController != null
-            ? Chewie(controller: _chewieController!)
-            : const SizedBox.shrink(),
+
+                // Controls row: Fullscreen button only
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    IconButton(
+                      icon: Icon(
+                        _isFullScreen
+                            ? Icons.fullscreen_exit
+                            : Icons.fullscreen,
+                        color: Colors.white,
+                      ),
+                      tooltip: 'Fullscreen',
+                      onPressed: _toggleFullScreen,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+
+        // 4. Skip intro/outro buttons (placed at the top-most level of the Stack, always clickable when active)
+        Positioned(
+          bottom: _isFullScreen ? 90.0 : 100.0,
+          right: 24.0,
+          child: ValueListenableBuilder<SkipTime?>(
+            valueListenable: _activeSkipTimeNotifier,
+            builder: (context, activeSkip, child) {
+              if (activeSkip == null) return const SizedBox.shrink();
+              return ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.black87,
+                  foregroundColor: Colors.white,
+                  side: const BorderSide(color: Colors.white30),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                onPressed: () {
+                  final seekTarget = Duration(
+                    seconds: activeSkip.endTime.toInt(),
+                  );
+                  debugPrint(
+                    "Skip button clicked! Seeking to ${seekTarget.inSeconds}s",
+                  );
+                  _videoPlayerController!.seekTo(seekTarget);
+                },
+                icon: const Icon(Icons.skip_next),
+                label: Text(
+                  activeSkip.skipType == 'op' ||
+                          activeSkip.skipType == 'mixed-op'
+                      ? 'Skip Opening'
+                      : activeSkip.skipType == 'ed' ||
+                            activeSkip.skipType == 'mixed-ed'
+                      ? 'Skip Ending'
+                      : 'Skip Recap',
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return PopScope(
+      canPop: !_isFullScreen,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        if (_isFullScreen) {
+          _toggleFullScreen();
+        }
+      },
+      child: Scaffold(
+        backgroundColor: Colors.black,
+        appBar: null,
+        body: Center(
+          child: _isLoading
+              ? Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator.adaptive(
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Text(
+                      _loadingText,
+                      style: const TextStyle(color: Colors.white, fontSize: 16),
+                    ),
+                  ],
+                )
+              : _errorMessage != null
+              ? Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.error_outline,
+                        size: 54,
+                        color: Colors.red,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        _errorMessage!,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      FilledButton(
+                        onPressed: _fetchVideoList,
+                        child: const Text('Retry'),
+                      ),
+                    ],
+                  ),
+                )
+              : _buildPlayerUI(),
+        ),
       ),
     );
   }
+}
+
+double? parseEpisodeNumber(ExtEpisode episode) {
+  try {
+    final parsed = jsonDecode(episode.url);
+    if (parsed is Map && parsed.containsKey('num')) {
+      return double.tryParse(parsed['num'].toString());
+    }
+  } catch (_) {}
+
+  if (episode.url.contains('/')) {
+    final parts = episode.url.split('/');
+    final epNumStr = parts.last;
+    final parsed = double.tryParse(epNumStr);
+    if (parsed != null) return parsed;
+  }
+
+  if (episode.url.contains('|')) {
+    final parts = episode.url.split('|');
+    final epNumStr = parts.last;
+    final parsed = double.tryParse(epNumStr);
+    if (parsed != null) return parsed;
+  }
+
+  final match = RegExp(
+    r'(?:episode|ep|e)\.?\s*(\d+(?:\.\d+)?)',
+    caseSensitive: false,
+  ).firstMatch(episode.name);
+  if (match != null) {
+    return double.tryParse(match.group(1)!);
+  }
+
+  final matchAny = RegExp(r'(\d+(?:\.\d+)?)').firstMatch(episode.name);
+  if (matchAny != null) {
+    return double.tryParse(matchAny.group(1)!);
+  }
+
+  return null;
 }

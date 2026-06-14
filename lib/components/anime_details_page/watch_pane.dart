@@ -8,6 +8,7 @@ import 'package:zenbu/pages/extensions_page.dart';
 
 class AnimeWatchPane extends StatefulWidget {
   final int mediaId;
+  final int? malId;
   final String animeTitle;
   final String? coverImage;
   final List? streamingEpisodes;
@@ -15,6 +16,7 @@ class AnimeWatchPane extends StatefulWidget {
   const AnimeWatchPane({
     super.key,
     required this.mediaId,
+    this.malId,
     required this.animeTitle,
     this.coverImage,
     this.streamingEpisodes,
@@ -424,6 +426,7 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
                                           episode: ep,
                                           source: _selectedExtension!,
                                           animeTitle: widget.animeTitle,
+                                          malId: widget.malId,
                                         ),
                                       ),
                                     );

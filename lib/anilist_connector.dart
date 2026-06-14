@@ -128,6 +128,7 @@ Future<Map<String, dynamic>> getAnimeData(int id) async {
     String query = '''
       query(\$id: Int) {
         Media(id: \$id) {
+          idMal
           title {
             english
             native

@@ -104,6 +104,7 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
                     child: SizedBox(
                       child: AnimeWatchPane(
                         mediaId: widget.id as int,
+                        malId: media["idMal"] as int?,
                         animeTitle: media["title"]["romaji"] ?? '',
                         coverImage: media["coverImage"]["extraLarge"],
                         streamingEpisodes: media["streamingEpisodes"] as List?,
