@@ -7,6 +7,7 @@ import 'package:flutter_subtitle/flutter_subtitle.dart' hide Subtitle;
 import 'package:http/http.dart' as http;
 import 'package:video_player/video_player.dart';
 import 'package:zenbu/models/extensions_models.dart';
+import 'package:zenbu/services/js_engine.dart';
 import 'package:zenbu/services/repo_service.dart';
 
 class SkipTime {
@@ -115,6 +116,8 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   VideoPlayerController? _videoPlayerController;
   ChewieController? _chewieController;
 
+  JsEngine? _jsEngine;
+
   bool _isLoading = true;
   String _loadingText = 'Resolving stream links...';
   String? _errorMessage;
@@ -143,6 +146,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   void dispose() {
     _activeSkipTimeNotifier.dispose();
     _disposePlayer();
+    _disposeEngine();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     super.dispose();
@@ -154,6 +158,11 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     _videoPlayerController?.dispose();
     _chewieController = null;
     _videoPlayerController = null;
+  }
+
+  void _disposeEngine() {
+    _jsEngine?.dispose();
+    _jsEngine = null;
   }
 
   void _startControlsTimer() {
@@ -194,7 +203,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     try {
       final engine = await RepoService.loadExtensionEngine(widget.source);
       final rawList = await engine.getVideoList(widget.episode.url);
-      engine.dispose();
+
+      _disposeEngine();
+      _jsEngine = engine;
 
       if (!mounted) return;
 
@@ -208,11 +219,6 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
           _isLoading = false;
         });
         return;
-      }
-
-      debugPrint('Fetched video streams count: ${list.length}');
-      for (int i = 0; i < list.length; i++) {
-        debugPrint("  Video $i quality: '${list[i].quality}'");
       }
 
       setState(() {
@@ -268,10 +274,6 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   Future<void> _initializePlayer() async {
     if (_selectedVideo == null) return;
 
-    debugPrint(
-      'Initializing player for stream: ${_selectedVideo!.quality} (URL: ${_selectedVideo!.url})',
-    );
-
     if (!mounted) return;
 
     setState(() {
@@ -298,8 +300,6 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
       if (!mounted) return;
 
       final resolvedUrl = await _resolveRedirects(_selectedVideo!.url, headers);
-      debugPrint('Resolved stream redirect URL: $resolvedUrl');
-
       if (!mounted) return;
 
       _videoPlayerController = VideoPlayerController.networkUrl(
@@ -308,8 +308,6 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
       );
 
       await _videoPlayerController!.initialize();
-      debugPrint('VideoPlayerController successfully initialized');
-
       if (!mounted) return;
 
       _chewieController = ChewieController(
@@ -335,20 +333,12 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
         if (!mounted) return;
       }
 
-      debugPrint('Checking AniSkip skip-times conditions...');
-      debugPrint('  widget.malId: ${widget.malId}');
       if (widget.malId != null) {
         final double? epNum = parseEpisodeNumber(widget.episode);
-        debugPrint('  Parsed episode number: $epNum');
         if (epNum != null) {
           final durationSec = _videoPlayerController!.value.duration.inSeconds;
-          debugPrint('  Episode duration: $durationSec seconds');
           await _fetchSkipTimes(widget.malId!, epNum, durationSec);
           if (!mounted) return;
-        } else {
-          debugPrint(
-            '  Failed to parse episode number from: ${widget.episode.url} / ${widget.episode.name}',
-          );
         }
       }
 
@@ -363,7 +353,6 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
       });
       _startControlsTimer();
     } catch (e) {
-      debugPrint('Player initialization failed: $e');
       if (!mounted) return;
       setState(() {
         _errorMessage = 'Failed to play video stream: $e';
@@ -372,42 +361,77 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     }
   }
 
+  Future<String?> _fetchSubtitleBody(String url) async {
+    const ua =
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
+        'AppleWebKit/537.36 (KHTML, like Gecko) '
+        'Chrome/120.0.0.0 Safari/537.36';
+
+    final base = Map<String, String>.from(_selectedVideo?.headers ?? {});
+    base.removeWhere((k, _) => k.toLowerCase() == 'user-agent');
+    base['User-Agent'] = ua;
+
+    if (!base.containsKey('Origin') && !base.containsKey('origin')) {
+      final originParam = Uri.tryParse(url)?.queryParameters['origin'];
+      if (originParam != null && originParam.isNotEmpty) {
+        base['Origin'] = originParam;
+        base.putIfAbsent(
+          'Referer',
+          () => originParam.endsWith('/') ? originParam : '$originParam/',
+        );
+      } else {
+        final ref = base['Referer'] ?? base['referer'] ?? '';
+        final refUri = Uri.tryParse(ref);
+        if (refUri != null) {
+          base['Origin'] = '${refUri.scheme}://${refUri.host}';
+        }
+      }
+    }
+
+    final attempts = [
+      () => _jsEngine?.fetchUrl(url, base),
+      () async {
+        final r = await http.get(Uri.parse(url), headers: base);
+        return r.statusCode == 200 ? utf8.decode(r.bodyBytes) : null;
+      },
+      () async {
+        final h = <String, String>{'User-Agent': ua};
+        final ref = base['Referer'] ?? base['referer'];
+        if (ref != null) h['Referer'] = ref;
+        final r = await http.get(Uri.parse(url), headers: h);
+        return r.statusCode == 200 ? utf8.decode(r.bodyBytes) : null;
+      },
+      () async {
+        final r = await http.get(Uri.parse(url), headers: {'User-Agent': ua});
+        return r.statusCode == 200 ? utf8.decode(r.bodyBytes) : null;
+      },
+      () async {
+        final r = await http.get(Uri.parse(url));
+        return r.statusCode == 200 ? utf8.decode(r.bodyBytes) : null;
+      },
+    ];
+
+    for (final attempt in attempts) {
+      final body = await attempt();
+      if (body != null) return body;
+    }
+    return null;
+  }
+
   Future<void> _loadSubtitle(ExtSubtitle sub) async {
     try {
-      debugPrint('Loading subtitle: ${sub.label} from ${sub.file}');
+      final resolvedUrl = await _resolveRedirects(
+        sub.file,
+        Map<String, String>.from(_selectedVideo?.headers ?? {}),
+      );
 
-      final headers = Map<String, String>.from(_selectedVideo?.headers ?? {});
+      final body = await _fetchSubtitleBody(resolvedUrl);
+      if (body == null) return;
 
-      headers.removeWhere((k, _) => k.toLowerCase() == 'user-agent');
-      headers['User-Agent'] =
-          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
-          'AppleWebKit/537.36 (KHTML, like Gecko) '
-          'Chrome/120.0.0.0 Safari/537.36';
-
-      debugPrint('Subtitle headers: $headers');
-
-      final resolvedUrl = await _resolveRedirects(sub.file, headers);
-      debugPrint('Resolved subtitle URL: $resolvedUrl');
-
-      final res = await http.get(Uri.parse(resolvedUrl), headers: headers);
-
-      if (res.statusCode != 200) {
-        debugPrint('Failed to download subtitle (HTTP ${res.statusCode})');
-        return;
-      }
-
-      final body = utf8.decode(res.bodyBytes);
-
-      final SubtitleFormat format = body.trimLeft().startsWith('WEBVTT')
+      final format = body.trimLeft().startsWith('WEBVTT')
           ? SubtitleFormat.webvtt
           : SubtitleFormat.srt;
-
       final ctrl = SubtitleController.string(body, format: format);
-
-      debugPrint(
-        'Subtitle parsed: ${sub.label} '
-        '(${format.name}, ${ctrl.subtitles.length} cues)',
-      );
 
       if (mounted) {
         setState(() {
@@ -415,9 +439,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
           _activeSubtitleCtrl = ctrl;
         });
       }
-    } catch (e) {
-      debugPrint('Error loading subtitle ${sub.label}: $e');
-    }
+    } catch (_) {}
   }
 
   void _disableSubtitles() {
@@ -571,10 +593,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     try {
       final url =
           'https://api.aniskip.com/v2/skip-times/$malId/$episodeNum?types[]=op&types[]=ed&types[]=mixed-op&types[]=mixed-ed&types[]=recap&episodeLength=$durationSeconds';
-      debugPrint('Fetching AniSkip skip times from URL: $url');
       final res = await http.get(Uri.parse(url));
-      debugPrint('AniSkip Response status: ${res.statusCode}');
-      debugPrint('AniSkip Response body: ${res.body}');
       if (res.statusCode == 200) {
         final data = jsonDecode(res.body);
         if (data is Map && data['found'] == true && data['results'] is List) {
@@ -596,24 +615,12 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
               );
             }
           }
-          debugPrint(
-            'Successfully parsed ${parsedSkips.length} AniSkip segments: '
-            "${parsedSkips.map((s) => '${s.skipType}: ${s.startTime}-${s.endTime}s').join(', ')}",
-          );
           if (mounted) {
             setState(() => _skipTimes = parsedSkips);
           }
-        } else {
-          debugPrint('AniSkip returned found=false or invalid results schema');
         }
-      } else {
-        debugPrint(
-          'Failed to fetch AniSkip skip times (HTTP ${res.statusCode})',
-        );
       }
-    } catch (e) {
-      debugPrint('Error fetching skip times: $e');
-    }
+    } catch (_) {}
   }
 
   void _onPlayerPositionChanged() {
@@ -622,7 +629,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
       return;
     }
 
-    if (_showControls && !_isDraggingSlider) {
+    if (!_isDraggingSlider) {
       setState(() {});
     }
 
@@ -636,9 +643,6 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
       }
     }
     if (matchingSkip != _activeSkipTimeNotifier.value) {
-      debugPrint(
-        'Player position: $currentSec s. Active skip segment changed to ${matchingSkip?.skipType}',
-      );
       _activeSkipTimeNotifier.value = matchingSkip;
     }
   }
@@ -955,14 +959,14 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
 
         if (_activeSubtitleCtrl != null && _videoPlayerController != null)
           Positioned(
-            bottom: _isFullScreen ? 72.0 : 80.0,
+            bottom: _isFullScreen ? (_showControls ? 76.0 : 20.0) : 80.0,
             left: 16.0,
             right: 16.0,
             child: IgnorePointer(
-              child: Builder(
-                builder: (context) {
-                  final posMs =
-                      _videoPlayerController!.value.position.inMilliseconds;
+              child: ValueListenableBuilder<VideoPlayerValue>(
+                valueListenable: _videoPlayerController!,
+                builder: (context, value, child) {
+                  final posMs = value.position.inMilliseconds;
                   final text = _activeSubtitleCtrl!.textFromMilliseconds(
                     posMs,
                     _activeSubtitleCtrl!.subtitles,
@@ -970,9 +974,15 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                   if (text.isEmpty) return const SizedBox.shrink();
                   return SubtitleView(
                     text: text,
+                    backgroundColor: Colors.transparent,
                     subtitleStyle: SubtitleStyle(
                       fontSize: _isFullScreen ? 20.0 : 16.0,
+                      textColor: Colors.white,
                       bordered: true,
+                      borderStyle: const SubtitleBorderStyle(
+                        strokeWidth: 2.0,
+                        color: Colors.black,
+                      ),
                     ),
                   );
                 },
@@ -1001,13 +1011,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                   ),
                 ),
                 onPressed: () {
-                  final seekTarget = Duration(
-                    seconds: activeSkip.endTime.toInt(),
+                  _videoPlayerController!.seekTo(
+                    Duration(seconds: activeSkip.endTime.toInt()),
                   );
-                  debugPrint(
-                    'Skip button clicked! Seeking to ${seekTarget.inSeconds}s',
-                  );
-                  _videoPlayerController!.seekTo(seekTarget);
                 },
                 icon: const Icon(Icons.skip_next),
                 label: Text(

@@ -431,6 +431,24 @@ class JsEngine {
     return json.decode(resolved.stringResult);
   }
 
+  Future<String?> fetchUrl(String url, Map<String, String> headers) async {
+    try {
+      final escapedUrl = url.replaceAll(r'\', r'\\').replaceAll('"', r'\"');
+      final headersJson = json.encode(headers);
+      final res = _runtime.evaluate(
+        'jsonStringify(extension.client.get("$escapedUrl", $headersJson))',
+      );
+      final resolved = await _runtime.handlePromise(res);
+      final data = json.decode(resolved.stringResult);
+      if (data is Map && data['statusCode'] == 200) {
+        return data['body'] as String?;
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
   void dispose() {
     _runtime.dispose();
   }
