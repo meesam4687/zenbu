@@ -379,7 +379,7 @@ class JsEngine {
       }
     ''');
     _runtime.evaluate(sourceCode);
-    _runtime.evaluate('''
+    _runtime.evaluate(r'''
       if (typeof DefaultExtension !== 'undefined') {
         DefaultExtension.prototype.originalB64dec = DefaultExtension.prototype.b64dec;
         DefaultExtension.prototype.b64dec = function(str) {
@@ -391,6 +391,22 @@ class JsEngine {
         DefaultExtension.prototype.inflate = function(data) {
           return JSON.parse(sendMessage('native_inflate', JSON.stringify([data])));
         };
+        if (typeof DefaultExtension.prototype.getDetail === 'function') {
+          DefaultExtension.prototype.originalGetDetail = DefaultExtension.prototype.getDetail;
+          DefaultExtension.prototype.getDetail = function(url) {
+            if (url && typeof url === 'string' && url.includes('/')) {
+              const lastSegment = url.split('/').filter(Boolean).pop();
+              if (/^\d+$/.test(lastSegment)) {
+                try {
+                  return this.originalGetDetail(url);
+                } catch (e) {
+                  return this.originalGetDetail(lastSegment);
+                }
+              }
+            }
+            return this.originalGetDetail(url);
+          };
+        }
       }
       var extension = new DefaultExtension();
     ''');
@@ -446,6 +462,22 @@ class JsEngine {
       return null;
     } catch (e) {
       return null;
+    }
+  }
+
+  Future<List<dynamic>> getSourcePreferences() async {
+    try {
+      final res = _runtime.evaluate(
+        'jsonStringify(typeof extension !== "undefined" && typeof extension.getSourcePreferences === "function" ? extension.getSourcePreferences() : [])',
+      );
+      final resolved = await _runtime.handlePromise(res);
+      final decoded = json.decode(resolved.stringResult);
+      if (decoded is List) {
+        return decoded;
+      }
+      return [];
+    } catch (_) {
+      return [];
     }
   }
 

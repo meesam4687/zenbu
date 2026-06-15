@@ -36,6 +36,12 @@ class ExtSource {
   final String version;
   final String sourceCodeUrl;
   String? sourceCode;
+  final String iconUrl;
+  final bool isManga;
+  final bool isNsfw;
+  final String apiUrl;
+  final String dateFormat;
+  final String dateFormatLocale;
 
   ExtSource({
     required this.name,
@@ -45,6 +51,12 @@ class ExtSource {
     required this.version,
     required this.sourceCodeUrl,
     this.sourceCode,
+    this.iconUrl = '',
+    this.isManga = true,
+    this.isNsfw = false,
+    this.apiUrl = '',
+    this.dateFormat = '',
+    this.dateFormatLocale = '',
   });
 
   factory ExtSource.fromJson(Map<String, dynamic> json) {
@@ -56,6 +68,12 @@ class ExtSource {
       version: json['version'] ?? '',
       sourceCodeUrl: json['sourceCodeUrl'] ?? '',
       sourceCode: json['sourceCode'],
+      iconUrl: json['iconUrl'] ?? json['icon'] ?? '',
+      isManga: json['isManga'] ?? true,
+      isNsfw: json['isNsfw'] ?? false,
+      apiUrl: json['apiUrl'] ?? '',
+      dateFormat: json['dateFormat'] ?? '',
+      dateFormatLocale: json['dateFormatLocale'] ?? '',
     );
   }
 
@@ -67,6 +85,12 @@ class ExtSource {
     'version': version,
     'sourceCodeUrl': sourceCodeUrl,
     'sourceCode': sourceCode,
+    'iconUrl': iconUrl,
+    'isManga': isManga,
+    'isNsfw': isNsfw,
+    'apiUrl': apiUrl,
+    'dateFormat': dateFormat,
+    'dateFormatLocale': dateFormatLocale,
   };
 }
 

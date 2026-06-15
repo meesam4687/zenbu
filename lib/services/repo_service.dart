@@ -177,4 +177,13 @@ class RepoService {
     await engine.loadExtension(sourceCode, source.baseUrl, userPrefs);
     return engine;
   }
+
+  static Future<List<dynamic>> getExtensionPreferences(ExtSource source) async {
+    final engine = await loadExtensionEngine(source);
+    try {
+      return await engine.getSourcePreferences();
+    } finally {
+      engine.dispose();
+    }
+  }
 }

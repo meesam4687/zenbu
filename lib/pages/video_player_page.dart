@@ -236,11 +236,13 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     }
   }
 
-  Future<String> _resolveRedirects(
+
+  Future<_ResolvedStream> _resolveRedirects(
     String url,
     Map<String, String> headers,
   ) async {
     String currentUrl = url;
+    String? contentType;
     try {
       final client = http.Client();
       var request = http.Request('GET', Uri.parse(currentUrl))
@@ -248,6 +250,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
       headers.forEach((k, v) => request.headers[k] = v);
 
       var response = await client.send(request);
+      contentType = response.headers['content-type'];
       await response.stream.listen((_) {}).cancel();
 
       int redirectCount = 0;
@@ -265,10 +268,11 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
           ..followRedirects = false;
         headers.forEach((k, v) => request.headers[k] = v);
         response = await client.send(request);
+        contentType = response.headers['content-type'];
         await response.stream.listen((_) {}).cancel();
       }
     } catch (_) {}
-    return currentUrl;
+    return _ResolvedStream(currentUrl, contentType);
   }
 
   Future<void> _initializePlayer() async {
@@ -288,23 +292,47 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
       _activeSkipTimeNotifier.value = null;
 
       final headers = Map<String, String>.from(_selectedVideo!.headers);
-      final keysToRemove = headers.keys
-          .where((k) => k.toLowerCase() == 'user-agent')
-          .toList();
-      for (var k in keysToRemove) {
-        headers.remove(k);
+      final hasUserAgent = headers.keys.any((k) => k.toLowerCase() == 'user-agent');
+      if (!hasUserAgent) {
+        headers['User-Agent'] =
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
       }
-      headers['User-Agent'] =
-          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
 
       if (!mounted) return;
 
-      final resolvedUrl = await _resolveRedirects(_selectedVideo!.url, headers);
+      final resolvedResult = await _resolveRedirects(_selectedVideo!.url, headers);
       if (!mounted) return;
+
+      final resolvedUrl = resolvedResult.url;
+      final contentType = resolvedResult.contentType;
+
+      VideoFormat? formatHint;
+      final lowerUrl = resolvedUrl.toLowerCase();
+      final lowerOrigUrl = _selectedVideo!.url.toLowerCase();
+      final lowerContentType = contentType?.toLowerCase() ?? '';
+      if (lowerUrl.contains('.m3u8') ||
+          lowerUrl.contains('/hls/') ||
+          lowerUrl.contains('type=m3u8') ||
+          lowerOrigUrl.contains('.m3u8') ||
+          lowerOrigUrl.contains('/hls/') ||
+          lowerOrigUrl.contains('type=m3u8') ||
+          lowerContentType.contains('mpegurl') ||
+          lowerContentType.contains('m3u8')) {
+        formatHint = VideoFormat.hls;
+      } else if (lowerUrl.contains('.mpd') ||
+                 lowerUrl.contains('/dash/') ||
+                 lowerUrl.contains('type=mpd') ||
+                 lowerOrigUrl.contains('.mpd') ||
+                 lowerOrigUrl.contains('/dash/') ||
+                 lowerOrigUrl.contains('type=mpd') ||
+                 lowerContentType.contains('dash+xml')) {
+        formatHint = VideoFormat.dash;
+      }
 
       _videoPlayerController = VideoPlayerController.networkUrl(
         Uri.parse(resolvedUrl),
         httpHeaders: headers,
+        formatHint: formatHint,
       );
 
       await _videoPlayerController!.initialize();
@@ -368,8 +396,10 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
         'Chrome/120.0.0.0 Safari/537.36';
 
     final base = Map<String, String>.from(_selectedVideo?.headers ?? {});
-    base.removeWhere((k, _) => k.toLowerCase() == 'user-agent');
-    base['User-Agent'] = ua;
+    final hasUserAgent = base.keys.any((k) => k.toLowerCase() == 'user-agent');
+    if (!hasUserAgent) {
+      base['User-Agent'] = ua;
+    }
 
     if (!base.containsKey('Origin') && !base.containsKey('origin')) {
       final originParam = Uri.tryParse(url)?.queryParameters['origin'];
@@ -420,10 +450,11 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
 
   Future<void> _loadSubtitle(ExtSubtitle sub) async {
     try {
-      final resolvedUrl = await _resolveRedirects(
+      final resolvedResult = await _resolveRedirects(
         sub.file,
         Map<String, String>.from(_selectedVideo?.headers ?? {}),
       );
+      final resolvedUrl = resolvedResult.url;
 
       final body = await _fetchSubtitleBody(resolvedUrl);
       if (body == null) return;
@@ -1126,4 +1157,10 @@ double? parseEpisodeNumber(ExtEpisode episode) {
   if (matchAny != null) return double.tryParse(matchAny.group(1)!);
 
   return null;
+}
+
+class _ResolvedStream {
+  final String url;
+  final String? contentType;
+  _ResolvedStream(this.url, this.contentType);
 }

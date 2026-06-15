@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:zenbu/models/extensions_models.dart';
 import 'package:zenbu/services/repo_service.dart';
 
@@ -110,6 +112,15 @@ class _ExtensionsPageState extends State<ExtensionsPage>
     } catch (e) {
       Fluttertoast.showToast(msg: 'Failed to uninstall ${ext.name}: $e');
     }
+  }
+
+  Future<void> _showExtensionSettings(ExtSource ext) async {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => _ExtensionSettingsSheet(ext: ext),
+    );
   }
 
   void _showAddRepoDialog() {
@@ -274,11 +285,25 @@ class _ExtensionsPageState extends State<ExtensionsPage>
                   color: Colors.grey.shade200,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Icon(
-                  Icons.extension,
-                  color: Colors.blueGrey,
-                  size: 28,
-                ),
+                child: ext.iconUrl.isNotEmpty
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.network(
+                          ext.iconUrl,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) =>
+                              const Icon(
+                                Icons.extension,
+                                color: Colors.blueGrey,
+                                size: 28,
+                              ),
+                        ),
+                      )
+                    : const Icon(
+                        Icons.extension,
+                        color: Colors.blueGrey,
+                        size: 28,
+                      ),
               ),
               title: Text(
                 ext.name,
@@ -291,7 +316,10 @@ class _ExtensionsPageState extends State<ExtensionsPage>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 4),
-                  Row(
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 4,
+                    crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       Container(
                         padding: const EdgeInsets.symmetric(
@@ -313,7 +341,25 @@ class _ExtensionsPageState extends State<ExtensionsPage>
                           ),
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      if (ext.isNsfw)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.red.shade100,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            '18+',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.red.shade900,
+                            ),
+                          ),
+                        ),
                       Text(
                         'v${ext.version}',
                         style: const TextStyle(
@@ -321,8 +367,7 @@ class _ExtensionsPageState extends State<ExtensionsPage>
                           color: Colors.grey,
                         ),
                       ),
-                      if (isInst && !needsUpdate) ...[
-                        const SizedBox(width: 8),
+                      if (isInst && !needsUpdate)
                         const Text(
                           'Installed',
                           style: TextStyle(
@@ -331,14 +376,21 @@ class _ExtensionsPageState extends State<ExtensionsPage>
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                      ],
                     ],
                   ),
                 ],
               ),
-              trailing: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
+                  if (isInst) ...[
+                    IconButton(
+                      icon: const Icon(Icons.settings),
+                      tooltip: 'Settings',
+                      onPressed: () => _showExtensionSettings(ext),
+                    ),
+                    const SizedBox(width: 4),
+                  ],
                   if (!isInst)
                     ElevatedButton.icon(
                       onPressed: () => _installExtension(ext),
@@ -504,6 +556,531 @@ class _ExtensionsPageState extends State<ExtensionsPage>
                 );
               },
             ),
+    );
+  }
+}
+
+class _ExtensionSettingsSheet extends StatefulWidget {
+  final ExtSource ext;
+
+  const _ExtensionSettingsSheet({required this.ext});
+
+  @override
+  State<_ExtensionSettingsSheet> createState() =>
+      _ExtensionSettingsSheetState();
+}
+
+class _ExtensionSettingsSheetState extends State<_ExtensionSettingsSheet> {
+  List<dynamic> _preferences = [];
+  Map<String, dynamic> _savedValues = {};
+  bool _isLoading = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPreferences();
+  }
+
+  Future<void> _loadPreferences() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final keys = prefs.getKeys();
+      final prefix = 'ext_pref_${widget.ext.id}_';
+      final saved = <String, dynamic>{};
+      for (final key in keys) {
+        if (key.startsWith(prefix)) {
+          final prefKey = key.substring(prefix.length);
+          final raw = prefs.getString(key);
+          if (raw != null) {
+            try {
+              saved[prefKey] = json.decode(raw);
+            } catch (_) {}
+          }
+        }
+      }
+
+      final definitions = await RepoService.getExtensionPreferences(widget.ext);
+
+      setState(() {
+        _preferences = definitions;
+        _savedValues = saved;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _error = e.toString();
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _updateValue(String key, dynamic value) async {
+    final prefs = await SharedPreferences.getInstance();
+    final prefKey = 'ext_pref_${widget.ext.id}_$key';
+    await prefs.setString(prefKey, json.encode(value));
+    setState(() {
+      _savedValues[key] = value;
+    });
+  }
+
+  dynamic _getCurrentValue(Map<String, dynamic> pref) {
+    final key = pref['key'] as String;
+    if (_savedValues.containsKey(key)) {
+      return _savedValues[key];
+    }
+    if (pref['checkBoxPreference'] != null) {
+      return pref['checkBoxPreference']['value'] ?? false;
+    }
+    if (pref['switchPreferenceCompat'] != null) {
+      return pref['switchPreferenceCompat']['value'] ?? false;
+    }
+    if (pref['editTextPreference'] != null) {
+      return pref['editTextPreference']['value'] ?? '';
+    }
+    if (pref['listPreference'] != null) {
+      final lp = pref['listPreference'];
+      final valueIndex = lp['valueIndex'] as int? ?? 0;
+      final entryValues = List<String>.from(lp['entryValues'] ?? []);
+      if (valueIndex >= 0 && valueIndex < entryValues.length) {
+        return entryValues[valueIndex];
+      }
+      return '';
+    }
+    if (pref['multiSelectListPreference'] != null) {
+      return List<String>.from(
+        pref['multiSelectListPreference']['values'] ?? [],
+      );
+    }
+    return null;
+  }
+
+  void _showTextDialog(String key, Map<String, dynamic> p, String currVal) {
+    final controller = TextEditingController(text: currVal);
+    final dialogTitle =
+        p['dialogTitle'] as String? ?? p['title'] as String? ?? 'Edit Setting';
+    final dialogMessage =
+        p['dialogMessage'] as String? ?? p['summary'] as String? ?? '';
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(dialogTitle),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (dialogMessage.isNotEmpty) ...[
+              Text(
+                dialogMessage,
+                style: const TextStyle(fontSize: 14, color: Colors.grey),
+              ),
+              const SizedBox(height: 12),
+            ],
+            TextField(
+              controller: controller,
+              decoration: const InputDecoration(border: OutlineInputBorder()),
+              autofocus: true,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () {
+              _updateValue(key, controller.text.trim());
+              Navigator.pop(context);
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showListDialog(
+    String key,
+    String title,
+    String summary,
+    List<String> entries,
+    List<String> entryValues,
+    String currVal,
+  ) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(title),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: entries.length,
+            itemBuilder: (context, index) {
+              final val = entryValues[index];
+              final label = entries[index];
+              return RadioListTile<String>(
+                title: Text(label),
+                value: val,
+                groupValue: currVal,
+                onChanged: (newVal) {
+                  if (newVal != null) {
+                    _updateValue(key, newVal);
+                  }
+                  Navigator.pop(context);
+                },
+              );
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showMultiSelectDialog(
+    String key,
+    String title,
+    List<String> entries,
+    List<String> entryValues,
+    List<String> currVals,
+  ) {
+    final selected = List<String>.from(currVals);
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: Text(title),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: entries.length,
+              itemBuilder: (context, index) {
+                final val = entryValues[index];
+                final label = entries[index];
+                final isChecked = selected.contains(val);
+                return CheckboxListTile(
+                  title: Text(label),
+                  value: isChecked,
+                  onChanged: (checked) {
+                    setDialogState(() {
+                      if (checked == true) {
+                        selected.add(val);
+                      } else {
+                        selected.remove(val);
+                      }
+                    });
+                  },
+                );
+              },
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () {
+                _updateValue(key, selected);
+                Navigator.pop(context);
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Theme.of(context).scaffoldBackgroundColor,
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+      clipBehavior: Clip.antiAlias,
+      child: Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 12),
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade400,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade200,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: widget.ext.iconUrl.isNotEmpty
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.network(
+                                widget.ext.iconUrl,
+                                fit: BoxFit.cover,
+                                errorBuilder: (c, e, s) => const Icon(
+                                  Icons.extension,
+                                  color: Colors.blueGrey,
+                                  size: 28,
+                                ),
+                              ),
+                            )
+                          : const Icon(
+                              Icons.extension,
+                              color: Colors.blueGrey,
+                              size: 28,
+                            ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            widget.ext.name,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Version ${widget.ext.version} • ${widget.ext.lang.toUpperCase()}',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
+              ),
+              const Divider(height: 24),
+              ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxHeight: MediaQuery.of(context).size.height * 0.5,
+                ),
+                child: _buildBody(),
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBody() {
+    if (_isLoading) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 40),
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator.adaptive(),
+              SizedBox(height: 16),
+              Text('Reading settings...', style: TextStyle(color: Colors.grey)),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (_error != null) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.error_outline, size: 48, color: Colors.red),
+              const SizedBox(height: 16),
+              Text(
+                'Failed to load settings:\n$_error',
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: Colors.red),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (_preferences.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 40),
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.tune, size: 48, color: Colors.grey),
+              SizedBox(height: 16),
+              Text(
+                'This extension has no settings.',
+                style: TextStyle(color: Colors.grey),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return ListView.builder(
+      shrinkWrap: true,
+      itemCount: _preferences.length,
+      itemBuilder: (context, index) {
+        final Map<String, dynamic> pref = Map<String, dynamic>.from(
+          _preferences[index],
+        );
+        final key = pref['key'] as String? ?? '';
+        if (key.isEmpty) return const SizedBox.shrink();
+
+        if (pref['checkBoxPreference'] != null ||
+            pref['switchPreferenceCompat'] != null) {
+          final isCompat = pref['switchPreferenceCompat'] != null;
+          final p = isCompat
+              ? pref['switchPreferenceCompat']
+              : pref['checkBoxPreference'];
+          final title = p['title'] as String? ?? '';
+          final summary = p['summary'] as String? ?? '';
+          final currValue = _getCurrentValue(pref) as bool? ?? false;
+          return SwitchListTile.adaptive(
+            title: Text(
+              title,
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
+            subtitle: summary.isNotEmpty ? Text(summary) : null,
+            value: currValue,
+            onChanged: (val) => _updateValue(key, val),
+          );
+        }
+
+        if (pref['editTextPreference'] != null) {
+          final p = pref['editTextPreference'];
+          final title = p['title'] as String? ?? '';
+          final summary = p['summary'] as String? ?? '';
+          final currValue = _getCurrentValue(pref) as String? ?? '';
+          return ListTile(
+            title: Text(
+              title,
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
+            subtitle: Text(
+              currValue.isEmpty
+                  ? (summary.isNotEmpty ? summary : 'Not configured')
+                  : currValue,
+            ),
+            trailing: const Icon(Icons.edit_outlined),
+            onTap: () => _showTextDialog(key, p, currValue),
+          );
+        }
+
+        if (pref['listPreference'] != null) {
+          final p = pref['listPreference'];
+          final title = p['title'] as String? ?? '';
+          final summary = p['summary'] as String? ?? '';
+          final entries = List<String>.from(p['entries'] ?? []);
+          final entryValues = List<String>.from(p['entryValues'] ?? []);
+          final currValue = _getCurrentValue(pref) as String? ?? '';
+
+          String displayVal = currValue;
+          final idx = entryValues.indexOf(currValue);
+          if (idx != -1 && idx < entries.length) {
+            displayVal = entries[idx];
+          }
+
+          return ListTile(
+            title: Text(
+              title,
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
+            subtitle: Text(
+              displayVal.isEmpty
+                  ? (summary.isNotEmpty ? summary : 'Choose setting')
+                  : displayVal,
+            ),
+            trailing: const Icon(Icons.arrow_drop_down),
+            onTap: () => _showListDialog(
+              key,
+              title,
+              summary,
+              entries,
+              entryValues,
+              currValue,
+            ),
+          );
+        }
+
+        if (pref['multiSelectListPreference'] != null) {
+          final p = pref['multiSelectListPreference'];
+          final title = p['title'] as String? ?? '';
+          final summary = p['summary'] as String? ?? '';
+          final entries = List<String>.from(p['entries'] ?? []);
+          final entryValues = List<String>.from(p['entryValues'] ?? []);
+          final currValues = List<String>.from(_getCurrentValue(pref) ?? []);
+
+          final List<String> displayVals = [];
+          for (final val in currValues) {
+            final idx = entryValues.indexOf(val);
+            if (idx != -1 && idx < entries.length) {
+              displayVals.add(entries[idx]);
+            } else {
+              displayVals.add(val);
+            }
+          }
+          final displayString = displayVals.isEmpty
+              ? (summary.isNotEmpty ? summary : 'None selected')
+              : displayVals.join(', ');
+
+          return ListTile(
+            title: Text(
+              title,
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
+            subtitle: Text(displayString),
+            trailing: const Icon(Icons.arrow_drop_down),
+            onTap: () => _showMultiSelectDialog(
+              key,
+              title,
+              entries,
+              entryValues,
+              currValues,
+            ),
+          );
+        }
+
+        return const SizedBox.shrink();
+      },
     );
   }
 }
