@@ -174,7 +174,7 @@ class RepoService {
     }
 
     final engine = JsEngine(source.id);
-    await engine.loadExtension(sourceCode, source.baseUrl, userPrefs);
+    await engine.loadExtension(sourceCode, source, userPrefs);
     return engine;
   }
 

@@ -48,6 +48,10 @@ dependencies:
   shared_preferences: ^2.2.2
   html: ^0.15.4
   flutter_subtitle: ^0.0.6
+  encrypt: ^5.0.3
+  crypto: ^3.0.7
+  pseudom: ^1.0.1
+  xpath_selector_html_parser: ^3.0.1
 
 dev_dependencies:
   flutter_test:

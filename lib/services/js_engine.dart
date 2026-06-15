@@ -5,6 +5,10 @@ import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' as html_parser;
 import 'package:html/dom.dart' as html_dom;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:zenbu/services/crypto_utils.dart';
+import 'package:zenbu/models/extensions_models.dart';
+import 'package:pseudom/pseudom.dart' as pseudom;
+import 'package:xpath_selector_html_parser/xpath_selector_html_parser.dart';
 
 class JsEngine {
   late JavascriptRuntime _runtime;
@@ -19,6 +23,7 @@ class JsEngine {
     _setupStringPrototypes();
     _setupHelpers();
     _setupNativeSpeedups();
+    _setupCryptoBindings();
   }
 
   void _setupConsole() {
@@ -48,8 +53,19 @@ class JsEngine {
   void _setupHttpClient() {
     _runtime.onMessage('http_get', (dynamic args) async {
       try {
-        final url = args[0] as String;
-        final headers = Map<String, String>.from(args[1] as Map? ?? {});
+        String url;
+        Map<String, String> headers;
+        if (args is List &&
+            args.isNotEmpty &&
+            args[0] == null &&
+            args.length >= 4) {
+          url = args[2] as String;
+          headers = Map<String, String>.from(args[3] as Map? ?? {});
+        } else {
+          url = args[0] as String;
+          headers = Map<String, String>.from(args[1] as Map? ?? {});
+        }
+
         final response = await http.get(Uri.parse(url), headers: headers);
         String bodyString;
         try {
@@ -59,22 +75,40 @@ class JsEngine {
         }
         return json.encode({
           'statusCode': response.statusCode,
+          'headers': response.headers,
           'body': bodyString,
         });
       } catch (e) {
-        return json.encode({'statusCode': 500, 'body': e.toString()});
+        return json.encode({
+          'statusCode': 500,
+          'headers': <String, String>{},
+          'body': e.toString(),
+        });
       }
     });
 
     _runtime.onMessage('http_post', (dynamic args) async {
       try {
-        final url = args[0] as String;
-        final headers = Map<String, String>.from(args[1] as Map? ?? {});
-        final body = args[2];
+        String url;
+        Map<String, String> headers;
+        dynamic body;
+        if (args is List &&
+            args.isNotEmpty &&
+            args[0] == null &&
+            args.length >= 4) {
+          url = args[2] as String;
+          headers = Map<String, String>.from(args[3] as Map? ?? {});
+          body = args.length >= 5 ? args[4] : null;
+        } else {
+          url = args[0] as String;
+          headers = Map<String, String>.from(args[1] as Map? ?? {});
+          body = args.length >= 3 ? args[2] : null;
+        }
+
         final response = await http.post(
           Uri.parse(url),
           headers: headers,
-          body: body is Map ? json.encode(body) : body.toString(),
+          body: body is Map ? json.encode(body) : body?.toString() ?? "",
         );
         String bodyString;
         try {
@@ -84,35 +118,236 @@ class JsEngine {
         }
         return json.encode({
           'statusCode': response.statusCode,
+          'headers': response.headers,
           'body': bodyString,
         });
       } catch (e) {
-        return json.encode({'statusCode': 500, 'body': e.toString()});
+        return json.encode({
+          'statusCode': 500,
+          'headers': <String, String>{},
+          'body': e.toString(),
+        });
+      }
+    });
+
+    _runtime.onMessage('http_head', (dynamic args) async {
+      try {
+        String url;
+        Map<String, String> headers;
+        if (args is List &&
+            args.isNotEmpty &&
+            args[0] == null &&
+            args.length >= 4) {
+          url = args[2] as String;
+          headers = Map<String, String>.from(args[3] as Map? ?? {});
+        } else {
+          url = args[0] as String;
+          headers = Map<String, String>.from(args[1] as Map? ?? {});
+        }
+
+        final response = await http.head(Uri.parse(url), headers: headers);
+        String bodyString;
+        try {
+          bodyString = utf8.decode(response.bodyBytes, allowMalformed: true);
+        } catch (_) {
+          bodyString = response.body;
+        }
+        return json.encode({
+          'statusCode': response.statusCode,
+          'headers': response.headers,
+          'body': bodyString,
+        });
+      } catch (e) {
+        return json.encode({
+          'statusCode': 500,
+          'headers': <String, String>{},
+          'body': e.toString(),
+        });
+      }
+    });
+
+    _runtime.onMessage('http_put', (dynamic args) async {
+      try {
+        String url;
+        Map<String, String> headers;
+        dynamic body;
+        if (args is List &&
+            args.isNotEmpty &&
+            args[0] == null &&
+            args.length >= 4) {
+          url = args[2] as String;
+          headers = Map<String, String>.from(args[3] as Map? ?? {});
+          body = args.length >= 5 ? args[4] : null;
+        } else {
+          url = args[0] as String;
+          headers = Map<String, String>.from(args[1] as Map? ?? {});
+          body = args.length >= 3 ? args[2] : null;
+        }
+
+        final response = await http.put(
+          Uri.parse(url),
+          headers: headers,
+          body: body is Map ? json.encode(body) : body?.toString() ?? "",
+        );
+        String bodyString;
+        try {
+          bodyString = utf8.decode(response.bodyBytes, allowMalformed: true);
+        } catch (_) {
+          bodyString = response.body;
+        }
+        return json.encode({
+          'statusCode': response.statusCode,
+          'headers': response.headers,
+          'body': bodyString,
+        });
+      } catch (e) {
+        return json.encode({
+          'statusCode': 500,
+          'headers': <String, String>{},
+          'body': e.toString(),
+        });
+      }
+    });
+
+    _runtime.onMessage('http_delete', (dynamic args) async {
+      try {
+        String url;
+        Map<String, String> headers;
+        dynamic body;
+        if (args is List &&
+            args.isNotEmpty &&
+            args[0] == null &&
+            args.length >= 4) {
+          url = args[2] as String;
+          headers = Map<String, String>.from(args[3] as Map? ?? {});
+          body = args.length >= 5 ? args[4] : null;
+        } else {
+          url = args[0] as String;
+          headers = Map<String, String>.from(args[1] as Map? ?? {});
+          body = args.length >= 3 ? args[2] : null;
+        }
+
+        final response = await http.delete(
+          Uri.parse(url),
+          headers: headers,
+          body: body is Map ? json.encode(body) : body?.toString(),
+        );
+        String bodyString;
+        try {
+          bodyString = utf8.decode(response.bodyBytes, allowMalformed: true);
+        } catch (_) {
+          bodyString = response.body;
+        }
+        return json.encode({
+          'statusCode': response.statusCode,
+          'headers': response.headers,
+          'body': bodyString,
+        });
+      } catch (e) {
+        return json.encode({
+          'statusCode': 500,
+          'headers': <String, String>{},
+          'body': e.toString(),
+        });
+      }
+    });
+
+    _runtime.onMessage('http_patch', (dynamic args) async {
+      try {
+        String url;
+        Map<String, String> headers;
+        dynamic body;
+        if (args is List &&
+            args.isNotEmpty &&
+            args[0] == null &&
+            args.length >= 4) {
+          url = args[2] as String;
+          headers = Map<String, String>.from(args[3] as Map? ?? {});
+          body = args.length >= 5 ? args[4] : null;
+        } else {
+          url = args[0] as String;
+          headers = Map<String, String>.from(args[1] as Map? ?? {});
+          body = args.length >= 3 ? args[2] : null;
+        }
+
+        final response = await http.patch(
+          Uri.parse(url),
+          headers: headers,
+          body: body is Map ? json.encode(body) : body?.toString() ?? "",
+        );
+        String bodyString;
+        try {
+          bodyString = utf8.decode(response.bodyBytes, allowMalformed: true);
+        } catch (_) {
+          bodyString = response.body;
+        }
+        return json.encode({
+          'statusCode': response.statusCode,
+          'headers': response.headers,
+          'body': bodyString,
+        });
+      } catch (e) {
+        return json.encode({
+          'statusCode': 500,
+          'headers': <String, String>{},
+          'body': e.toString(),
+        });
       }
     });
 
     _runtime.evaluate('''
       class Client {
-        async get(url, optionsOrHeaders) {
+        constructor(reqcopyWith) {
+          this.reqcopyWith = reqcopyWith;
+        }
+        _extractHeaders(optionsOrHeaders) {
           let headers = optionsOrHeaders || {};
           if (optionsOrHeaders && optionsOrHeaders.headers && typeof optionsOrHeaders.headers === 'object') {
             headers = optionsOrHeaders.headers;
           }
-          const res = await sendMessage('http_get', JSON.stringify([url, headers]));
-          return JSON.parse(res);
+          return headers;
         }
-        async post(url, optionsOrHeaders, body) {
-          let headers = optionsOrHeaders || {};
+        _extractBody(optionsOrHeaders, body) {
           let reqBody = body || "";
           if (optionsOrHeaders && typeof optionsOrHeaders === 'object') {
-            if (optionsOrHeaders.headers && typeof optionsOrHeaders.headers === 'object') {
-              headers = optionsOrHeaders.headers;
-            }
             if (optionsOrHeaders.body !== undefined) {
               reqBody = optionsOrHeaders.body;
             }
           }
-          const res = await sendMessage('http_post', JSON.stringify([url, headers, reqBody]));
+          return reqBody;
+        }
+        async get(url, optionsOrHeaders) {
+          const headers = this._extractHeaders(optionsOrHeaders);
+          const res = await sendMessage('http_get', JSON.stringify([null, this.reqcopyWith, url, headers]));
+          return JSON.parse(res);
+        }
+        async post(url, optionsOrHeaders, body) {
+          const headers = this._extractHeaders(optionsOrHeaders);
+          const reqBody = this._extractBody(optionsOrHeaders, body);
+          const res = await sendMessage('http_post', JSON.stringify([null, this.reqcopyWith, url, headers, reqBody]));
+          return JSON.parse(res);
+        }
+        async head(url, optionsOrHeaders) {
+          const headers = this._extractHeaders(optionsOrHeaders);
+          const res = await sendMessage('http_head', JSON.stringify([null, this.reqcopyWith, url, headers]));
+          return JSON.parse(res);
+        }
+        async put(url, optionsOrHeaders, body) {
+          const headers = this._extractHeaders(optionsOrHeaders);
+          const reqBody = this._extractBody(optionsOrHeaders, body);
+          const res = await sendMessage('http_put', JSON.stringify([null, this.reqcopyWith, url, headers, reqBody]));
+          return JSON.parse(res);
+        }
+        async delete(url, optionsOrHeaders, body) {
+          const headers = this._extractHeaders(optionsOrHeaders);
+          const reqBody = this._extractBody(optionsOrHeaders, body);
+          const res = await sendMessage('http_delete', JSON.stringify([null, this.reqcopyWith, url, headers, reqBody]));
+          return JSON.parse(res);
+        }
+        async patch(url, optionsOrHeaders, body) {
+          const headers = this._extractHeaders(optionsOrHeaders);
+          const reqBody = this._extractBody(optionsOrHeaders, body);
+          const res = await sendMessage('http_patch', JSON.stringify([null, this.reqcopyWith, url, headers, reqBody]));
           return JSON.parse(res);
         }
       }
@@ -165,6 +400,35 @@ class JsEngine {
           sendMessage('save_pref', JSON.stringify([key, value]));
           return true;
         }
+        getBool(key, defaultValue) {
+          const val = this.get(key);
+          return val !== null ? (val === true || val === 'true') : defaultValue;
+        }
+        setBool(key, value) {
+          return this.setString(key, value);
+        }
+        getInt(key, defaultValue) {
+          const val = this.get(key);
+          if (val !== null) {
+            const parsed = parseInt(val);
+            return isNaN(parsed) ? defaultValue : parsed;
+          }
+          return defaultValue;
+        }
+        setInt(key, value) {
+          return this.setString(key, value);
+        }
+        getDouble(key, defaultValue) {
+          const val = this.get(key);
+          if (val !== null) {
+            const parsed = parseFloat(val);
+            return isNaN(parsed) ? defaultValue : parsed;
+          }
+          return defaultValue;
+        }
+        setDouble(key, value) {
+          return this.setString(key, value);
+        }
       }
     ''');
   }
@@ -174,13 +438,29 @@ class JsEngine {
 
   void _setupDomParser() {
     _runtime.onMessage('get_doc_element', (dynamic args) {
-      final html = args[0] as String;
+      final input = args[0] as String;
       final type = args[1] as String;
-      final doc = html_parser.parse(html);
-      final element = type == 'body' ? doc.body : doc.documentElement;
+      final doc = html_parser.parse(input);
+      final element = switch (type) {
+        'body' => doc.body,
+        'documentElement' => doc.documentElement,
+        'head' => doc.head,
+        _ => doc.parent,
+      };
       _elementKey++;
       _elements[_elementKey] = element;
       return _elementKey;
+    });
+
+    _runtime.onMessage('get_doc_string', (dynamic args) {
+      final input = args[0] as String;
+      final type = args[1] as String;
+      final doc = html_parser.parse(input);
+      final res = switch (type) {
+        'text' => doc.text,
+        _ => doc.outerHtml,
+      };
+      return res;
     });
 
     _runtime.onMessage('get_element_string', (dynamic args) {
@@ -188,81 +468,255 @@ class JsEngine {
       final key = args[1] as int;
       final element = _elements[key];
       if (element == null) return "";
-      switch (type) {
-        case 'text':
-          return element.text;
-        case 'outerHtml':
-          return element.outerHtml;
-        case 'innerHtml':
-          return element.innerHtml;
-        case 'getSrc':
-          return element.attributes['src'] ?? "";
-        case 'getHref':
-          return element.attributes['href'] ?? "";
-        case 'getImg':
-          return element.attributes['src'] ??
-              element.attributes['data-src'] ??
-              "";
-        default:
-          return "";
-      }
-    });
-
-    _runtime.onMessage('doc_select', (dynamic args) {
-      final html = args[0] as String;
-      final selector = args[1] as String;
-      final doc = html_parser.parse(html);
-      final elements = doc.querySelectorAll(selector);
-      final List<int> keys = [];
-      for (var ele in elements) {
-        _elementKey++;
-        _elements[_elementKey] = ele;
-        keys.add(_elementKey);
-      }
-      return json.encode(keys);
-    });
-
-    _runtime.onMessage('ele_select', (dynamic args) {
-      final key = args[0] as int;
-      final selector = args[1] as String;
-      final element = _elements[key];
-      if (element == null) return json.encode([]);
-      final elements = element.querySelectorAll(selector);
-      final List<int> keys = [];
-      for (var ele in elements) {
-        _elementKey++;
-        _elements[_elementKey] = ele;
-        keys.add(_elementKey);
-      }
-      return json.encode(keys);
+      final res = switch (type) {
+        'text' => element.text,
+        'innerHtml' => element.innerHtml,
+        'outerHtml' => element.outerHtml,
+        'className' => element.className,
+        'localName' => element.localName,
+        'namespaceUri' => element.namespaceUri,
+        'getSrc' => _regSrcMatcher(element.outerHtml),
+        'getImg' => _regImgMatcher(element.outerHtml),
+        'getHref' => _regHrefMatcher(element.outerHtml),
+        'getDataSrc' => _regDataSrcMatcher(element.outerHtml),
+        _ => "",
+      };
+      return res;
     });
 
     _runtime.onMessage('doc_select_first', (dynamic args) {
-      final html = args[0] as String;
+      final input = args[0] as String;
       final selector = args[1] as String;
-      final doc = html_parser.parse(html);
-      final ele = doc.querySelector(selector);
+      final doc = html_parser.parse(input);
       _elementKey++;
-      _elements[_elementKey] = ele;
+      _elements[_elementKey] = _docSelectFirst(doc, selector);
       return _elementKey;
     });
 
     _runtime.onMessage('ele_selectFirst', (dynamic args) {
-      final key = args[0] as int;
-      final selector = args[1] as String;
+      final dynamic first = args[0];
+      final dynamic second = args[1];
+      String selector;
+      int key;
+      if (first is int) {
+        key = first;
+        selector = second as String;
+      } else {
+        selector = first as String;
+        key = second as int;
+      }
       final element = _elements[key];
-      if (element == null) return 0;
-      final ele = element.querySelector(selector);
       _elementKey++;
-      _elements[_elementKey] = ele;
+      _elements[_elementKey] = element == null
+          ? null
+          : _selectFirst(element, selector);
+      return _elementKey;
+    });
+
+    _runtime.onMessage('ele_element_sibling', (dynamic args) {
+      final type = args[0] as String;
+      final key = args[1] as int;
+      final ele = _elements[key];
+      final element = type == 'nextElementSibling'
+          ? ele?.nextElementSibling
+          : ele?.previousElementSibling;
+      _elementKey++;
+      _elements[_elementKey] = element;
       return _elementKey;
     });
 
     _runtime.onMessage('ele_attr', (dynamic args) {
-      final key = args[0] as int;
+      final dynamic first = args[0];
+      final dynamic second = args[1];
+      String attrName;
+      int key;
+      if (first is int) {
+        key = first;
+        attrName = second as String;
+      } else {
+        attrName = first as String;
+        key = second as int;
+      }
+      return _elements[key]?.attributes[attrName] ?? "";
+    });
+
+    _runtime.onMessage('doc_attr', (dynamic args) {
+      final input = args[0] as String;
       final attr = args[1] as String;
+      final doc = html_parser.parse(input);
+      return doc.attributes[attr] ?? "";
+    });
+
+    _runtime.onMessage('ele_has_attr', (dynamic args) {
+      final dynamic first = args[0];
+      final dynamic second = args[1];
+      String attr;
+      int key;
+      if (first is int) {
+        key = first;
+        attr = second as String;
+      } else {
+        attr = first as String;
+        key = second as int;
+      }
+      return _elements[key]?.attributes.containsKey(attr) ?? false;
+    });
+
+    _runtime.onMessage('doc_has_attr', (dynamic args) {
+      final input = args[0] as String;
+      final attr = args[1] as String;
+      final doc = html_parser.parse(input);
+      return doc.attributes.containsKey(attr);
+    });
+
+    _runtime.onMessage('doc_xpath_first', (dynamic args) {
+      final input = args[0] as String;
+      final xpath = args[1] as String;
+      final doc = html_parser.parse(input);
+      return _docXpathFirst(doc, xpath);
+    });
+
+    _runtime.onMessage('ele_xpathFirst', (dynamic args) {
+      final dynamic first = args[0];
+      final dynamic second = args[1];
+      String xpath;
+      int key;
+      if (first is int) {
+        key = first;
+        xpath = second as String;
+      } else {
+        xpath = first as String;
+        key = second as int;
+      }
       final element = _elements[key];
-      return element?.attributes[attr] ?? "";
+      return element == null ? "" : _eleXpathFirst(element, xpath);
+    });
+
+    _runtime.onMessage('xpathFirst', (dynamic args) {
+      final xpath = args[0] as String;
+      final key = args[1] as int;
+      final element = _elements[key];
+      return element == null ? "" : _eleXpathFirst(element, xpath);
+    });
+
+    _runtime.onMessage('doc_xpath', (dynamic args) {
+      final input = args[0] as String;
+      final xpath = args[1] as String;
+      final doc = html_parser.parse(input);
+      return json.encode(_docXpath(doc, xpath));
+    });
+
+    _runtime.onMessage('ele_xpath', (dynamic args) {
+      final dynamic first = args[0];
+      final dynamic second = args[1];
+      String xpath;
+      int key;
+      if (first is int) {
+        key = first;
+        xpath = second as String;
+      } else {
+        xpath = first as String;
+        key = second as int;
+      }
+      final element = _elements[key];
+      return json.encode(
+        element == null ? <String>[] : _eleXpath(element, xpath),
+      );
+    });
+
+    _runtime.onMessage('xpath', (dynamic args) {
+      final xpath = args[0] as String;
+      final key = args[1] as int;
+      final element = _elements[key];
+      return json.encode(
+        element == null ? <String>[] : _eleXpath(element, xpath),
+      );
+    });
+
+    _runtime.onMessage('doc_get_elements_by', (dynamic args) {
+      final input = args[0] as String;
+      final type = args[1] as String;
+      final name = args[2] as String;
+      final doc = html_parser.parse(input);
+      final elements = switch (type) {
+        'children' => doc.children,
+        'getElementsByTagName' => doc.getElementsByTagName(name),
+        _ => doc.getElementsByClassName(name),
+      };
+      final List<int> elementKeys = [];
+      for (var element in elements) {
+        _elementKey++;
+        _elements[_elementKey] = element;
+        elementKeys.add(_elementKey);
+      }
+      return json.encode(elementKeys);
+    });
+
+    _runtime.onMessage('ele_get_elements_by', (dynamic args) {
+      final type = args[0] as String;
+      final name = args[1] as String;
+      final key = args[2] as int;
+      final element = _elements[key];
+      if (element == null) return json.encode(<int>[]);
+      final elements = switch (type) {
+        'children' => element.children,
+        'getElementsByTagName' => element.getElementsByTagName(name),
+        _ => element.getElementsByClassName(name),
+      };
+      final List<int> elementKeys = [];
+      for (var ele in elements) {
+        _elementKey++;
+        _elements[_elementKey] = ele;
+        elementKeys.add(_elementKey);
+      }
+      return json.encode(elementKeys);
+    });
+
+    _runtime.onMessage('doc_get_element_by_id', (dynamic args) {
+      final input = args[0] as String;
+      final id = args[1] as String;
+      final doc = html_parser.parse(input);
+      _elementKey++;
+      _elements[_elementKey] = doc.getElementById(id);
+      return _elementKey;
+    });
+
+    _runtime.onMessage('doc_select', (dynamic args) {
+      final input = args[0] as String;
+      final selector = args[1] as String;
+      final doc = html_parser.parse(input);
+      final elements = _docSelect(doc, selector);
+      final List<int> elementKeys = [];
+      for (var element in elements) {
+        _elementKey++;
+        _elements[_elementKey] = element;
+        elementKeys.add(_elementKey);
+      }
+      return json.encode(elementKeys);
+    });
+
+    _runtime.onMessage('ele_select', (dynamic args) {
+      final dynamic first = args[0];
+      final dynamic second = args[1];
+      String selector;
+      int key;
+      if (first is int) {
+        key = first;
+        selector = second as String;
+      } else {
+        selector = first as String;
+        key = second as int;
+      }
+      final element = _elements[key];
+      if (element == null) return json.encode(<int>[]);
+      final elements = _select(element, selector);
+      final List<int> elementKeys = [];
+      for (var ele in elements) {
+        _elementKey++;
+        _elements[_elementKey] = ele;
+        elementKeys.add(_elementKey);
+      }
+      return json.encode(elementKeys);
     });
 
     _runtime.evaluate('''
@@ -270,18 +724,78 @@ class JsEngine {
         constructor(html) {
           this.html = html;
         }
-        get body() {
-          const key = sendMessage('get_doc_element', JSON.stringify([this.html, 'body']));
+        getElement(type) {
+          const key = sendMessage('get_doc_element', JSON.stringify([this.html, type]));
           return new Element(key);
         }
-        select(selector) {
-          const keysJson = sendMessage('doc_select', JSON.stringify([this.html, selector]));
-          const keys = JSON.parse(keysJson);
-          return keys.map(k => new Element(k));
+        get body() {
+          return this.getElement('body');
+        }
+        get documentElement() {
+          return this.getElement('documentElement');
+        }
+        get head() {
+          return this.getElement('head');
+        }
+        get parent() {
+          return this.getElement('parent');
+        }
+        getString(type) {
+          return sendMessage('get_doc_string', JSON.stringify([this.html, type]));
+        }
+        get text() {
+          return this.getString('text');
+        }
+        get outerHtml() {
+          return this.getString('outerHtml');
         }
         selectFirst(selector) {
           const key = sendMessage('doc_select_first', JSON.stringify([this.html, selector]));
           return new Element(key);
+        }
+        select(selector) {
+          let elements = [];
+          JSON.parse(
+            sendMessage("doc_select", JSON.stringify([this.html, selector]))
+          ).forEach((key) => {
+            elements.push(new Element(key));
+          });
+          return elements;
+        }
+        xpathFirst(xpath) {
+          return sendMessage('doc_xpath_first', JSON.stringify([this.html, xpath]));
+        }
+        xpath(xpath) {
+          return JSON.parse(sendMessage('doc_xpath', JSON.stringify([this.html, xpath])));
+        }
+        getElementsListBy(type, name) {
+          name = name || '';
+          let elements = [];
+          JSON.parse(
+            sendMessage("doc_get_elements_by", JSON.stringify([this.html, type, name]))
+          ).forEach((key) => {
+            elements.push(new Element(key));
+          });
+          return elements;
+        }
+        get children() {
+          return this.getElementsListBy('children');
+        }
+        getElementsByTagName(name) {
+          return this.getElementsListBy('getElementsByTagName', name);
+        }
+        getElementsByClassName(name) {
+          return this.getElementsListBy('getElementsByClassName', name);
+        }
+        getElementById(id) {
+          const key = sendMessage('doc_get_element_by_id', JSON.stringify([this.html, id]));
+          return new Element(key);
+        }
+        attr(attr) {
+          return sendMessage('doc_attr', JSON.stringify([this.html, attr]));
+        }
+        hasAttr(attr) {
+          return sendMessage('doc_has_attr', JSON.stringify([this.html, attr]));
         }
       }
 
@@ -289,41 +803,101 @@ class JsEngine {
         constructor(key) {
           this.key = key;
         }
+        getString(type) {
+          return sendMessage('get_element_string', JSON.stringify([type, this.key]));
+        }
         get text() {
-          return sendMessage('get_element_string', JSON.stringify(['text', this.key]));
+          return this.getString('text');
         }
         get outerHtml() {
-          return sendMessage('get_element_string', JSON.stringify(['outerHtml', this.key]));
+          return this.getString('outerHtml');
         }
         get innerHtml() {
-          return sendMessage('get_element_string', JSON.stringify(['innerHtml', this.key]));
-        }
-        attr(name) {
-          return sendMessage('ele_attr', JSON.stringify([this.key, name]));
-        }
-        select(selector) {
-          const keysJson = sendMessage('ele_select', JSON.stringify([this.key, selector]));
-          const keys = JSON.parse(keysJson);
-          return keys.map(k => new Element(k));
-        }
-        selectFirst(selector) {
-          const k = sendMessage('ele_selectFirst', JSON.stringify([this.key, selector]));
-          return new Element(k);
-        }
-        getSrc() {
-          return sendMessage('get_element_string', JSON.stringify(['getSrc', this.key]));
-        }
-        getImg() {
-          return sendMessage('get_element_string', JSON.stringify(['getImg', this.key]));
-        }
-        getHref() {
-          return sendMessage('get_element_string', JSON.stringify(['getHref', this.key]));
+          return this.getString('innerHtml');
         }
         get className() {
-          return this.attr('class');
+          return this.getString('className');
         }
-        get id() {
-          return this.attr('id');
+        get localName() {
+          return this.getString('localName');
+        }
+        get namespaceUri() {
+          return this.getString('namespaceUri');
+        }
+        get getSrc() {
+          return this.getString('getSrc');
+        }
+        get getImg() {
+          return this.getString('getImg');
+        }
+        get getHref() {
+          return this.getString('getHref');
+        }
+        get getDataSrc() {
+          return this.getString('getDataSrc');
+        }
+        getSrc() {
+          return this.getSrc;
+        }
+        getImg() {
+          return this.getImg;
+        }
+        getHref() {
+          return this.getHref;
+        }
+        getElementSibling(type) {
+          const key = sendMessage('ele_element_sibling', JSON.stringify([type, this.key]));
+          return new Element(key);
+        }
+        get previousElementSibling() {
+          return this.getElementSibling('previousElementSibling');
+        }
+        get nextElementSibling() {
+          return this.getElementSibling('nextElementSibling');
+        }
+        getElementsListBy(type, name) {
+          name = name || '';
+          let elements = [];
+          JSON.parse(
+            sendMessage("ele_get_elements_by", JSON.stringify([type, name, this.key]))
+          ).forEach((key) => {
+            elements.push(new Element(key));
+          });
+          return elements;
+        }
+        get children() {
+          return this.getElementsListBy('children');
+        }
+        getElementsByTagName(name) {
+          return this.getElementsListBy('getElementsByTagName', name);
+        }
+        getElementsByClassName(name) {
+          return this.getElementsListBy('getElementsByClassName', name);
+        }
+        xpath(xpath) {
+          return JSON.parse(sendMessage('xpath', JSON.stringify([xpath, this.key])));
+        }
+        attr(attr) {
+          return sendMessage('ele_attr', JSON.stringify([attr, this.key]));
+        }
+        xpathFirst(xpath) {
+          return sendMessage('xpathFirst', JSON.stringify([xpath, this.key]));
+        }
+        selectFirst(selector) {
+          const key = sendMessage('ele_selectFirst', JSON.stringify([selector, this.key]));
+          return new Element(key);
+        }
+        select(selector) {
+          let elements = [];
+          JSON.parse(
+            sendMessage("ele_select", JSON.stringify([selector, this.key]))
+          ).forEach((key) => {
+            elements.push(new Element(key));
+          });
+          return elements;
+        }
+        hasAttr(attr) {
+          return sendMessage('ele_has_attr', JSON.stringify([attr, this.key]));
         }
       }
 
@@ -336,32 +910,89 @@ class JsEngine {
   void _setupStringPrototypes() {
     _runtime.evaluate('''
       String.prototype.substringAfter = function(pattern) {
-        const index = this.indexOf(pattern);
-        if (index === -1) return this;
-        return this.substring(index + pattern.length);
+        const startIndex = this.indexOf(pattern);
+        if (startIndex === -1) return this.substring(0);
+
+        const start = startIndex + pattern.length;
+        return this.substring(start);
+      };
+
+      String.prototype.substringAfterLast = function(pattern) {
+        return this.split(pattern).pop();
       };
 
       String.prototype.substringBefore = function(pattern) {
-        const index = this.indexOf(pattern);
-        if (index === -1) return this;
-        return this.substring(0, index);
+        const endIndex = this.indexOf(pattern);
+        if (endIndex === -1) return this.substring(0);
+
+        return this.substring(0, endIndex);
+      };
+
+      String.prototype.substringBeforeLast = function(pattern) {
+        const endIndex = this.lastIndexOf(pattern);
+        if (endIndex === -1) return this.substring(0);
+        return this.substring(0, endIndex);
       };
 
       String.prototype.substringBetween = function(left, right) {
-        const start = this.indexOf(left);
-        if (start === -1) return "";
-        const end = this.indexOf(right, start + left.length);
-        if (end === -1) return "";
-        return this.substring(start + left.length, end);
+        let startIndex = 0;
+        let index = this.indexOf(left, startIndex);
+        if (index === -1) return "";
+        let leftIndex = index + left.length;
+        let rightIndex = this.indexOf(right, leftIndex);
+        if (rightIndex === -1) return "";
+        startIndex = rightIndex + right.length;
+        return this.substring(leftIndex, rightIndex);
       };
     ''');
   }
 
   void _setupHelpers() {
-    _runtime.evaluate('''
+    _runtime.evaluate(r'''
       async function jsonStringify(promiseOrValue) {
         const resolved = await promiseOrValue;
         return JSON.stringify(resolved);
+      }
+
+      function unpackJs(code) {
+        if (!code || !code.includes("p,a,c,k,e,")) return code;
+        try {
+          let packed = code.trim();
+          if (packed.startsWith("eval(")) {
+            packed = packed.substring(5);
+            if (packed.endsWith(")")) {
+              packed = packed.substring(0, packed.length - 1);
+            }
+            if (packed.endsWith(";")) {
+              packed = packed.substring(0, packed.length - 1);
+            }
+          }
+          const unpacker = new Function("return " + packed);
+          return unpacker();
+        } catch (e) {
+          console.log("Unpacker error: " + e);
+          return code;
+        }
+      }
+
+      function unpackJsAndCombine(code) {
+        if (!code) return "";
+        const regex = /eval\s*\(\s*function\s*\(\s*p\s*,\s*a\s*,\s*c\s*,\s*k\s*,\s*e\s*,\s*[dr\s,]*\)[\s\S]+?\)/g;
+        return code.replace(regex, (match) => {
+          try {
+            return unpackJs(match);
+          } catch (e) {
+            return match;
+          }
+        });
+      }
+
+      function deobfuscateJsPassword(password) {
+        try {
+          return eval(password);
+        } catch (e) {
+          return password;
+        }
       }
     ''');
   }
@@ -396,17 +1027,52 @@ class JsEngine {
 
   Future<void> loadExtension(
     String sourceCode,
-    String baseUrl,
+    ExtSource source,
     Map<String, dynamic> prefs,
   ) async {
     final prefsJson = json.encode(prefs);
+    final sourceJson = json.encode(source.toJson());
     _runtime.evaluate('var _userPrefs = $prefsJson;');
     _runtime.evaluate('''
       class MProvider {
-        constructor() {
-          this.source = {
-            baseUrl: "$baseUrl"
-          };
+        get source() {
+          return $sourceJson;
+        }
+        get supportsLatest() {
+          throw new Error("supportsLatest not implemented");
+        }
+        getHeaders(url) {
+          throw new Error("getHeaders not implemented");
+        }
+        async getPopular(page) {
+          throw new Error("getPopular not implemented");
+        }
+        async getLatestUpdates(page) {
+          throw new Error("getLatestUpdates not implemented");
+        }
+        async search(query, page, filters) {
+          throw new Error("search not implemented");
+        }
+        async getDetail(url) {
+          throw new Error("getDetail not implemented");
+        }
+        async getPageList() {
+          throw new Error("getPageList not implemented");
+        }
+        async getVideoList(url) {
+          throw new Error("getVideoList not implemented");
+        }
+        async getHtmlContent(name, url) {
+          throw new Error("getHtmlContent not implemented");
+        }
+        async cleanHtmlContent(html) {
+          throw new Error("cleanHtmlContent not implemented");
+        }
+        getFilterList() {
+          throw new Error("getFilterList not implemented");
+        }
+        getSourcePreferences() {
+          throw new Error("getSourcePreferences not implemented");
         }
       }
     ''');
@@ -513,7 +1179,442 @@ class JsEngine {
     }
   }
 
+  void _setupCryptoBindings() {
+    _runtime.onMessage('cryptoHandler', (dynamic args) {
+      final text = args[0] as String;
+      final iv = args[1] as String;
+      final key = args[2] as String;
+      final isEncrypt = args[3] as bool;
+      return CryptoAES.cryptoHandler(text, iv, key, isEncrypt);
+    });
+
+    _runtime.onMessage('encryptAESCryptoJS', (dynamic args) {
+      final text = args[0] as String;
+      final passphrase = args[1] as String;
+      return CryptoAES.encryptAESCryptoJS(text, passphrase);
+    });
+
+    _runtime.onMessage('decryptAESCryptoJS', (dynamic args) {
+      final encrypted = args[0] as String;
+      final passphrase = args[1] as String;
+      return CryptoAES.decryptAESCryptoJS(encrypted, passphrase);
+    });
+
+    _runtime.evaluate('''
+      function cryptoHandler(text, iv, key, encrypt) {
+        return sendMessage('cryptoHandler', JSON.stringify([text, iv, key, encrypt]));
+      }
+
+      function encryptAESCryptoJS(plainText, passphrase) {
+        return sendMessage('encryptAESCryptoJS', JSON.stringify([plainText, passphrase]));
+      }
+
+      function decryptAESCryptoJS(encrypted, passphrase) {
+        return sendMessage('decryptAESCryptoJS', JSON.stringify([encrypted, passphrase]));
+      }
+    ''');
+  }
+
   void dispose() {
     _runtime.dispose();
+  }
+}
+
+bool _pseudoSelectorInitialized = false;
+
+(int, int) _parseNth(String arg) {
+  var working = arg.toLowerCase().replaceAll(' ', '');
+  if (working == 'odd') return (2, 1);
+  if (working == 'even') return (2, 0);
+  final reg = RegExp(r'^(\d*)n([+-]?\d+)?$');
+  final match = reg.firstMatch(working);
+  if (match != null) {
+    final aStr = match.group(1);
+    final a = aStr == null || aStr.isEmpty ? 1 : int.parse(aStr);
+    final bStr = match.group(2);
+    final b = bStr == null ? 0 : int.parse(bStr);
+    return (a, b);
+  }
+  final n = int.tryParse(working);
+  if (n != null) return (0, n);
+  return (0, 0);
+}
+
+bool _matchesNth(int index, int a, int b) {
+  if (a == 0) return index == b;
+  final diff = index - b;
+  return diff % a == 0 && diff ~/ a >= 0;
+}
+
+String _getWholeText(html_dom.Element element) {
+  return element.nodes.map((node) {
+    if (node is html_dom.Text) return node.text;
+    if (node is html_dom.Element) return _getWholeText(node);
+    return '';
+  }).join();
+}
+
+String _getWholeOwnText(html_dom.Element element) {
+  return element.nodes.whereType<html_dom.Text>().map((t) => t.text).join();
+}
+
+bool _nthChild(html_dom.Element element, String? args) {
+  if (args == null) return false;
+  final parent = element.parent;
+  if (parent == null) return false;
+  final siblings = parent.children;
+  final index = siblings.indexOf(element) + 1;
+  final (a, b) = _parseNth(args);
+  return _matchesNth(index, a, b);
+}
+
+bool _nthLastChild(html_dom.Element element, String? args) {
+  if (args == null) return false;
+  final parent = element.parent;
+  if (parent == null) return false;
+  final siblings = parent.children;
+  final index = siblings.length - siblings.indexOf(element);
+  final (a, b) = _parseNth(args);
+  return _matchesNth(index, a, b);
+}
+
+bool _nthOfType(html_dom.Element element, String? args) {
+  if (args == null) return false;
+  final parent = element.parent;
+  if (parent == null) return false;
+  final siblings = parent.children
+      .where((e) => e.localName == element.localName)
+      .toList();
+  final index = siblings.indexOf(element) + 1;
+  final (a, b) = _parseNth(args);
+  return _matchesNth(index, a, b);
+}
+
+bool _nthLastOfType(html_dom.Element element, String? args) {
+  if (args == null) return false;
+  final parent = element.parent;
+  if (parent == null) return false;
+  final siblings = parent.children
+      .where((e) => e.localName == element.localName)
+      .toList();
+  final index = siblings.length - siblings.indexOf(element);
+  final (a, b) = _parseNth(args);
+  return _matchesNth(index, a, b);
+}
+
+bool _has(html_dom.Element element, String? args) {
+  if (args == null) return false;
+  final parent = element.parent;
+  final res = parent == null
+      ? false
+      : pseudom.parse(args.replaceAll(':not', ':inot')).selectFirst(parent) ==
+            element;
+  return res
+      ? res
+      : pseudom.parse(args.replaceAll(':not', ':inot')).selectFirst(element) !=
+            null;
+}
+
+bool _inot(html_dom.Element element, String? args) {
+  if (args == null) return false;
+  final parent = element.parent;
+  final res = parent == null
+      ? false
+      : pseudom.parse(args.replaceAll(':not', ':inot')).selectFirst(parent) !=
+            element;
+  return res
+      ? res
+      : pseudom.parse(args.replaceAll(':not', ':inot')).selectFirst(element) ==
+            null;
+}
+
+bool _contains(html_dom.Element element, String? args) {
+  final text = args ?? '';
+  return element.text.toLowerCase().contains(text.toLowerCase());
+}
+
+bool _containsOwn(html_dom.Element element, String? args) {
+  final text = args ?? '';
+  final ownText = element.nodes
+      .whereType<html_dom.Text>()
+      .map((t) => t.text)
+      .join();
+  return ownText.toLowerCase().contains(text.toLowerCase());
+}
+
+bool _matches(html_dom.Element element, String? args) {
+  if (args == null) return false;
+  try {
+    final reg = RegExp(args, caseSensitive: false);
+    return reg.hasMatch(element.text);
+  } catch (e) {
+    return false;
+  }
+}
+
+bool _containsData(html_dom.Element element, String? args) {
+  final data = args ?? '';
+  if (element.localName == 'script' || element.localName == 'style') {
+    return element.text.toLowerCase().contains(data.toLowerCase());
+  }
+  return false;
+}
+
+bool _containsWholeText(html_dom.Element element, String? args) {
+  final text = args ?? '';
+  return _getWholeText(element).contains(text);
+}
+
+bool _containsWholeOwnText(html_dom.Element element, String? args) {
+  final text = args ?? '';
+  return _getWholeOwnText(element).contains(text);
+}
+
+bool _matchesWholeText(html_dom.Element element, String? args) {
+  if (args == null) return false;
+  try {
+    final reg = RegExp(args);
+    return reg.hasMatch(_getWholeText(element));
+  } catch (e) {
+    return false;
+  }
+}
+
+bool _matchesWholeOwnText(html_dom.Element element, String? args) {
+  if (args == null) return false;
+  try {
+    final reg = RegExp(args);
+    return reg.hasMatch(_getWholeOwnText(element));
+  } catch (e) {
+    return false;
+  }
+}
+
+bool _isSelector(html_dom.Element element, String? args) {
+  if (args == null) return false;
+  final selectors = args.split(',').map((s) => s.trim()).toList();
+  for (final sel in selectors) {
+    try {
+      final parsed = pseudom.parse(sel.replaceAll(':not', ':inot'));
+      if (parsed.selectFirst(element) != null) return true;
+    } catch (_) {}
+  }
+  return false;
+}
+
+bool _firstChild(html_dom.Element element, String? args) {
+  return element.previousElementSibling == null;
+}
+
+bool _lastChild(html_dom.Element element, String? args) {
+  return element.nextElementSibling == null;
+}
+
+bool _firstOfType(html_dom.Element element, String? args) {
+  final parent = element.parent;
+  if (parent == null) return false;
+  final siblings = parent.children.where(
+    (e) => e.localName == element.localName,
+  );
+  return siblings.first == element;
+}
+
+bool _lastOfType(html_dom.Element element, String? args) {
+  final parent = element.parent;
+  if (parent == null) return false;
+  final siblings = parent.children.where(
+    (e) => e.localName == element.localName,
+  );
+  return siblings.last == element;
+}
+
+bool _onlyChild(html_dom.Element element, String? args) {
+  return element.previousElementSibling == null &&
+      element.nextElementSibling == null;
+}
+
+bool _onlyOfType(html_dom.Element element, String? args) {
+  final parent = element.parent;
+  if (parent == null) return false;
+  final siblings = parent.children.where(
+    (e) => e.localName == element.localName,
+  );
+  return siblings.length == 1;
+}
+
+bool _empty(html_dom.Element element, String? args) {
+  return element.children.isEmpty && element.text.trim().isEmpty;
+}
+
+bool _root(html_dom.Element element, String? args) {
+  return element.parent == null;
+}
+
+bool _lt(html_dom.Element element, String? args) {
+  if (args == null) return false;
+  final n = int.tryParse(args);
+  if (n == null) return false;
+  final parent = element.parent;
+  if (parent == null) return false;
+  final index = parent.children.indexOf(element);
+  return index < n;
+}
+
+bool _gt(html_dom.Element element, String? args) {
+  if (args == null) return false;
+  final n = int.tryParse(args);
+  if (n == null) return false;
+  final parent = element.parent;
+  if (parent == null) return false;
+  final index = parent.children.indexOf(element);
+  return index > n;
+}
+
+bool _eq(html_dom.Element element, String? args) {
+  if (args == null) return false;
+  final n = int.tryParse(args);
+  if (n == null) return false;
+  final parent = element.parent;
+  if (parent == null) return false;
+  final index = parent.children.indexOf(element);
+  return index == n;
+}
+
+void _initPseudoSelector() {
+  if (_pseudoSelectorInitialized) return;
+  _pseudoSelectorInitialized = true;
+  pseudom.PseudoSelector.handlers['nth-child'] = _nthChild;
+  pseudom.PseudoSelector.handlers['nth-last-child'] = _nthLastChild;
+  pseudom.PseudoSelector.handlers['nth-of-type'] = _nthOfType;
+  pseudom.PseudoSelector.handlers['nth-last-of-type'] = _nthLastOfType;
+  pseudom.PseudoSelector.handlers['has'] = _has;
+  pseudom.PseudoSelector.handlers['inot'] = _inot;
+  pseudom.PseudoSelector.handlers['contains'] = _contains;
+  pseudom.PseudoSelector.handlers['containsOwn'] = _containsOwn;
+  pseudom.PseudoSelector.handlers['containsData'] = _containsData;
+  pseudom.PseudoSelector.handlers['containsWholeText'] = _containsWholeText;
+  pseudom.PseudoSelector.handlers['containsWholeOwnText'] =
+      _containsWholeOwnText;
+  pseudom.PseudoSelector.handlers['matches'] = _matches;
+  pseudom.PseudoSelector.handlers['matchesWholeText'] = _matchesWholeText;
+  pseudom.PseudoSelector.handlers['matchesWholeOwnText'] = _matchesWholeOwnText;
+  pseudom.PseudoSelector.handlers['is'] = _isSelector;
+  pseudom.PseudoSelector.handlers['last-child'] = _lastChild;
+  pseudom.PseudoSelector.handlers['first-child'] = _firstChild;
+  pseudom.PseudoSelector.handlers['first-of-type'] = _firstOfType;
+  pseudom.PseudoSelector.handlers['last-of-type'] = _lastOfType;
+  pseudom.PseudoSelector.handlers['only-child'] = _onlyChild;
+  pseudom.PseudoSelector.handlers['only-of-type'] = _onlyOfType;
+  pseudom.PseudoSelector.handlers['empty'] = _empty;
+  pseudom.PseudoSelector.handlers['root'] = _root;
+  pseudom.PseudoSelector.handlers['lt'] = _lt;
+  pseudom.PseudoSelector.handlers['gt'] = _gt;
+  pseudom.PseudoSelector.handlers['eq'] = _eq;
+}
+
+String _regHrefMatcher(String input) {
+  try {
+    RegExp exp = RegExp(r'href="([^"]+)"');
+    Iterable<Match> matches = exp.allMatches(input);
+    return matches.first.group(1)!;
+  } catch (_) {
+    return "";
+  }
+}
+
+String _regDataSrcMatcher(String input) {
+  try {
+    RegExp exp = RegExp(r'data-src="([^"]+)"');
+    Iterable<Match> matches = exp.allMatches(input);
+    return matches.first.group(1)!;
+  } catch (_) {
+    return "";
+  }
+}
+
+String _regSrcMatcher(String input) {
+  try {
+    RegExp exp = RegExp(r'src="([^"]+)"');
+    Iterable<Match> matches = exp.allMatches(input);
+    return matches.first.group(1)!;
+  } catch (_) {
+    return "";
+  }
+}
+
+String _regImgMatcher(String input) {
+  try {
+    RegExp exp = RegExp(r'img="([^"]+)"');
+    Iterable<Match> matches = exp.allMatches(input);
+    return matches.first.group(1)!;
+  } catch (_) {
+    return "";
+  }
+}
+
+List<html_dom.Element> _select(html_dom.Element dom, String selector) {
+  try {
+    _initPseudoSelector();
+    final fixedSelector = selector.replaceAll(':not', ':inot');
+    return pseudom.parse(fixedSelector).select(dom).toList();
+  } catch (_) {
+    return [];
+  }
+}
+
+html_dom.Element? _selectFirst(html_dom.Element dom, String selector) {
+  try {
+    _initPseudoSelector();
+    final fixedSelector = selector.replaceAll(':not', ':inot');
+    return pseudom.parse(fixedSelector).selectFirst(dom);
+  } catch (_) {
+    return null;
+  }
+}
+
+List<html_dom.Element> _docSelect(html_dom.Document doc, String selector) {
+  final dom = doc.documentElement;
+  if (dom == null) return [];
+  return _select(dom, selector);
+}
+
+html_dom.Element? _docSelectFirst(html_dom.Document doc, String selector) {
+  final dom = doc.documentElement;
+  if (dom == null) return null;
+  return _selectFirst(dom, selector);
+}
+
+String _docXpathFirst(html_dom.Document doc, String xpath) {
+  final dom = doc.documentElement;
+  if (dom == null) return "";
+  return _eleXpathFirst(dom, xpath);
+}
+
+String _eleXpathFirst(html_dom.Element element, String xpath) {
+  try {
+    var htmlXPath = HtmlXPath.node(element);
+    var query = htmlXPath.query(xpath);
+    return query.attr ?? "";
+  } catch (_) {
+    return "";
+  }
+}
+
+List<String> _docXpath(html_dom.Document doc, String xpath) {
+  final dom = doc.documentElement;
+  if (dom == null) return [];
+  return _eleXpath(dom, xpath);
+}
+
+List<String> _eleXpath(html_dom.Element element, String xpath) {
+  try {
+    var htmlXPath = HtmlXPath.node(element);
+    var query = htmlXPath.query(xpath);
+    if (query.nodes.length > 1) {
+      return query.attrs.map((e) => e?.trim() ?? "").toList();
+    }
+    return [];
+  } catch (_) {
+    return [];
   }
 }
