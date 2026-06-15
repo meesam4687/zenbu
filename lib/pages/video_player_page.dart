@@ -136,6 +136,25 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   bool _isDraggingSlider = false;
   double _sliderDragValue = 0.0;
 
+  List<ExtSubtitle> get _allSubtitles {
+    final Map<String, ExtSubtitle> unique = {};
+    for (final video in _videos) {
+      for (final sub in video.subtitles) {
+        if (sub.file.isNotEmpty) {
+          final suffix = ' - ${video.quality}';
+          final newLabel = sub.label.contains(suffix)
+              ? sub.label
+              : '${sub.label}$suffix';
+          unique.putIfAbsent(sub.file, () => ExtSubtitle(
+            file: sub.file,
+            label: newLabel,
+          ));
+        }
+      }
+    }
+    return unique.values.toList();
+  }
+
   @override
   void initState() {
     super.initState();
@@ -350,7 +369,12 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
       );
 
       if (_selectedVideo!.subtitles.isNotEmpty) {
-        await _loadSubtitle(_selectedVideo!.subtitles.first);
+        final firstSub = _selectedVideo!.subtitles.first;
+        final matchedSub = _allSubtitles.firstWhere(
+          (s) => s.file == firstSub.file,
+          orElse: () => firstSub,
+        );
+        await _loadSubtitle(matchedSub);
         if (!mounted) return;
       } else {
         _selectedSubtitle = null;
@@ -395,7 +419,19 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
         'AppleWebKit/537.36 (KHTML, like Gecko) '
         'Chrome/120.0.0.0 Safari/537.36';
 
-    final base = Map<String, String>.from(_selectedVideo?.headers ?? {});
+    Map<String, String> base = {};
+    ExtVideo? matchingVideo;
+    for (final v in _videos) {
+      if (v.subtitles.any((s) => s.file == url)) {
+        matchingVideo = v;
+        break;
+      }
+    }
+    if (matchingVideo != null) {
+      base = Map<String, String>.from(matchingVideo.headers);
+    } else {
+      base = Map<String, String>.from(_selectedVideo?.headers ?? {});
+    }
     final hasUserAgent = base.keys.any((k) => k.toLowerCase() == 'user-agent');
     if (!hasUserAgent) {
       base['User-Agent'] = ua;
@@ -481,7 +517,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   }
 
   void _showSubtitleSelector() {
-    final subtitles = _selectedVideo?.subtitles ?? [];
+    final subtitles = _allSubtitles;
     showModalBottomSheet(
       context: context,
       builder: (context) {
@@ -858,7 +894,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                 ],
               ),
               actions: [
-                if ((_selectedVideo?.subtitles ?? []).isNotEmpty)
+                if (_allSubtitles.isNotEmpty)
                   IconButton(
                     icon: Icon(
                       Icons.closed_caption,
