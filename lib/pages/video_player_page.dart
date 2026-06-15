@@ -422,22 +422,22 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
       () => _jsEngine?.fetchUrl(url, base),
       () async {
         final r = await http.get(Uri.parse(url), headers: base);
-        return r.statusCode == 200 ? utf8.decode(r.bodyBytes) : null;
+        return r.statusCode == 200 ? utf8.decode(r.bodyBytes, allowMalformed: true) : null;
       },
       () async {
         final h = <String, String>{'User-Agent': ua};
         final ref = base['Referer'] ?? base['referer'];
         if (ref != null) h['Referer'] = ref;
         final r = await http.get(Uri.parse(url), headers: h);
-        return r.statusCode == 200 ? utf8.decode(r.bodyBytes) : null;
+        return r.statusCode == 200 ? utf8.decode(r.bodyBytes, allowMalformed: true) : null;
       },
       () async {
         final r = await http.get(Uri.parse(url), headers: {'User-Agent': ua});
-        return r.statusCode == 200 ? utf8.decode(r.bodyBytes) : null;
+        return r.statusCode == 200 ? utf8.decode(r.bodyBytes, allowMalformed: true) : null;
       },
       () async {
         final r = await http.get(Uri.parse(url));
-        return r.statusCode == 200 ? utf8.decode(r.bodyBytes) : null;
+        return r.statusCode == 200 ? utf8.decode(r.bodyBytes, allowMalformed: true) : null;
       },
     ];
 
@@ -576,7 +576,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                   itemCount: _videos.length,
                   itemBuilder: (context, index) {
                     final video = _videos[index];
-                    final isSel = video.url == _selectedVideo?.url;
+                    final isSel = video == _selectedVideo;
                     return ListTile(
                       title: Text(
                         video.quality,

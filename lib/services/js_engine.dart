@@ -51,9 +51,15 @@ class JsEngine {
         final url = args[0] as String;
         final headers = Map<String, String>.from(args[1] as Map? ?? {});
         final response = await http.get(Uri.parse(url), headers: headers);
+        String bodyString;
+        try {
+          bodyString = utf8.decode(response.bodyBytes, allowMalformed: true);
+        } catch (_) {
+          bodyString = response.body;
+        }
         return json.encode({
           'statusCode': response.statusCode,
-          'body': response.body,
+          'body': bodyString,
         });
       } catch (e) {
         return json.encode({'statusCode': 500, 'body': e.toString()});
@@ -70,9 +76,15 @@ class JsEngine {
           headers: headers,
           body: body is Map ? json.encode(body) : body.toString(),
         );
+        String bodyString;
+        try {
+          bodyString = utf8.decode(response.bodyBytes, allowMalformed: true);
+        } catch (_) {
+          bodyString = response.body;
+        }
         return json.encode({
           'statusCode': response.statusCode,
-          'body': response.body,
+          'body': bodyString,
         });
       } catch (e) {
         return json.encode({'statusCode': 500, 'body': e.toString()});
@@ -81,12 +93,26 @@ class JsEngine {
 
     _runtime.evaluate('''
       class Client {
-        async get(url, headers) {
-          const res = await sendMessage('http_get', JSON.stringify([url, headers || {}]));
+        async get(url, optionsOrHeaders) {
+          let headers = optionsOrHeaders || {};
+          if (optionsOrHeaders && optionsOrHeaders.headers && typeof optionsOrHeaders.headers === 'object') {
+            headers = optionsOrHeaders.headers;
+          }
+          const res = await sendMessage('http_get', JSON.stringify([url, headers]));
           return JSON.parse(res);
         }
-        async post(url, headers, body) {
-          const res = await sendMessage('http_post', JSON.stringify([url, headers || {}, body || ""]));
+        async post(url, optionsOrHeaders, body) {
+          let headers = optionsOrHeaders || {};
+          let reqBody = body || "";
+          if (optionsOrHeaders && typeof optionsOrHeaders === 'object') {
+            if (optionsOrHeaders.headers && typeof optionsOrHeaders.headers === 'object') {
+              headers = optionsOrHeaders.headers;
+            }
+            if (optionsOrHeaders.body !== undefined) {
+              reqBody = optionsOrHeaders.body;
+            }
+          }
+          const res = await sendMessage('http_post', JSON.stringify([url, headers, reqBody]));
           return JSON.parse(res);
         }
       }
@@ -292,6 +318,12 @@ class JsEngine {
         }
         getHref() {
           return sendMessage('get_element_string', JSON.stringify(['getHref', this.key]));
+        }
+        get className() {
+          return this.attr('class');
+        }
+        get id() {
+          return this.attr('id');
         }
       }
 
