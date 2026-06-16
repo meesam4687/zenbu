@@ -1,7 +1,9 @@
 # TODOS
 
-- [ ] Filters
+- [x] Filters
 - [x] Account handling
 - [x] AniChart Integration
 - [ ] Icon
-- [ ] Watch and Reviews Tab
+- [x] Watch Tab 
+- [ ] Read Tab 
+- [ ] Reviews Tab
