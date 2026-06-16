@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.al_client"
+    namespace = "dev.meesam.zenbu"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 

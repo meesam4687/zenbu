@@ -1,4 +1,4 @@
-package com.example.al_client
+package dev.meesam.zenbu
 
 import io.flutter.embedding.android.FlutterActivity
 
