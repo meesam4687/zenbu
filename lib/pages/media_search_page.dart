@@ -18,6 +18,9 @@ class SearchPage extends StatefulWidget {
     this.format,
     this.airingStatus,
     this.sourceMaterial,
+    this.sortBy,
+    this.genresNotIn,
+    this.tagsNotIn,
   });
 
   final bool isAnime;
@@ -30,6 +33,9 @@ class SearchPage extends StatefulWidget {
   final String? format;
   final String? airingStatus;
   final String? sourceMaterial;
+  final String? sortBy;
+  final List? genresNotIn;
+  final List? tagsNotIn;
 
   @override
   State<SearchPage> createState() => _SearchPageState();
@@ -75,6 +81,9 @@ class _SearchPageState extends State<SearchPage> {
         widget.airingStatus,
         widget.countryOfOrigin,
         widget.sourceMaterial,
+        widget.sortBy,
+        widget.genresNotIn,
+        widget.tagsNotIn,
       );
     } else {
       data = await searchManga(
@@ -88,6 +97,9 @@ class _SearchPageState extends State<SearchPage> {
         widget.airingStatus,
         widget.countryOfOrigin,
         widget.sourceMaterial,
+        widget.sortBy,
+        widget.genresNotIn,
+        widget.tagsNotIn,
       );
     }
 

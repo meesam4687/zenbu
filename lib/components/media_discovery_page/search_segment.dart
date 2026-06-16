@@ -16,6 +16,9 @@ class SearchSegment extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final provider = Provider.of<StateProvider>(context);
+    final isFilterActive = isAnime ? provider.isAnimeFilterActive : provider.isMangaFilterActive;
+
     return Container(
       margin: const EdgeInsets.only(top: 50, left: 12, right: 12),
       child: Row(
@@ -34,6 +37,11 @@ class SearchSegment extends StatelessWidget {
               onSubmitted: (value) {
                 if (value.isNotEmpty) {
                   final provider = Provider.of<StateProvider>(context, listen: false);
+                  if (isAnime) {
+                    provider.animeSearchQuery = value;
+                  } else {
+                    provider.mangaSearchQuery = value;
+                  }
                   final filters = isAnime ? provider.currentAnimeFilters : provider.currentMangaFilters;
 
                   final route = PageRouteBuilder(
@@ -48,6 +56,12 @@ class SearchSegment extends StatelessWidget {
                         tags: (filters["selectedTags"] as Set).toList().isNotEmpty
                             ? (filters["selectedTags"] as Set).toList()
                             : null,
+                        genresNotIn: (filters["excludedGenres"] as Set).toList().isNotEmpty
+                            ? (filters["excludedGenres"] as Set).toList()
+                            : null,
+                        tagsNotIn: (filters["excludedTags"] as Set).toList().isNotEmpty
+                            ? (filters["excludedTags"] as Set).toList()
+                            : null,
                         countryOfOrigin: filters["countryOfOrigin"] != ""
                             ? filters["countryOfOrigin"]
                             : null,
@@ -58,6 +72,7 @@ class SearchSegment extends StatelessWidget {
                         format: filters["format"] != "" ? filters["format"] : null,
                         airingStatus: filters["airingStatus"] != "" ? filters["airingStatus"] : null,
                         sourceMaterial: filters["sourceMaterial"] != "" ? filters["sourceMaterial"] : null,
+                        sortBy: filters["sortBy"],
                       );
                     },
                   );
@@ -77,14 +92,20 @@ class SearchSegment extends StatelessWidget {
               style: ButtonStyle(
                 elevation: const WidgetStatePropertyAll(6),
                 backgroundColor: WidgetStatePropertyAll(
-                  Theme.of(context).colorScheme.onInverseSurface,
+                  isFilterActive
+                      ? Theme.of(context).colorScheme.primary
+                      : Theme.of(context).colorScheme.onInverseSurface,
                 ),
                 foregroundColor: WidgetStatePropertyAll(
-                  Theme.of(context).colorScheme.onSurface,
+                  isFilterActive
+                      ? Theme.of(context).colorScheme.onPrimary
+                      : Theme.of(context).colorScheme.onSurface,
                 ),
                 fixedSize: const WidgetStatePropertyAll(Size(80, 56)),
                 overlayColor: WidgetStatePropertyAll(
-                  Theme.of(context).colorScheme.outlineVariant,
+                  isFilterActive
+                      ? Theme.of(context).colorScheme.primaryContainer
+                      : Theme.of(context).colorScheme.outlineVariant,
                 ),
               ),
               onPressed: () {

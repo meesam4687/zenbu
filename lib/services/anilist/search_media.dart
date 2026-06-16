@@ -12,6 +12,9 @@ Future<Map<String, dynamic>> searchAnime(
   String? status,
   String? countryOfOrigin,
   String? mediaSource,
+  String? sortBy,
+  List? genreNotIn,
+  List? tagNotIn,
 ) async {
   Map<String, dynamic> vars = {"page": page, "perPage": perPage};
   if (searchQuery != null) vars["search"] = searchQuery;
@@ -27,25 +30,31 @@ Future<Map<String, dynamic>> searchAnime(
   if (mediaSource != null && mediaSource.isNotEmpty) {
     vars["source"] = mediaSource;
   }
+  vars["sort"] = sortBy != null && sortBy.isNotEmpty ? [sortBy] : ["POPULARITY_DESC"];
+  if (genreNotIn != null && genreNotIn.isNotEmpty) vars["genreNotIn"] = genreNotIn;
+  if (tagNotIn != null && tagNotIn.isNotEmpty) vars["tagNotIn"] = tagNotIn;
 
   String query = '''
     query (
       \$page: Int,
-      \$perPage: Int${vars.containsKey("search") ? ", \$search: String" : ""}${vars.containsKey("genreIn") ? ", \$genreIn: [String]" : ""}${vars.containsKey("tagIn") ? ", \$tagIn: [String]" : ""}${vars.containsKey("season") ? ", \$season: MediaSeason" : ""}${vars.containsKey("seasonYear") ? ", \$seasonYear: Int" : ""}${vars.containsKey("format") ? ", \$format: MediaFormat" : ""}${vars.containsKey("status") ? ", \$status: MediaStatus" : ""}${vars.containsKey("countryOfOrigin") ? ", \$countryOfOrigin: CountryCode" : ""}${vars.containsKey("source") ? ", \$source: MediaSource" : ""}
+      \$perPage: Int,
+      \$sort: [MediaSort]${vars.containsKey("search") ? ", \$search: String" : ""}${vars.containsKey("genreIn") ? ", \$genreIn: [String]" : ""}${vars.containsKey("tagIn") ? ", \$tagIn: [String]" : ""}${vars.containsKey("season") ? ", \$season: MediaSeason" : ""}${vars.containsKey("seasonYear") ? ", \$seasonYear: Int" : ""}${vars.containsKey("format") ? ", \$format: MediaFormat" : ""}${vars.containsKey("status") ? ", \$status: MediaStatus" : ""}${vars.containsKey("countryOfOrigin") ? ", \$countryOfOrigin: CountryCode" : ""}${vars.containsKey("source") ? ", \$source: MediaSource" : ""}${vars.containsKey("genreNotIn") ? ", \$genreNotIn: [String]" : ""}${vars.containsKey("tagNotIn") ? ", \$tagNotIn: [String]" : ""}
     ) {
       Page(page: \$page, perPage: \$perPage) { 
         media(
           type: ANIME,
+          sort: \$sort,
           ${vars.containsKey("search") ? "search: \$search," : ""}
           ${vars.containsKey("genreIn") ? "genre_in: \$genreIn," : ""}
           ${vars.containsKey("tagIn") ? "tag_in: \$tagIn," : ""}
+          ${vars.containsKey("genreNotIn") ? "genre_not_in: \$genreNotIn," : ""}
+          ${vars.containsKey("tagNotIn") ? "tag_not_in: \$tagNotIn," : ""}
           ${vars.containsKey("season") ? "season: \$season," : ""}
           ${vars.containsKey("seasonYear") ? "seasonYear: \$seasonYear," : ""}
           ${vars.containsKey("format") ? "format: \$format," : ""}
           ${vars.containsKey("status") ? "status: \$status," : ""}
           ${vars.containsKey("countryOfOrigin") ? "countryOfOrigin: \$countryOfOrigin," : ""}
           ${vars.containsKey("source") ? "source: \$source," : ""}
-          sort: POPULARITY_DESC,
         ) {
           id 
           title { romaji english native }
@@ -70,6 +79,9 @@ Future<Map<String, dynamic>> searchManga(
   String? status,
   String? countryOfOrigin,
   String? mediaSource,
+  String? sortBy,
+  List? genreNotIn,
+  List? tagNotIn,
 ) async {
   Map<String, dynamic> vars = {"page": page, "perPage": perPage};
   if (searchQuery != null) vars["search"] = searchQuery;
@@ -87,24 +99,30 @@ Future<Map<String, dynamic>> searchManga(
   if (mediaSource != null && mediaSource.isNotEmpty) {
     vars["source"] = mediaSource;
   }
+  vars["sort"] = sortBy != null && sortBy.isNotEmpty ? [sortBy] : ["POPULARITY_DESC"];
+  if (genreNotIn != null && genreNotIn.isNotEmpty) vars["genreNotIn"] = genreNotIn;
+  if (tagNotIn != null && tagNotIn.isNotEmpty) vars["tagNotIn"] = tagNotIn;
 
   String query = '''
     query (
       \$page: Int,
-      \$perPage: Int${vars.containsKey("search") ? ", \$search: String" : ""}${vars.containsKey("genreIn") ? ", \$genreIn: [String]" : ""}${vars.containsKey("tagIn") ? ", \$tagIn: [String]" : ""}${vars.containsKey("startDate_greater") ? ", \$startDate_greater: FuzzyDateInt, \$startDate_lesser: FuzzyDateInt" : ""}${vars.containsKey("format") ? ", \$format: MediaFormat" : ""}${vars.containsKey("status") ? ", \$status: MediaStatus" : ""}${vars.containsKey("countryOfOrigin") ? ", \$countryOfOrigin: CountryCode" : ""}${vars.containsKey("source") ? ", \$source: MediaSource" : ""}
+      \$perPage: Int,
+      \$sort: [MediaSort]${vars.containsKey("search") ? ", \$search: String" : ""}${vars.containsKey("genreIn") ? ", \$genreIn: [String]" : ""}${vars.containsKey("tagIn") ? ", \$tagIn: [String]" : ""}${vars.containsKey("startDate_greater") ? ", \$startDate_greater: FuzzyDateInt, \$startDate_lesser: FuzzyDateInt" : ""}${vars.containsKey("format") ? ", \$format: MediaFormat" : ""}${vars.containsKey("status") ? ", \$status: MediaStatus" : ""}${vars.containsKey("countryOfOrigin") ? ", \$countryOfOrigin: CountryCode" : ""}${vars.containsKey("source") ? ", \$source: MediaSource" : ""}${vars.containsKey("genreNotIn") ? ", \$genreNotIn: [String]" : ""}${vars.containsKey("tagNotIn") ? ", \$tagNotIn: [String]" : ""}
     ) {
       Page(page: \$page, perPage: \$perPage) { 
         media(
           type: MANGA,
+          sort: \$sort,
           ${vars.containsKey("search") ? "search: \$search," : ""}
           ${vars.containsKey("genreIn") ? "genre_in: \$genreIn," : ""}
           ${vars.containsKey("tagIn") ? "tag_in: \$tagIn," : ""}
+          ${vars.containsKey("genreNotIn") ? "genre_not_in: \$genreNotIn," : ""}
+          ${vars.containsKey("tagNotIn") ? "tag_not_in: \$tagNotIn," : ""}
           ${vars.containsKey("startDate_greater") ? "startDate_greater: \$startDate_greater, startDate_lesser: \$startDate_lesser," : ""}
           ${vars.containsKey("format") ? "format: \$format," : ""}
           ${vars.containsKey("status") ? "status: \$status," : ""}
           ${vars.containsKey("countryOfOrigin") ? "countryOfOrigin: \$countryOfOrigin," : ""}
           ${vars.containsKey("source") ? "source: \$source," : ""}
-          sort: POPULARITY_DESC,
         ) {
           id 
           title { romaji english native }

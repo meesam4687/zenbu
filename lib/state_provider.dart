@@ -6,6 +6,8 @@ class StateProvider extends ChangeNotifier {
   Map _mangaDiscoveryData = {};
   Map _currentAnimeFilters = _defaultAnimeFilters();
   Map _currentMangaFilters = _defaultMangaFilters();
+  String _animeSearchQuery = "";
+  String _mangaSearchQuery = "";
 
   Map get alData => _alData;
   set alData(Map value) {
@@ -37,25 +39,72 @@ class StateProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  String get animeSearchQuery => _animeSearchQuery;
+  set animeSearchQuery(String value) {
+    _animeSearchQuery = value;
+    notifyListeners();
+  }
+
+  String get mangaSearchQuery => _mangaSearchQuery;
+  set mangaSearchQuery(String value) {
+    _mangaSearchQuery = value;
+    notifyListeners();
+  }
+
+  bool get isAnimeFilterActive {
+    final filters = _currentAnimeFilters;
+    return (filters["selectedGenres"] as Set).isNotEmpty ||
+        (filters["selectedTags"] as Set).isNotEmpty ||
+        (filters["excludedGenres"] as Set).isNotEmpty ||
+        (filters["excludedTags"] as Set).isNotEmpty ||
+        filters["releaseYear"] != null ||
+        filters["countryOfOrigin"] != "" ||
+        filters["season"] != "" ||
+        filters["format"] != "" ||
+        filters["airingStatus"] != "" ||
+        filters["sourceMaterial"] != "" ||
+        (filters["sortBy"] != null && filters["sortBy"] != "POPULARITY_DESC");
+  }
+
+  bool get isMangaFilterActive {
+    final filters = _currentMangaFilters;
+    return (filters["selectedGenres"] as Set).isNotEmpty ||
+        (filters["selectedTags"] as Set).isNotEmpty ||
+        (filters["excludedGenres"] as Set).isNotEmpty ||
+        (filters["excludedTags"] as Set).isNotEmpty ||
+        filters["releaseYear"] != null ||
+        filters["countryOfOrigin"] != "" ||
+        filters["format"] != "" ||
+        filters["airingStatus"] != "" ||
+        filters["sourceMaterial"] != "" ||
+        (filters["sortBy"] != null && filters["sortBy"] != "POPULARITY_DESC");
+  }
+
   static Map _defaultAnimeFilters() => {
         "selectedGenres": <String>{},
         "selectedTags": <String>{},
+        "excludedGenres": <String>{},
+        "excludedTags": <String>{},
         "releaseYear": null,
         "countryOfOrigin": "",
         "season": "",
         "format": "",
         "airingStatus": "",
         "sourceMaterial": "",
+        "sortBy": "POPULARITY_DESC",
       };
 
   static Map _defaultMangaFilters() => {
         "selectedGenres": <String>{},
         "selectedTags": <String>{},
+        "excludedGenres": <String>{},
+        "excludedTags": <String>{},
         "releaseYear": null,
         "countryOfOrigin": "",
         "format": "",
         "airingStatus": "",
         "sourceMaterial": "",
+        "sortBy": "POPULARITY_DESC",
       };
 
   void updateData(Map newData) {
@@ -65,11 +114,13 @@ class StateProvider extends ChangeNotifier {
 
   void clearAnimeFilters() {
     _currentAnimeFilters = _defaultAnimeFilters();
+    _animeSearchQuery = "";
     notifyListeners();
   }
 
   void clearMangaFilters() {
     _currentMangaFilters = _defaultMangaFilters();
+    _mangaSearchQuery = "";
     notifyListeners();
   }
 
