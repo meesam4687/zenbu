@@ -1,7 +1,6 @@
 import 'dart:ui' as ui;
-import 'package:zenbu/pages/anime_details_page.dart';
+import 'package:zenbu/pages/media_details_page.dart';
 import 'package:zenbu/pages/character_details_page.dart';
-import 'package:zenbu/pages/manga_details_page.dart';
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 
@@ -42,7 +41,7 @@ class AiringBanner extends StatelessWidget {
         return Container(
           height: 240,
           width: double.infinity,
-          margin: EdgeInsets.only(top: 10, left: 10, right: 10, bottom: 5),
+          margin: const EdgeInsets.only(top: 10, left: 10, right: 10, bottom: 5),
           child: Card(
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.all(Radius.circular(cardRadius)),
@@ -78,7 +77,7 @@ class AiringBanner extends StatelessWidget {
                         height: 190,
                         width: 140,
                         child: Card(
-                          shape: RoundedRectangleBorder(
+                          shape: const RoundedRectangleBorder(
                             borderRadius: BorderRadius.all(Radius.circular(14)),
                           ),
                           elevation: 5,
@@ -86,7 +85,6 @@ class AiringBanner extends StatelessWidget {
                           child: Image.network(
                             coverImage,
                             fit: BoxFit.cover,
-
                             errorBuilder: (context, error, stackTrace) =>
                                 const Icon(Icons.error),
                           ),
@@ -95,14 +93,14 @@ class AiringBanner extends StatelessWidget {
                       const SizedBox(width: 10),
                       Expanded(
                         child: Container(
-                          margin: EdgeInsets.only(right: 10),
+                          margin: const EdgeInsets.only(right: 10),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
                               Text(
                                 title,
-                                style: TextStyle(
+                                style: const TextStyle(
                                   fontSize: 24,
                                   shadows: [
                                     BoxShadow(
@@ -118,7 +116,7 @@ class AiringBanner extends StatelessWidget {
                               (totalEpisodes != null && airedEpisodes != null)
                                   ? Text(
                                       "Episodes: $airedEpisodes/$totalEpisodes\n$tagString",
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         fontSize: 15,
                                         shadows: [
                                           BoxShadow(
@@ -133,7 +131,7 @@ class AiringBanner extends StatelessWidget {
                                     )
                                   : Text(
                                       tagString,
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         fontSize: 15,
                                         shadows: [
                                           BoxShadow(
@@ -146,7 +144,7 @@ class AiringBanner extends StatelessWidget {
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                     ),
-                              SizedBox(height: 18),
+                              const SizedBox(height: 18),
                             ],
                           ),
                         ),
@@ -167,13 +165,13 @@ class AiringBanner extends StatelessWidget {
       },
       openBuilder: (context, closeContainer) {
         if (type == "anime") {
-          return AnimeDetailsPage(id: id);
+          return MediaDetailsPage(id: id, isAnime: true);
         } else if (type == "manga") {
-          return MangaDetailsPage(id: id);
+          return MediaDetailsPage(id: id, isAnime: false);
         } else if (type == "character") {
           return CharacterDetailsPage(id: id);
         }
-        return Placeholder();
+        return const Placeholder();
       },
     );
   }

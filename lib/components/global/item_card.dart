@@ -1,6 +1,5 @@
-import 'package:zenbu/pages/anime_details_page.dart';
+import 'package:zenbu/pages/media_details_page.dart';
 import 'package:zenbu/pages/character_details_page.dart';
-import 'package:zenbu/pages/manga_details_page.dart';
 import 'package:zenbu/pages/staff_details_page.dart';
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
@@ -57,7 +56,7 @@ class ItemCard extends StatelessWidget {
                   Text(
                     title as String,
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -65,7 +64,7 @@ class ItemCard extends StatelessWidget {
                       ? Text(
                           state as String,
                           textAlign: TextAlign.center,
-                          style: TextStyle(fontWeight: FontWeight.w200),
+                          style: const TextStyle(fontWeight: FontWeight.w200),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         )
@@ -78,15 +77,15 @@ class ItemCard extends StatelessWidget {
       },
       openBuilder: (context, closeContainer) {
         if (type == "anime") {
-          return AnimeDetailsPage(id: id);
+          return MediaDetailsPage(id: id, isAnime: true);
         } else if (type == "manga") {
-          return MangaDetailsPage(id: id);
+          return MediaDetailsPage(id: id, isAnime: false);
         } else if (type == "character") {
           return CharacterDetailsPage(id: id);
         } else if (type == "staff") {
           return StaffDetailsPage(id: id);
         }
-        return Placeholder();
+        return const Placeholder();
       },
     );
   }

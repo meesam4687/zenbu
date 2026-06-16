@@ -1,5 +1,5 @@
 import 'dart:ui';
-import 'package:zenbu/components/anime_details_page/list_editor_bottom_sheet.dart';
+import 'package:zenbu/components/media_details_page/list_editor_bottom_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -15,6 +15,7 @@ class TitlePane extends StatefulWidget {
     required this.mediaState,
     required this.mediaListEntry,
     required this.totalEpisodes,
+    required this.isAnime,
   });
 
   final String title;
@@ -26,6 +27,7 @@ class TitlePane extends StatefulWidget {
   final Map? mediaListEntry;
   final String totalEpisodes;
   final String fullTitle;
+  final bool isAnime;
 
   @override
   State<TitlePane> createState() => _TitlePaneState();
@@ -61,19 +63,19 @@ class _TitlePaneState extends State<TitlePane> {
     final surfaceColor = Theme.of(context).colorScheme.surface;
     List<Widget> elementList = [];
     if (mediaState == 'CURRENT') {
-      elementList = [Icon(Icons.edit), Text(" Watching")];
+      elementList = [const Icon(Icons.edit), Text(widget.isAnime ? " Watching" : " Reading")];
     } else if (mediaState == 'COMPLETED') {
-      elementList = [Icon(Icons.check), Text(" Completed")];
+      elementList = [const Icon(Icons.check), const Text(" Completed")];
     } else if (mediaState == 'PLANNING') {
-      elementList = [Icon(Icons.schedule), Text(" Planning")];
+      elementList = [const Icon(Icons.schedule), const Text(" Planning")];
     } else if (mediaState == 'DROPPED') {
-      elementList = [Icon(Icons.cancel), Text(" Dropped")];
+      elementList = [const Icon(Icons.cancel), const Text(" Dropped")];
     } else if (mediaState == 'PAUSED') {
-      elementList = [Icon(Icons.pause), Text(" Paused")];
+      elementList = [const Icon(Icons.pause), const Text(" Paused")];
     } else if (mediaState == 'REPEATING') {
-      elementList = [Icon(Icons.loop), Text(" Rewatching")];
+      elementList = [const Icon(Icons.loop), Text(widget.isAnime ? " Rewatching" : " Rereading")];
     } else {
-      elementList = [Icon(Icons.add), Text(" Add to List")];
+      elementList = [const Icon(Icons.add), const Text(" Add to List")];
     }
     return SizedBox(
       height: 350,
@@ -109,7 +111,7 @@ class _TitlePaneState extends State<TitlePane> {
                   children: [
                     Container(
                       margin: const EdgeInsets.only(left: 10),
-                      decoration: BoxDecoration(
+                      decoration: const BoxDecoration(
                         borderRadius: BorderRadius.all(Radius.circular(10)),
                       ),
                       height: 180,
@@ -128,7 +130,7 @@ class _TitlePaneState extends State<TitlePane> {
                       ),
                     ),
                     Container(
-                      margin: EdgeInsets.only(left: 10),
+                      margin: const EdgeInsets.only(left: 10),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -144,7 +146,7 @@ class _TitlePaneState extends State<TitlePane> {
                               width: 200,
                               child: Text(
                                 widget.title,
-                                style: TextStyle(fontSize: 27),
+                                style: const TextStyle(fontSize: 27),
                                 maxLines: 3,
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -158,7 +160,7 @@ class _TitlePaneState extends State<TitlePane> {
                 ),
                 Container(
                   width: double.infinity,
-                  margin: EdgeInsets.only(left: 12, right: 12, top: 10),
+                  margin: const EdgeInsets.only(left: 12, right: 12, top: 10),
                   child: FilledButton(
                     onPressed: () {
                       showModalBottomSheet(
@@ -170,6 +172,7 @@ class _TitlePaneState extends State<TitlePane> {
                               bottom: MediaQuery.of(context).viewInsets.bottom,
                             ),
                             child: ListEditorBottomSheet(
+                              isAnime: widget.isAnime,
                               status: mediaListEntry?["status"] ?? "NONE",
                               progress: mediaListEntry?["progress"] ?? 0,
                               startDate:

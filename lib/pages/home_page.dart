@@ -2,10 +2,9 @@ import 'package:zenbu/components/home_page/user_info_modal_sheet.dart';
 import 'package:zenbu/pages/error_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:zenbu/anilist_connector.dart';
+import 'package:zenbu/services/anilist/anilist.dart';
 import 'package:zenbu/state_provider.dart';
-import 'package:zenbu/components/home_page/anime_list.dart';
-import 'package:zenbu/components/home_page/manga_list.dart';
+import 'package:zenbu/components/home_page/media_list.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -15,7 +14,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  late Future<Map<String, dynamic>> alData;
+  late Future<Map<String, dynamic>> _alData;
+
   @override
   void initState() {
     super.initState();
@@ -25,35 +25,28 @@ class _HomePageState extends State<HomePage> {
     ).alData;
 
     if (providerData.isEmpty) {
-      alData = getHomePageData();
+      _alData = getHomePageData();
     }
+  }
+
+  List<dynamic> _extractListEntries(Map data, String listKey) {
+    if (data.isEmpty) return [];
+    final listData = data["data"]?[listKey];
+    if (listData == null || listData["lists"] == null) return [];
+    final lists = listData["lists"] as List;
+    final entries = [];
+    for (var list in lists) {
+      if (list["entries"] != null) {
+        entries.addAll(list["entries"]);
+      }
+    }
+    return entries;
   }
 
   @override
   Widget build(BuildContext context) {
     Map providerData = Provider.of<StateProvider>(context).alData;
-    late List palist1;
-    late List palist2;
-    late List pmlist1;
-    late List pmlist2;
-    if (providerData.isNotEmpty) {
-      palist1 =
-          ((providerData["data"]["animeList"]["lists"] as List).isNotEmpty)
-          ? providerData["data"]["animeList"]["lists"][0]["entries"]
-          : [];
-      palist2 =
-          ((providerData["data"]["animeList"]["lists"] as List).length > 1)
-          ? providerData["data"]["animeList"]["lists"][1]["entries"]
-          : [];
-      pmlist1 =
-          ((providerData["data"]["mangaList"]["lists"] as List).isNotEmpty)
-          ? providerData["data"]["mangaList"]["lists"][0]["entries"]
-          : [];
-      pmlist2 =
-          ((providerData["data"]["mangaList"]["lists"] as List).length > 1)
-          ? providerData["data"]["mangaList"]["lists"][1]["entries"]
-          : [];
-    }
+
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 60,
@@ -88,12 +81,12 @@ class _HomePageState extends State<HomePage> {
                     border: Border.all(
                       color: Theme.of(context).colorScheme.onSecondary,
                     ),
-                    borderRadius: BorderRadius.all(Radius.circular(360)),
+                    borderRadius: const BorderRadius.all(Radius.circular(360)),
                   ),
                   child: ClipOval(
                     child: (providerData.isEmpty)
                         ? FutureBuilder(
-                            future: alData,
+                            future: _alData,
                             builder: (context, snapshot) {
                               if (snapshot.connectionState ==
                                   ConnectionState.waiting) {
@@ -138,7 +131,7 @@ class _HomePageState extends State<HomePage> {
       ),
       body: (providerData.isEmpty)
           ? FutureBuilder(
-              future: alData,
+              future: _alData,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(
@@ -150,7 +143,7 @@ class _HomePageState extends State<HomePage> {
                     scaffold: false,
                     onReload: () {
                       setState(() {
-                        alData = getHomePageData();
+                        _alData = getHomePageData();
                       });
                     },
                   );
@@ -162,29 +155,13 @@ class _HomePageState extends State<HomePage> {
                     listen: false,
                   ).updateData(data);
                 });
-                final alist1 =
-                    ((data["data"]["animeList"]["lists"] as List).isNotEmpty)
-                    ? data["data"]["animeList"]["lists"][0]["entries"]
-                    : [];
-                final alist2 =
-                    ((data["data"]["animeList"]["lists"] as List).length > 1)
-                    ? data["data"]["animeList"]["lists"][1]["entries"]
-                    : [];
-                final animeData = [...alist1, ...alist2];
-                final mlist1 =
-                    ((data["data"]["mangaList"]["lists"] as List).isNotEmpty)
-                    ? data["data"]["mangaList"]["lists"][0]["entries"]
-                    : [];
-                final mlist2 =
-                    ((data["data"]["mangaList"]["lists"] as List).length > 1)
-                    ? data["data"]["mangaList"]["lists"][1]["entries"]
-                    : [];
-                final mangaData = [...mlist1, ...mlist2];
+                final animeData = _extractListEntries(data, "animeList");
+                final mangaData = _extractListEntries(data, "mangaList");
                 return SingleChildScrollView(
                   child: Column(
                     children: [
-                      AnimeList(items: animeData),
-                      MangaList(items: mangaData),
+                      MediaList(items: animeData, isAnime: true),
+                      MediaList(items: mangaData, isAnime: false),
                     ],
                   ),
                 );
@@ -193,8 +170,14 @@ class _HomePageState extends State<HomePage> {
           : SingleChildScrollView(
               child: Column(
                 children: [
-                  AnimeList(items: [...palist1, ...palist2]),
-                  MangaList(items: [...pmlist1, ...pmlist2]),
+                  MediaList(
+                    items: _extractListEntries(providerData, "animeList"),
+                    isAnime: true,
+                  ),
+                  MediaList(
+                    items: _extractListEntries(providerData, "mangaList"),
+                    isAnime: false,
+                  ),
                 ],
               ),
             ),

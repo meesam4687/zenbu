@@ -1,5 +1,4 @@
-import 'package:zenbu/pages/anime_details_page.dart';
-import 'package:zenbu/pages/manga_details_page.dart';
+import 'package:zenbu/pages/media_details_page.dart';
 import 'package:flutter/material.dart';
 import 'package:animations/animations.dart';
 
@@ -97,12 +96,11 @@ class NotificationCard extends StatelessWidget {
         );
       },
       openBuilder: (context, closeContainer) {
-        if (notificationData["media"]["type"] == "ANIME") {
-          return AnimeDetailsPage(id: notificationData["media"]["id"]);
-        } else if (notificationData["media"]["type"] == "CHARACTER") {
-          return MangaDetailsPage(id: notificationData["media"]["id"]);
-        }
-        return Placeholder();
+        final isAnime = notificationData["media"]["type"] == "ANIME";
+        return MediaDetailsPage(
+          id: notificationData["media"]["id"],
+          isAnime: isAnime,
+        );
       },
     );
   }

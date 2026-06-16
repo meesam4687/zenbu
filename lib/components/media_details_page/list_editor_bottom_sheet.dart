@@ -1,4 +1,4 @@
-import 'package:zenbu/anilist_connector.dart';
+import 'package:zenbu/services/anilist/anilist.dart';
 import 'package:zenbu/state_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -14,6 +14,7 @@ class ListEditorBottomSheet extends StatefulWidget {
     required this.repeatCount,
     required this.mediaId,
     required this.onUpdate,
+    required this.isAnime,
   });
 
   final String status;
@@ -24,6 +25,7 @@ class ListEditorBottomSheet extends StatefulWidget {
   final int repeatCount;
   final int mediaId;
   final Function(String, int, Map) onUpdate;
+  final bool isAnime;
 
   @override
   State<ListEditorBottomSheet> createState() => _ListEditorBottomSheetState();
@@ -62,15 +64,26 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
-    Map listStatusToText = {
-      "CURRENT": "Reading",
-      "COMPLETED": "Completed",
-      "PLANNING": "Planning",
-      "DROPPED": "Dropped",
-      "REPEATING": "Rereading",
-      "NONE": "Select",
-      "PAUSED": "Paused",
-    };
+    Map listStatusToText = widget.isAnime
+        ? {
+            "CURRENT": "Watching",
+            "COMPLETED": "Completed",
+            "PLANNING": "Planning",
+            "DROPPED": "Dropped",
+            "REPEATING": "Rewatching",
+            "NONE": "Select",
+            "PAUSED": "Paused",
+          }
+        : {
+            "CURRENT": "Reading",
+            "COMPLETED": "Completed",
+            "PLANNING": "Planning",
+            "DROPPED": "Dropped",
+            "REPEATING": "Rereading",
+            "NONE": "Select",
+            "PAUSED": "Paused",
+          };
+
     return Container(
       padding: const EdgeInsets.only(top: 40, left: 20, right: 20),
       width: double.infinity,
@@ -86,21 +99,30 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 spacing: 10,
                 children: [
-                  Text(
+                  const Text(
                     "Status",
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
                   ),
                   DropdownMenu(
                     width: MediaQuery.of(context).size.width * 0.44,
                     hintText: listStatusToText[widget.status],
-                    dropdownMenuEntries: [
-                      DropdownMenuEntry(value: "CURRENT", label: "Reading"),
-                      DropdownMenuEntry(value: "COMPLETED", label: "Completed"),
-                      DropdownMenuEntry(value: "PLANNING", label: "Planning"),
-                      DropdownMenuEntry(value: "DROPPED", label: "Dropped"),
-                      DropdownMenuEntry(value: "REPEATING", label: "Rereading"),
-                      DropdownMenuEntry(value: "PAUSED", label: "Paused"),
-                    ],
+                    dropdownMenuEntries: widget.isAnime
+                        ? [
+                            const DropdownMenuEntry(value: "CURRENT", label: "Watching"),
+                            const DropdownMenuEntry(value: "COMPLETED", label: "Completed"),
+                            const DropdownMenuEntry(value: "PLANNING", label: "Planning"),
+                            const DropdownMenuEntry(value: "DROPPED", label: "Dropped"),
+                            const DropdownMenuEntry(value: "REPEATING", label: "Rewatching"),
+                            const DropdownMenuEntry(value: "PAUSED", label: "Paused"),
+                          ]
+                        : [
+                            const DropdownMenuEntry(value: "CURRENT", label: "Reading"),
+                            const DropdownMenuEntry(value: "COMPLETED", label: "Completed"),
+                            const DropdownMenuEntry(value: "PLANNING", label: "Planning"),
+                            const DropdownMenuEntry(value: "DROPPED", label: "Dropped"),
+                            const DropdownMenuEntry(value: "REPEATING", label: "Rereading"),
+                            const DropdownMenuEntry(value: "PAUSED", label: "Paused"),
+                          ],
                     onSelected: (value) {
                       selectedStatus = value as String;
                     },
@@ -112,8 +134,8 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                 spacing: 10,
                 children: [
                   Text(
-                    "Chapters Read",
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                    widget.isAnime ? "Episodes Watched" : "Chapters Read",
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
                   ),
                   SizedBox(
                     width: MediaQuery.of(context).size.width * 0.44,
@@ -121,8 +143,8 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                       keyboardType: TextInputType.number,
                       controller: chaptersController,
                       decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        hint: Text(widget.progress.toString()),
+                        border: const OutlineInputBorder(),
+                        hintText: widget.progress.toString(),
                       ),
                     ),
                   ),
@@ -137,7 +159,7 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 spacing: 10,
                 children: [
-                  Text(
+                  const Text(
                     "Start Date",
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
                   ),
@@ -148,14 +170,14 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                       height: 55,
                       child: Container(
                         alignment: Alignment.centerLeft,
-                        padding: EdgeInsets.all(12),
+                        padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
                           border: Border.all(color: Colors.grey),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
                           startDateString as String,
-                          style: TextStyle(fontSize: 16),
+                          style: const TextStyle(fontSize: 16),
                         ),
                       ),
                     ),
@@ -174,10 +196,12 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                           DateTime.now().day,
                         ),
                       );
-                      setState(() {
-                        startDateString =
-                            '${startDate!.day.toString()}/${startDate!.month.toString()}/${startDate!.year.toString()}';
-                      });
+                      if (startDate != null) {
+                        setState(() {
+                          startDateString =
+                              '${startDate!.day.toString()}/${startDate!.month.toString()}/${startDate!.year.toString()}';
+                        });
+                      }
                     },
                   ),
                 ],
@@ -186,7 +210,7 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 spacing: 10,
                 children: [
-                  Text(
+                  const Text(
                     "End Date",
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
                   ),
@@ -197,14 +221,14 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                       height: 55,
                       child: Container(
                         alignment: Alignment.centerLeft,
-                        padding: EdgeInsets.all(12),
+                        padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
                           border: Border.all(color: Colors.grey),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
                           endDateString as String,
-                          style: TextStyle(fontSize: 16),
+                          style: const TextStyle(fontSize: 16),
                         ),
                       ),
                     ),
@@ -223,10 +247,12 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                           DateTime.now().day,
                         ),
                       );
-                      setState(() {
-                        endDateString =
-                            '${endDate!.day.toString()}/${endDate!.month.toString()}/${endDate!.year.toString()}';
-                      });
+                      if (endDate != null) {
+                        setState(() {
+                          endDateString =
+                              '${endDate!.day.toString()}/${endDate!.month.toString()}/${endDate!.year.toString()}';
+                        });
+                      }
                     },
                   ),
                 ],
@@ -240,7 +266,7 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 spacing: 10,
                 children: [
-                  Text(
+                  const Text(
                     "Score",
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
                   ),
@@ -250,8 +276,8 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                       keyboardType: TextInputType.number,
                       controller: scoreController,
                       decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        hint: Text(widget.score.toString()),
+                        border: const OutlineInputBorder(),
+                        hintText: widget.score.toString(),
                       ),
                     ),
                   ),
@@ -262,8 +288,8 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                 spacing: 10,
                 children: [
                   Text(
-                    "Total Rereads",
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                    widget.isAnime ? "Total Rewatches" : "Total Rereads",
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
                   ),
                   SizedBox(
                     width: MediaQuery.of(context).size.width * 0.44,
@@ -271,8 +297,8 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                       controller: rewatchController,
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        hint: Text(widget.repeatCount.toString()),
+                        border: const OutlineInputBorder(),
+                        hintText: widget.repeatCount.toString(),
                       ),
                     ),
                   ),
@@ -335,12 +361,14 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                       }
 
                       Map newAlData = await getHomePageData();
-                      Provider.of<StateProvider>(
-                        context,
-                        listen: false,
-                      ).updateData(newAlData);
+                      if (context.mounted) {
+                        Provider.of<StateProvider>(
+                          context,
+                          listen: false,
+                        ).updateData(newAlData);
+                      }
 
-                      if (mounted) {
+                      if (context.mounted) {
                         Navigator.of(context).pop();
                       }
 
@@ -349,7 +377,7 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                       });
                     },
               icon: isLoading
-                  ? SizedBox(
+                  ? const SizedBox(
                       width: 20,
                       height: 20,
                       child: CircularProgressIndicator(
@@ -357,8 +385,8 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                         strokeWidth: 2,
                       ),
                     )
-                  : Icon(Icons.check),
-              label: isLoading ? Text(" Loading...") : Text("Save"),
+                  : const Icon(Icons.check),
+              label: isLoading ? const Text(" Loading...") : const Text("Save"),
             ),
           ),
         ],

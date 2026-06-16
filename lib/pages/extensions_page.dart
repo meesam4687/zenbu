@@ -201,8 +201,8 @@ class _ExtensionsPageState extends State<ExtensionsPage>
         bottom: TabBar(
           controller: _tabController,
           tabs: const [
-            Tab(icon: Icon(Icons.extension), text: 'Extensions'),
-            Tab(icon: Icon(Icons.cloud_queue), text: 'Repositories'),
+            Tab(text: 'Extensions'),
+            Tab(text: 'Repositories'),
           ],
         ),
       ),

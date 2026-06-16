@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:zenbu/anilist_connector.dart';
+import 'package:zenbu/services/anilist/anilist.dart';
 import 'package:zenbu/components/global/item_card.dart';
 
 class SimulcastPageView extends StatefulWidget {

@@ -45,9 +45,9 @@ class _SimulcastsButtonState extends State<SimulcastsButton> {
     return Container(
       height: 60,
       width: double.infinity,
-      margin: EdgeInsets.only(left: 10, right: 10, bottom: 0, top: 0),
+      margin: const EdgeInsets.only(left: 10, right: 10, bottom: 0, top: 0),
       child: Card(
-        shape: RoundedRectangleBorder(
+        shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(15)),
         ),
         elevation: 3,
@@ -73,7 +73,7 @@ class _SimulcastsButtonState extends State<SimulcastsButton> {
               margin: const EdgeInsets.all(10),
               height: 60,
               width: double.infinity,
-              child: Row(
+              child: const Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Padding(padding: EdgeInsets.only(left: 10)),
@@ -108,7 +108,7 @@ class _SimulcastsButtonState extends State<SimulcastsButton> {
                     Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (context) {
-                          return SimulcastsPage();
+                          return const SimulcastsPage();
                         },
                       ),
                     );

@@ -1,4 +1,4 @@
-import 'package:zenbu/anilist_connector.dart';
+import 'package:zenbu/services/anilist/anilist.dart';
 import 'package:zenbu/components/character_details_page/character_description.dart';
 import 'package:zenbu/components/character_details_page/character_header.dart';
 import 'package:zenbu/components/character_details_page/character_relations.dart';

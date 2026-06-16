@@ -2,15 +2,16 @@ import 'package:zenbu/components/global/item_card.dart';
 import 'package:zenbu/pages/entire_list_view.dart';
 import 'package:flutter/material.dart';
 
-class HorizontalAnimeList extends StatelessWidget {
-  const HorizontalAnimeList({
+class HorizontalList extends StatelessWidget {
+  const HorizontalList({
     super.key,
     required this.heading,
-    required this.animeArray,
+    required this.mediaArray,
     required this.pagetype,
   });
+
   final String heading;
-  final List animeArray;
+  final List mediaArray;
   final PageType pagetype;
 
   @override
@@ -18,17 +19,17 @@ class HorizontalAnimeList extends StatelessWidget {
     return Container(
       height: 305,
       width: double.infinity,
-      margin: EdgeInsets.only(left: 15, right: 15),
+      margin: const EdgeInsets.only(left: 15, right: 15),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(heading, style: TextStyle(fontSize: 20)),
+              Text(heading, style: const TextStyle(fontSize: 20)),
               MaterialButton(
-                padding: EdgeInsets.only(left: 10, right: 10),
-                shape: RoundedRectangleBorder(
+                padding: const EdgeInsets.only(left: 10, right: 10),
+                shape: const RoundedRectangleBorder(
                   borderRadius: BorderRadius.all(Radius.circular(100)),
                 ),
                 onPressed: () {
@@ -40,7 +41,7 @@ class HorizontalAnimeList extends StatelessWidget {
                     ),
                   );
                 },
-                child: Row(
+                child: const Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [Text('View All  '), Icon(Icons.arrow_forward)],
                 ),
@@ -48,21 +49,21 @@ class HorizontalAnimeList extends StatelessWidget {
             ],
           ),
           Container(
-            margin: EdgeInsets.only(top: 12),
+            margin: const EdgeInsets.only(top: 12),
             width: double.infinity,
             height: 245,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
-              itemCount: animeArray.length,
+              itemCount: mediaArray.length,
               itemBuilder: (context, index) {
-                final Map anime = animeArray[index];
+                final Map media = mediaArray[index];
                 return Padding(
-                  padding: EdgeInsets.only(right: 3),
+                  padding: const EdgeInsets.only(right: 3),
                   child: ItemCard(
-                    title: anime["title"]["romaji"],
-                    image: anime["coverImage"]["large"],
-                    id: anime["id"],
-                    type: anime["type"].toString().toLowerCase(),
+                    title: media["title"]["romaji"] ?? '',
+                    image: media["coverImage"]["large"] ?? '',
+                    id: media["id"],
+                    type: media["type"].toString().toLowerCase(),
                   ),
                 );
               },

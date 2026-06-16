@@ -394,7 +394,7 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
                             ),
                           )
                         : ListView.builder(
-                            padding: EdgeInsets.only(bottom: 20),
+                            padding: const EdgeInsets.only(bottom: 20),
                             itemCount: _rawEpisodes.length,
                             itemBuilder: (context, index) {
                               final rawEp = _rawEpisodes[index];
@@ -438,22 +438,22 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
                                         height: 80,
                                         child:
                                             widget.coverImage != null &&
-                                                widget.coverImage!.isNotEmpty
-                                            ? CachedNetworkImage(
-                                                imageUrl: widget.coverImage!,
-                                                fit: BoxFit.cover,
-                                                placeholder: (context, url) =>
-                                                    const Center(
-                                                      child:
-                                                          CircularProgressIndicator.adaptive(
-                                                            strokeWidth: 2,
-                                                          ),
-                                                    ),
-                                                errorWidget:
-                                                    (context, url, error) =>
-                                                        _buildPlaceholderThumbnail(),
-                                              )
-                                            : _buildPlaceholderThumbnail(),
+                                                    widget.coverImage!.isNotEmpty
+                                                ? CachedNetworkImage(
+                                                    imageUrl: widget.coverImage!,
+                                                    fit: BoxFit.cover,
+                                                    placeholder: (context, url) =>
+                                                        const Center(
+                                                          child:
+                                                              CircularProgressIndicator.adaptive(
+                                                                strokeWidth: 2,
+                                                              ),
+                                                        ),
+                                                    errorWidget:
+                                                        (context, url, error) =>
+                                                            _buildPlaceholderThumbnail(),
+                                                  )
+                                                : _buildPlaceholderThumbnail(),
                                       ),
                                       const SizedBox(width: 16),
                                       Expanded(

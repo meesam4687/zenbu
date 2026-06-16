@@ -1,6 +1,5 @@
-import 'package:zenbu/pages/anime_discovery_page.dart';
+import 'package:zenbu/pages/media_discovery_page.dart';
 import 'package:zenbu/pages/home_page.dart';
-import 'package:zenbu/pages/manga_discovery_page.dart';
 import 'package:flutter/material.dart';
 import 'package:animations/animations.dart';
 
@@ -11,7 +10,11 @@ class MainPageView extends StatefulWidget {
   State<MainPageView> createState() => _MainPageState();
 }
 
-List<Widget> pages = [AnimeDiscoveryPage(), HomePage(), MangaDiscoveryPage()];
+List<Widget> pages = [
+  const MediaDiscoveryPage(isAnime: true, key: ValueKey('anime_discovery')),
+  const HomePage(),
+  const MediaDiscoveryPage(isAnime: false, key: ValueKey('manga_discovery')),
+];
 
 class _MainPageState extends State<MainPageView> {
   late int selectedIdx;
