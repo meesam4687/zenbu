@@ -7,11 +7,7 @@ import 'package:zenbu/pages/media_search_page.dart';
 import 'package:zenbu/state_provider.dart';
 
 class FilterSheet extends StatefulWidget {
-  const FilterSheet({
-    super.key,
-    required this.maxYear,
-    required this.isAnime,
-  });
+  const FilterSheet({super.key, required this.maxYear, required this.isAnime});
 
   final int maxYear;
   final bool isAnime;
@@ -89,7 +85,9 @@ class _FilterSheetState extends State<FilterSheet> {
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setModalState) {
-            final filteredTags = tags.where((tag) => tag.toLowerCase().contains(query.toLowerCase())).toList();
+            final filteredTags = tags
+                .where((tag) => tag.toLowerCase().contains(query.toLowerCase()))
+                .toList();
             return DraggableScrollableSheet(
               initialChildSize: 0.9,
               minChildSize: 0.5,
@@ -137,12 +135,13 @@ class _FilterSheetState extends State<FilterSheet> {
                       Expanded(
                         child: GridView.builder(
                           controller: scrollController,
-                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            mainAxisSpacing: 8,
-                            crossAxisSpacing: 8,
-                            childAspectRatio: 3,
-                          ),
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 2,
+                                mainAxisSpacing: 8,
+                                crossAxisSpacing: 8,
+                                childAspectRatio: 3,
+                              ),
                           itemCount: filteredTags.length,
                           itemBuilder: (context, index) {
                             final tag = filteredTags[index];
@@ -162,10 +161,7 @@ class _FilterSheetState extends State<FilterSheet> {
                                 selected: isIncluded || isExcluded,
                                 showCheckmark: isIncluded,
                                 avatar: isExcluded
-                                    ? const Icon(
-                                        Icons.remove,
-                                        size: 16,
-                                      )
+                                    ? const Icon(Icons.remove, size: 16)
                                     : null,
                                 onSelected: (selected) {
                                   _onTagTap(tag);
@@ -214,7 +210,9 @@ class _FilterSheetState extends State<FilterSheet> {
   void initState() {
     super.initState();
     final provider = Provider.of<StateProvider>(context, listen: false);
-    final filters = widget.isAnime ? provider.currentAnimeFilters : provider.currentMangaFilters;
+    final filters = widget.isAnime
+        ? provider.currentAnimeFilters
+        : provider.currentMangaFilters;
 
     selectedGenres = filters["selectedGenres"] as Set<String>;
     selectedTags = filters["selectedTags"] as Set<String>;
@@ -295,10 +293,7 @@ class _FilterSheetState extends State<FilterSheet> {
                                 selected: isIncluded || isExcluded,
                                 showCheckmark: isIncluded,
                                 avatar: isExcluded
-                                    ? const Icon(
-                                        Icons.remove,
-                                        size: 16,
-                                      )
+                                    ? const Icon(Icons.remove, size: 16)
                                     : null,
                                 onSelected: (selected) => _onGenreTap(genre),
                               ),
@@ -345,10 +340,7 @@ class _FilterSheetState extends State<FilterSheet> {
                                 selected: isIncluded || isExcluded,
                                 showCheckmark: isIncluded,
                                 avatar: isExcluded
-                                    ? const Icon(
-                                        Icons.remove,
-                                        size: 16,
-                                      )
+                                    ? const Icon(Icons.remove, size: 16)
                                     : null,
                                 onSelected: (selected) => _onTagTap(tag),
                               ),
@@ -379,8 +371,8 @@ class _FilterSheetState extends State<FilterSheet> {
                                   return yearArray
                                       .where(
                                         (item) => item.toLowerCase().contains(
-                                              pattern.toLowerCase(),
-                                            ),
+                                          pattern.toLowerCase(),
+                                        ),
                                       )
                                       .toList();
                                 },
@@ -425,10 +417,22 @@ class _FilterSheetState extends State<FilterSheet> {
                                 width: MediaQuery.of(context).size.width * 0.44,
                                 hintText: season != "" ? season : "Any",
                                 dropdownMenuEntries: const [
-                                  DropdownMenuEntry(value: "SPRING", label: "Spring"),
-                                  DropdownMenuEntry(value: "SUMMER", label: "Summer"),
-                                  DropdownMenuEntry(value: "FALL", label: "Fall"),
-                                  DropdownMenuEntry(value: "WINTER", label: "Winter"),
+                                  DropdownMenuEntry(
+                                    value: "SPRING",
+                                    label: "Spring",
+                                  ),
+                                  DropdownMenuEntry(
+                                    value: "SUMMER",
+                                    label: "Summer",
+                                  ),
+                                  DropdownMenuEntry(
+                                    value: "FALL",
+                                    label: "Fall",
+                                  ),
+                                  DropdownMenuEntry(
+                                    value: "WINTER",
+                                    label: "Winter",
+                                  ),
                                   DropdownMenuEntry(value: "", label: "Any"),
                                 ],
                                 onSelected: (value) {
@@ -451,11 +455,22 @@ class _FilterSheetState extends State<FilterSheet> {
                               const Padding(padding: EdgeInsets.all(5)),
                               DropdownMenu(
                                 width: MediaQuery.of(context).size.width * 0.44,
-                                hintText: countryOfOrigin != "" ? countryOfOrigin : "Any",
+                                hintText: countryOfOrigin != ""
+                                    ? countryOfOrigin
+                                    : "Any",
                                 dropdownMenuEntries: const [
-                                  DropdownMenuEntry(value: "CN", label: "China"),
-                                  DropdownMenuEntry(value: "JP", label: "Japan"),
-                                  DropdownMenuEntry(value: "KR", label: "Korea"),
+                                  DropdownMenuEntry(
+                                    value: "CN",
+                                    label: "China",
+                                  ),
+                                  DropdownMenuEntry(
+                                    value: "JP",
+                                    label: "Japan",
+                                  ),
+                                  DropdownMenuEntry(
+                                    value: "KR",
+                                    label: "Korea",
+                                  ),
                                   DropdownMenuEntry(value: "", label: "Any"),
                                 ],
                                 onSelected: (value) {
@@ -486,20 +501,56 @@ class _FilterSheetState extends State<FilterSheet> {
                               hintText: format != "" ? format : "Any",
                               dropdownMenuEntries: widget.isAnime
                                   ? const [
-                                      DropdownMenuEntry(value: "TV", label: "TV"),
-                                      DropdownMenuEntry(value: "TV_SHORT", label: "TV Short"),
-                                      DropdownMenuEntry(value: "MOVIE", label: "Movie"),
-                                      DropdownMenuEntry(value: "SPECIAL", label: "Special"),
-                                      DropdownMenuEntry(value: "OVA", label: "OVA"),
-                                      DropdownMenuEntry(value: "ONA", label: "ONA"),
-                                      DropdownMenuEntry(value: "MUSIC", label: "Music"),
-                                      DropdownMenuEntry(value: "", label: "Any"),
+                                      DropdownMenuEntry(
+                                        value: "TV",
+                                        label: "TV",
+                                      ),
+                                      DropdownMenuEntry(
+                                        value: "TV_SHORT",
+                                        label: "TV Short",
+                                      ),
+                                      DropdownMenuEntry(
+                                        value: "MOVIE",
+                                        label: "Movie",
+                                      ),
+                                      DropdownMenuEntry(
+                                        value: "SPECIAL",
+                                        label: "Special",
+                                      ),
+                                      DropdownMenuEntry(
+                                        value: "OVA",
+                                        label: "OVA",
+                                      ),
+                                      DropdownMenuEntry(
+                                        value: "ONA",
+                                        label: "ONA",
+                                      ),
+                                      DropdownMenuEntry(
+                                        value: "MUSIC",
+                                        label: "Music",
+                                      ),
+                                      DropdownMenuEntry(
+                                        value: "",
+                                        label: "Any",
+                                      ),
                                     ]
                                   : const [
-                                      DropdownMenuEntry(value: "MANGA", label: "Manga"),
-                                      DropdownMenuEntry(value: "NOVEL", label: "Novel"),
-                                      DropdownMenuEntry(value: "ONE_SHOT", label: "One Shot"),
-                                      DropdownMenuEntry(value: "", label: "Any"),
+                                      DropdownMenuEntry(
+                                        value: "MANGA",
+                                        label: "Manga",
+                                      ),
+                                      DropdownMenuEntry(
+                                        value: "NOVEL",
+                                        label: "Novel",
+                                      ),
+                                      DropdownMenuEntry(
+                                        value: "ONE_SHOT",
+                                        label: "One Shot",
+                                      ),
+                                      DropdownMenuEntry(
+                                        value: "",
+                                        label: "Any",
+                                      ),
                                     ],
                               onSelected: (value) {
                                 format = value as String;
@@ -520,13 +571,30 @@ class _FilterSheetState extends State<FilterSheet> {
                             const Padding(padding: EdgeInsets.all(5)),
                             DropdownMenu(
                               width: MediaQuery.of(context).size.width * 0.44,
-                              hintText: airingStatus != "" ? airingStatus : "Any",
+                              hintText: airingStatus != ""
+                                  ? airingStatus
+                                  : "Any",
                               dropdownMenuEntries: const [
-                                DropdownMenuEntry(value: "RELEASING", label: "Releasing"),
-                                DropdownMenuEntry(value: "FINISHED", label: "Finished"),
-                                DropdownMenuEntry(value: "NOT_YET_RELEASED", label: "Not released yet"),
-                                DropdownMenuEntry(value: "CANCELLED", label: "Cancelled"),
-                                DropdownMenuEntry(value: "HIATUS", label: "Hiatus"),
+                                DropdownMenuEntry(
+                                  value: "RELEASING",
+                                  label: "Releasing",
+                                ),
+                                DropdownMenuEntry(
+                                  value: "FINISHED",
+                                  label: "Finished",
+                                ),
+                                DropdownMenuEntry(
+                                  value: "NOT_YET_RELEASED",
+                                  label: "Not released yet",
+                                ),
+                                DropdownMenuEntry(
+                                  value: "CANCELLED",
+                                  label: "Cancelled",
+                                ),
+                                DropdownMenuEntry(
+                                  value: "HIATUS",
+                                  label: "Hiatus",
+                                ),
                                 DropdownMenuEntry(value: "", label: "Any"),
                               ],
                               onSelected: (value) {
@@ -554,25 +622,77 @@ class _FilterSheetState extends State<FilterSheet> {
                                   ),
                                   const Padding(padding: EdgeInsets.all(5)),
                                   DropdownMenu(
-                                    width: MediaQuery.of(context).size.width * 0.29,
-                                    hintText: sourceMaterial != "" ? sourceMaterial : "Any",
+                                    width:
+                                        MediaQuery.of(context).size.width *
+                                        0.29,
+                                    hintText: sourceMaterial != ""
+                                        ? sourceMaterial
+                                        : "Any",
                                     dropdownMenuEntries: const [
-                                      DropdownMenuEntry(value: "ORIGINAL", label: "Original"),
-                                      DropdownMenuEntry(value: "MANGA", label: "Manga"),
-                                      DropdownMenuEntry(value: "LIGHT_NOVEL", label: "Light Novel"),
-                                      DropdownMenuEntry(value: "VISUAL_NOVEL", label: "Visual Novel"),
-                                      DropdownMenuEntry(value: "VIDEO_GAME", label: "Video Game"),
-                                      DropdownMenuEntry(value: "OTHER", label: "Other"),
-                                      DropdownMenuEntry(value: "NOVEL", label: "Novel"),
-                                      DropdownMenuEntry(value: "DOUJINSHI", label: "Doujinshi"),
-                                      DropdownMenuEntry(value: "ANIME", label: "Anime"),
-                                      DropdownMenuEntry(value: "WEB_NOVEL", label: "Web Novel"),
-                                      DropdownMenuEntry(value: "LIVE_ACTION", label: "Live Action"),
-                                      DropdownMenuEntry(value: "GAME", label: "Game"),
-                                      DropdownMenuEntry(value: "COMIC", label: "Comic"),
-                                      DropdownMenuEntry(value: "MULTIMEDIA_PROJECT", label: "Multimedia Project"),
-                                      DropdownMenuEntry(value: "PICTURE_BOOK", label: "Picture Book"),
-                                      DropdownMenuEntry(value: "", label: "Any"),
+                                      DropdownMenuEntry(
+                                        value: "ORIGINAL",
+                                        label: "Original",
+                                      ),
+                                      DropdownMenuEntry(
+                                        value: "MANGA",
+                                        label: "Manga",
+                                      ),
+                                      DropdownMenuEntry(
+                                        value: "LIGHT_NOVEL",
+                                        label: "Light Novel",
+                                      ),
+                                      DropdownMenuEntry(
+                                        value: "VISUAL_NOVEL",
+                                        label: "Visual Novel",
+                                      ),
+                                      DropdownMenuEntry(
+                                        value: "VIDEO_GAME",
+                                        label: "Video Game",
+                                      ),
+                                      DropdownMenuEntry(
+                                        value: "OTHER",
+                                        label: "Other",
+                                      ),
+                                      DropdownMenuEntry(
+                                        value: "NOVEL",
+                                        label: "Novel",
+                                      ),
+                                      DropdownMenuEntry(
+                                        value: "DOUJINSHI",
+                                        label: "Doujinshi",
+                                      ),
+                                      DropdownMenuEntry(
+                                        value: "ANIME",
+                                        label: "Anime",
+                                      ),
+                                      DropdownMenuEntry(
+                                        value: "WEB_NOVEL",
+                                        label: "Web Novel",
+                                      ),
+                                      DropdownMenuEntry(
+                                        value: "LIVE_ACTION",
+                                        label: "Live Action",
+                                      ),
+                                      DropdownMenuEntry(
+                                        value: "GAME",
+                                        label: "Game",
+                                      ),
+                                      DropdownMenuEntry(
+                                        value: "COMIC",
+                                        label: "Comic",
+                                      ),
+                                      DropdownMenuEntry(
+                                        value: "MULTIMEDIA_PROJECT",
+                                        label: "Multimedia Project",
+                                      ),
+                                      DropdownMenuEntry(
+                                        value: "PICTURE_BOOK",
+                                        label: "Picture Book",
+                                      ),
+                                      DropdownMenuEntry(
+                                        value: "",
+                                        label: "Any",
+                                      ),
                                     ],
                                     onSelected: (value) {
                                       setState(() {
@@ -594,13 +714,29 @@ class _FilterSheetState extends State<FilterSheet> {
                                   ),
                                   const Padding(padding: EdgeInsets.all(5)),
                                   DropdownMenu(
-                                    width: MediaQuery.of(context).size.width * 0.29,
-                                    hintText: countryOfOrigin != "" ? countryOfOrigin : "Any",
+                                    width:
+                                        MediaQuery.of(context).size.width *
+                                        0.29,
+                                    hintText: countryOfOrigin != ""
+                                        ? countryOfOrigin
+                                        : "Any",
                                     dropdownMenuEntries: const [
-                                      DropdownMenuEntry(value: "CN", label: "China"),
-                                      DropdownMenuEntry(value: "JP", label: "Japan"),
-                                      DropdownMenuEntry(value: "KR", label: "Korea"),
-                                      DropdownMenuEntry(value: "", label: "Any"),
+                                      DropdownMenuEntry(
+                                        value: "CN",
+                                        label: "China",
+                                      ),
+                                      DropdownMenuEntry(
+                                        value: "JP",
+                                        label: "Japan",
+                                      ),
+                                      DropdownMenuEntry(
+                                        value: "KR",
+                                        label: "Korea",
+                                      ),
+                                      DropdownMenuEntry(
+                                        value: "",
+                                        label: "Any",
+                                      ),
                                     ],
                                     onSelected: (value) {
                                       setState(() {
@@ -622,16 +758,39 @@ class _FilterSheetState extends State<FilterSheet> {
                                   ),
                                   const Padding(padding: EdgeInsets.all(5)),
                                   DropdownMenu(
-                                    width: MediaQuery.of(context).size.width * 0.29,
+                                    width:
+                                        MediaQuery.of(context).size.width *
+                                        0.29,
                                     hintText: getSortByLabel(sortBy),
                                     dropdownMenuEntries: const [
-                                      DropdownMenuEntry(value: "TITLE_ROMAJI", label: "Title (A-Z)"),
-                                      DropdownMenuEntry(value: "POPULARITY_DESC", label: "Popularity"),
-                                      DropdownMenuEntry(value: "SCORE_DESC", label: "Score"),
-                                      DropdownMenuEntry(value: "TRENDING_DESC", label: "Trending"),
-                                      DropdownMenuEntry(value: "FAVOURITES_DESC", label: "Favourites"),
-                                      DropdownMenuEntry(value: "ID_DESC", label: "Date Added"),
-                                      DropdownMenuEntry(value: "START_DATE_DESC", label: "Release Date"),
+                                      DropdownMenuEntry(
+                                        value: "TITLE_ROMAJI",
+                                        label: "Title (A-Z)",
+                                      ),
+                                      DropdownMenuEntry(
+                                        value: "POPULARITY_DESC",
+                                        label: "Popularity",
+                                      ),
+                                      DropdownMenuEntry(
+                                        value: "SCORE_DESC",
+                                        label: "Score",
+                                      ),
+                                      DropdownMenuEntry(
+                                        value: "TRENDING_DESC",
+                                        label: "Trending",
+                                      ),
+                                      DropdownMenuEntry(
+                                        value: "FAVOURITES_DESC",
+                                        label: "Favourites",
+                                      ),
+                                      DropdownMenuEntry(
+                                        value: "ID_DESC",
+                                        label: "Date Added",
+                                      ),
+                                      DropdownMenuEntry(
+                                        value: "START_DATE_DESC",
+                                        label: "Release Date",
+                                      ),
                                     ],
                                     onSelected: (value) {
                                       setState(() {
@@ -655,25 +814,77 @@ class _FilterSheetState extends State<FilterSheet> {
                                   ),
                                   const Padding(padding: EdgeInsets.all(5)),
                                   DropdownMenu(
-                                    width: MediaQuery.of(context).size.width * 0.44,
-                                    hintText: sourceMaterial != "" ? sourceMaterial : "Any",
+                                    width:
+                                        MediaQuery.of(context).size.width *
+                                        0.44,
+                                    hintText: sourceMaterial != ""
+                                        ? sourceMaterial
+                                        : "Any",
                                     dropdownMenuEntries: const [
-                                      DropdownMenuEntry(value: "ORIGINAL", label: "Original"),
-                                      DropdownMenuEntry(value: "MANGA", label: "Manga"),
-                                      DropdownMenuEntry(value: "LIGHT_NOVEL", label: "Light Novel"),
-                                      DropdownMenuEntry(value: "VISUAL_NOVEL", label: "Visual Novel"),
-                                      DropdownMenuEntry(value: "VIDEO_GAME", label: "Video Game"),
-                                      DropdownMenuEntry(value: "OTHER", label: "Other"),
-                                      DropdownMenuEntry(value: "NOVEL", label: "Novel"),
-                                      DropdownMenuEntry(value: "DOUJINSHI", label: "Doujinshi"),
-                                      DropdownMenuEntry(value: "ANIME", label: "Anime"),
-                                      DropdownMenuEntry(value: "WEB_NOVEL", label: "Web Novel"),
-                                      DropdownMenuEntry(value: "LIVE_ACTION", label: "Live Action"),
-                                      DropdownMenuEntry(value: "GAME", label: "Game"),
-                                      DropdownMenuEntry(value: "COMIC", label: "Comic"),
-                                      DropdownMenuEntry(value: "MULTIMEDIA_PROJECT", label: "Multimedia Project"),
-                                      DropdownMenuEntry(value: "PICTURE_BOOK", label: "Picture Book"),
-                                      DropdownMenuEntry(value: "", label: "Any"),
+                                      DropdownMenuEntry(
+                                        value: "ORIGINAL",
+                                        label: "Original",
+                                      ),
+                                      DropdownMenuEntry(
+                                        value: "MANGA",
+                                        label: "Manga",
+                                      ),
+                                      DropdownMenuEntry(
+                                        value: "LIGHT_NOVEL",
+                                        label: "Light Novel",
+                                      ),
+                                      DropdownMenuEntry(
+                                        value: "VISUAL_NOVEL",
+                                        label: "Visual Novel",
+                                      ),
+                                      DropdownMenuEntry(
+                                        value: "VIDEO_GAME",
+                                        label: "Video Game",
+                                      ),
+                                      DropdownMenuEntry(
+                                        value: "OTHER",
+                                        label: "Other",
+                                      ),
+                                      DropdownMenuEntry(
+                                        value: "NOVEL",
+                                        label: "Novel",
+                                      ),
+                                      DropdownMenuEntry(
+                                        value: "DOUJINSHI",
+                                        label: "Doujinshi",
+                                      ),
+                                      DropdownMenuEntry(
+                                        value: "ANIME",
+                                        label: "Anime",
+                                      ),
+                                      DropdownMenuEntry(
+                                        value: "WEB_NOVEL",
+                                        label: "Web Novel",
+                                      ),
+                                      DropdownMenuEntry(
+                                        value: "LIVE_ACTION",
+                                        label: "Live Action",
+                                      ),
+                                      DropdownMenuEntry(
+                                        value: "GAME",
+                                        label: "Game",
+                                      ),
+                                      DropdownMenuEntry(
+                                        value: "COMIC",
+                                        label: "Comic",
+                                      ),
+                                      DropdownMenuEntry(
+                                        value: "MULTIMEDIA_PROJECT",
+                                        label: "Multimedia Project",
+                                      ),
+                                      DropdownMenuEntry(
+                                        value: "PICTURE_BOOK",
+                                        label: "Picture Book",
+                                      ),
+                                      DropdownMenuEntry(
+                                        value: "",
+                                        label: "Any",
+                                      ),
                                     ],
                                     onSelected: (value) {
                                       setState(() {
@@ -695,16 +906,39 @@ class _FilterSheetState extends State<FilterSheet> {
                                   ),
                                   const Padding(padding: EdgeInsets.all(5)),
                                   DropdownMenu(
-                                    width: MediaQuery.of(context).size.width * 0.44,
+                                    width:
+                                        MediaQuery.of(context).size.width *
+                                        0.44,
                                     hintText: getSortByLabel(sortBy),
                                     dropdownMenuEntries: const [
-                                      DropdownMenuEntry(value: "TITLE_ROMAJI", label: "Title (A-Z)"),
-                                      DropdownMenuEntry(value: "POPULARITY_DESC", label: "Popularity"),
-                                      DropdownMenuEntry(value: "SCORE_DESC", label: "Score"),
-                                      DropdownMenuEntry(value: "TRENDING_DESC", label: "Trending"),
-                                      DropdownMenuEntry(value: "FAVOURITES_DESC", label: "Favourites"),
-                                      DropdownMenuEntry(value: "ID_DESC", label: "Date Added"),
-                                      DropdownMenuEntry(value: "START_DATE_DESC", label: "Release Date"),
+                                      DropdownMenuEntry(
+                                        value: "TITLE_ROMAJI",
+                                        label: "Title (A-Z)",
+                                      ),
+                                      DropdownMenuEntry(
+                                        value: "POPULARITY_DESC",
+                                        label: "Popularity",
+                                      ),
+                                      DropdownMenuEntry(
+                                        value: "SCORE_DESC",
+                                        label: "Score",
+                                      ),
+                                      DropdownMenuEntry(
+                                        value: "TRENDING_DESC",
+                                        label: "Trending",
+                                      ),
+                                      DropdownMenuEntry(
+                                        value: "FAVOURITES_DESC",
+                                        label: "Favourites",
+                                      ),
+                                      DropdownMenuEntry(
+                                        value: "ID_DESC",
+                                        label: "Date Added",
+                                      ),
+                                      DropdownMenuEntry(
+                                        value: "START_DATE_DESC",
+                                        label: "Release Date",
+                                      ),
                                     ],
                                     onSelected: (value) {
                                       setState(() {
@@ -717,19 +951,37 @@ class _FilterSheetState extends State<FilterSheet> {
                             ],
                     ),
                     const Padding(padding: EdgeInsets.all(10)),
-                    Container(
-                      alignment: Alignment.bottomRight,
-                      child: FilledButton(
-                        style: FilledButton.styleFrom(
-                          minimumSize: const Size(180, 56),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 24,
-                            vertical: 16,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+                      children: [
+                        TextButton(
+                          style: TextButton.styleFrom(
+                            minimumSize: const Size(120, 56),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 16,
+                            ),
                           ),
+                          onPressed: () {
+                            _clearFilters();
+                            _applyFilters();
+                          },
+                          child: const Text("Clear Filters"),
                         ),
-                        onPressed: _applyFilters,
-                        child: const Text("Apply Filters"),
-                      ),
+                        const SizedBox(width: 10),
+                        FilledButton(
+                          style: FilledButton.styleFrom(
+                            minimumSize: const Size(180, 56),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 16,
+                            ),
+                          ),
+                          onPressed: _applyFilters,
+                          child: const Text("Apply Filters"),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -771,8 +1023,12 @@ class _FilterSheetState extends State<FilterSheet> {
       Navigator.of(context).pop();
     }
 
-    final targetFilters = widget.isAnime ? provider.currentAnimeFilters : provider.currentMangaFilters;
-    final query = widget.isAnime ? provider.animeSearchQuery : provider.mangaSearchQuery;
+    final targetFilters = widget.isAnime
+        ? provider.currentAnimeFilters
+        : provider.currentMangaFilters;
+    final query = widget.isAnime
+        ? provider.animeSearchQuery
+        : provider.mangaSearchQuery;
 
     final route = PageRouteBuilder(
       transitionDuration: const Duration(milliseconds: 300),
@@ -786,7 +1042,8 @@ class _FilterSheetState extends State<FilterSheet> {
           tags: (targetFilters["selectedTags"] as Set).toList().isNotEmpty
               ? (targetFilters["selectedTags"] as Set).toList()
               : null,
-          genresNotIn: (targetFilters["excludedGenres"] as Set).toList().isNotEmpty
+          genresNotIn:
+              (targetFilters["excludedGenres"] as Set).toList().isNotEmpty
               ? (targetFilters["excludedGenres"] as Set).toList()
               : null,
           tagsNotIn: (targetFilters["excludedTags"] as Set).toList().isNotEmpty
@@ -799,9 +1056,15 @@ class _FilterSheetState extends State<FilterSheet> {
           season: widget.isAnime && targetFilters["season"] != ""
               ? targetFilters["season"]
               : null,
-          format: targetFilters["format"] != "" ? targetFilters["format"] : null,
-          airingStatus: targetFilters["airingStatus"] != "" ? targetFilters["airingStatus"] : null,
-          sourceMaterial: targetFilters["sourceMaterial"] != "" ? targetFilters["sourceMaterial"] : null,
+          format: targetFilters["format"] != ""
+              ? targetFilters["format"]
+              : null,
+          airingStatus: targetFilters["airingStatus"] != ""
+              ? targetFilters["airingStatus"]
+              : null,
+          sourceMaterial: targetFilters["sourceMaterial"] != ""
+              ? targetFilters["sourceMaterial"]
+              : null,
           sortBy: targetFilters["sortBy"],
         );
       },
@@ -812,5 +1075,22 @@ class _FilterSheetState extends State<FilterSheet> {
     } else {
       Navigator.of(context).pushReplacement(route);
     }
+  }
+
+  void _clearFilters() {
+    setState(() {
+      selectedGenres.clear();
+      selectedTags.clear();
+      excludedGenres.clear();
+      excludedTags.clear();
+      releaseYear = null;
+      releaseYearController.clear();
+      countryOfOrigin = "";
+      season = "";
+      format = "";
+      airingStatus = "";
+      sourceMaterial = "";
+      sortBy = "POPULARITY_DESC";
+    });
   }
 }
