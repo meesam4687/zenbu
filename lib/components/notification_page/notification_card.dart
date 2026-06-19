@@ -3,8 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:animations/animations.dart';
 
 class NotificationCard extends StatelessWidget {
-  const NotificationCard({super.key, required this.notificationData});
+  const NotificationCard({
+    super.key,
+    required this.notificationData,
+    this.isUnread = false,
+  });
   final Map notificationData;
+  final bool isUnread;
 
   @override
   Widget build(BuildContext context) {
@@ -40,9 +45,16 @@ class NotificationCard extends StatelessWidget {
                 height: 250,
                 child: Card(
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                    borderRadius: const BorderRadius.all(Radius.circular(10)),
                     side: BorderSide(
-                      color: Theme.of(context).colorScheme.onSecondaryFixed,
+                      color: isUnread
+                          ? Color.lerp(
+                              Theme.of(context).colorScheme.onSecondaryFixed,
+                              Colors.white,
+                              0.5,
+                            )!
+                          : Theme.of(context).colorScheme.onSecondaryFixed,
+                      width: isUnread ? 1.5 : 1.0,
                     ),
                   ),
                   child: Row(
