@@ -42,6 +42,30 @@ Future<Map<String, dynamic>> getMediaLists() async {
           }
         }
       }
+      favourites: User(id: \$userId) {
+        favourites {
+          anime {
+            nodes {
+              id
+              title { romaji english native }
+              coverImage { extraLarge }
+              episodes
+              mediaListEntry { status progress }
+              status
+              bannerImage
+            }
+          }
+          manga {
+            nodes {
+              id
+              title { romaji english native }
+              coverImage { extraLarge }
+              chapters
+              mediaListEntry { status progress }
+            }
+          }
+        }
+      }
     }
   ''';
 
