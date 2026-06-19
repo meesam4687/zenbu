@@ -5,6 +5,7 @@ Future<Map<String, dynamic>> getAnimeData(int id) async {
     query(\$id: Int) {
       Media(id: \$id) {
         idMal
+        isFavourite
         title {
           english
           native
@@ -136,6 +137,7 @@ Future<Map<String, dynamic>> getMangaData(int id) async {
   const String query = '''
     query(\$id: Int) {
       Media(id: \$id) {
+        isFavourite
         title {
           english
           native

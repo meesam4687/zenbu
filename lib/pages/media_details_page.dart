@@ -87,6 +87,7 @@ class _MediaDetailsPageState extends State<MediaDetailsPage>
                       mediaListEntry: media["mediaListEntry"],
                       fullTitle: media["title"]["romaji"] ?? '',
                       isAnime: widget.isAnime,
+                      isFavourite: media["isFavourite"] ?? false,
                     ),
                   ),
                 ),
