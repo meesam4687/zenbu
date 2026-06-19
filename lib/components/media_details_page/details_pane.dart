@@ -3,6 +3,37 @@ import 'package:zenbu/components/media_details_page/details.dart';
 import 'package:zenbu/pages/error_page.dart';
 import 'package:flutter/material.dart';
 import 'package:zenbu/components/global/item_card.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:html/parser.dart' show parseFragment;
+
+String _convertHtmlToMarkdown(String html) {
+  var out = html;
+
+  out = out.replaceAll(RegExp(r'<br\s*/?>', caseSensitive: false), '\n');
+
+  out = out.replaceAll(RegExp(r'</?i>', caseSensitive: false), '*');
+  out = out.replaceAll(RegExp(r'</?em>', caseSensitive: false), '*');
+
+  out = out.replaceAll(RegExp(r'</?b>', caseSensitive: false), '**');
+  out = out.replaceAll(RegExp(r'</?strong>', caseSensitive: false), '**');
+
+  out = out.replaceAllMapped(
+    RegExp(
+      r'<a\s+(?:[^>]*?\s+)?href="([^"]*)"[^>]*>(.*?)</a>',
+      caseSensitive: false,
+      dotAll: true,
+    ),
+    (match) {
+      final url = match.group(1) ?? '';
+      final text = match.group(2) ?? '';
+      return '[$text]($url)';
+    },
+  );
+
+  final fragment = parseFragment(out);
+  return fragment.text ?? out;
+}
 
 class DetailsPane extends StatefulWidget {
   const DetailsPane({super.key, required this.mediaId, required this.isAnime});
@@ -170,11 +201,34 @@ class _DetailsPaneState extends State<DetailsPane>
                     Container(
                       margin: const EdgeInsets.only(top: 10),
                       child: (media["description"] != null)
-                          ? Text(
-                              (media["description"].toString()).replaceAll(
-                                RegExp(r'<[^>]*>'),
-                                '',
+                          ? MarkdownBody(
+                              data: _convertHtmlToMarkdown(
+                                media["description"].toString(),
                               ),
+                              selectable: true,
+                              styleSheet:
+                                  MarkdownStyleSheet.fromTheme(
+                                    Theme.of(context),
+                                  ).copyWith(
+                                    p: TextStyle(
+                                      fontSize:
+                                          Theme.of(
+                                            context,
+                                          ).textTheme.bodyMedium?.fontSize ??
+                                          14,
+                                    ),
+                                  ),
+                              onTapLink: (text, href, title) async {
+                                if (href != null) {
+                                  final uri = Uri.parse(href);
+                                  try {
+                                    await launchUrl(
+                                      uri,
+                                      mode: LaunchMode.platformDefault,
+                                    );
+                                  } catch (_) {}
+                                }
+                              },
                             )
                           : const Text("N/A"),
                     ),
