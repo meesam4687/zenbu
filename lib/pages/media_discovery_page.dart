@@ -22,7 +22,9 @@ class _MediaDiscoveryPageState extends State<MediaDiscoveryPage> {
 
   void _loadData() {
     setState(() {
-      _data = widget.isAnime ? getAnimeHomePage(1, 10) : getMangaHomePage(1, 10);
+      _data = widget.isAnime
+          ? getAnimeHomePage(1, 10)
+          : getMangaHomePage(1, 10);
     });
   }
 
@@ -30,9 +32,13 @@ class _MediaDiscoveryPageState extends State<MediaDiscoveryPage> {
   void initState() {
     super.initState();
     final provider = Provider.of<StateProvider>(context, listen: false);
-    final providerData = widget.isAnime ? provider.animeDiscoveryData : provider.mangaDiscoveryData;
+    final providerData = widget.isAnime
+        ? provider.animeDiscoveryData
+        : provider.mangaDiscoveryData;
     if (providerData.isEmpty) {
-      _data = widget.isAnime ? getAnimeHomePage(1, 10) : getMangaHomePage(1, 10);
+      _data = widget.isAnime
+          ? getAnimeHomePage(1, 10)
+          : getMangaHomePage(1, 10);
     }
   }
 
@@ -58,12 +64,14 @@ class _MediaDiscoveryPageState extends State<MediaDiscoveryPage> {
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<StateProvider>(context);
-    final providerData = widget.isAnime ? provider.animeDiscoveryData : provider.mangaDiscoveryData;
+    final providerData = widget.isAnime
+        ? provider.animeDiscoveryData
+        : provider.mangaDiscoveryData;
 
     return Scaffold(
       appBar: AppBar(
         flexibleSpace: SearchSegment(isAnime: widget.isAnime),
-        toolbarHeight: 100,
+        toolbarHeight: 90,
       ),
       body: RefreshIndicator(
         onRefresh: _handleRefresh,
@@ -82,7 +90,10 @@ class _MediaDiscoveryPageState extends State<MediaDiscoveryPage> {
                       child: SizedBox(
                         height: MediaQuery.of(context).size.height - 200,
                         child: Center(
-                          child: ErrorPage(scaffold: false, onReload: _loadData),
+                          child: ErrorPage(
+                            scaffold: false,
+                            onReload: _loadData,
+                          ),
                         ),
                       ),
                     );
@@ -90,11 +101,15 @@ class _MediaDiscoveryPageState extends State<MediaDiscoveryPage> {
                   final fetchedData = snapshot.data!;
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     if (widget.isAnime) {
-                      Provider.of<StateProvider>(context, listen: false)
-                          .updateDiscoveryData(fetchedData);
+                      Provider.of<StateProvider>(
+                        context,
+                        listen: false,
+                      ).updateDiscoveryData(fetchedData);
                     } else {
-                      Provider.of<StateProvider>(context, listen: false)
-                          .updateMangaDiscoveryData(fetchedData);
+                      Provider.of<StateProvider>(
+                        context,
+                        listen: false,
+                      ).updateMangaDiscoveryData(fetchedData);
                     }
                   });
                   return _buildContent(fetchedData);
@@ -135,12 +150,15 @@ class _MediaDiscoveryPageState extends State<MediaDiscoveryPage> {
                   coverImage: media["coverImage"]?["large"]?.toString() ?? '',
                   title: media["title"]?["romaji"]?.toString() ?? '',
                   totalEpisodes: widget.isAnime
-                      ? (media["episodes"] != null ? media["episodes"].toString() : "??")
+                      ? (media["episodes"] != null
+                            ? media["episodes"].toString()
+                            : "??")
                       : null,
                   airedEpisodes: widget.isAnime
                       ? ((media["nextAiringEpisode"] != null)
-                          ? (media["nextAiringEpisode"]["episode"] - 1).toString()
-                          : "0")
+                            ? (media["nextAiringEpisode"]["episode"] - 1)
+                                  .toString()
+                            : "0")
                       : null,
                   tagString: displayTags,
                   type: media["type"].toString().toLowerCase(),
