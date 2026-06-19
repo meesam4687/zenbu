@@ -281,8 +281,15 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.refresh),
-                onPressed: _loadEpisodes,
+                icon: const Icon(Icons.settings),
+                onPressed: () async {
+                  await Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const ExtensionsPage(),
+                    ),
+                  );
+                  _loadExtensions();
+                },
               ),
             ],
           ),

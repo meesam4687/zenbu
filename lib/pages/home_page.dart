@@ -43,6 +43,18 @@ class _HomePageState extends State<HomePage> {
     return entries;
   }
 
+  Future<void> _handleRefresh() async {
+    try {
+      final newData = await getHomePageData();
+      if (mounted) {
+        Provider.of<StateProvider>(context, listen: false).updateData(newData);
+        setState(() {
+          _alData = Future.value(newData);
+        });
+      }
+    } catch (_) {}
+  }
+
   @override
   Widget build(BuildContext context) {
     Map providerData = Provider.of<StateProvider>(context).alData;
@@ -129,58 +141,71 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-      body: (providerData.isEmpty)
-          ? FutureBuilder(
-              future: _alData,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(
-                    child: CircularProgressIndicator.adaptive(),
+      body: RefreshIndicator(
+        onRefresh: _handleRefresh,
+        child: (providerData.isEmpty)
+            ? FutureBuilder(
+                future: _alData,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(
+                      child: CircularProgressIndicator.adaptive(),
+                    );
+                  }
+                  if (snapshot.hasError) {
+                    return SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      child: SizedBox(
+                        height: MediaQuery.of(context).size.height - 120,
+                        child: Center(
+                          child: ErrorPage(
+                            scaffold: false,
+                            onReload: () {
+                              setState(() {
+                                _alData = getHomePageData();
+                              });
+                            },
+                          ),
+                        ),
+                      ),
+                    );
+                  }
+                  final data = snapshot.data!;
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    Provider.of<StateProvider>(
+                      context,
+                      listen: false,
+                    ).updateData(data);
+                  });
+                  final animeData = _extractListEntries(data, "animeList");
+                  final mangaData = _extractListEntries(data, "mangaList");
+                  return SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    child: Column(
+                      children: [
+                        MediaList(items: animeData, isAnime: true),
+                        MediaList(items: mangaData, isAnime: false),
+                      ],
+                    ),
                   );
-                }
-                if (snapshot.hasError) {
-                  return ErrorPage(
-                    scaffold: false,
-                    onReload: () {
-                      setState(() {
-                        _alData = getHomePageData();
-                      });
-                    },
-                  );
-                }
-                final data = snapshot.data!;
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  Provider.of<StateProvider>(
-                    context,
-                    listen: false,
-                  ).updateData(data);
-                });
-                final animeData = _extractListEntries(data, "animeList");
-                final mangaData = _extractListEntries(data, "mangaList");
-                return SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      MediaList(items: animeData, isAnime: true),
-                      MediaList(items: mangaData, isAnime: false),
-                    ],
-                  ),
-                );
-              },
-            )
-          : SingleChildScrollView(
-              child: Column(
-                children: [
-                  MediaList(
-                    items: _extractListEntries(providerData, "animeList"),
-                    isAnime: true,
-                  ),
-                  MediaList(
-                    items: _extractListEntries(providerData, "mangaList"),
-                    isAnime: false,
-                  ),
-                ],
+                },
+              )
+            : SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: Column(
+                  children: [
+                    MediaList(
+                      items: _extractListEntries(providerData, "animeList"),
+                      isAnime: true,
+                    ),
+                    MediaList(
+                      items: _extractListEntries(providerData, "mangaList"),
+                      isAnime: false,
+                    ),
+                  ],
+                ),
               ),
-            ),
+      ),
     );
   }
 }

@@ -122,6 +122,58 @@ class _SearchPageState extends State<SearchPage> {
     super.dispose();
   }
 
+  Future<void> _handleRefresh() async {
+    dynamic data;
+    try {
+      if (widget.isAnime) {
+        data = await searchAnime(
+          1,
+          48,
+          widget.query,
+          widget.genres,
+          widget.tags,
+          widget.season,
+          widget.releaseYear,
+          widget.format,
+          widget.airingStatus,
+          widget.countryOfOrigin,
+          widget.sourceMaterial,
+          widget.sortBy,
+          widget.genresNotIn,
+          widget.tagsNotIn,
+        );
+      } else {
+        data = await searchManga(
+          1,
+          48,
+          widget.query,
+          widget.genres,
+          widget.tags,
+          widget.releaseYear,
+          widget.format,
+          widget.airingStatus,
+          widget.countryOfOrigin,
+          widget.sourceMaterial,
+          widget.sortBy,
+          widget.genresNotIn,
+          widget.tagsNotIn,
+        );
+      }
+
+      if (mounted) {
+        setState(() {
+          medias.clear();
+          if (data != null && data["data"] != null && data["data"]["Page"] != null && data["data"]["Page"]["media"] != null) {
+            for (var media in (data["data"]["Page"]["media"] as List)) {
+              medias.add(media);
+            }
+          }
+          page = 2;
+        });
+      }
+    } catch (_) {}
+  }
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
@@ -148,51 +200,63 @@ class _SearchPageState extends State<SearchPage> {
           ),
           toolbarHeight: 100,
         ),
-        body: (medias.isEmpty && _isLoading)
-            ? const Center(
-                child: Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: CircularProgressIndicator(),
-                ),
-              )
-            : (medias.isNotEmpty)
-                ? Container(
-                    margin: const EdgeInsets.only(left: 10, right: 10, top: 10),
-                    child: Column(
-                      children: [
-                        Expanded(
-                          child: GridView.builder(
-                            controller: _scrollController,
-                            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                              maxCrossAxisExtent: 137.142,
-                              childAspectRatio: 100 / 200,
-                            ),
-                            itemCount: _isLoading ? medias.length + 1 : medias.length,
-                            itemBuilder: (context, index) {
-                              if (index == medias.length && _isLoading) {
-                                return const Center(
-                                  child: Padding(
-                                    padding: EdgeInsets.all(8.0),
-                                    child: CircularProgressIndicator(),
+        body: RefreshIndicator(
+          onRefresh: _handleRefresh,
+          child: (medias.isEmpty && _isLoading)
+              ? const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: CircularProgressIndicator(),
+                  ),
+                )
+              : (medias.isNotEmpty)
+                  ? Container(
+                      margin: const EdgeInsets.only(left: 10, right: 10, top: 10),
+                      child: Column(
+                        children: [
+                          Expanded(
+                            child: GridView.builder(
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              controller: _scrollController,
+                              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                                maxCrossAxisExtent: 137.142,
+                                childAspectRatio: 100 / 200,
+                              ),
+                              itemCount: _isLoading ? medias.length + 1 : medias.length,
+                              itemBuilder: (context, index) {
+                                if (index == medias.length && _isLoading) {
+                                  return const Center(
+                                    child: Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: CircularProgressIndicator(),
+                                    ),
+                                  );
+                                }
+                                return Padding(
+                                  padding: const EdgeInsets.only(left: 3.0),
+                                  child: ItemCard(
+                                    title: medias[index]["title"]["romaji"] as String,
+                                    image: medias[index]["coverImage"]["large"] as String,
+                                    id: medias[index]["id"] as int,
+                                    type: (medias[index]["type"] as String).toLowerCase(),
                                   ),
                                 );
-                              }
-                              return Padding(
-                                padding: const EdgeInsets.only(left: 3.0),
-                                child: ItemCard(
-                                  title: medias[index]["title"]["romaji"] as String,
-                                  image: medias[index]["coverImage"]["large"] as String,
-                                  id: medias[index]["id"] as int,
-                                  type: (medias[index]["type"] as String).toLowerCase(),
-                                ),
-                              );
-                            },
+                              },
+                            ),
                           ),
+                        ],
+                      ),
+                    )
+                  : const SingleChildScrollView(
+                      physics: AlwaysScrollableScrollPhysics(),
+                      child: SizedBox(
+                        height: 400,
+                        child: Center(
+                          child: Text("No Results"),
                         ),
-                      ],
+                      ),
                     ),
-                  )
-                : const Center(child: Text("No Results")),
+        ),
       ),
     );
   }

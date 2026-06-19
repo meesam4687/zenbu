@@ -36,6 +36,25 @@ class _MediaDiscoveryPageState extends State<MediaDiscoveryPage> {
     }
   }
 
+  Future<void> _handleRefresh() async {
+    try {
+      final fetchedData = await (widget.isAnime
+          ? getAnimeHomePage(1, 10)
+          : getMangaHomePage(1, 10));
+      if (mounted) {
+        final provider = Provider.of<StateProvider>(context, listen: false);
+        if (widget.isAnime) {
+          provider.updateDiscoveryData(fetchedData);
+        } else {
+          provider.updateMangaDiscoveryData(fetchedData);
+        }
+        setState(() {
+          _data = Future.value(fetchedData);
+        });
+      }
+    } catch (_) {}
+  }
+
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<StateProvider>(context);
@@ -46,32 +65,43 @@ class _MediaDiscoveryPageState extends State<MediaDiscoveryPage> {
         flexibleSpace: SearchSegment(isAnime: widget.isAnime),
         toolbarHeight: 100,
       ),
-      body: providerData.isEmpty
-          ? FutureBuilder(
-              future: _data,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(
-                    child: CircularProgressIndicator.adaptive(),
-                  );
-                }
-                if (snapshot.hasError) {
-                  return ErrorPage(scaffold: false, onReload: _loadData);
-                }
-                final fetchedData = snapshot.data!;
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  if (widget.isAnime) {
-                    Provider.of<StateProvider>(context, listen: false)
-                        .updateDiscoveryData(fetchedData);
-                  } else {
-                    Provider.of<StateProvider>(context, listen: false)
-                        .updateMangaDiscoveryData(fetchedData);
+      body: RefreshIndicator(
+        onRefresh: _handleRefresh,
+        child: providerData.isEmpty
+            ? FutureBuilder(
+                future: _data,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(
+                      child: CircularProgressIndicator.adaptive(),
+                    );
                   }
-                });
-                return _buildContent(fetchedData);
-              },
-            )
-          : _buildContent(providerData),
+                  if (snapshot.hasError) {
+                    return SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      child: SizedBox(
+                        height: MediaQuery.of(context).size.height - 200,
+                        child: Center(
+                          child: ErrorPage(scaffold: false, onReload: _loadData),
+                        ),
+                      ),
+                    );
+                  }
+                  final fetchedData = snapshot.data!;
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (widget.isAnime) {
+                      Provider.of<StateProvider>(context, listen: false)
+                          .updateDiscoveryData(fetchedData);
+                    } else {
+                      Provider.of<StateProvider>(context, listen: false)
+                          .updateMangaDiscoveryData(fetchedData);
+                    }
+                  });
+                  return _buildContent(fetchedData);
+                },
+              )
+            : _buildContent(providerData),
+      ),
     );
   }
 
@@ -81,6 +111,7 @@ class _MediaDiscoveryPageState extends State<MediaDiscoveryPage> {
         : (dataMap["data"]["trending"]["media"] as List);
 
     return SingleChildScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
       child: Column(
         children: [
           SizedBox(
