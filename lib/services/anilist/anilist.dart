@@ -15,3 +15,4 @@ export 'update_list_item.dart';
 export 'get_notifications.dart';
 export 'get_simulcasts.dart';
 export 'toggle_favorite.dart';
+export 'get_media_reviews.dart';
