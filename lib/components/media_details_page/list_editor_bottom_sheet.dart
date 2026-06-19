@@ -108,20 +108,56 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                     hintText: listStatusToText[widget.status],
                     dropdownMenuEntries: widget.isAnime
                         ? [
-                            const DropdownMenuEntry(value: "CURRENT", label: "Watching"),
-                            const DropdownMenuEntry(value: "COMPLETED", label: "Completed"),
-                            const DropdownMenuEntry(value: "PLANNING", label: "Planning"),
-                            const DropdownMenuEntry(value: "DROPPED", label: "Dropped"),
-                            const DropdownMenuEntry(value: "REPEATING", label: "Rewatching"),
-                            const DropdownMenuEntry(value: "PAUSED", label: "Paused"),
+                            const DropdownMenuEntry(
+                              value: "CURRENT",
+                              label: "Watching",
+                            ),
+                            const DropdownMenuEntry(
+                              value: "COMPLETED",
+                              label: "Completed",
+                            ),
+                            const DropdownMenuEntry(
+                              value: "PLANNING",
+                              label: "Planning",
+                            ),
+                            const DropdownMenuEntry(
+                              value: "DROPPED",
+                              label: "Dropped",
+                            ),
+                            const DropdownMenuEntry(
+                              value: "REPEATING",
+                              label: "Rewatching",
+                            ),
+                            const DropdownMenuEntry(
+                              value: "PAUSED",
+                              label: "Paused",
+                            ),
                           ]
                         : [
-                            const DropdownMenuEntry(value: "CURRENT", label: "Reading"),
-                            const DropdownMenuEntry(value: "COMPLETED", label: "Completed"),
-                            const DropdownMenuEntry(value: "PLANNING", label: "Planning"),
-                            const DropdownMenuEntry(value: "DROPPED", label: "Dropped"),
-                            const DropdownMenuEntry(value: "REPEATING", label: "Rereading"),
-                            const DropdownMenuEntry(value: "PAUSED", label: "Paused"),
+                            const DropdownMenuEntry(
+                              value: "CURRENT",
+                              label: "Reading",
+                            ),
+                            const DropdownMenuEntry(
+                              value: "COMPLETED",
+                              label: "Completed",
+                            ),
+                            const DropdownMenuEntry(
+                              value: "PLANNING",
+                              label: "Planning",
+                            ),
+                            const DropdownMenuEntry(
+                              value: "DROPPED",
+                              label: "Dropped",
+                            ),
+                            const DropdownMenuEntry(
+                              value: "REPEATING",
+                              label: "Rereading",
+                            ),
+                            const DropdownMenuEntry(
+                              value: "PAUSED",
+                              label: "Paused",
+                            ),
                           ],
                     onSelected: (value) {
                       selectedStatus = value as String;
@@ -135,7 +171,10 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                 children: [
                   Text(
                     widget.isAnime ? "Episodes Watched" : "Chapters Read",
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                    ),
                   ),
                   SizedBox(
                     width: MediaQuery.of(context).size.width * 0.44,
@@ -289,7 +328,10 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                 children: [
                   Text(
                     widget.isAnime ? "Total Rewatches" : "Total Rereads",
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                    ),
                   ),
                   SizedBox(
                     width: MediaQuery.of(context).size.width * 0.44,

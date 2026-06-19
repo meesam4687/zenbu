@@ -11,9 +11,7 @@ Future<Map<String, dynamic>> executeQuery(
   bool requireAuth = true,
 }) async {
   try {
-    Map<String, String> headers = {
-      "Content-Type": "application/json",
-    };
+    Map<String, String> headers = {"Content-Type": "application/json"};
 
     if (requireAuth) {
       String? token = await TokenStorage.getAccessToken();
@@ -24,10 +22,7 @@ Future<Map<String, dynamic>> executeQuery(
     final res = await http.post(
       Uri.parse(_anilistApiUrl),
       headers: headers,
-      body: jsonEncode({
-        "query": query,
-        "variables": variables,
-      }),
+      body: jsonEncode({"query": query, "variables": variables}),
     );
 
     if (res.statusCode == 429) {

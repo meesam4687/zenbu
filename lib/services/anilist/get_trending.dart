@@ -20,10 +20,7 @@ Future<Map<String, dynamic>> getTrendingAnime(int page, int perPage) async {
     }
   ''';
 
-  return executeQuery(
-    query,
-    variables: {"page": page, "perPage": perPage},
-  );
+  return executeQuery(query, variables: {"page": page, "perPage": perPage});
 }
 
 Future<Map<String, dynamic>> getTrendingManga(int page, int perPage) async {
@@ -50,8 +47,5 @@ Future<Map<String, dynamic>> getTrendingManga(int page, int perPage) async {
     }
   ''';
 
-  return executeQuery(
-    query,
-    variables: {"page": page, "perPage": perPage},
-  );
+  return executeQuery(query, variables: {"page": page, "perPage": perPage});
 }

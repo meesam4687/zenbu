@@ -41,7 +41,12 @@ class AiringBanner extends StatelessWidget {
         return Container(
           height: 240,
           width: double.infinity,
-          margin: const EdgeInsets.only(top: 10, left: 10, right: 10, bottom: 5),
+          margin: const EdgeInsets.only(
+            top: 10,
+            left: 10,
+            right: 10,
+            bottom: 5,
+          ),
           child: Card(
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.all(Radius.circular(cardRadius)),

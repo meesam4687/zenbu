@@ -76,8 +76,5 @@ Future<Map<String, dynamic>> getNotifications(int page, int perPage) async {
     }
   ''';
 
-  return executeQuery(
-    query,
-    variables: {"page": page, "perPage": perPage},
-  );
+  return executeQuery(query, variables: {"page": page, "perPage": perPage});
 }

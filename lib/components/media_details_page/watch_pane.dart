@@ -445,22 +445,22 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
                                         height: 80,
                                         child:
                                             widget.coverImage != null &&
-                                                    widget.coverImage!.isNotEmpty
-                                                ? CachedNetworkImage(
-                                                    imageUrl: widget.coverImage!,
-                                                    fit: BoxFit.cover,
-                                                    placeholder: (context, url) =>
-                                                        const Center(
-                                                          child:
-                                                              CircularProgressIndicator.adaptive(
-                                                                strokeWidth: 2,
-                                                              ),
-                                                        ),
-                                                    errorWidget:
-                                                        (context, url, error) =>
-                                                            _buildPlaceholderThumbnail(),
-                                                  )
-                                                : _buildPlaceholderThumbnail(),
+                                                widget.coverImage!.isNotEmpty
+                                            ? CachedNetworkImage(
+                                                imageUrl: widget.coverImage!,
+                                                fit: BoxFit.cover,
+                                                placeholder: (context, url) =>
+                                                    const Center(
+                                                      child:
+                                                          CircularProgressIndicator.adaptive(
+                                                            strokeWidth: 2,
+                                                          ),
+                                                    ),
+                                                errorWidget:
+                                                    (context, url, error) =>
+                                                        _buildPlaceholderThumbnail(),
+                                              )
+                                            : _buildPlaceholderThumbnail(),
                                       ),
                                       const SizedBox(width: 16),
                                       Expanded(

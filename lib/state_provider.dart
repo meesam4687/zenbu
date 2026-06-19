@@ -81,31 +81,31 @@ class StateProvider extends ChangeNotifier {
   }
 
   static Map _defaultAnimeFilters() => {
-        "selectedGenres": <String>{},
-        "selectedTags": <String>{},
-        "excludedGenres": <String>{},
-        "excludedTags": <String>{},
-        "releaseYear": null,
-        "countryOfOrigin": "",
-        "season": "",
-        "format": "",
-        "airingStatus": "",
-        "sourceMaterial": "",
-        "sortBy": "POPULARITY_DESC",
-      };
+    "selectedGenres": <String>{},
+    "selectedTags": <String>{},
+    "excludedGenres": <String>{},
+    "excludedTags": <String>{},
+    "releaseYear": null,
+    "countryOfOrigin": "",
+    "season": "",
+    "format": "",
+    "airingStatus": "",
+    "sourceMaterial": "",
+    "sortBy": "POPULARITY_DESC",
+  };
 
   static Map _defaultMangaFilters() => {
-        "selectedGenres": <String>{},
-        "selectedTags": <String>{},
-        "excludedGenres": <String>{},
-        "excludedTags": <String>{},
-        "releaseYear": null,
-        "countryOfOrigin": "",
-        "format": "",
-        "airingStatus": "",
-        "sourceMaterial": "",
-        "sortBy": "POPULARITY_DESC",
-      };
+    "selectedGenres": <String>{},
+    "selectedTags": <String>{},
+    "excludedGenres": <String>{},
+    "excludedTags": <String>{},
+    "releaseYear": null,
+    "countryOfOrigin": "",
+    "format": "",
+    "airingStatus": "",
+    "sourceMaterial": "",
+    "sortBy": "POPULARITY_DESC",
+  };
 
   void updateData(Map newData) {
     _alData = newData;

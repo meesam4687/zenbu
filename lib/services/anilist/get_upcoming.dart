@@ -25,10 +25,6 @@ Future<Map<String, dynamic>> getUpcomingAnime(int page, int perPage) async {
 
   return executeQuery(
     query,
-    variables: {
-      "page": page,
-      "perPage": perPage,
-      "nextSeason": nextSeasonVal,
-    },
+    variables: {"page": page, "perPage": perPage, "nextSeason": nextSeasonVal},
   );
 }

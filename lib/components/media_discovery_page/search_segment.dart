@@ -5,11 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:zenbu/state_provider.dart';
 
 class SearchSegment extends StatelessWidget {
-  const SearchSegment({
-    super.key,
-    this.searchText,
-    required this.isAnime,
-  });
+  const SearchSegment({super.key, this.searchText, required this.isAnime});
 
   final String? searchText;
   final bool isAnime;
@@ -17,7 +13,9 @@ class SearchSegment extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<StateProvider>(context);
-    final isFilterActive = isAnime ? provider.isAnimeFilterActive : provider.isMangaFilterActive;
+    final isFilterActive = isAnime
+        ? provider.isAnimeFilterActive
+        : provider.isMangaFilterActive;
 
     return Container(
       margin: const EdgeInsets.only(top: 50, left: 12, right: 12),
@@ -36,13 +34,18 @@ class SearchSegment extends StatelessWidget {
               controller: TextEditingController(text: searchText ?? ""),
               onSubmitted: (value) {
                 if (value.isNotEmpty) {
-                  final provider = Provider.of<StateProvider>(context, listen: false);
+                  final provider = Provider.of<StateProvider>(
+                    context,
+                    listen: false,
+                  );
                   if (isAnime) {
                     provider.animeSearchQuery = value;
                   } else {
                     provider.mangaSearchQuery = value;
                   }
-                  final filters = isAnime ? provider.currentAnimeFilters : provider.currentMangaFilters;
+                  final filters = isAnime
+                      ? provider.currentAnimeFilters
+                      : provider.currentMangaFilters;
 
                   final route = PageRouteBuilder(
                     transitionDuration: const Duration(milliseconds: 300),
@@ -50,16 +53,24 @@ class SearchSegment extends StatelessWidget {
                       return SearchPage(
                         isAnime: isAnime,
                         query: value,
-                        genres: (filters["selectedGenres"] as Set).toList().isNotEmpty
+                        genres:
+                            (filters["selectedGenres"] as Set)
+                                .toList()
+                                .isNotEmpty
                             ? (filters["selectedGenres"] as Set).toList()
                             : null,
-                        tags: (filters["selectedTags"] as Set).toList().isNotEmpty
+                        tags:
+                            (filters["selectedTags"] as Set).toList().isNotEmpty
                             ? (filters["selectedTags"] as Set).toList()
                             : null,
-                        genresNotIn: (filters["excludedGenres"] as Set).toList().isNotEmpty
+                        genresNotIn:
+                            (filters["excludedGenres"] as Set)
+                                .toList()
+                                .isNotEmpty
                             ? (filters["excludedGenres"] as Set).toList()
                             : null,
-                        tagsNotIn: (filters["excludedTags"] as Set).toList().isNotEmpty
+                        tagsNotIn:
+                            (filters["excludedTags"] as Set).toList().isNotEmpty
                             ? (filters["excludedTags"] as Set).toList()
                             : null,
                         countryOfOrigin: filters["countryOfOrigin"] != ""
@@ -69,9 +80,15 @@ class SearchSegment extends StatelessWidget {
                         season: isAnime && filters["season"] != ""
                             ? filters["season"]
                             : null,
-                        format: filters["format"] != "" ? filters["format"] : null,
-                        airingStatus: filters["airingStatus"] != "" ? filters["airingStatus"] : null,
-                        sourceMaterial: filters["sourceMaterial"] != "" ? filters["sourceMaterial"] : null,
+                        format: filters["format"] != ""
+                            ? filters["format"]
+                            : null,
+                        airingStatus: filters["airingStatus"] != ""
+                            ? filters["airingStatus"]
+                            : null,
+                        sourceMaterial: filters["sourceMaterial"] != ""
+                            ? filters["sourceMaterial"]
+                            : null,
                         sortBy: filters["sortBy"],
                       );
                     },

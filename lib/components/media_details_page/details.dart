@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 
 class Details extends StatelessWidget {
-  const Details({
-    super.key,
-    required this.items,
-  });
+  const Details({super.key, required this.items});
 
   final List<({String label, String? value})> items;
 

@@ -3,11 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:zenbu/components/global/item_card.dart';
 
 class MediaList extends StatelessWidget {
-  const MediaList({
-    super.key,
-    required this.items,
-    required this.isAnime,
-  });
+  const MediaList({super.key, required this.items, required this.isAnime});
 
   final List<dynamic> items;
   final bool isAnime;
@@ -47,7 +43,9 @@ class MediaList extends StatelessWidget {
                           builder: (context) {
                             return ListPage(
                               title: isAnime ? "Anime List" : "Manga List",
-                              mediaListType: isAnime ? MediaType.anime : MediaType.manga,
+                              mediaListType: isAnime
+                                  ? MediaType.anime
+                                  : MediaType.manga,
                             );
                           },
                         ),

@@ -39,7 +39,10 @@ Future<Map<String, dynamic>> getPopularSeason(int page, int perPage) async {
   );
 }
 
-Future<Map<String, dynamic>> getPopularAllTimeAnime(int page, int perPage) async {
+Future<Map<String, dynamic>> getPopularAllTimeAnime(
+  int page,
+  int perPage,
+) async {
   const String query = '''
     query (\$page: Int, \$perPage: Int) {
       list: Page(page: \$page, perPage: \$perPage) {
@@ -59,13 +62,13 @@ Future<Map<String, dynamic>> getPopularAllTimeAnime(int page, int perPage) async
     }
   ''';
 
-  return executeQuery(
-    query,
-    variables: {"page": page, "perPage": perPage},
-  );
+  return executeQuery(query, variables: {"page": page, "perPage": perPage});
 }
 
-Future<Map<String, dynamic>> getPopularAllTimeManga(int page, int perPage) async {
+Future<Map<String, dynamic>> getPopularAllTimeManga(
+  int page,
+  int perPage,
+) async {
   const String query = '''
     query (\$page: Int, \$perPage: Int) {
       list: Page(page: \$page, perPage: \$perPage) {
@@ -85,8 +88,5 @@ Future<Map<String, dynamic>> getPopularAllTimeManga(int page, int perPage) async
     }
   ''';
 
-  return executeQuery(
-    query,
-    variables: {"page": page, "perPage": perPage},
-  );
+  return executeQuery(query, variables: {"page": page, "perPage": perPage});
 }

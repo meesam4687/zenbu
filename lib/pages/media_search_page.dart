@@ -105,7 +105,10 @@ class _SearchPageState extends State<SearchPage> {
 
     if (mounted) {
       setState(() {
-        if (data != null && data["data"] != null && data["data"]["Page"] != null && data["data"]["Page"]["media"] != null) {
+        if (data != null &&
+            data["data"] != null &&
+            data["data"]["Page"] != null &&
+            data["data"]["Page"]["media"] != null) {
           for (var media in (data["data"]["Page"]["media"] as List)) {
             medias.add(media);
           }
@@ -163,7 +166,10 @@ class _SearchPageState extends State<SearchPage> {
       if (mounted) {
         setState(() {
           medias.clear();
-          if (data != null && data["data"] != null && data["data"]["Page"] != null && data["data"]["Page"]["media"] != null) {
+          if (data != null &&
+              data["data"] != null &&
+              data["data"]["Page"] != null &&
+              data["data"]["Page"]["media"] != null) {
             for (var media in (data["data"]["Page"]["media"] as List)) {
               medias.add(media);
             }
@@ -210,52 +216,57 @@ class _SearchPageState extends State<SearchPage> {
                   ),
                 )
               : (medias.isNotEmpty)
-                  ? Container(
-                      margin: const EdgeInsets.only(left: 10, right: 10, top: 10),
-                      child: Column(
-                        children: [
-                          Expanded(
-                            child: GridView.builder(
-                              physics: const AlwaysScrollableScrollPhysics(),
-                              controller: _scrollController,
-                              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+              ? Container(
+                  margin: const EdgeInsets.only(left: 10, right: 10, top: 10),
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: GridView.builder(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          controller: _scrollController,
+                          gridDelegate:
+                              const SliverGridDelegateWithMaxCrossAxisExtent(
                                 maxCrossAxisExtent: 137.142,
                                 childAspectRatio: 100 / 200,
                               ),
-                              itemCount: _isLoading ? medias.length + 1 : medias.length,
-                              itemBuilder: (context, index) {
-                                if (index == medias.length && _isLoading) {
-                                  return const Center(
-                                    child: Padding(
-                                      padding: EdgeInsets.all(8.0),
-                                      child: CircularProgressIndicator(),
-                                    ),
-                                  );
-                                }
-                                return Padding(
-                                  padding: const EdgeInsets.only(left: 3.0),
-                                  child: ItemCard(
-                                    title: medias[index]["title"]["romaji"] as String,
-                                    image: medias[index]["coverImage"]["large"] as String,
-                                    id: medias[index]["id"] as int,
-                                    type: (medias[index]["type"] as String).toLowerCase(),
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                    )
-                  : const SingleChildScrollView(
-                      physics: AlwaysScrollableScrollPhysics(),
-                      child: SizedBox(
-                        height: 400,
-                        child: Center(
-                          child: Text("No Results"),
+                          itemCount: _isLoading
+                              ? medias.length + 1
+                              : medias.length,
+                          itemBuilder: (context, index) {
+                            if (index == medias.length && _isLoading) {
+                              return const Center(
+                                child: Padding(
+                                  padding: EdgeInsets.all(8.0),
+                                  child: CircularProgressIndicator(),
+                                ),
+                              );
+                            }
+                            return Padding(
+                              padding: const EdgeInsets.only(left: 3.0),
+                              child: ItemCard(
+                                title:
+                                    medias[index]["title"]["romaji"] as String,
+                                image:
+                                    medias[index]["coverImage"]["large"]
+                                        as String,
+                                id: medias[index]["id"] as int,
+                                type: (medias[index]["type"] as String)
+                                    .toLowerCase(),
+                              ),
+                            );
+                          },
                         ),
                       ),
-                    ),
+                    ],
+                  ),
+                )
+              : const SingleChildScrollView(
+                  physics: AlwaysScrollableScrollPhysics(),
+                  child: SizedBox(
+                    height: 400,
+                    child: Center(child: Text("No Results")),
+                  ),
+                ),
         ),
       ),
     );

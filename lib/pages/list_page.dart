@@ -158,62 +158,68 @@ class _ListPageState extends State<ListPage> {
                     children: [
                       ListPageView(
                         list: _filterList(
-                            (listNameIndexMap[(list == "animeList")
-                                        ? "Watching"
-                                        : "Reading"] !=
-                                    null)
-                                ? data["data"][list]["lists"][listNameIndexMap[(list ==
-                                          "animeList")
+                          (listNameIndexMap[(list == "animeList")
                                       ? "Watching"
-                                      : "Reading"]]["entries"]
-                                : [],
-                            _searchQuery),
+                                      : "Reading"] !=
+                                  null)
+                              ? data["data"][list]["lists"][listNameIndexMap[(list ==
+                                        "animeList")
+                                    ? "Watching"
+                                    : "Reading"]]["entries"]
+                              : [],
+                          _searchQuery,
+                        ),
                         mediaType: (list == "animeList") ? "anime" : "manga",
                       ),
                       ListPageView(
                         list: _filterList(
-                            (listNameIndexMap['Planning'] != null)
-                                ? data["data"][list]["lists"][listNameIndexMap['Planning']]["entries"]
-                                : [],
-                            _searchQuery),
+                          (listNameIndexMap['Planning'] != null)
+                              ? data["data"][list]["lists"][listNameIndexMap['Planning']]["entries"]
+                              : [],
+                          _searchQuery,
+                        ),
                         mediaType: (list == "animeList") ? "anime" : "manga",
                       ),
                       ListPageView(
                         list: _filterList(
-                            (listNameIndexMap['Completed'] != null)
-                                ? data["data"][list]["lists"][listNameIndexMap['Completed']]["entries"]
-                                : [],
-                            _searchQuery),
+                          (listNameIndexMap['Completed'] != null)
+                              ? data["data"][list]["lists"][listNameIndexMap['Completed']]["entries"]
+                              : [],
+                          _searchQuery,
+                        ),
                         mediaType: (list == "animeList") ? "anime" : "manga",
                       ),
                       ListPageView(
                         list: _filterList(
-                            (listNameIndexMap[(list == "animeList")
-                                        ? "Rewatching"
-                                        : "Rereading"] !=
-                                    null)
-                                ? data["data"][list]["lists"][listNameIndexMap[(list ==
-                                          "animeList")
+                          (listNameIndexMap[(list == "animeList")
                                       ? "Rewatching"
-                                      : "Rereading"]]["entries"]
-                                : [],
-                            _searchQuery),
+                                      : "Rereading"] !=
+                                  null)
+                              ? data["data"][list]["lists"][listNameIndexMap[(list ==
+                                        "animeList")
+                                    ? "Rewatching"
+                                    : "Rereading"]]["entries"]
+                              : [],
+                          _searchQuery,
+                        ),
                         mediaType: (list == "animeList") ? "anime" : "manga",
                       ),
                       ListPageView(
                         list: _filterList(
-                            (listNameIndexMap['Paused'] != null)
-                                ? data["data"][list]["lists"][listNameIndexMap['Paused']]["entries"]
-                                : [],
-                            _searchQuery),
+                          (listNameIndexMap['Paused'] != null)
+                              ? data["data"][list]["lists"][listNameIndexMap['Paused']]["entries"]
+                              : [],
+                          _searchQuery,
+                        ),
                         mediaType: (list == "animeList") ? "anime" : "manga",
                       ),
                       ListPageView(
                         list: _filterList(
-                            (listNameIndexMap['Dropped'] != null)
-                                ? data["data"][list]["lists"][listNameIndexMap['Dropped']]["entries"]
-                                : [],
-                            _searchQuery),
+                          (listNameIndexMap['Dropped'] != null)
+                              ? data["data"][list]["lists"][listNameIndexMap['Dropped']]["entries"]
+                              : [],
+                          _searchQuery,
+                        ),
                         mediaType: (list == "animeList") ? "anime" : "manga",
                       ),
                       ListPageView(
@@ -222,10 +228,16 @@ class _ListPageState extends State<ListPage> {
                       ),
                       ListPageView(
                         list: _filterList(
-                            (data["data"]?["favourites"]?["favourites"]?[list == "animeList" ? "anime" : "manga"]?["nodes"] as List? ?? [])
-                                .map((media) => {"media": media})
-                                .toList(),
-                            _searchQuery),
+                          (data["data"]?["favourites"]?["favourites"]?[list ==
+                                              "animeList"
+                                          ? "anime"
+                                          : "manga"]?["nodes"]
+                                      as List? ??
+                                  [])
+                              .map((media) => {"media": media})
+                              .toList(),
+                          _searchQuery,
+                        ),
                         mediaType: (list == "animeList") ? "anime" : "manga",
                       ),
                     ],

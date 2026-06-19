@@ -69,16 +69,13 @@ class _TitlePaneState extends State<TitlePane> {
       String newStatus = mediaState;
       Map newEndDate = (mediaListEntry?["completedAt"]?["day"] == null)
           ? {"day": null, "month": null, "year": null}
-          : mediaListEntry?["completedAt"] ?? {"day": null, "month": null, "year": null};
+          : mediaListEntry?["completedAt"] ??
+                {"day": null, "month": null, "year": null};
 
       if (total != null && newProgress >= total) {
         newStatus = 'COMPLETED';
         final now = DateTime.now();
-        newEndDate = {
-          "day": now.day,
-          "month": now.month,
-          "year": now.year,
-        };
+        newEndDate = {"day": now.day, "month": now.month, "year": now.year};
       }
 
       final response = await updateListItem(
@@ -87,7 +84,8 @@ class _TitlePaneState extends State<TitlePane> {
         newProgress,
         (mediaListEntry?["startedAt"]?["day"] == null)
             ? {"day": null, "month": null, "year": null}
-            : mediaListEntry?["startedAt"] ?? {"day": null, "month": null, "year": null},
+            : mediaListEntry?["startedAt"] ??
+                  {"day": null, "month": null, "year": null},
         newEndDate,
         (mediaListEntry?["score"] is num)
             ? (mediaListEntry?["score"] as num).toDouble()
@@ -100,13 +98,17 @@ class _TitlePaneState extends State<TitlePane> {
         final savedEntry = response["data"]["SaveMediaListEntry"];
         setState(() {
           mediaState = savedEntry["status"];
-          progress = "Progress: ${savedEntry["progress"]}/${widget.totalEpisodes}";
+          progress =
+              "Progress: ${savedEntry["progress"]}/${widget.totalEpisodes}";
           mediaListEntry = savedEntry;
         });
 
         final newAlData = await getHomePageData();
         if (mounted) {
-          Provider.of<StateProvider>(context, listen: false).updateData(newAlData);
+          Provider.of<StateProvider>(
+            context,
+            listen: false,
+          ).updateData(newAlData);
         }
       }
     } catch (_) {
@@ -133,7 +135,8 @@ class _TitlePaneState extends State<TitlePane> {
 
       if (response["errors"] != null) {
         if (mounted) {
-          final errMsg = response["errors"][0]?["message"] ?? "Unknown GraphQL error";
+          final errMsg =
+              response["errors"][0]?["message"] ?? "Unknown GraphQL error";
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text("Failed to toggle favorite: $errMsg")),
           );
@@ -147,9 +150,9 @@ class _TitlePaneState extends State<TitlePane> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Error: $e")),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("Error: $e")));
       }
     } finally {
       if (mounted) {
@@ -177,7 +180,10 @@ class _TitlePaneState extends State<TitlePane> {
     final surfaceColor = Theme.of(context).colorScheme.surface;
     List<Widget> elementList = [];
     if (mediaState == 'CURRENT') {
-      elementList = [const Icon(Icons.edit), Text(widget.isAnime ? " Watching" : " Reading")];
+      elementList = [
+        const Icon(Icons.edit),
+        Text(widget.isAnime ? " Watching" : " Reading"),
+      ];
     } else if (mediaState == 'COMPLETED') {
       elementList = [const Icon(Icons.check), const Text(" Completed")];
     } else if (mediaState == 'PLANNING') {
@@ -187,7 +193,10 @@ class _TitlePaneState extends State<TitlePane> {
     } else if (mediaState == 'PAUSED') {
       elementList = [const Icon(Icons.pause), const Text(" Paused")];
     } else if (mediaState == 'REPEATING') {
-      elementList = [const Icon(Icons.loop), Text(widget.isAnime ? " Rewatching" : " Rereading")];
+      elementList = [
+        const Icon(Icons.loop),
+        Text(widget.isAnime ? " Rewatching" : " Rereading"),
+      ];
     } else {
       elementList = [const Icon(Icons.add), const Text(" Add to List")];
     }
@@ -281,9 +290,9 @@ class _TitlePaneState extends State<TitlePane> {
                                     decoration: BoxDecoration(
                                       color: _isIncrementing
                                           ? Colors.grey.shade600
-                                          : Theme.of(context)
-                                              .colorScheme
-                                              .primaryContainer,
+                                          : Theme.of(
+                                              context,
+                                            ).colorScheme.primaryContainer,
                                       shape: BoxShape.circle,
                                     ),
                                     alignment: Alignment.center,
@@ -295,7 +304,8 @@ class _TitlePaneState extends State<TitlePane> {
                                               strokeWidth: 2,
                                               valueColor:
                                                   AlwaysStoppedAnimation<Color>(
-                                                      Colors.white),
+                                                    Colors.white,
+                                                  ),
                                             ),
                                           )
                                         : Text(
@@ -303,9 +313,9 @@ class _TitlePaneState extends State<TitlePane> {
                                             style: TextStyle(
                                               fontWeight: FontWeight.bold,
                                               fontSize: 14,
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .onPrimaryContainer,
+                                              color: Theme.of(
+                                                context,
+                                              ).colorScheme.onPrimaryContainer,
                                             ),
                                           ),
                                   ),
@@ -332,10 +342,10 @@ class _TitlePaneState extends State<TitlePane> {
                             color: _isTogglingFavourite
                                 ? Colors.grey.shade600
                                 : (isFavourite
-                                    ? Colors.red.shade600
-                                    : Theme.of(context)
-                                        .colorScheme
-                                        .primaryContainer),
+                                      ? Colors.red.shade600
+                                      : Theme.of(
+                                          context,
+                                        ).colorScheme.primaryContainer),
                           ),
                           alignment: Alignment.center,
                           child: _isTogglingFavourite
@@ -344,9 +354,9 @@ class _TitlePaneState extends State<TitlePane> {
                                   height: 20,
                                   child: CircularProgressIndicator(
                                     strokeWidth: 2,
-                                    valueColor:
-                                        AlwaysStoppedAnimation<Color>(
-                                            Colors.white),
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white,
+                                    ),
                                   ),
                                 )
                               : Icon(
@@ -368,16 +378,20 @@ class _TitlePaneState extends State<TitlePane> {
                               builder: (context) {
                                 return Padding(
                                   padding: EdgeInsets.only(
-                                    bottom: MediaQuery.of(context).viewInsets.bottom,
+                                    bottom: MediaQuery.of(
+                                      context,
+                                    ).viewInsets.bottom,
                                   ),
                                   child: ListEditorBottomSheet(
                                     isAnime: widget.isAnime,
                                     status: mediaListEntry?["status"] ?? "NONE",
                                     progress: mediaListEntry?["progress"] ?? 0,
                                     startDate:
-                                        (mediaListEntry?["startedAt"]?["day"] == null)
+                                        (mediaListEntry?["startedAt"]?["day"] ==
+                                            null)
                                         ? {"day": -1}
-                                        : mediaListEntry?["startedAt"] ?? {"day": -1},
+                                        : mediaListEntry?["startedAt"] ??
+                                              {"day": -1},
                                     endDate:
                                         (mediaListEntry?["completedAt"]?["day"] ==
                                             null)
@@ -385,7 +399,8 @@ class _TitlePaneState extends State<TitlePane> {
                                         : mediaListEntry?["completedAt"] ??
                                               {"day": -1},
                                     score: (mediaListEntry?["score"] is int)
-                                        ? (mediaListEntry?["score"] as int).toDouble()
+                                        ? (mediaListEntry?["score"] as int)
+                                              .toDouble()
                                         : mediaListEntry?["score"] ?? 0.0,
                                     repeatCount: mediaListEntry?["repeat"] ?? 0,
                                     mediaId: widget.id,

@@ -145,10 +145,10 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
           final newLabel = sub.label.contains(suffix)
               ? sub.label
               : '${sub.label}$suffix';
-          unique.putIfAbsent(sub.file, () => ExtSubtitle(
-            file: sub.file,
-            label: newLabel,
-          ));
+          unique.putIfAbsent(
+            sub.file,
+            () => ExtSubtitle(file: sub.file, label: newLabel),
+          );
         }
       }
     }
@@ -255,7 +255,6 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     }
   }
 
-
   Future<_ResolvedStream> _resolveRedirects(
     String url,
     Map<String, String> headers,
@@ -311,7 +310,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
       _activeSkipTimeNotifier.value = null;
 
       final headers = Map<String, String>.from(_selectedVideo!.headers);
-      final hasUserAgent = headers.keys.any((k) => k.toLowerCase() == 'user-agent');
+      final hasUserAgent = headers.keys.any(
+        (k) => k.toLowerCase() == 'user-agent',
+      );
       if (!hasUserAgent) {
         headers['User-Agent'] =
             'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
@@ -319,7 +320,10 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
 
       if (!mounted) return;
 
-      final resolvedResult = await _resolveRedirects(_selectedVideo!.url, headers);
+      final resolvedResult = await _resolveRedirects(
+        _selectedVideo!.url,
+        headers,
+      );
       if (!mounted) return;
 
       final resolvedUrl = resolvedResult.url;
@@ -339,12 +343,12 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
           lowerContentType.contains('m3u8')) {
         formatHint = VideoFormat.hls;
       } else if (lowerUrl.contains('.mpd') ||
-                 lowerUrl.contains('/dash/') ||
-                 lowerUrl.contains('type=mpd') ||
-                 lowerOrigUrl.contains('.mpd') ||
-                 lowerOrigUrl.contains('/dash/') ||
-                 lowerOrigUrl.contains('type=mpd') ||
-                 lowerContentType.contains('dash+xml')) {
+          lowerUrl.contains('/dash/') ||
+          lowerUrl.contains('type=mpd') ||
+          lowerOrigUrl.contains('.mpd') ||
+          lowerOrigUrl.contains('/dash/') ||
+          lowerOrigUrl.contains('type=mpd') ||
+          lowerContentType.contains('dash+xml')) {
         formatHint = VideoFormat.dash;
       }
 
@@ -458,22 +462,30 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
       () => _jsEngine?.fetchUrl(url, base),
       () async {
         final r = await http.get(Uri.parse(url), headers: base);
-        return r.statusCode == 200 ? utf8.decode(r.bodyBytes, allowMalformed: true) : null;
+        return r.statusCode == 200
+            ? utf8.decode(r.bodyBytes, allowMalformed: true)
+            : null;
       },
       () async {
         final h = <String, String>{'User-Agent': ua};
         final ref = base['Referer'] ?? base['referer'];
         if (ref != null) h['Referer'] = ref;
         final r = await http.get(Uri.parse(url), headers: h);
-        return r.statusCode == 200 ? utf8.decode(r.bodyBytes, allowMalformed: true) : null;
+        return r.statusCode == 200
+            ? utf8.decode(r.bodyBytes, allowMalformed: true)
+            : null;
       },
       () async {
         final r = await http.get(Uri.parse(url), headers: {'User-Agent': ua});
-        return r.statusCode == 200 ? utf8.decode(r.bodyBytes, allowMalformed: true) : null;
+        return r.statusCode == 200
+            ? utf8.decode(r.bodyBytes, allowMalformed: true)
+            : null;
       },
       () async {
         final r = await http.get(Uri.parse(url));
-        return r.statusCode == 200 ? utf8.decode(r.bodyBytes, allowMalformed: true) : null;
+        return r.statusCode == 200
+            ? utf8.decode(r.bodyBytes, allowMalformed: true)
+            : null;
       },
     ];
 

@@ -6,11 +6,7 @@ import 'package:zenbu/components/media_details_page/watch_pane.dart';
 import 'package:zenbu/pages/error_page.dart';
 
 class MediaDetailsPage extends StatefulWidget {
-  const MediaDetailsPage({
-    super.key,
-    required this.id,
-    required this.isAnime,
-  });
+  const MediaDetailsPage({super.key, required this.id, required this.isAnime});
 
   final int? id;
   final bool isAnime;
@@ -101,10 +97,7 @@ class _MediaDetailsPageState extends State<MediaDetailsPage>
                               Tab(text: "Watch"),
                               Tab(text: "Reviews"),
                             ]
-                          : const [
-                              Tab(text: "About"),
-                              Tab(text: "Reviews"),
-                            ],
+                          : const [Tab(text: "About"), Tab(text: "Reviews")],
                     ),
                   ),
                 ),
@@ -129,7 +122,8 @@ class _MediaDetailsPageState extends State<MediaDetailsPage>
                               malId: media["idMal"] as int?,
                               animeTitle: media["title"]["romaji"] ?? '',
                               coverImage: media["coverImage"]["extraLarge"],
-                              streamingEpisodes: media["streamingEpisodes"] as List?,
+                              streamingEpisodes:
+                                  media["streamingEpisodes"] as List?,
                             ),
                           ),
                         ),

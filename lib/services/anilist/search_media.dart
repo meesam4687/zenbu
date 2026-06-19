@@ -30,11 +30,15 @@ Future<Map<String, dynamic>> searchAnime(
   if (mediaSource != null && mediaSource.isNotEmpty) {
     vars["source"] = mediaSource;
   }
-  vars["sort"] = sortBy != null && sortBy.isNotEmpty ? [sortBy] : ["POPULARITY_DESC"];
-  if (genreNotIn != null && genreNotIn.isNotEmpty) vars["genreNotIn"] = genreNotIn;
+  vars["sort"] = sortBy != null && sortBy.isNotEmpty
+      ? [sortBy]
+      : ["POPULARITY_DESC"];
+  if (genreNotIn != null && genreNotIn.isNotEmpty)
+    vars["genreNotIn"] = genreNotIn;
   if (tagNotIn != null && tagNotIn.isNotEmpty) vars["tagNotIn"] = tagNotIn;
 
-  String query = '''
+  String query =
+      '''
     query (
       \$page: Int,
       \$perPage: Int,
@@ -99,11 +103,15 @@ Future<Map<String, dynamic>> searchManga(
   if (mediaSource != null && mediaSource.isNotEmpty) {
     vars["source"] = mediaSource;
   }
-  vars["sort"] = sortBy != null && sortBy.isNotEmpty ? [sortBy] : ["POPULARITY_DESC"];
-  if (genreNotIn != null && genreNotIn.isNotEmpty) vars["genreNotIn"] = genreNotIn;
+  vars["sort"] = sortBy != null && sortBy.isNotEmpty
+      ? [sortBy]
+      : ["POPULARITY_DESC"];
+  if (genreNotIn != null && genreNotIn.isNotEmpty)
+    vars["genreNotIn"] = genreNotIn;
   if (tagNotIn != null && tagNotIn.isNotEmpty) vars["tagNotIn"] = tagNotIn;
 
-  String query = '''
+  String query =
+      '''
     query (
       \$page: Int,
       \$perPage: Int,
