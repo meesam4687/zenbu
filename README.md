@@ -6,4 +6,4 @@
 - [ ] Icon
 - [x] Watch Tab 
 - [ ] Read Tab 
-- [ ] Reviews Tab
+- [x] Reviews Tab

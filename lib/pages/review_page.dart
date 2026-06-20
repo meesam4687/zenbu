@@ -4,9 +4,8 @@ import 'package:html/parser.dart' show parseFragment;
 import 'package:video_player/video_player.dart';
 import 'package:zenbu/components/global/spoiler.dart';
 
-
 class ReviewSegment {
-  final String type; // 'text', 'image', 'video'
+  final String type;
   final String content;
   ReviewSegment(this.type, this.content);
 }
@@ -17,7 +16,6 @@ List<ReviewSegment> _parseReviewBody(String body) {
 
   int lastIndex = 0;
   for (final match in regex.allMatches(body)) {
-    // Add text segment before the match
     if (match.start > lastIndex) {
       final text = body.substring(lastIndex, match.start);
       if (text.trim().isNotEmpty) {
@@ -37,7 +35,6 @@ List<ReviewSegment> _parseReviewBody(String body) {
     lastIndex = match.end;
   }
 
-  // Add remaining text
   if (lastIndex < body.length) {
     final text = body.substring(lastIndex);
     if (text.trim().isNotEmpty) {
@@ -51,10 +48,8 @@ List<ReviewSegment> _parseReviewBody(String body) {
 String _convertHtmlToMarkdown(String html) {
   var out = html;
 
-  // Remove AniList custom center tags (three tildes) to prevent them from being parsed as code blocks
   out = out.replaceAll('~~~', '');
 
-  // Fix headers lacking a space after the '#' symbol
   out = out.replaceAllMapped(
     RegExp(r'^(#+)([^\s#])', multiLine: true),
     (match) => '${match.group(1)} ${match.group(2)}',
@@ -102,22 +97,24 @@ class _LoopVideoPlayerState extends State<LoopVideoPlayer> {
   void initState() {
     super.initState();
     _controller = VideoPlayerController.networkUrl(Uri.parse(widget.url))
-      ..initialize().then((_) {
-        if (mounted) {
-          setState(() {
-            _isInitialized = true;
+      ..initialize()
+          .then((_) {
+            if (mounted) {
+              setState(() {
+                _isInitialized = true;
+              });
+              _controller.setVolume(0.0);
+              _controller.setLooping(true);
+              _controller.play();
+            }
+          })
+          .catchError((_) {
+            if (mounted) {
+              setState(() {
+                _hasError = true;
+              });
+            }
           });
-          _controller.setVolume(0.0); // Muted
-          _controller.setLooping(true); // Loop
-          _controller.play(); // Auto play
-        }
-      }).catchError((_) {
-        if (mounted) {
-          setState(() {
-            _hasError = true;
-          });
-        }
-      });
   }
 
   @override
@@ -184,16 +181,17 @@ class ReviewPage extends StatelessWidget {
     final segments = _parseReviewBody(body);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Review"),
-      ),
+      appBar: AppBar(title: const Text("Review")),
       body: SafeArea(
         child: Column(
           children: [
             Expanded(
               child: SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16.0,
+                  vertical: 12.0,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -210,10 +208,7 @@ class ReviewPage extends StatelessWidget {
                       children: [
                         const Text(
                           "Written by ",
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey,
-                          ),
+                          style: TextStyle(fontSize: 14, color: Colors.grey),
                         ),
                         if (avatarUrl != null) ...[
                           ClipOval(
@@ -249,12 +244,16 @@ class ReviewPage extends StatelessWidget {
                           child: Image.network(
                             segment.content,
                             fit: BoxFit.contain,
-                            errorBuilder: (context, error, stackTrace) => Container(
-                              height: 100,
-                              color: Colors.black12,
-                              alignment: Alignment.center,
-                              child: const Icon(Icons.broken_image, color: Colors.grey),
-                            ),
+                            errorBuilder: (context, error, stackTrace) =>
+                                Container(
+                                  height: 100,
+                                  color: Colors.black12,
+                                  alignment: Alignment.center,
+                                  child: const Icon(
+                                    Icons.broken_image,
+                                    color: Colors.grey,
+                                  ),
+                                ),
                           ),
                         );
                       } else if (segment.type == 'video') {
@@ -268,11 +267,16 @@ class ReviewPage extends StatelessWidget {
                         );
                       } else {
                         return MarkdownBody(
-                          data: preprocessSpoilers(_convertHtmlToMarkdown(segment.content)),
-                          selectable: true,
-                          styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
-                            p: const TextStyle(fontSize: 16, height: 1.5),
+                          data: preprocessSpoilers(
+                            _convertHtmlToMarkdown(segment.content),
                           ),
+                          selectable: true,
+                          styleSheet:
+                              MarkdownStyleSheet.fromTheme(
+                                Theme.of(context),
+                              ).copyWith(
+                                p: const TextStyle(fontSize: 16, height: 1.5),
+                              ),
                           inlineSyntaxes: [SpoilerSyntax()],
                           builders: {'spoiler': SpoilerBuilder()},
                         );
