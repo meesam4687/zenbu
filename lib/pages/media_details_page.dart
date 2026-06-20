@@ -3,6 +3,7 @@ import 'package:zenbu/services/anilist/anilist.dart';
 import 'package:zenbu/components/media_details_page/details_pane.dart';
 import 'package:zenbu/components/media_details_page/title_pane.dart';
 import 'package:zenbu/components/media_details_page/watch_pane.dart';
+import 'package:zenbu/components/media_details_page/reviews_pane.dart';
 import 'package:zenbu/pages/error_page.dart';
 
 class MediaDetailsPage extends StatefulWidget {
@@ -127,8 +128,8 @@ class _MediaDetailsPageState extends State<MediaDetailsPage>
                             ),
                           ),
                         ),
-                        const _KeepAliveWrapper(
-                          child: Center(child: Text("Reviews coming soon")),
+                        _KeepAliveWrapper(
+                          child: ReviewsPane(mediaId: widget.id as int),
                         ),
                       ]
                     : [
@@ -142,8 +143,8 @@ class _MediaDetailsPageState extends State<MediaDetailsPage>
                             ),
                           ),
                         ),
-                        const _KeepAliveWrapper(
-                          child: Center(child: Text("Reviews coming soon")),
+                        _KeepAliveWrapper(
+                          child: ReviewsPane(mediaId: widget.id as int),
                         ),
                       ],
               ),

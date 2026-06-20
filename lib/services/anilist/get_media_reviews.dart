@@ -16,6 +16,12 @@ Future<Map<String, dynamic>> getMediaReviews(
             summary 
             body 
             score 
+            user {
+              name
+              avatar {
+                large
+              }
+            }
           } 
         }
       } 
