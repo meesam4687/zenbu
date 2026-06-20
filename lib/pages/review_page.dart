@@ -224,7 +224,7 @@ class ReviewPage extends StatelessWidget {
                           const SizedBox(width: 8),
                         ],
                         Text(
-                          username ?? "Unknown Reviewer",
+                          username ?? "Anonymous",
                           style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
