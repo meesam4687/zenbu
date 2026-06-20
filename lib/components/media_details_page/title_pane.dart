@@ -280,44 +280,45 @@ class _TitlePaneState extends State<TitlePane> {
                               Text(progress),
                               if (mediaState == 'CURRENT') ...[
                                 const SizedBox(width: 8),
-                                GestureDetector(
-                                  onTap: _isIncrementing
-                                      ? null
-                                      : _incrementProgress,
-                                  child: Container(
-                                    width: 32,
-                                    height: 32,
-                                    decoration: BoxDecoration(
-                                      color: _isIncrementing
-                                          ? Colors.grey.shade600
-                                          : Theme.of(
-                                              context,
-                                            ).colorScheme.primaryContainer,
-                                      shape: BoxShape.circle,
-                                    ),
-                                    alignment: Alignment.center,
-                                    child: _isIncrementing
-                                        ? const SizedBox(
-                                            width: 16,
-                                            height: 16,
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 2,
-                                              valueColor:
-                                                  AlwaysStoppedAnimation<Color>(
-                                                    Colors.white,
+                                ClipOval(
+                                  child: Material(
+                                    color: _isIncrementing
+                                        ? Colors.grey.shade600
+                                        : Theme.of(context)
+                                            .colorScheme
+                                            .primaryContainer,
+                                    child: InkWell(
+                                      onTap: _isIncrementing
+                                          ? null
+                                          : _incrementProgress,
+                                      child: SizedBox(
+                                        width: 32,
+                                        height: 32,
+                                        child: Center(
+                                          child: _isIncrementing
+                                              ? const SizedBox(
+                                                  width: 16,
+                                                  height: 16,
+                                                  child: CircularProgressIndicator(
+                                                    strokeWidth: 2,
+                                                    valueColor:
+                                                        AlwaysStoppedAnimation<Color>(
+                                                            Colors.white),
                                                   ),
-                                            ),
-                                          )
-                                        : Text(
-                                            "+1",
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 14,
-                                              color: Theme.of(
-                                                context,
-                                              ).colorScheme.onPrimaryContainer,
-                                            ),
-                                          ),
+                                                )
+                                              : Text(
+                                                  "+1",
+                                                  style: TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 14,
+                                                    color: Theme.of(context)
+                                                        .colorScheme
+                                                        .onPrimaryContainer,
+                                                  ),
+                                                ),
+                                        ),
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ],
@@ -332,40 +333,42 @@ class _TitlePaneState extends State<TitlePane> {
                   margin: const EdgeInsets.only(left: 12, right: 12, top: 10),
                   child: Row(
                     children: [
-                      GestureDetector(
-                        onTap: _isTogglingFavourite ? null : _toggleFavourite,
-                        child: Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: _isTogglingFavourite
-                                ? Colors.grey.shade600
-                                : (isFavourite
-                                      ? Colors.red.shade600
-                                      : Theme.of(
-                                          context,
-                                        ).colorScheme.primaryContainer),
+                      ClipOval(
+                        child: Material(
+                          color: _isTogglingFavourite
+                              ? Colors.grey.shade600
+                              : (isFavourite
+                                  ? Colors.red.shade600
+                                  : Theme.of(context)
+                                      .colorScheme
+                                      .primaryContainer),
+                          child: InkWell(
+                            onTap: _isTogglingFavourite ? null : _toggleFavourite,
+                            child: SizedBox(
+                              width: 40,
+                              height: 40,
+                              child: Center(
+                                child: _isTogglingFavourite
+                                    ? const SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          valueColor:
+                                              AlwaysStoppedAnimation<Color>(
+                                                  Colors.white),
+                                        ),
+                                      )
+                                    : Icon(
+                                        isFavourite
+                                            ? Icons.favorite
+                                            : Icons.favorite_border,
+                                        color: Colors.white,
+                                        size: 20,
+                                      ),
+                              ),
+                            ),
                           ),
-                          alignment: Alignment.center,
-                          child: _isTogglingFavourite
-                              ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      Colors.white,
-                                    ),
-                                  ),
-                                )
-                              : Icon(
-                                  isFavourite
-                                      ? Icons.favorite
-                                      : Icons.favorite_border,
-                                  color: Colors.white,
-                                  size: 20,
-                                ),
                         ),
                       ),
                       const SizedBox(width: 8),
