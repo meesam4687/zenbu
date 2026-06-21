@@ -108,7 +108,6 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
       _isLoadingPage = true;
     });
 
-    //TODO: Remove this and see what happens
     Future.delayed(const Duration(milliseconds: 150), () {
       if (!mounted) return;
 
