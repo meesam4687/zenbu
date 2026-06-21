@@ -9,6 +9,7 @@ import 'package:video_player/video_player.dart';
 import 'package:zenbu/models/extensions_models.dart';
 import 'package:zenbu/services/js_engine.dart';
 import 'package:zenbu/services/repo_service.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 
 class SkipTime {
   final double startTime;
@@ -163,6 +164,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
 
   @override
   void dispose() {
+    WakelockPlus.disable();
     _activeSkipTimeNotifier.dispose();
     _disposePlayer();
     _disposeEngine();
@@ -401,6 +403,8 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
       _videoPlayerController!.addListener(_onPlayerPositionChanged);
 
       await _videoPlayerController!.play();
+
+      WakelockPlus.enable();
 
       if (!mounted) return;
       setState(() {
@@ -959,12 +963,14 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                         : Icons.play_circle_filled,
                     color: Colors.white,
                   ),
-                  onPressed: () {
+                  onPressed: () async {
                     _startControlsTimer();
                     if (_videoPlayerController!.value.isPlaying) {
-                      _videoPlayerController!.pause();
+                      await _videoPlayerController!.pause();
+                      await WakelockPlus.disable();
                     } else {
-                      _videoPlayerController!.play();
+                      await _videoPlayerController!.play();
+                      await WakelockPlus.enable();
                     }
                     setState(() {});
                   },
