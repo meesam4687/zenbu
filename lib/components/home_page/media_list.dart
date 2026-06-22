@@ -11,14 +11,14 @@ class MediaList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(top: isAnime ? 12 : 0),
+      margin: EdgeInsets.only(top: isAnime ? 20 : 0),
       width: double.infinity,
-      height: 320,
+      height: 310,
       child: Column(
         children: [
           SizedBox(
             width: double.infinity,
-            height: 50,
+            height: 40,
             child: Padding(
               padding: const EdgeInsets.only(
                 left: 12.0,
