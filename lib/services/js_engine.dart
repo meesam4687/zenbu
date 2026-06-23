@@ -1079,10 +1079,10 @@ class JsEngine {
           return $sourceJson;
         }
         get supportsLatest() {
-          throw new Error("supportsLatest not implemented");
+          return false;
         }
         getHeaders(url) {
-          throw new Error("getHeaders not implemented");
+          return {};
         }
         async getPopular(page) {
           throw new Error("getPopular not implemented");
@@ -1106,13 +1106,13 @@ class JsEngine {
           throw new Error("getHtmlContent not implemented");
         }
         async cleanHtmlContent(html) {
-          throw new Error("cleanHtmlContent not implemented");
+          return html;
         }
         getFilterList() {
-          throw new Error("getFilterList not implemented");
+          return [];
         }
         getSourcePreferences() {
-          throw new Error("getSourcePreferences not implemented");
+          return [];
         }
       }
     ''');
@@ -1160,7 +1160,7 @@ class JsEngine {
   Future<List<Map<String, dynamic>>> search(String query, int page) async {
     final escapedQuery = query.replaceAll('"', '\\"');
     final res = _runtime.evaluate(
-      'jsonStringify(extension.search("$escapedQuery", $page, typeof extension.getFilterList === "function" ? extension.getFilterList() : []))',
+      'jsonStringify(extension.search("$escapedQuery", $page, typeof extension.getFilterList === "function" ? (function() { try { return extension.getFilterList() || []; } catch(e) { return []; } })() : []))',
     );
     final resolved = await _runtime.handlePromise(res);
     final data = json.decode(resolved.stringResult);

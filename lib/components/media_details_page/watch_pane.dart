@@ -186,6 +186,7 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
       });
     } catch (e) {
       if (!mounted) return;
+      print("[WATCH PANE ERROR] Failed to load episodes: $e");
       final is403 =
           _cachedEngine?.lastStatusCode == 403 ||
           _cachedEngine?.lastStatusCode == 503;
