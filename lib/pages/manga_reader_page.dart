@@ -27,7 +27,8 @@ class MangaReaderPage extends StatefulWidget {
   State<MangaReaderPage> createState() => _MangaReaderPageState();
 }
 
-class _MangaReaderPageState extends State<MangaReaderPage> {
+class _MangaReaderPageState extends State<MangaReaderPage>
+    with SingleTickerProviderStateMixin {
   late int _currentChapterIndex;
   List<dynamic> _pages = [];
   bool _isLoading = true;
@@ -41,6 +42,14 @@ class _MangaReaderPageState extends State<MangaReaderPage> {
   final ScrollController _scrollController = ScrollController();
   PageController? _pageController;
 
+  late AnimationController _zoomAnimationController;
+  Animation<Matrix4>? _zoomAnimation;
+  final TransformationController _transformationController =
+      TransformationController();
+  bool _isZoomed = false;
+  int _pointerCount = 0;
+  TapDownDetails? _doubleTapDetails;
+
   @override
   void initState() {
     super.initState();
@@ -49,6 +58,12 @@ class _MangaReaderPageState extends State<MangaReaderPage> {
     _loadChapterPages();
     _scrollController.addListener(_onScroll);
     WakelockPlus.enable();
+
+    _zoomAnimationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 200),
+    );
+    _transformationController.addListener(_onTransformationChanged);
   }
 
   @override
@@ -58,7 +73,61 @@ class _MangaReaderPageState extends State<MangaReaderPage> {
     _scrollController.dispose();
     _pageController?.dispose();
     _jsEngine?.dispose();
+    _zoomAnimationController.dispose();
+    _transformationController.removeListener(_onTransformationChanged);
+    _transformationController.dispose();
     super.dispose();
+  }
+
+  void _onTransformationChanged() {
+    final Matrix4 matrix = _transformationController.value;
+    final double scale = matrix.getMaxScaleOnAxis();
+    final bool zoomed = scale > 1.001;
+    if (zoomed != _isZoomed) {
+      setState(() {
+        _isZoomed = zoomed;
+      });
+    }
+  }
+
+  void _handleDoubleTap() {
+    if (_zoomAnimationController.isAnimating) return;
+
+    final Matrix4 currentMatrix = _transformationController.value;
+    final double currentScale = currentMatrix.getMaxScaleOnAxis();
+
+    final Matrix4 targetMatrix;
+    if (currentScale > 1.001) {
+      targetMatrix = Matrix4.identity();
+    } else {
+      final localPosition = _doubleTapDetails?.localPosition ?? Offset.zero;
+      final double targetScale = 2.5;
+      final double x = localPosition.dx;
+      final double y = localPosition.dy;
+      final translation = Matrix4.translationValues(x, y, 0.0);
+      final scale = Matrix4.diagonal3Values(targetScale, targetScale, 1.0);
+      final translationInverse = Matrix4.translationValues(-x, -y, 0.0);
+      targetMatrix = translation * scale * translationInverse;
+    }
+
+    _zoomAnimation = Matrix4Tween(begin: currentMatrix, end: targetMatrix)
+        .animate(
+          CurvedAnimation(
+            parent: _zoomAnimationController,
+            curve: Curves.easeOut,
+          ),
+        );
+
+    _zoomAnimationController.addListener(_onZoomAnimationTick);
+    _zoomAnimationController.forward(from: 0.0).then((_) {
+      _zoomAnimationController.removeListener(_onZoomAnimationTick);
+    });
+  }
+
+  void _onZoomAnimationTick() {
+    if (_zoomAnimation != null) {
+      _transformationController.value = _zoomAnimation!.value;
+    }
   }
 
   Future<void> _loadReadingModePreference() async {
@@ -76,8 +145,10 @@ class _MangaReaderPageState extends State<MangaReaderPage> {
     final prefs = await SharedPreferences.getInstance();
     final newMode = !_isWebtoonMode;
     await prefs.setBool('manga_reader_webtoon', newMode);
+    _transformationController.value = Matrix4.identity();
     setState(() {
       _isWebtoonMode = newMode;
+      _isZoomed = false;
       if (_isWebtoonMode) {
         _pageController?.dispose();
         _pageController = null;
@@ -191,6 +262,10 @@ class _MangaReaderPageState extends State<MangaReaderPage> {
           children: [
             GestureDetector(
               onTap: _toggleControls,
+              onDoubleTapDown: (details) {
+                _doubleTapDetails = details;
+              },
+              onDoubleTap: _handleDoubleTap,
               behavior: HitTestBehavior.translucent,
               child: _isLoading
                   ? const Center(
@@ -284,16 +359,15 @@ class _MangaReaderPageState extends State<MangaReaderPage> {
     );
   }
 
-  int _pointerCount = 0;
-
   Widget _buildWebtoonReader() {
     return Listener(
       onPointerDown: (_) => setState(() => _pointerCount++),
       onPointerUp: (_) => setState(() => _pointerCount--),
       onPointerCancel: (_) => setState(() => _pointerCount--),
       child: InteractiveViewer(
+        transformationController: _transformationController,
         constrained: true,
-        panEnabled: _pointerCount >= 2,
+        panEnabled: _isZoomed || _pointerCount >= 2,
         minScale: 1.0,
         maxScale: 4.0,
         child: SizedBox(
@@ -301,7 +375,7 @@ class _MangaReaderPageState extends State<MangaReaderPage> {
           height: MediaQuery.of(context).size.height,
           child: ListView.builder(
             controller: _scrollController,
-            physics: _pointerCount >= 2
+            physics: (_isZoomed || _pointerCount >= 2)
                 ? const NeverScrollableScrollPhysics()
                 : const ClampingScrollPhysics(),
             padding: EdgeInsets.only(
@@ -364,62 +438,79 @@ class _MangaReaderPageState extends State<MangaReaderPage> {
   }
 
   Widget _buildSinglePageReader() {
-    return PageView.builder(
-      controller: _pageController,
-      itemCount: _pages.length,
-      onPageChanged: (index) {
-        setState(() {
-          _currentPageIndex = index;
-        });
-      },
-      itemBuilder: (context, index) {
-        final page = _pages[index];
-        final url = page['url'] as String;
-        final headers = Map<String, String>.from(page['headers'] ?? {});
+    return Listener(
+      onPointerDown: (_) => setState(() => _pointerCount++),
+      onPointerUp: (_) => setState(() => _pointerCount--),
+      onPointerCancel: (_) => setState(() => _pointerCount--),
+      child: PageView.builder(
+        controller: _pageController,
+        physics: (_isZoomed || _pointerCount >= 2)
+            ? const NeverScrollableScrollPhysics()
+            : const ClampingScrollPhysics(),
+        itemCount: _pages.length,
+        onPageChanged: (index) {
+          setState(() {
+            _currentPageIndex = index;
+          });
+          _transformationController.value = Matrix4.identity();
+          setState(() {
+            _isZoomed = false;
+          });
+        },
+        itemBuilder: (context, index) {
+          final page = _pages[index];
+          final url = page['url'] as String;
+          final headers = Map<String, String>.from(page['headers'] ?? {});
+          final isActive = index == _currentPageIndex;
 
-        return InteractiveViewer(
-          minScale: 1.0,
-          maxScale: 4.0,
-          child: Center(
-            child: CachedNetworkImage(
-              imageUrl: url,
-              httpHeaders: headers,
-              fit: BoxFit.contain,
-              placeholder: (context, url) => const Center(
-                child: SizedBox(
-                  width: 32,
-                  height: 32,
-                  child: CircularProgressIndicator.adaptive(
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white30),
-                    strokeWidth: 2,
+          return InteractiveViewer(
+            transformationController: isActive
+                ? _transformationController
+                : null,
+            panEnabled: _isZoomed || _pointerCount >= 2,
+            minScale: 1.0,
+            maxScale: 4.0,
+            child: Center(
+              child: CachedNetworkImage(
+                imageUrl: url,
+                httpHeaders: headers,
+                fit: BoxFit.contain,
+                placeholder: (context, url) => const Center(
+                  child: SizedBox(
+                    width: 32,
+                    height: 32,
+                    child: CircularProgressIndicator.adaptive(
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white30),
+                      strokeWidth: 2,
+                    ),
                   ),
                 ),
-              ),
-              errorWidget: (context, url, error) => Container(
-                height: 300,
-                color: Colors.transparent,
-                child: const Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.error_outline,
-                        color: Colors.redAccent,
-                        size: 36,
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        'Failed to load image',
-                        style: TextStyle(color: Colors.white54, fontSize: 12),
-                      ),
-                    ],
+                errorWidget: (context, url, error) => Container(
+                  height: 300,
+                  color: Colors.transparent,
+                  child: const Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.error_outline,
+                          color: Colors.redAccent,
+                          size: 36,
+                        ),
+                        SizedBox(height: 8),
+                        Text(
+                          'Failed to load image',
+                          style: TextStyle(color: Colors.white54, fontSize: 12),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 
