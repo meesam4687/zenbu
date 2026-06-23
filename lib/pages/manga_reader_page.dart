@@ -5,6 +5,7 @@ import 'package:zenbu/models/extensions_models.dart';
 import 'package:zenbu/services/js_engine.dart';
 import 'package:zenbu/services/repo_service.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
+import 'package:flutter/services.dart';
 
 class MangaReaderPage extends StatefulWidget {
   final List<ExtEpisode> chapters;
@@ -168,150 +169,197 @@ class _MangaReaderPageState extends State<MangaReaderPage> {
     setState(() {
       _showControls = !_showControls;
     });
+
+    if (_showControls) {
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    } else {
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final currentChapter = widget.chapters[_currentChapterIndex];
 
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: Stack(
-        children: [
-          GestureDetector(
-            onTap: _toggleControls,
-            behavior: HitTestBehavior.translucent,
-            child: _isLoading
-                ? const Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        CircularProgressIndicator.adaptive(
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            Colors.white,
-                          ),
-                        ),
-                        SizedBox(height: 16),
-                        Text(
-                          'Loading pages...',
-                          style: TextStyle(color: Colors.white70, fontSize: 14),
-                        ),
-                      ],
-                    ),
-                  )
-                : _errorMessage != null
-                ? Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(24.0),
+    return PopScope(
+      onPopInvokedWithResult: (didPop, result) {
+        SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+      },
+      child: Scaffold(
+        backgroundColor: Colors.black,
+        body: Stack(
+          children: [
+            GestureDetector(
+              onTap: _toggleControls,
+              behavior: HitTestBehavior.translucent,
+              child: _isLoading
+                  ? const Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(
-                            Icons.error_outline,
-                            color: Colors.red,
-                            size: 48,
+                          CircularProgressIndicator.adaptive(
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white,
+                            ),
                           ),
-                          const SizedBox(height: 16),
+                          SizedBox(height: 16),
                           Text(
-                            _errorMessage!,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              color: Colors.redAccent,
+                            'Loading pages...',
+                            style: TextStyle(
+                              color: Colors.white70,
                               fontSize: 14,
                             ),
                           ),
-                          const SizedBox(height: 24),
-                          FilledButton(
-                            onPressed: _loadChapterPages,
-                            child: const Text('Retry'),
-                          ),
                         ],
                       ),
-                    ),
-                  )
-                : _pages.isEmpty
-                ? const Center(
-                    child: Text(
-                      'No pages found for this chapter.',
-                      style: TextStyle(color: Colors.white70),
-                    ),
-                  )
-                : _isWebtoonMode
-                ? _buildWebtoonReader()
-                : _buildSinglePageReader(),
-          ),
+                    )
+                  : _errorMessage != null
+                  ? Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(24.0),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(
+                              Icons.error_outline,
+                              color: Colors.red,
+                              size: 48,
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              _errorMessage!,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                color: Colors.redAccent,
+                                fontSize: 14,
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+                            FilledButton(
+                              onPressed: _loadChapterPages,
+                              child: const Text('Retry'),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                  : _pages.isEmpty
+                  ? const Center(
+                      child: Text(
+                        'No pages found for this chapter.',
+                        style: TextStyle(color: Colors.white70),
+                      ),
+                    )
+                  : _isWebtoonMode
+                  ? _buildWebtoonReader()
+                  : _buildSinglePageReader(),
+            ),
 
-          AnimatedPositioned(
-            duration: const Duration(milliseconds: 200),
-            top: _showControls ? 0 : -100,
-            left: 0,
-            right: 0,
-            child: _buildHeader(currentChapter),
-          ),
+            Positioned(
+              left: 0,
+              right: 0,
+              top: 0,
+              child: AnimatedSlide(
+                duration: const Duration(milliseconds: 350),
+                curve: Curves.fastOutSlowIn,
+                offset: _showControls ? Offset.zero : const Offset(0, -1),
+                child: _buildHeader(currentChapter),
+              ),
+            ),
 
-          AnimatedPositioned(
-            duration: const Duration(milliseconds: 200),
-            bottom: _showControls ? 0 : -120,
-            left: 0,
-            right: 0,
-            child: _buildBottomControls(),
-          ),
-        ],
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: AnimatedSlide(
+                duration: const Duration(milliseconds: 350),
+                curve: Curves.fastOutSlowIn,
+                offset: _showControls ? Offset.zero : const Offset(0, 1),
+                child: _buildBottomControls(),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildWebtoonReader() {
-    return ListView.builder(
-      controller: _scrollController,
-      padding: EdgeInsets.only(
-        top: MediaQuery.of(context).padding.top + 60,
-        bottom: MediaQuery.of(context).padding.bottom + 80,
-      ),
-      itemCount: _pages.length,
-      itemBuilder: (context, index) {
-        final page = _pages[index];
-        final url = page['url'] as String;
-        final headers = Map<String, String>.from(page['headers'] ?? {});
+  int _pointerCount = 0;
 
-        return CachedNetworkImage(
-          imageUrl: url,
-          httpHeaders: headers,
-          fit: BoxFit.fitWidth,
-          width: double.infinity,
-          placeholder: (context, url) => Container(
-            height: 400,
-            color: Colors.black,
-            child: const Center(
-              child: SizedBox(
-                width: 32,
-                height: 32,
-                child: CircularProgressIndicator.adaptive(
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white30),
-                  strokeWidth: 2,
-                ),
-              ),
+  Widget _buildWebtoonReader() {
+    return Listener(
+      onPointerDown: (_) => setState(() => _pointerCount++),
+      onPointerUp: (_) => setState(() => _pointerCount--),
+      onPointerCancel: (_) => setState(() => _pointerCount--),
+      child: InteractiveViewer(
+        constrained: true,
+        panEnabled: _pointerCount >= 2,
+        minScale: 1.0,
+        maxScale: 4.0,
+        child: SizedBox(
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height,
+          child: ListView.builder(
+            controller: _scrollController,
+            physics: _pointerCount >= 2
+                ? const NeverScrollableScrollPhysics()
+                : const ClampingScrollPhysics(),
+            padding: EdgeInsets.only(
+              top: MediaQuery.of(context).padding.top,
+              bottom: MediaQuery.of(context).padding.bottom,
             ),
-          ),
-          errorWidget: (context, url, error) => Container(
-            height: 300,
-            color: Colors.grey.shade900,
-            child: const Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.error_outline, color: Colors.redAccent, size: 36),
-                  SizedBox(height: 8),
-                  Text(
-                    'Failed to load image',
-                    style: TextStyle(color: Colors.white54, fontSize: 12),
+            itemCount: _pages.length,
+            itemBuilder: (context, index) {
+              final page = _pages[index];
+              final url = page['url'] as String;
+              final headers = Map<String, String>.from(page['headers'] ?? {});
+              return CachedNetworkImage(
+                imageUrl: url,
+                httpHeaders: headers,
+                fit: BoxFit.fitWidth,
+                width: double.infinity,
+                placeholder: (context, url) => Container(
+                  height: 400,
+                  color: Colors.black,
+                  child: const Center(
+                    child: SizedBox(
+                      width: 32,
+                      height: 32,
+                      child: CircularProgressIndicator.adaptive(
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          Colors.white30,
+                        ),
+                        strokeWidth: 2,
+                      ),
+                    ),
                   ),
-                ],
-              ),
-            ),
+                ),
+                errorWidget: (context, url, error) => Container(
+                  height: 300,
+                  color: Colors.grey.shade900,
+                  child: const Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.error_outline,
+                          color: Colors.redAccent,
+                          size: 36,
+                        ),
+                        SizedBox(height: 8),
+                        Text(
+                          'Failed to load image',
+                          style: TextStyle(color: Colors.white54, fontSize: 12),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 
@@ -377,10 +425,7 @@ class _MangaReaderPageState extends State<MangaReaderPage> {
 
   Widget _buildHeader(ExtEpisode chapter) {
     return Container(
-      padding: EdgeInsets.only(
-        top: MediaQuery.of(context).padding.top,
-        bottom: 8,
-      ),
+      padding: EdgeInsets.only(top: 0, bottom: 8),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [Colors.black.withValues(alpha: 0.9), Colors.transparent],
@@ -393,7 +438,10 @@ class _MangaReaderPageState extends State<MangaReaderPage> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () {
+            SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+            Navigator.of(context).pop();
+          },
         ),
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
