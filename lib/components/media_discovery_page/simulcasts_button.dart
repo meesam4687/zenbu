@@ -1,6 +1,5 @@
 import 'dart:math';
 import 'dart:ui' as ui;
-
 import 'package:flutter/material.dart';
 import 'package:zenbu/pages/simulcasts_page.dart';
 
@@ -79,7 +78,13 @@ class _SimulcastsButtonState extends State<SimulcastsButton> {
                   Padding(padding: EdgeInsets.only(left: 10)),
                   Icon(
                     Icons.calendar_month,
-                    shadows: [BoxShadow(blurRadius: 5.0, color: Colors.black)],
+                    shadows: [
+                      Shadow(
+                        blurRadius: 5.0,
+                        color: Colors.black,
+                        offset: Offset(0, 0),
+                      ),
+                    ],
                   ),
                   Padding(padding: EdgeInsets.only(left: 10)),
                   Text(
@@ -87,14 +92,24 @@ class _SimulcastsButtonState extends State<SimulcastsButton> {
                     style: TextStyle(
                       fontSize: 17,
                       shadows: [
-                        BoxShadow(blurRadius: 5.0, color: Colors.black),
+                        Shadow(
+                          blurRadius: 5.0,
+                          color: Colors.black,
+                          offset: Offset(0, 0),
+                        ),
                       ],
                     ),
                   ),
                   Spacer(),
                   Icon(
                     Icons.arrow_forward,
-                    shadows: [BoxShadow(blurRadius: 5.0, color: Colors.black)],
+                    shadows: [
+                      Shadow(
+                        blurRadius: 5.0,
+                        color: Colors.black,
+                        offset: Offset(0, 0),
+                      ),
+                    ],
                   ),
                   Padding(padding: EdgeInsets.only(right: 10)),
                 ],

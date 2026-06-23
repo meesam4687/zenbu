@@ -13,6 +13,8 @@ import 'package:xpath_selector_html_parser/xpath_selector_html_parser.dart';
 class JsEngine {
   late JavascriptRuntime _runtime;
   final int sourceId;
+  int? lastStatusCode;
+  String? lastRequestUrl;
 
   JsEngine(this.sourceId) {
     _runtime = getJavascriptRuntime();
@@ -66,19 +68,35 @@ class JsEngine {
           headers = Map<String, String>.from(args[1] as Map? ?? {});
         }
 
-        final response = await http.get(Uri.parse(url), headers: headers);
+        url = _cleanUrl(url);
+        print("[HTTP GET REQUEST] URL: $url");
+        lastRequestUrl = url;
+        final response = await http.get(Uri.parse(url), headers: _mergeHeaders(url, headers));
+        lastStatusCode = response.statusCode;
+        print("[HTTP GET RESPONSE] Status: ${response.statusCode}");
+        
         String bodyString;
         try {
           bodyString = utf8.decode(response.bodyBytes, allowMalformed: true);
         } catch (_) {
           bodyString = response.body;
         }
+
+        if (bodyString.contains("Just a moment...") ||
+            bodyString.contains("cloudflare") ||
+            response.statusCode == 403 ||
+            response.statusCode == 503) {
+          print("[HTTP GET WARNING] Possible Cloudflare or browser protection challenge detected!");
+          print("[HTTP GET BODY PREVIEW]: ${bodyString.length > 500 ? bodyString.substring(0, 500) : bodyString}");
+        }
+
         return json.encode({
           'statusCode': response.statusCode,
           'headers': response.headers,
           'body': bodyString,
         });
       } catch (e) {
+        print("[HTTP GET ERROR] Failed: $e");
         return json.encode({
           'statusCode': 500,
           'headers': <String, String>{},
@@ -105,11 +123,13 @@ class JsEngine {
           body = args.length >= 3 ? args[2] : null;
         }
 
+        lastRequestUrl = url;
         final response = await http.post(
           Uri.parse(url),
-          headers: headers,
+          headers: _mergeHeaders(url, headers),
           body: body is Map ? json.encode(body) : body?.toString() ?? "",
         );
+        lastStatusCode = response.statusCode;
         String bodyString;
         try {
           bodyString = utf8.decode(response.bodyBytes, allowMalformed: true);
@@ -145,7 +165,8 @@ class JsEngine {
           headers = Map<String, String>.from(args[1] as Map? ?? {});
         }
 
-        final response = await http.head(Uri.parse(url), headers: headers);
+        lastRequestUrl = url;
+        final response = await http.head(Uri.parse(url), headers: _mergeHeaders(url, headers));
         String bodyString;
         try {
           bodyString = utf8.decode(response.bodyBytes, allowMalformed: true);
@@ -184,9 +205,10 @@ class JsEngine {
           body = args.length >= 3 ? args[2] : null;
         }
 
+        lastRequestUrl = url;
         final response = await http.put(
           Uri.parse(url),
-          headers: headers,
+          headers: _mergeHeaders(url, headers),
           body: body is Map ? json.encode(body) : body?.toString() ?? "",
         );
         String bodyString;
@@ -227,9 +249,10 @@ class JsEngine {
           body = args.length >= 3 ? args[2] : null;
         }
 
+        lastRequestUrl = url;
         final response = await http.delete(
           Uri.parse(url),
-          headers: headers,
+          headers: _mergeHeaders(url, headers),
           body: body is Map ? json.encode(body) : body?.toString(),
         );
         String bodyString;
@@ -270,9 +293,10 @@ class JsEngine {
           body = args.length >= 3 ? args[2] : null;
         }
 
+        lastRequestUrl = url;
         final response = await http.patch(
           Uri.parse(url),
-          headers: headers,
+          headers: _mergeHeaders(url, headers),
           body: body is Map ? json.encode(body) : body?.toString() ?? "",
         );
         String bodyString;
@@ -316,36 +340,56 @@ class JsEngine {
           }
           return reqBody;
         }
+        _mergeExtHeaders(url, headers) {
+          let merged = headers || {};
+          if (typeof extension !== 'undefined' && typeof extension.getHeaders === 'function') {
+            try {
+              const extHeaders = extension.getHeaders(url);
+              if (extHeaders && typeof extHeaders === 'object') {
+                merged = Object.assign({}, extHeaders, merged);
+              }
+            } catch(e) {
+              console.log("Error getting extension headers: " + e);
+            }
+          }
+          return merged;
+        }
         async get(url, optionsOrHeaders) {
-          const headers = this._extractHeaders(optionsOrHeaders);
+          let headers = this._extractHeaders(optionsOrHeaders);
+          headers = this._mergeExtHeaders(url, headers);
           const res = await sendMessage('http_get', JSON.stringify([null, this.reqcopyWith, url, headers]));
           return JSON.parse(res);
         }
         async post(url, optionsOrHeaders, body) {
-          const headers = this._extractHeaders(optionsOrHeaders);
+          let headers = this._extractHeaders(optionsOrHeaders);
+          headers = this._mergeExtHeaders(url, headers);
           const reqBody = this._extractBody(optionsOrHeaders, body);
           const res = await sendMessage('http_post', JSON.stringify([null, this.reqcopyWith, url, headers, reqBody]));
           return JSON.parse(res);
         }
         async head(url, optionsOrHeaders) {
-          const headers = this._extractHeaders(optionsOrHeaders);
+          let headers = this._extractHeaders(optionsOrHeaders);
+          headers = this._mergeExtHeaders(url, headers);
           const res = await sendMessage('http_head', JSON.stringify([null, this.reqcopyWith, url, headers]));
           return JSON.parse(res);
         }
         async put(url, optionsOrHeaders, body) {
-          const headers = this._extractHeaders(optionsOrHeaders);
+          let headers = this._extractHeaders(optionsOrHeaders);
+          headers = this._mergeExtHeaders(url, headers);
           const reqBody = this._extractBody(optionsOrHeaders, body);
           const res = await sendMessage('http_put', JSON.stringify([null, this.reqcopyWith, url, headers, reqBody]));
           return JSON.parse(res);
         }
         async delete(url, optionsOrHeaders, body) {
-          const headers = this._extractHeaders(optionsOrHeaders);
+          let headers = this._extractHeaders(optionsOrHeaders);
+          headers = this._mergeExtHeaders(url, headers);
           const reqBody = this._extractBody(optionsOrHeaders, body);
           const res = await sendMessage('http_delete', JSON.stringify([null, this.reqcopyWith, url, headers, reqBody]));
           return JSON.parse(res);
         }
         async patch(url, optionsOrHeaders, body) {
-          const headers = this._extractHeaders(optionsOrHeaders);
+          let headers = this._extractHeaders(optionsOrHeaders);
+          headers = this._mergeExtHeaders(url, headers);
           const reqBody = this._extractBody(optionsOrHeaders, body);
           const res = await sendMessage('http_patch', JSON.stringify([null, this.reqcopyWith, url, headers, reqBody]));
           return JSON.parse(res);
@@ -475,10 +519,10 @@ class JsEngine {
         'className' => element.className,
         'localName' => element.localName,
         'namespaceUri' => element.namespaceUri,
-        'getSrc' => _regSrcMatcher(element.outerHtml),
-        'getImg' => _regImgMatcher(element.outerHtml),
-        'getHref' => _regHrefMatcher(element.outerHtml),
-        'getDataSrc' => _regDataSrcMatcher(element.outerHtml),
+        'getSrc' => element.attributes['src'] ?? _regSrcMatcher(element.outerHtml),
+        'getImg' => element.attributes['img'] ?? element.attributes['src'] ?? _regImgMatcher(element.outerHtml),
+        'getHref' => element.attributes['href'] ?? _regHrefMatcher(element.outerHtml),
+        'getDataSrc' => element.attributes['data-src'] ?? _regDataSrcMatcher(element.outerHtml),
         _ => "",
       };
       return res;
@@ -836,15 +880,6 @@ class JsEngine {
         get getDataSrc() {
           return this.getString('getDataSrc');
         }
-        getSrc() {
-          return this.getSrc;
-        }
-        getImg() {
-          return this.getImg;
-        }
-        getHref() {
-          return this.getHref;
-        }
         getElementSibling(type) {
           const key = sendMessage('ele_element_sibling', JSON.stringify([type, this.key]));
           return new Element(key);
@@ -1118,21 +1153,25 @@ class JsEngine {
   }
 
   Future<List<Map<String, dynamic>>> search(String query, int page) async {
+    print("[JS ENGINE SEARCH] Query: '$query', Page: $page");
     final escapedQuery = query.replaceAll('"', '\\"');
     final res = _runtime.evaluate(
-      'jsonStringify(extension.search("$escapedQuery", $page, []))',
+      'jsonStringify(extension.search("$escapedQuery", $page, typeof extension.getFilterList === "function" ? extension.getFilterList() : []))',
     );
     final resolved = await _runtime.handlePromise(res);
     final data = json.decode(resolved.stringResult);
+    print("[JS ENGINE SEARCH SUCCESS] Found ${data['list']?.length ?? 0} results");
     return List<Map<String, dynamic>>.from(data['list']);
   }
 
   Future<Map<String, dynamic>> getDetail(String url) async {
+    print("[JS ENGINE GETDETAIL] URL: '$url'");
     final escapedUrl = url.replaceAll('"', '\\"');
     final res = _runtime.evaluate(
       'jsonStringify(extension.getDetail("$escapedUrl"))',
     );
     final resolved = await _runtime.handlePromise(res);
+    print("[JS ENGINE GETDETAIL SUCCESS]");
     return json.decode(resolved.stringResult);
   }
 
@@ -1143,6 +1182,32 @@ class JsEngine {
     );
     final resolved = await _runtime.handlePromise(res);
     return json.decode(resolved.stringResult);
+  }
+
+  Future<List<dynamic>> getPageList(String url) async {
+    final escapedUrl = url.replaceAll('"', '\\"');
+    final res = _runtime.evaluate(
+      'jsonStringify(extension.getPageList("$escapedUrl"))',
+    );
+    final resolved = await _runtime.handlePromise(res);
+    return json.decode(resolved.stringResult);
+  }
+
+  Future<Map<String, String>> getHeaders(String url) async {
+    try {
+      final escapedUrl = url.replaceAll(r'\', r'\\').replaceAll('"', r'\"');
+      final res = _runtime.evaluate(
+        'jsonStringify(extension.getHeaders("$escapedUrl"))',
+      );
+      final resolved = await _runtime.handlePromise(res);
+      final decoded = json.decode(resolved.stringResult);
+      if (decoded is Map) {
+        return Map<String, String>.from(
+          decoded.map((k, v) => MapEntry(k.toString(), v.toString())),
+        );
+      }
+    } catch (_) {}
+    return {};
   }
 
   Future<String?> fetchUrl(String url, Map<String, String> headers) async {
@@ -1217,6 +1282,46 @@ class JsEngine {
 
   void dispose() {
     _runtime.dispose();
+  }
+
+  String _cleanUrl(String url) {
+    try {
+      var uri = Uri.parse(url);
+      if (uri.hasQuery) {
+        final cleanParams = <String, String>{};
+        uri.queryParameters.forEach((key, value) {
+          if (value.isNotEmpty) {
+            cleanParams[key] = value;
+          }
+        });
+        uri = uri.replace(
+          queryParameters: cleanParams.isEmpty ? null : cleanParams,
+        );
+        return uri.toString();
+      }
+    } catch (_) {}
+    return url;
+  }
+
+  Map<String, String> _mergeHeaders(String url, Map<String, String> customHeaders) {
+    final Map<String, String> merged = {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      'Accept-Language': 'en-US,en;q=0.9',
+      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+    };
+    try {
+      final uri = Uri.parse(url);
+      final origin = '${uri.scheme}://${uri.host}';
+      merged['Referer'] = '$origin/';
+    } catch (_) {}
+    customHeaders.forEach((key, value) {
+      final existingKey = merged.keys.firstWhere(
+        (k) => k.toLowerCase() == key.toLowerCase(),
+        orElse: () => key,
+      );
+      merged[existingKey] = value;
+    });
+    return merged;
   }
 }
 
@@ -1554,20 +1659,42 @@ String _regImgMatcher(String input) {
 
 List<html_dom.Element> _select(html_dom.Element dom, String selector) {
   try {
+    final results = dom.querySelectorAll(selector);
+    if (results.isNotEmpty) {
+      print("[SELECT SUCCESS] Selector: '$selector' -> Found ${results.length} elements");
+      return results;
+    }
+  } catch (_) {}
+
+  try {
     _initPseudoSelector();
     final fixedSelector = selector.replaceAll(':not', ':inot');
-    return pseudom.parse(fixedSelector).select(dom).toList();
-  } catch (_) {
+    final results = pseudom.parse(fixedSelector).select(dom).toList();
+    print("[SELECT FALLBACK] Selector: '$selector' -> Found ${results.length} elements");
+    return results;
+  } catch (err) {
+    print("[SELECT ERROR] Selector: '$selector' -> Pseudom error: $err");
     return [];
   }
 }
 
 html_dom.Element? _selectFirst(html_dom.Element dom, String selector) {
   try {
+    final result = dom.querySelector(selector);
+    if (result != null) {
+      print("[SELECTFIRST SUCCESS] Selector: '$selector' -> Found");
+      return result;
+    }
+  } catch (_) {}
+
+  try {
     _initPseudoSelector();
     final fixedSelector = selector.replaceAll(':not', ':inot');
-    return pseudom.parse(fixedSelector).selectFirst(dom);
-  } catch (_) {
+    final result = pseudom.parse(fixedSelector).selectFirst(dom);
+    print("[SELECTFIRST FALLBACK] Selector: '$selector' -> Found? ${result != null}");
+    return result;
+  } catch (err) {
+    print("[SELECTFIRST ERROR] Selector: '$selector' -> Pseudom error: $err");
     return null;
   }
 }

@@ -1,39 +1,34 @@
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:zenbu/models/extensions_models.dart';
 import 'package:zenbu/services/repo_service.dart';
 import 'package:zenbu/services/js_engine.dart';
-import 'package:zenbu/pages/video_player_page.dart';
+import 'package:zenbu/pages/manga_reader_page.dart';
 import 'package:zenbu/pages/extensions_page.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class AnimeWatchPane extends StatefulWidget {
+class MangaReadPane extends StatefulWidget {
   final int mediaId;
-  final int? malId;
-  final String animeTitle;
+  final String mangaTitle;
   final String? coverImage;
-  final List? streamingEpisodes;
 
-  const AnimeWatchPane({
+  const MangaReadPane({
     super.key,
     required this.mediaId,
-    this.malId,
-    required this.animeTitle,
+    required this.mangaTitle,
     this.coverImage,
-    this.streamingEpisodes,
   });
 
   @override
-  State<AnimeWatchPane> createState() => _AnimeWatchPaneState();
+  State<MangaReadPane> createState() => _MangaReadPaneState();
 }
 
-class _AnimeWatchPaneState extends State<AnimeWatchPane> {
+class _MangaReadPaneState extends State<MangaReadPane> {
   List<ExtSource> _installedExtensions = [];
   ExtSource? _selectedExtension;
-  List<dynamic> _allRawEpisodes = [];
-  List<dynamic> _rawEpisodes = [];
+  List<dynamic> _allRawChapters = [];
+  List<dynamic> _rawChapters = [];
   bool _isLoadingExtensions = false;
-  bool _isLoadingEpisodes = false;
+  bool _isLoadingChapters = false;
   bool _isLoadingPage = false;
   String? _errorMessage;
   bool _is403Error = false;
@@ -54,11 +49,6 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
     super.dispose();
   }
 
-  @override
-  void didUpdateWidget(covariant AnimeWatchPane oldWidget) {
-    super.didUpdateWidget(oldWidget);
-  }
-
   Future<void> _loadExtensions() async {
     if (!mounted) return;
     setState(() {
@@ -68,13 +58,13 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
 
     try {
       final list = await RepoService.getInstalledExtensions();
-      final animeExtensions = list.where((ext) => !ext.isManga).toList();
+      final mangaExtensions = list.where((ext) => ext.isManga).toList();
       if (!mounted) return;
       setState(() {
-        _installedExtensions = animeExtensions;
-        if (animeExtensions.isNotEmpty) {
-          _selectedExtension = animeExtensions.first;
-          _loadEpisodes();
+        _installedExtensions = mangaExtensions;
+        if (mangaExtensions.isNotEmpty) {
+          _selectedExtension = mangaExtensions.first;
+          _loadChapters();
         }
       });
     } catch (e) {
@@ -91,19 +81,19 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
     }
   }
 
-  void _setEpisodes(List<dynamic> rawEpisodes) {
-    _allRawEpisodes = rawEpisodes;
+  void _setChapters(List<dynamic> rawChapters) {
+    _allRawChapters = rawChapters;
     _currentPage = 0;
 
-    final endIndex = (30 < _allRawEpisodes.length)
+    final endIndex = (30 < _allRawChapters.length)
         ? 30
-        : _allRawEpisodes.length;
+        : _allRawChapters.length;
     final List<dynamic> pageSlice = [];
     for (var k = 0; k < endIndex; k++) {
-      final originalIndex = _allRawEpisodes.length - 1 - k;
-      pageSlice.add(_allRawEpisodes[originalIndex]);
+      final originalIndex = _allRawChapters.length - 1 - k;
+      pageSlice.add(_allRawChapters[originalIndex]);
     }
-    _rawEpisodes = pageSlice;
+    _rawChapters = pageSlice;
   }
 
   void _changePage(int idx) {
@@ -116,31 +106,31 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
       if (!mounted) return;
 
       final startIndex = idx * 30;
-      final endIndex = (startIndex + 30 < _allRawEpisodes.length)
+      final endIndex = (startIndex + 30 < _allRawChapters.length)
           ? startIndex + 30
-          : _allRawEpisodes.length;
+          : _allRawChapters.length;
       final List<dynamic> pageSlice = [];
       for (var k = startIndex; k < endIndex; k++) {
-        final originalIndex = _allRawEpisodes.length - 1 - k;
-        pageSlice.add(_allRawEpisodes[originalIndex]);
+        final originalIndex = _allRawChapters.length - 1 - k;
+        pageSlice.add(_allRawChapters[originalIndex]);
       }
 
       setState(() {
-        _rawEpisodes = pageSlice;
+        _rawChapters = pageSlice;
         _isLoadingPage = false;
       });
     });
   }
 
-  Future<void> _loadEpisodes() async {
+  Future<void> _loadChapters() async {
     if (_selectedExtension == null || !mounted) return;
 
     setState(() {
-      _isLoadingEpisodes = true;
+      _isLoadingChapters = true;
       _errorMessage = null;
       _is403Error = false;
-      _allRawEpisodes = [];
-      _rawEpisodes = [];
+      _allRawChapters = [];
+      _rawChapters = [];
       _currentPage = 0;
       _isLoadingPage = false;
     });
@@ -150,8 +140,11 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
         _selectedExtension!,
       );
 
-      final searchResults = await _cachedEngine!.search(widget.animeTitle, 1);
-      final is403 = _cachedEngine?.lastStatusCode == 403 || _cachedEngine?.lastStatusCode == 503;
+      final searchResults = await _cachedEngine!.search(widget.mangaTitle, 1);
+      print("[READ PANE] Search Results: $searchResults");
+      final is403 =
+          _cachedEngine?.lastStatusCode == 403 ||
+          _cachedEngine?.lastStatusCode == 503;
       if (is403) {
         throw Exception('Cloudflare challenge detected.');
       }
@@ -159,8 +152,8 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
       if (searchResults.isEmpty) {
         if (!mounted) return;
         setState(() {
-          _allRawEpisodes = [];
-          _rawEpisodes = [];
+          _allRawChapters = [];
+          _rawChapters = [];
         });
         return;
       }
@@ -169,33 +162,35 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
       if (matchedLink.isEmpty) {
         if (!mounted) return;
         setState(() {
-          _allRawEpisodes = [];
-          _rawEpisodes = [];
+          _allRawChapters = [];
+          _rawChapters = [];
         });
         return;
       }
 
       final detail = await _cachedEngine!.getDetail(matchedLink);
-      final rawEpisodes = detail['chapters'] as List? ?? [];
+      final rawChapters = detail['chapters'] as List? ?? [];
 
       if (!mounted) return;
       setState(() {
-        _setEpisodes(rawEpisodes);
+        _setChapters(rawChapters);
       });
     } catch (e) {
       if (!mounted) return;
-      print("[WATCH PANE ERROR] Failed to load episodes: $e");
-      final is403 = _cachedEngine?.lastStatusCode == 403 || _cachedEngine?.lastStatusCode == 503;
+      print("[READ PANE ERROR] Failed to load chapters: $e");
+      final is403 =
+          _cachedEngine?.lastStatusCode == 403 ||
+          _cachedEngine?.lastStatusCode == 503;
       final failedUrl = _cachedEngine?.lastRequestUrl;
       setState(() {
-        _errorMessage = 'An error occurred while loading episodes.';
+        _errorMessage = 'An error occurred while loading chapters.';
         _is403Error = is403;
         _failedUrl = failedUrl;
       });
     } finally {
       if (mounted) {
         setState(() {
-          _isLoadingEpisodes = false;
+          _isLoadingChapters = false;
         });
       }
     }
@@ -228,12 +223,12 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
             ),
             const SizedBox(height: 16),
             const Text(
-              'No Extensions Installed',
+              'No Manga Extensions Installed',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             const Text(
-              'To start watching, add repositories and install an anime extension.',
+              'To start reading, add repositories and install a manga extension.',
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 13, color: Colors.grey),
             ),
@@ -284,7 +279,7 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
                       setState(() {
                         _selectedExtension = ext;
                       });
-                      _loadEpisodes();
+                      _loadChapters();
                     }
                   },
                 ),
@@ -303,7 +298,7 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
             ],
           ),
           const SizedBox(height: 16),
-          if (_isLoadingEpisodes)
+          if (_isLoadingChapters)
             Expanded(
               child: Center(
                 child: CircularProgressIndicator.adaptive(
@@ -330,7 +325,7 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
                       Text(
                         _is403Error
                             ? 'Cloudflare might be preventing fetching. Try opening in browser and completing the captcha.'
-                            : 'An error occurred while loading episodes.',
+                            : 'An error occurred while loading chapters.',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 13,
@@ -341,10 +336,14 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
                       if (_is403Error && _selectedExtension != null) ...[
                         OutlinedButton.icon(
                           onPressed: () async {
-                            final urlString = _failedUrl ?? _selectedExtension!.baseUrl;
+                            final urlString =
+                                _failedUrl ?? _selectedExtension!.baseUrl;
                             final url = Uri.parse(urlString);
                             try {
-                              await launchUrl(url, mode: LaunchMode.externalApplication);
+                              await launchUrl(
+                                url,
+                                mode: LaunchMode.externalApplication,
+                              );
                             } catch (e) {
                               print("Failed to launch URL: $e");
                             }
@@ -355,7 +354,7 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
                         const SizedBox(height: 12),
                       ],
                       FilledButton(
-                        onPressed: _loadEpisodes,
+                        onPressed: _loadChapters,
                         child: const Text('Retry'),
                       ),
                     ],
@@ -363,11 +362,11 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
                 ),
               ),
             )
-          else if (_allRawEpisodes.isEmpty)
+          else if (_allRawChapters.isEmpty)
             const Expanded(
               child: Center(
                 child: Text(
-                  'No episodes found for this show.',
+                  'No chapters found for this manga.',
                   style: TextStyle(color: Colors.grey),
                 ),
               ),
@@ -378,7 +377,7 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Episodes (${_allRawEpisodes.length})',
+                    'Chapters (${_allRawChapters.length})',
                     style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.bold,
@@ -386,7 +385,7 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
                   ),
                   const SizedBox(height: 12),
                   (() {
-                    final totalPages = (_allRawEpisodes.length / 30).ceil();
+                    final totalPages = (_allRawChapters.length / 30).ceil();
                     if (totalPages <= 1) return const SizedBox.shrink();
                     return Column(
                       children: [
@@ -398,9 +397,9 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
                             itemBuilder: (context, idx) {
                               final startEp = idx * 30 + 1;
                               final endEp =
-                                  (idx + 1) * 30 < _allRawEpisodes.length
+                                  (idx + 1) * 30 < _allRawChapters.length
                                   ? (idx + 1) * 30
-                                  : _allRawEpisodes.length;
+                                  : _allRawChapters.length;
                               final isSelected = _currentPage == idx;
                               return Padding(
                                 padding: const EdgeInsets.only(right: 8.0),
@@ -432,11 +431,11 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
                           )
                         : ListView.builder(
                             padding: const EdgeInsets.only(bottom: 20),
-                            itemCount: _rawEpisodes.length,
+                            itemCount: _rawChapters.length,
                             itemBuilder: (context, index) {
-                              final rawEp = _rawEpisodes[index];
-                              final ep = ExtEpisode.fromJson(
-                                Map<String, dynamic>.from(rawEp),
+                              final rawChap = _rawChapters[index];
+                              final chap = ExtEpisode.fromJson(
+                                Map<String, dynamic>.from(rawChap),
                               );
 
                               return Card(
@@ -457,56 +456,51 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
                                 ),
                                 child: InkWell(
                                   onTap: () {
+                                    final chronologicalChapters =
+                                        _allRawChapters.reversed
+                                            .map(
+                                              (e) => ExtEpisode.fromJson(
+                                                Map<String, dynamic>.from(e),
+                                              ),
+                                            )
+                                            .toList();
+
+                                    final curIdx = chronologicalChapters
+                                        .indexWhere((c) => c.url == chap.url);
+
                                     Navigator.of(context).push(
                                       MaterialPageRoute(
-                                        builder: (context) => VideoPlayerPage(
-                                          episode: ep,
+                                        builder: (context) => MangaReaderPage(
+                                          chapters: chronologicalChapters,
+                                          currentIndex: curIdx >= 0
+                                              ? curIdx
+                                              : 0,
                                           source: _selectedExtension!,
-                                          animeTitle: widget.animeTitle,
-                                          malId: widget.malId,
+                                          mangaTitle: widget.mangaTitle,
+                                          mediaId: widget.mediaId,
                                         ),
                                       ),
                                     );
                                   },
-                                  child: Row(
-                                    children: [
-                                      SizedBox(
-                                        width: 140,
-                                        height: 80,
-                                        child:
-                                            widget.coverImage != null &&
-                                                widget.coverImage!.isNotEmpty
-                                            ? CachedNetworkImage(
-                                                imageUrl: widget.coverImage!,
-                                                fit: BoxFit.cover,
-                                                placeholder: (context, url) =>
-                                                    const Center(
-                                                      child:
-                                                          CircularProgressIndicator.adaptive(
-                                                            strokeWidth: 2,
-                                                          ),
-                                                    ),
-                                                errorWidget:
-                                                    (context, url, error) =>
-                                                        _buildPlaceholderThumbnail(),
-                                              )
-                                            : _buildPlaceholderThumbnail(),
-                                      ),
-                                      const SizedBox(width: 16),
-                                      Expanded(
-                                        child: Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                            vertical: 8,
-                                            horizontal: 8,
-                                          ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 12,
+                                      horizontal: 16,
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        const Icon(
+                                          Icons.menu_book,
+                                          color: Colors.blueGrey,
+                                        ),
+                                        const SizedBox(width: 16),
+                                        Expanded(
                                           child: Column(
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
                                             children: [
                                               Text(
-                                                ep.name,
+                                                chap.name,
                                                 style: const TextStyle(
                                                   fontWeight: FontWeight.bold,
                                                   fontSize: 14,
@@ -514,13 +508,13 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
                                                 maxLines: 2,
                                                 overflow: TextOverflow.ellipsis,
                                               ),
-                                              if (ep.description != null &&
-                                                  ep
+                                              if (chap.description != null &&
+                                                  chap
                                                       .description!
                                                       .isNotEmpty) ...[
                                                 const SizedBox(height: 4),
                                                 Text(
-                                                  ep.description!,
+                                                  chap.description!,
                                                   style: TextStyle(
                                                     fontSize: 12,
                                                     color:
@@ -538,8 +532,12 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
                                             ],
                                           ),
                                         ),
-                                      ),
-                                    ],
+                                        const Icon(
+                                          Icons.chevron_right,
+                                          color: Colors.grey,
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               );
@@ -550,15 +548,6 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
               ),
             ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildPlaceholderThumbnail() {
-    return Container(
-      color: Colors.grey.shade900,
-      child: const Center(
-        child: Icon(Icons.play_circle_outline, color: Colors.white54, size: 32),
       ),
     );
   }

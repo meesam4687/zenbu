@@ -4,6 +4,7 @@ import 'package:zenbu/components/media_details_page/details_pane.dart';
 import 'package:zenbu/components/media_details_page/title_pane.dart';
 import 'package:zenbu/components/media_details_page/watch_pane.dart';
 import 'package:zenbu/components/media_details_page/reviews_pane.dart';
+import 'package:zenbu/components/media_details_page/read_pane.dart';
 import 'package:zenbu/pages/error_page.dart';
 
 class MediaDetailsPage extends StatefulWidget {
@@ -59,8 +60,11 @@ class _MediaDetailsPageState extends State<MediaDetailsPage>
 
         final currentProgress = media["mediaListEntry"]?["progress"] ?? "0";
 
+        final format = media["format"]?.toString() ?? "";
+        final showReadTab = !widget.isAnime && format != 'NOVEL';
+
         return DefaultTabController(
-          length: widget.isAnime ? 3 : 2,
+          length: widget.isAnime ? 3 : (showReadTab ? 3 : 2),
           child: Scaffold(
             body: NestedScrollView(
               floatHeaderSlivers: true,
@@ -98,7 +102,13 @@ class _MediaDetailsPageState extends State<MediaDetailsPage>
                               Tab(text: "Watch"),
                               Tab(text: "Reviews"),
                             ]
-                          : const [Tab(text: "About"), Tab(text: "Reviews")],
+                          : (showReadTab
+                              ? const [
+                                  Tab(text: "About"),
+                                  Tab(text: "Read"),
+                                  Tab(text: "Reviews"),
+                                ]
+                              : const [Tab(text: "About"), Tab(text: "Reviews")]),
                     ),
                   ),
                 ),
@@ -132,21 +142,46 @@ class _MediaDetailsPageState extends State<MediaDetailsPage>
                           child: ReviewsPane(mediaId: widget.id as int),
                         ),
                       ]
-                    : [
-                        _KeepAliveWrapper(
-                          child: SingleChildScrollView(
-                            key: const PageStorageKey('about'),
-                            physics: const ClampingScrollPhysics(),
-                            child: DetailsPane(
-                              mediaId: widget.id as int,
-                              isAnime: false,
+                    : (showReadTab
+                        ? [
+                            _KeepAliveWrapper(
+                              child: SingleChildScrollView(
+                                key: const PageStorageKey('about'),
+                                physics: const ClampingScrollPhysics(),
+                                child: DetailsPane(
+                                  mediaId: widget.id as int,
+                                  isAnime: false,
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
-                        _KeepAliveWrapper(
-                          child: ReviewsPane(mediaId: widget.id as int),
-                        ),
-                      ],
+                            _KeepAliveWrapper(
+                              child: SizedBox(
+                                child: MangaReadPane(
+                                  mediaId: widget.id as int,
+                                  mangaTitle: media["title"]["romaji"] ?? '',
+                                  coverImage: media["coverImage"]["extraLarge"],
+                                ),
+                              ),
+                            ),
+                            _KeepAliveWrapper(
+                              child: ReviewsPane(mediaId: widget.id as int),
+                            ),
+                          ]
+                        : [
+                            _KeepAliveWrapper(
+                              child: SingleChildScrollView(
+                                key: const PageStorageKey('about'),
+                                physics: const ClampingScrollPhysics(),
+                                child: DetailsPane(
+                                  mediaId: widget.id as int,
+                                  isAnime: false,
+                                ),
+                              ),
+                            ),
+                            _KeepAliveWrapper(
+                              child: ReviewsPane(mediaId: widget.id as int),
+                            ),
+                          ]),
               ),
             ),
           ),

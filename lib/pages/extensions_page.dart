@@ -327,6 +327,28 @@ class _ExtensionsPageState extends State<ExtensionsPage>
                           vertical: 2,
                         ),
                         decoration: BoxDecoration(
+                          color: ext.isManga
+                              ? Colors.green.shade100
+                              : Colors.blue.shade100,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          ext.isManga ? 'MANGA' : 'ANIME',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: ext.isManga
+                                ? Colors.green.shade900
+                                : Colors.blue.shade900,
+                          ),
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
                           color: Theme.of(context).colorScheme.primaryContainer,
                           borderRadius: BorderRadius.circular(4),
                         ),
