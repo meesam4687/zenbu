@@ -141,7 +141,6 @@ class _MangaReadPaneState extends State<MangaReadPane> {
       );
 
       final searchResults = await _cachedEngine!.search(widget.mangaTitle, 1);
-      print("[READ PANE] Search Results: $searchResults");
       final is403 =
           _cachedEngine?.lastStatusCode == 403 ||
           _cachedEngine?.lastStatusCode == 503;
@@ -177,7 +176,6 @@ class _MangaReadPaneState extends State<MangaReadPane> {
       });
     } catch (e) {
       if (!mounted) return;
-      print("[READ PANE ERROR] Failed to load chapters: $e");
       final is403 =
           _cachedEngine?.lastStatusCode == 403 ||
           _cachedEngine?.lastStatusCode == 503;
@@ -344,9 +342,7 @@ class _MangaReadPaneState extends State<MangaReadPane> {
                                 url,
                                 mode: LaunchMode.externalApplication,
                               );
-                            } catch (e) {
-                              print("Failed to launch URL: $e");
-                            }
+                            } catch (_) {}
                           },
                           icon: const Icon(Icons.open_in_browser),
                           label: const Text('Open in Browser'),

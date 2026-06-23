@@ -151,7 +151,9 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
       );
 
       final searchResults = await _cachedEngine!.search(widget.animeTitle, 1);
-      final is403 = _cachedEngine?.lastStatusCode == 403 || _cachedEngine?.lastStatusCode == 503;
+      final is403 =
+          _cachedEngine?.lastStatusCode == 403 ||
+          _cachedEngine?.lastStatusCode == 503;
       if (is403) {
         throw Exception('Cloudflare challenge detected.');
       }
@@ -184,8 +186,9 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
       });
     } catch (e) {
       if (!mounted) return;
-      print("[WATCH PANE ERROR] Failed to load episodes: $e");
-      final is403 = _cachedEngine?.lastStatusCode == 403 || _cachedEngine?.lastStatusCode == 503;
+      final is403 =
+          _cachedEngine?.lastStatusCode == 403 ||
+          _cachedEngine?.lastStatusCode == 503;
       final failedUrl = _cachedEngine?.lastRequestUrl;
       setState(() {
         _errorMessage = 'An error occurred while loading episodes.';
@@ -341,13 +344,15 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
                       if (_is403Error && _selectedExtension != null) ...[
                         OutlinedButton.icon(
                           onPressed: () async {
-                            final urlString = _failedUrl ?? _selectedExtension!.baseUrl;
+                            final urlString =
+                                _failedUrl ?? _selectedExtension!.baseUrl;
                             final url = Uri.parse(urlString);
                             try {
-                              await launchUrl(url, mode: LaunchMode.externalApplication);
-                            } catch (e) {
-                              print("Failed to launch URL: $e");
-                            }
+                              await launchUrl(
+                                url,
+                                mode: LaunchMode.externalApplication,
+                              );
+                            } catch (_) {}
                           },
                           icon: const Icon(Icons.open_in_browser),
                           label: const Text('Open in Browser'),

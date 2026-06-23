@@ -69,12 +69,13 @@ class JsEngine {
         }
 
         url = _cleanUrl(url);
-        print("[HTTP GET REQUEST] URL: $url");
         lastRequestUrl = url;
-        final response = await http.get(Uri.parse(url), headers: _mergeHeaders(url, headers));
+        final response = await http.get(
+          Uri.parse(url),
+          headers: _mergeHeaders(url, headers),
+        );
         lastStatusCode = response.statusCode;
-        print("[HTTP GET RESPONSE] Status: ${response.statusCode}");
-        
+
         String bodyString;
         try {
           bodyString = utf8.decode(response.bodyBytes, allowMalformed: true);
@@ -85,10 +86,7 @@ class JsEngine {
         if (bodyString.contains("Just a moment...") ||
             bodyString.contains("cloudflare") ||
             response.statusCode == 403 ||
-            response.statusCode == 503) {
-          print("[HTTP GET WARNING] Possible Cloudflare or browser protection challenge detected!");
-          print("[HTTP GET BODY PREVIEW]: ${bodyString.length > 500 ? bodyString.substring(0, 500) : bodyString}");
-        }
+            response.statusCode == 503) {}
 
         return json.encode({
           'statusCode': response.statusCode,
@@ -96,7 +94,6 @@ class JsEngine {
           'body': bodyString,
         });
       } catch (e) {
-        print("[HTTP GET ERROR] Failed: $e");
         return json.encode({
           'statusCode': 500,
           'headers': <String, String>{},
@@ -166,7 +163,10 @@ class JsEngine {
         }
 
         lastRequestUrl = url;
-        final response = await http.head(Uri.parse(url), headers: _mergeHeaders(url, headers));
+        final response = await http.head(
+          Uri.parse(url),
+          headers: _mergeHeaders(url, headers),
+        );
         String bodyString;
         try {
           bodyString = utf8.decode(response.bodyBytes, allowMalformed: true);
@@ -405,9 +405,7 @@ class JsEngine {
         final value = args[1];
         final sp = await SharedPreferences.getInstance();
         await sp.setString('ext_pref_${sourceId}_$key', json.encode(value));
-      } catch (e) {
-        print("Error saving preference: $e");
-      }
+      } catch (_) {}
       return null;
     });
 
@@ -519,10 +517,17 @@ class JsEngine {
         'className' => element.className,
         'localName' => element.localName,
         'namespaceUri' => element.namespaceUri,
-        'getSrc' => element.attributes['src'] ?? _regSrcMatcher(element.outerHtml),
-        'getImg' => element.attributes['img'] ?? element.attributes['src'] ?? _regImgMatcher(element.outerHtml),
-        'getHref' => element.attributes['href'] ?? _regHrefMatcher(element.outerHtml),
-        'getDataSrc' => element.attributes['data-src'] ?? _regDataSrcMatcher(element.outerHtml),
+        'getSrc' =>
+          element.attributes['src'] ?? _regSrcMatcher(element.outerHtml),
+        'getImg' =>
+          element.attributes['img'] ??
+              element.attributes['src'] ??
+              _regImgMatcher(element.outerHtml),
+        'getHref' =>
+          element.attributes['href'] ?? _regHrefMatcher(element.outerHtml),
+        'getDataSrc' =>
+          element.attributes['data-src'] ??
+              _regDataSrcMatcher(element.outerHtml),
         _ => "",
       };
       return res;
@@ -1153,25 +1158,22 @@ class JsEngine {
   }
 
   Future<List<Map<String, dynamic>>> search(String query, int page) async {
-    print("[JS ENGINE SEARCH] Query: '$query', Page: $page");
     final escapedQuery = query.replaceAll('"', '\\"');
     final res = _runtime.evaluate(
       'jsonStringify(extension.search("$escapedQuery", $page, typeof extension.getFilterList === "function" ? extension.getFilterList() : []))',
     );
     final resolved = await _runtime.handlePromise(res);
     final data = json.decode(resolved.stringResult);
-    print("[JS ENGINE SEARCH SUCCESS] Found ${data['list']?.length ?? 0} results");
+
     return List<Map<String, dynamic>>.from(data['list']);
   }
 
   Future<Map<String, dynamic>> getDetail(String url) async {
-    print("[JS ENGINE GETDETAIL] URL: '$url'");
     final escapedUrl = url.replaceAll('"', '\\"');
     final res = _runtime.evaluate(
       'jsonStringify(extension.getDetail("$escapedUrl"))',
     );
     final resolved = await _runtime.handlePromise(res);
-    print("[JS ENGINE GETDETAIL SUCCESS]");
     return json.decode(resolved.stringResult);
   }
 
@@ -1303,11 +1305,16 @@ class JsEngine {
     return url;
   }
 
-  Map<String, String> _mergeHeaders(String url, Map<String, String> customHeaders) {
+  Map<String, String> _mergeHeaders(
+    String url,
+    Map<String, String> customHeaders,
+  ) {
     final Map<String, String> merged = {
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      'User-Agent':
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
       'Accept-Language': 'en-US,en;q=0.9',
-      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+      'Accept':
+          'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
     };
     try {
       final uri = Uri.parse(url);
@@ -1661,7 +1668,6 @@ List<html_dom.Element> _select(html_dom.Element dom, String selector) {
   try {
     final results = dom.querySelectorAll(selector);
     if (results.isNotEmpty) {
-      print("[SELECT SUCCESS] Selector: '$selector' -> Found ${results.length} elements");
       return results;
     }
   } catch (_) {}
@@ -1670,10 +1676,8 @@ List<html_dom.Element> _select(html_dom.Element dom, String selector) {
     _initPseudoSelector();
     final fixedSelector = selector.replaceAll(':not', ':inot');
     final results = pseudom.parse(fixedSelector).select(dom).toList();
-    print("[SELECT FALLBACK] Selector: '$selector' -> Found ${results.length} elements");
     return results;
   } catch (err) {
-    print("[SELECT ERROR] Selector: '$selector' -> Pseudom error: $err");
     return [];
   }
 }
@@ -1682,7 +1686,6 @@ html_dom.Element? _selectFirst(html_dom.Element dom, String selector) {
   try {
     final result = dom.querySelector(selector);
     if (result != null) {
-      print("[SELECTFIRST SUCCESS] Selector: '$selector' -> Found");
       return result;
     }
   } catch (_) {}
@@ -1691,10 +1694,8 @@ html_dom.Element? _selectFirst(html_dom.Element dom, String selector) {
     _initPseudoSelector();
     final fixedSelector = selector.replaceAll(':not', ':inot');
     final result = pseudom.parse(fixedSelector).selectFirst(dom);
-    print("[SELECTFIRST FALLBACK] Selector: '$selector' -> Found? ${result != null}");
     return result;
   } catch (err) {
-    print("[SELECTFIRST ERROR] Selector: '$selector' -> Pseudom error: $err");
     return null;
   }
 }

@@ -5,5 +5,5 @@
 - [x] AniChart Integration
 - [ ] Icon
 - [x] Watch Tab 
-- [ ] Read Tab 
+- [x] Read Tab 
 - [x] Reviews Tab
