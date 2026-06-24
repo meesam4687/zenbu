@@ -84,11 +84,14 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
             "PAUSED": "Paused",
           };
 
-    return Container(
-      padding: const EdgeInsets.only(top: 40, left: 20, right: 20),
-      width: double.infinity,
-      height: 470,
-      child: Column(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final sheetWidth = constraints.maxWidth;
+        return SingleChildScrollView(
+          child: Container(
+            padding: const EdgeInsets.only(top: 40, left: 20, right: 20, bottom: 20),
+            width: double.infinity,
+            child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         spacing: 20,
         children: [
@@ -104,7 +107,7 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
                   ),
                   DropdownMenu(
-                    width: MediaQuery.of(context).size.width * 0.44,
+                    width: sheetWidth * 0.44,
                     hintText: listStatusToText[widget.status],
                     dropdownMenuEntries: widget.isAnime
                         ? [
@@ -177,7 +180,7 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                     ),
                   ),
                   SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.44,
+                    width: sheetWidth * 0.44,
                     child: TextField(
                       keyboardType: TextInputType.number,
                       controller: chaptersController,
@@ -205,7 +208,7 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                   InkWell(
                     borderRadius: BorderRadius.circular(4),
                     child: SizedBox(
-                      width: MediaQuery.of(context).size.width * 0.44,
+                      width: sheetWidth * 0.44,
                       height: 55,
                       child: Container(
                         alignment: Alignment.centerLeft,
@@ -256,7 +259,7 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                   InkWell(
                     borderRadius: BorderRadius.circular(4),
                     child: SizedBox(
-                      width: MediaQuery.of(context).size.width * 0.44,
+                      width: sheetWidth * 0.44,
                       height: 55,
                       child: Container(
                         alignment: Alignment.centerLeft,
@@ -310,7 +313,7 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
                   ),
                   SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.44,
+                    width: sheetWidth * 0.44,
                     child: TextField(
                       keyboardType: TextInputType.number,
                       controller: scoreController,
@@ -334,7 +337,7 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                     ),
                   ),
                   SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.44,
+                    width: sheetWidth * 0.44,
                     child: TextField(
                       controller: rewatchController,
                       keyboardType: TextInputType.number,
@@ -433,6 +436,9 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
           ),
         ],
       ),
+    ),
+  );
+      },
     );
   }
 }

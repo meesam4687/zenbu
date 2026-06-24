@@ -249,11 +249,14 @@ class _FilterSheetState extends State<FilterSheet> {
   @override
   Widget build(BuildContext context) {
     List<String> yearArray = yearOptions(widget.maxYear);
-    return Padding(
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom,
-      ),
-      child: SingleChildScrollView(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final sheetWidth = constraints.maxWidth;
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          child: SingleChildScrollView(
         child: SizedBox(
           width: double.infinity,
           height: 670,
@@ -365,7 +368,7 @@ class _FilterSheetState extends State<FilterSheet> {
                             ),
                             const Padding(padding: EdgeInsets.all(5)),
                             SizedBox(
-                              width: MediaQuery.of(context).size.width * 0.44,
+                              width: sheetWidth * 0.44,
                               child: TypeAheadField(
                                 suggestionsCallback: (pattern) {
                                   return yearArray
@@ -414,7 +417,7 @@ class _FilterSheetState extends State<FilterSheet> {
                               ),
                               const Padding(padding: EdgeInsets.all(5)),
                               DropdownMenu(
-                                width: MediaQuery.of(context).size.width * 0.44,
+                                width: sheetWidth * 0.44,
                                 hintText: season != "" ? season : "Any",
                                 dropdownMenuEntries: const [
                                   DropdownMenuEntry(
@@ -454,7 +457,7 @@ class _FilterSheetState extends State<FilterSheet> {
                               ),
                               const Padding(padding: EdgeInsets.all(5)),
                               DropdownMenu(
-                                width: MediaQuery.of(context).size.width * 0.44,
+                                width: sheetWidth * 0.44,
                                 hintText: countryOfOrigin != ""
                                     ? countryOfOrigin
                                     : "Any",
@@ -497,7 +500,7 @@ class _FilterSheetState extends State<FilterSheet> {
                             ),
                             const Padding(padding: EdgeInsets.all(5)),
                             DropdownMenu(
-                              width: MediaQuery.of(context).size.width * 0.44,
+                              width: sheetWidth * 0.44,
                               hintText: format != "" ? format : "Any",
                               dropdownMenuEntries: widget.isAnime
                                   ? const [
@@ -570,7 +573,7 @@ class _FilterSheetState extends State<FilterSheet> {
                             ),
                             const Padding(padding: EdgeInsets.all(5)),
                             DropdownMenu(
-                              width: MediaQuery.of(context).size.width * 0.44,
+                              width: sheetWidth * 0.44,
                               hintText: airingStatus != ""
                                   ? airingStatus
                                   : "Any",
@@ -623,7 +626,7 @@ class _FilterSheetState extends State<FilterSheet> {
                                   const Padding(padding: EdgeInsets.all(5)),
                                   DropdownMenu(
                                     width:
-                                        MediaQuery.of(context).size.width *
+                                        sheetWidth *
                                         0.29,
                                     hintText: sourceMaterial != ""
                                         ? sourceMaterial
@@ -715,7 +718,7 @@ class _FilterSheetState extends State<FilterSheet> {
                                   const Padding(padding: EdgeInsets.all(5)),
                                   DropdownMenu(
                                     width:
-                                        MediaQuery.of(context).size.width *
+                                        sheetWidth *
                                         0.29,
                                     hintText: countryOfOrigin != ""
                                         ? countryOfOrigin
@@ -759,7 +762,7 @@ class _FilterSheetState extends State<FilterSheet> {
                                   const Padding(padding: EdgeInsets.all(5)),
                                   DropdownMenu(
                                     width:
-                                        MediaQuery.of(context).size.width *
+                                        sheetWidth *
                                         0.29,
                                     hintText: getSortByLabel(sortBy),
                                     dropdownMenuEntries: const [
@@ -815,7 +818,7 @@ class _FilterSheetState extends State<FilterSheet> {
                                   const Padding(padding: EdgeInsets.all(5)),
                                   DropdownMenu(
                                     width:
-                                        MediaQuery.of(context).size.width *
+                                        sheetWidth *
                                         0.44,
                                     hintText: sourceMaterial != ""
                                         ? sourceMaterial
@@ -907,7 +910,7 @@ class _FilterSheetState extends State<FilterSheet> {
                                   const Padding(padding: EdgeInsets.all(5)),
                                   DropdownMenu(
                                     width:
-                                        MediaQuery.of(context).size.width *
+                                        sheetWidth *
                                         0.44,
                                     hintText: getSortByLabel(sortBy),
                                     dropdownMenuEntries: const [
@@ -990,6 +993,8 @@ class _FilterSheetState extends State<FilterSheet> {
           ),
         ),
       ),
+    );
+      },
     );
   }
 
