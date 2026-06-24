@@ -33,6 +33,7 @@ class _CharacterDetailsPageState extends State<CharacterDetailsPage> {
         if (snapshot.hasError) {
           return ErrorPage(
             scaffold: true,
+            message: snapshot.error?.toString(),
             onReload: () {
               setState(() {
                 characterData = getCharacterData(widget.id);

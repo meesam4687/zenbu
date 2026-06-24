@@ -160,6 +160,7 @@ class _HomePageState extends State<HomePage> {
                         child: Center(
                           child: ErrorPage(
                             scaffold: false,
+                            message: snapshot.error?.toString(),
                             onReload: () {
                               setState(() {
                                 _alData = getHomePageData();

@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:zenbu/authentication_token_controller.dart';
 
 const String _anilistApiUrl = 'https://graphql.anilist.co';
@@ -26,15 +25,22 @@ Future<Map<String, dynamic>> executeQuery(
     );
 
     if (res.statusCode == 429) {
-      Fluttertoast.showToast(
-        msg: "Rate limited, try again later",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        fontSize: 16.0,
-      );
+      throw 'Rate limited, try again later';
+    }
+    if (res.statusCode == 403) {
+      throw 'Access forbidden (403)';
+    }
+    if (res.statusCode != 200) {
+      throw 'Request failed with status: ${res.statusCode}';
     }
 
     final data = jsonDecode(res.body) as Map<String, dynamic>;
+    if (data.containsKey("errors") && data["errors"] != null) {
+      final errorsList = data["errors"] as List;
+      if (errorsList.isNotEmpty) {
+        throw errorsList[0]["message"] ?? "An error occurred";
+      }
+    }
     return data;
   } catch (e) {
     throw e.toString();

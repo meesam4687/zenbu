@@ -92,6 +92,7 @@ class _MediaDiscoveryPageState extends State<MediaDiscoveryPage> {
                         child: Center(
                           child: ErrorPage(
                             scaffold: false,
+                            message: snapshot.error?.toString(),
                             onReload: _loadData,
                           ),
                         ),

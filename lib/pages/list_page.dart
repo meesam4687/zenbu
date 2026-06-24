@@ -141,7 +141,12 @@ class _ListPageState extends State<ListPage> {
                   );
                 }
                 if (snapshot.hasError) {
-                  return Expanded(child: Error(reload: _reloadData));
+                  return Expanded(
+                    child: Error(
+                      reload: _reloadData,
+                      message: snapshot.error?.toString(),
+                    ),
+                  );
                 }
                 final data = snapshot.data!;
                 final List combinedEntries =

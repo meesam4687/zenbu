@@ -19,7 +19,7 @@ class _NotificationPageState extends State<NotificationPage> {
   bool _clearedUnread = false;
   final ScrollController _scrollController = ScrollController();
   bool _isLoading = false;
-  bool _hasError = false;
+  String? _errorMessage;
 
   @override
   void initState() {
@@ -39,7 +39,7 @@ class _NotificationPageState extends State<NotificationPage> {
   void _loadMore() async {
     setState(() {
       _isLoading = true;
-      _hasError = false;
+      _errorMessage = null;
     });
     try {
       Map data = await getNotifications(page, 10);
@@ -66,7 +66,7 @@ class _NotificationPageState extends State<NotificationPage> {
       }
     } catch (e) {
       setState(() {
-        _hasError = true;
+        _errorMessage = e.toString();
         _isLoading = false;
       });
     }
@@ -76,7 +76,7 @@ class _NotificationPageState extends State<NotificationPage> {
     setState(() {
       items.clear();
       page = 1;
-      _hasError = false;
+      _errorMessage = null;
     });
     _loadMore();
   }
@@ -94,13 +94,13 @@ class _NotificationPageState extends State<NotificationPage> {
           }
           page = 2;
           _unreadCount = 0;
-          _hasError = false;
+          _errorMessage = null;
         });
       }
-    } catch (_) {
+    } catch (e) {
       if (mounted) {
         setState(() {
-          _hasError = true;
+          _errorMessage = e.toString();
         });
       }
     }
@@ -118,12 +118,17 @@ class _NotificationPageState extends State<NotificationPage> {
       appBar: AppBar(title: const Text("Notifications")),
       body: RefreshIndicator(
         onRefresh: _handleRefresh,
-        child: _hasError
+        child: _errorMessage != null
             ? SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 child: SizedBox(
                   height: MediaQuery.of(context).size.height - 120,
-                  child: Center(child: Error(reload: _reload)),
+                  child: Center(
+                    child: Error(
+                      reload: _reload,
+                      message: _errorMessage,
+                    ),
+                  ),
                 ),
               )
             : (items.isEmpty)

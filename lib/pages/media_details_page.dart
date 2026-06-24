@@ -43,6 +43,7 @@ class _MediaDetailsPageState extends State<MediaDetailsPage>
         if (snapshot.hasError) {
           return ErrorPage(
             scaffold: true,
+            message: snapshot.error?.toString(),
             onReload: () {
               setState(() {
                 _mediaData = widget.isAnime

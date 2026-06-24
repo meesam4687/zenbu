@@ -29,7 +29,7 @@ class _EntireListViewState extends State<EntireListView> {
   int page = 1;
   final ScrollController _scrollController = ScrollController();
   bool _isLoading = false;
-  bool _hasError = false;
+  String? _errorMessage;
 
   @override
   void initState() {
@@ -49,7 +49,7 @@ class _EntireListViewState extends State<EntireListView> {
   void _loadMore() async {
     setState(() {
       _isLoading = true;
-      _hasError = false;
+      _errorMessage = null;
     });
     try {
       final Map<PageType, Future<Map<String, dynamic>> Function(int, int)>
@@ -80,7 +80,7 @@ class _EntireListViewState extends State<EntireListView> {
     } catch (e) {
       if (mounted) {
         setState(() {
-          _hasError = true;
+          _errorMessage = e.toString();
           _isLoading = false;
         });
       }
@@ -91,7 +91,7 @@ class _EntireListViewState extends State<EntireListView> {
     setState(() {
       medias.clear();
       page = 1;
-      _hasError = false;
+      _errorMessage = null;
     });
     _loadMore();
   }
@@ -126,13 +126,13 @@ class _EntireListViewState extends State<EntireListView> {
             medias.add(media);
           }
           page = 2;
-          _hasError = false;
+          _errorMessage = null;
         });
       }
-    } catch (_) {
+    } catch (e) {
       if (mounted) {
         setState(() {
-          _hasError = true;
+          _errorMessage = e.toString();
         });
       }
     }
@@ -144,12 +144,17 @@ class _EntireListViewState extends State<EntireListView> {
       appBar: AppBar(title: Text(widget.heading)),
       body: RefreshIndicator(
         onRefresh: _handleRefresh,
-        child: _hasError
+        child: _errorMessage != null
             ? SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 child: SizedBox(
                   height: MediaQuery.of(context).size.height - 120,
-                  child: Center(child: Error(reload: _reload)),
+                  child: Center(
+                    child: Error(
+                      reload: _reload,
+                      message: _errorMessage,
+                    ),
+                  ),
                 ),
               )
             : (medias.isEmpty)

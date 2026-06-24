@@ -33,6 +33,7 @@ class _StaffDetailsPageState extends State<StaffDetailsPage> {
         if (snapshot.hasError) {
           return ErrorPage(
             scaffold: true,
+            message: snapshot.error?.toString(),
             onReload: () {
               setState(() {
                 characterData = getStaffData(widget.id);
