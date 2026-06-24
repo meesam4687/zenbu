@@ -1,5 +1,5 @@
 <p align="center">
-   <img style="border-radius: 20%" src="https://raw.githubusercontent.com/meesam4687/zenbu/refs/heads/main/assets/zenbu_512.png" alt="Dartotsu Banner" width="25%">
+   <img src="https://raw.githubusercontent.com/meesam4687/zenbu/refs/heads/main/assets/zenbu_512.png" alt="Dartotsu Banner" width="25%">
 </p>
 
 # Zenbu
