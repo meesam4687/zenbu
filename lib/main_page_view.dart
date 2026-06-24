@@ -7,7 +7,7 @@ class MainPageView extends StatefulWidget {
   const MainPageView({super.key});
 
   @override
-  State<MainPageView> createState() => _MainPageState();
+  State<MainPageView> createState() => MainPageViewState();
 }
 
 List<Widget> pages = [
@@ -16,12 +16,18 @@ List<Widget> pages = [
   const MediaDiscoveryPage(isAnime: false, key: ValueKey('manga_discovery')),
 ];
 
-class _MainPageState extends State<MainPageView> {
+class MainPageViewState extends State<MainPageView> {
   late int selectedIdx;
   @override
   void initState() {
     super.initState();
     selectedIdx = 1;
+  }
+
+  void changeTab(int index) {
+    setState(() {
+      selectedIdx = index;
+    });
   }
 
   @override

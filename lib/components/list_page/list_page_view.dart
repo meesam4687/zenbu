@@ -8,18 +8,42 @@ class ListPageView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (list.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              mediaType == "anime"
+                  ? Icons.tv_off_outlined
+                  : Icons.menu_book_outlined,
+              size: 48,
+              color: Theme.of(context).colorScheme.outline,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              "Empty list",
+              style: TextStyle(
+                fontSize: 16,
+                color: Theme.of(context).colorScheme.outline,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
     return Container(
       width: double.infinity,
-      margin: EdgeInsets.only(top: 10, left: 10, right: 10),
+      margin: const EdgeInsets.only(top: 10, left: 10, right: 10),
       child: GridView.builder(
         itemCount: list.length,
-        gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+        gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
           maxCrossAxisExtent: 137.142,
           childAspectRatio: 100 / 200,
         ),
         itemBuilder: (context, index) {
           return Padding(
-            padding: EdgeInsets.only(left: 3.0),
+            padding: const EdgeInsets.only(left: 3.0),
             child: ItemCard(
               title: (list[index]["media"]["title"]["romaji"] as String),
               image: list[index]["media"]["coverImage"]["extraLarge"],
