@@ -425,8 +425,13 @@ class _DetailsPaneState extends State<DetailsPane>
                                   (media["recommendations"]["edges"] as List)
                                       .length,
                               itemBuilder: (context, index) {
-                                final nodeMedia =
-                                    media["recommendations"]["edges"][index]["node"]["media"];
+                                final recs =
+                                    (media["recommendations"]["edges"] as List)
+                                        .where(
+                                          (e) => e["node"]["media"] != null,
+                                        )
+                                        .toList();
+                                final nodeMedia = recs[index]["node"]["media"];
                                 return Padding(
                                   padding: const EdgeInsets.only(right: 3.0),
                                   child: ItemCard(
