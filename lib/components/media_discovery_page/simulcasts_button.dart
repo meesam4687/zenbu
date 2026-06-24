@@ -78,38 +78,44 @@ class _SimulcastsButtonState extends State<SimulcastsButton> {
                   Padding(padding: EdgeInsets.only(left: 10)),
                   Icon(
                     Icons.calendar_month,
-                    shadows: [
-                      Shadow(
-                        blurRadius: 5.0,
-                        color: Colors.black,
-                        offset: Offset(0, 0),
-                      ),
-                    ],
+                    // Flutter shadow ghosting bug apparently
+                    // TODO: Add back when fixed
+                    // shadows: [
+                    //   Shadow(
+                    //     blurRadius: 5.0,
+                    //     color: Colors.black,
+                    //     offset: Offset(0, 0),
+                    //   ),
+                    // ],
                   ),
                   Padding(padding: EdgeInsets.only(left: 10)),
                   Text(
                     "Simulcasts",
                     style: TextStyle(
                       fontSize: 17,
-                      shadows: [
-                        Shadow(
-                          blurRadius: 5.0,
-                          color: Colors.black,
-                          offset: Offset(0, 0),
-                        ),
-                      ],
+                      // Flutter shadow ghosting bug apparently
+                      // TODO: Add back when fixed
+                      // shadows: [
+                      //   Shadow(
+                      //     blurRadius: 5.0,
+                      //     color: Colors.black,
+                      //     offset: Offset(0, 0),
+                      //   ),
+                      // ],
                     ),
                   ),
                   Spacer(),
                   Icon(
                     Icons.arrow_forward,
-                    shadows: [
-                      Shadow(
-                        blurRadius: 5.0,
-                        color: Colors.black,
-                        offset: Offset(0, 0),
-                      ),
-                    ],
+                    // Flutter shadow ghosting bug apparently
+                    // TODO: Add back when fixed
+                    // shadows: [
+                    //   Shadow(
+                    //     blurRadius: 5.0,
+                    //     color: Colors.black,
+                    //     offset: Offset(0, 0),
+                    //   ),
+                    // ],
                   ),
                   Padding(padding: EdgeInsets.only(right: 10)),
                 ],
