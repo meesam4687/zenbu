@@ -33,8 +33,9 @@ Future<Map<String, dynamic>> searchAnime(
   vars["sort"] = sortBy != null && sortBy.isNotEmpty
       ? [sortBy]
       : ["POPULARITY_DESC"];
-  if (genreNotIn != null && genreNotIn.isNotEmpty)
+  if (genreNotIn != null && genreNotIn.isNotEmpty) {
     vars["genreNotIn"] = genreNotIn;
+  }
   if (tagNotIn != null && tagNotIn.isNotEmpty) vars["tagNotIn"] = tagNotIn;
 
   String query =
@@ -106,8 +107,9 @@ Future<Map<String, dynamic>> searchManga(
   vars["sort"] = sortBy != null && sortBy.isNotEmpty
       ? [sortBy]
       : ["POPULARITY_DESC"];
-  if (genreNotIn != null && genreNotIn.isNotEmpty)
+  if (genreNotIn != null && genreNotIn.isNotEmpty) {
     vars["genreNotIn"] = genreNotIn;
+  }
   if (tagNotIn != null && tagNotIn.isNotEmpty) vars["tagNotIn"] = tagNotIn;
 
   String query =

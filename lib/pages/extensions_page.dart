@@ -170,7 +170,7 @@ class _ExtensionsPageState extends State<ExtensionsPage>
                           }
                           setDialogState(() => isAdding = true);
                           await _addRepository(url);
-                          if (mounted) Navigator.of(context).pop();
+                          if (context.mounted) Navigator.of(context).pop();
                         },
                   child: isAdding
                       ? const SizedBox(
@@ -745,7 +745,9 @@ class _ExtensionSettingsSheetState extends State<_ExtensionSettingsSheet> {
               return RadioListTile<String>(
                 title: Text(label),
                 value: val,
+                // ignore: deprecated_member_use
                 groupValue: currVal,
+                // ignore: deprecated_member_use
                 onChanged: (newVal) {
                   if (newVal != null) {
                     _updateValue(key, newVal);

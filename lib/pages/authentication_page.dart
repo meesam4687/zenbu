@@ -18,7 +18,6 @@ Future<void> openInBrowser(String url) async {
 }
 
 class _AuthenticationPageState extends State<AuthenticationPage> {
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -59,6 +58,7 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
                       'assets/alLogo.svg',
                       width: 18,
                       height: 18,
+                      // ignore: deprecated_member_use
                       color: Theme.of(context).colorScheme.onSecondary,
                     ),
                   ],
