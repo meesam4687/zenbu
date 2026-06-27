@@ -97,6 +97,7 @@ class VideoPlayerPage extends StatefulWidget {
   final ExtSource source;
   final String animeTitle;
   final int? malId;
+  final List<ExtEpisode>? allEpisodes;
 
   const VideoPlayerPage({
     super.key,
@@ -104,6 +105,7 @@ class VideoPlayerPage extends StatefulWidget {
     required this.source,
     required this.animeTitle,
     this.malId,
+    this.allEpisodes,
   });
 
   @override
@@ -123,6 +125,31 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   String _loadingText = 'Resolving stream links...';
   String? _errorMessage;
   Duration _currentPosition = Duration.zero;
+
+  late ExtEpisode _currentEpisode;
+  ExtEpisode? _nextEpisode;
+
+  void _updateNextEpisode() {
+    if (widget.allEpisodes == null || widget.allEpisodes!.isEmpty) {
+      _nextEpisode = null;
+      return;
+    }
+    _nextEpisode = findNextEpisode(_currentEpisode, widget.allEpisodes!);
+  }
+
+  void _playNextEpisode() {
+    if (_nextEpisode == null) return;
+
+    setState(() {
+      _currentEpisode = _nextEpisode!;
+      _updateNextEpisode();
+      _videos = [];
+      _selectedVideo = null;
+      _currentPosition = Duration.zero;
+    });
+
+    _fetchVideoList();
+  }
 
   final ValueNotifier<SkipTime?> _activeSkipTimeNotifier =
       ValueNotifier<SkipTime?>(null);
@@ -159,6 +186,8 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   @override
   void initState() {
     super.initState();
+    _currentEpisode = widget.episode;
+    _updateNextEpisode();
     _fetchVideoList();
   }
 
@@ -223,7 +252,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
 
     try {
       final engine = await RepoService.loadExtensionEngine(widget.source);
-      final rawList = await engine.getVideoList(widget.episode.url);
+      final rawList = await engine.getVideoList(_currentEpisode.url);
 
       _disposeEngine();
       _jsEngine = engine;
@@ -392,7 +421,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
       }
 
       if (widget.malId != null) {
-        final double? epNum = parseEpisodeNumber(widget.episode);
+        final double? epNum = parseEpisodeNumber(_currentEpisode);
         if (epNum != null) {
           final durationSec = _videoPlayerController!.value.duration.inSeconds;
           await _fetchSkipTimes(widget.malId!, epNum, durationSec);
@@ -900,7 +929,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                     style: const TextStyle(fontSize: 12, color: Colors.white70),
                   ),
                   Text(
-                    widget.episode.name,
+                    _currentEpisode.name,
                     style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.bold,
@@ -910,6 +939,15 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                 ],
               ),
               actions: [
+                if (_nextEpisode != null)
+                  IconButton(
+                    icon: const Icon(Icons.skip_next, color: Colors.white),
+                    tooltip: 'Next Episode',
+                    onPressed: () {
+                      _startControlsTimer();
+                      _playNextEpisode();
+                    },
+                  ),
                 if (_allSubtitles.isNotEmpty)
                   IconButton(
                     icon: Icon(
@@ -1023,8 +1061,38 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                 ),
 
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
+                    InkWell(
+                      onTap: () {
+                        _startControlsTimer();
+                        final newPos =
+                            _videoPlayerController!.value.position +
+                            const Duration(seconds: 85);
+                        _videoPlayerController!.seekTo(
+                          newPos > totalDuration ? totalDuration : newPos,
+                        );
+                      },
+                      borderRadius: BorderRadius.circular(8),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.white, width: 1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Text(
+                          '+85s',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
                     IconButton(
                       icon: Icon(
                         _isFullScreen
@@ -1126,58 +1194,55 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
         if (didPop) return;
         if (_isFullScreen) _toggleFullScreen();
       },
-      child: Theme(
-        data: ThemeData.dark(),
-        child: Scaffold(
-          backgroundColor: Colors.black,
-          appBar: null,
-          body: Center(
-            child: _isLoading
-                ? Column(
+      child: Scaffold(
+        backgroundColor: Colors.black,
+        appBar: null,
+        body: Center(
+          child: _isLoading
+              ? Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator.adaptive(
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Text(
+                      _loadingText,
+                      style: const TextStyle(color: Colors.white, fontSize: 16),
+                    ),
+                  ],
+                )
+              : _errorMessage != null
+              ? Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      CircularProgressIndicator.adaptive(
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          Theme.of(context).colorScheme.primary,
+                      const Icon(
+                        Icons.error_outline,
+                        size: 54,
+                        color: Colors.red,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        _errorMessage!,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 14,
                         ),
                       ),
                       const SizedBox(height: 24),
-                      Text(
-                        _loadingText,
-                        style: const TextStyle(color: Colors.white, fontSize: 16),
+                      FilledButton(
+                        onPressed: _fetchVideoList,
+                        child: const Text('Retry'),
                       ),
                     ],
-                  )
-                : _errorMessage != null
-                ? Padding(
-                    padding: const EdgeInsets.all(24.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(
-                          Icons.error_outline,
-                          size: 54,
-                          color: Colors.red,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          _errorMessage!,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            color: Colors.white70,
-                            fontSize: 14,
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                        FilledButton(
-                          onPressed: _fetchVideoList,
-                          child: const Text('Retry'),
-                        ),
-                      ],
-                    ),
-                  )
-                : _buildPlayerUI(),
-          ),
+                  ),
+                )
+              : _buildPlayerUI(),
         ),
       ),
     );
@@ -1220,4 +1285,44 @@ class _ResolvedStream {
   final String url;
   final String? contentType;
   _ResolvedStream(this.url, this.contentType);
+}
+
+ExtEpisode? findNextEpisode(ExtEpisode current, List<ExtEpisode> allEpisodes) {
+  final currentNum = parseEpisodeNumber(current);
+  if (currentNum == null) {
+    final firstNum = allEpisodes.isNotEmpty
+        ? parseEpisodeNumber(allEpisodes.first)
+        : null;
+    final lastNum = allEpisodes.isNotEmpty
+        ? parseEpisodeNumber(allEpisodes.last)
+        : null;
+    final currentIndex = allEpisodes.indexWhere((e) => e.url == current.url);
+    if (currentIndex == -1) return null;
+
+    if (firstNum != null && lastNum != null && firstNum < lastNum) {
+      if (currentIndex + 1 < allEpisodes.length) {
+        return allEpisodes[currentIndex + 1];
+      }
+    } else {
+      if (currentIndex - 1 >= 0) {
+        return allEpisodes[currentIndex - 1];
+      }
+    }
+    return null;
+  }
+
+  ExtEpisode? bestMatch;
+  double? bestMatchNum;
+
+  for (final ep in allEpisodes) {
+    final num = parseEpisodeNumber(ep);
+    if (num != null && num > currentNum) {
+      if (bestMatchNum == null || num < bestMatchNum) {
+        bestMatch = ep;
+        bestMatchNum = num;
+      }
+    }
+  }
+
+  return bestMatch;
 }
