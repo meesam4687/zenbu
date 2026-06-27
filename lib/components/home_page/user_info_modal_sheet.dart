@@ -54,6 +54,7 @@ class UserInfoModalSheet extends StatelessWidget {
           Padding(padding: EdgeInsetsGeometry.all(15)),
           InkWell(
             onTap: () {
+              Navigator.of(context).pop();
               Navigator.of(context).push(
                 MaterialPageRoute(builder: (context) => NotificationPage()),
               );
