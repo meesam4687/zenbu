@@ -7,6 +7,7 @@ import 'package:html/dom.dart' as html_dom;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:zenbu/services/crypto_utils.dart';
 import 'package:zenbu/models/extensions_models.dart';
+import 'package:flutter/foundation.dart';
 import 'package:pseudom/pseudom.dart' as pseudom;
 import 'package:xpath_selector_html_parser/xpath_selector_html_parser.dart';
 
@@ -30,7 +31,7 @@ class JsEngine {
 
   void _setupConsole() {
     _runtime.onMessage('log', (dynamic args) {
-      print("[JS LOG]: ${args[0]}");
+      debugPrint("[JS LOG]: ${args[0]}");
       return null;
     });
 
