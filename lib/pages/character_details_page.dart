@@ -28,7 +28,9 @@ class _CharacterDetailsPageState extends State<CharacterDetailsPage> {
       future: characterData,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator.adaptive());
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator.adaptive()),
+          );
         }
         if (snapshot.hasError) {
           return ErrorPage(

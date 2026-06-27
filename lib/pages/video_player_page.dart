@@ -1126,55 +1126,58 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
         if (didPop) return;
         if (_isFullScreen) _toggleFullScreen();
       },
-      child: Scaffold(
-        backgroundColor: Colors.black,
-        appBar: null,
-        body: Center(
-          child: _isLoading
-              ? Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    CircularProgressIndicator.adaptive(
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        Theme.of(context).colorScheme.primary,
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    Text(
-                      _loadingText,
-                      style: const TextStyle(color: Colors.white, fontSize: 16),
-                    ),
-                  ],
-                )
-              : _errorMessage != null
-              ? Padding(
-                  padding: const EdgeInsets.all(24.0),
-                  child: Column(
+      child: Theme(
+        data: ThemeData.dark(),
+        child: Scaffold(
+          backgroundColor: Colors.black,
+          appBar: null,
+          body: Center(
+            child: _isLoading
+                ? Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(
-                        Icons.error_outline,
-                        size: 54,
-                        color: Colors.red,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        _errorMessage!,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          color: Colors.white70,
-                          fontSize: 14,
+                      CircularProgressIndicator.adaptive(
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          Theme.of(context).colorScheme.primary,
                         ),
                       ),
                       const SizedBox(height: 24),
-                      FilledButton(
-                        onPressed: _fetchVideoList,
-                        child: const Text('Retry'),
+                      Text(
+                        _loadingText,
+                        style: const TextStyle(color: Colors.white, fontSize: 16),
                       ),
                     ],
-                  ),
-                )
-              : _buildPlayerUI(),
+                  )
+                : _errorMessage != null
+                ? Padding(
+                    padding: const EdgeInsets.all(24.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.error_outline,
+                          size: 54,
+                          color: Colors.red,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          _errorMessage!,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            color: Colors.white70,
+                            fontSize: 14,
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        FilledButton(
+                          onPressed: _fetchVideoList,
+                          child: const Text('Retry'),
+                        ),
+                      ],
+                    ),
+                  )
+                : _buildPlayerUI(),
+          ),
         ),
       ),
     );

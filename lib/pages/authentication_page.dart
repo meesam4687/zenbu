@@ -1,12 +1,6 @@
-import 'package:zenbu/main_page_view.dart';
 import 'package:flutter/material.dart';
-import 'package:app_links/app_links.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:zenbu/authentication_token_controller.dart';
-
-final AppLinks _appLinks = AppLinks();
-late String authToken;
 
 class AuthenticationPage extends StatefulWidget {
   const AuthenticationPage({super.key});
@@ -24,23 +18,6 @@ Future<void> openInBrowser(String url) async {
 }
 
 class _AuthenticationPageState extends State<AuthenticationPage> {
-  void _listenToLinks() {
-    _appLinks.uriLinkStream.listen((Uri? uri) async {
-      if (uri == null) return;
-      authToken = uri.fragment.split("=")[1].split("&")[0];
-      await TokenStorage.saveTokens(accessToken: authToken);
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => MainPageView()),
-      );
-    });
-  }
-
-  @override
-  void initState() {
-    _listenToLinks();
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
