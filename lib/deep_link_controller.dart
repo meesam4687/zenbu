@@ -8,6 +8,9 @@ import 'package:zenbu/pages/authentication_page.dart';
 import 'package:zenbu/pages/character_details_page.dart';
 import 'package:zenbu/pages/media_details_page.dart';
 import 'package:zenbu/pages/staff_details_page.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:zenbu/pages/extensions_page.dart';
+import 'package:zenbu/services/repo_service.dart';
 
 class DeepLinkController {
   final GlobalKey<NavigatorState> navigatorKey;
@@ -45,6 +48,59 @@ class DeepLinkController {
 
   void handleDeepLink(Uri uri) async {
     final pathSegments = uri.pathSegments;
+
+    if (uri.scheme == 'mangayomi' && uri.host == 'add-repo') {
+      final params = uri.queryParameters;
+      final repoName = params['repo_name'] ?? 'Community Repo';
+      final repoUrl = params['repo_url'];
+      final animeUrl = params['anime_url'];
+      final mangaUrl = params['manga_url'];
+
+      if (animeUrl == null && mangaUrl == null) {
+        Fluttertoast.showToast(msg: 'No valid extension URL found in link.');
+        return;
+      }
+
+      try {
+        int addedCount = 0;
+        if (animeUrl != null) {
+          final suffix = (mangaUrl != null) ? ' (Anime)' : '';
+          await RepoService.addRepo(
+            animeUrl,
+            customName: '$repoName$suffix',
+            customWebsite: repoUrl,
+          );
+          addedCount++;
+        }
+        if (mangaUrl != null) {
+          final suffix = (animeUrl != null) ? ' (Manga)' : '';
+          await RepoService.addRepo(
+            mangaUrl,
+            customName: '$repoName$suffix',
+            customWebsite: repoUrl,
+          );
+          addedCount++;
+        }
+
+        if (addedCount > 0) {
+          Fluttertoast.showToast(msg: 'Added repository: $repoName');
+
+          final savedToken = await TokenStorage.getAccessToken();
+          if (savedToken != null) {
+            navigatorKey.currentState?.push(
+              MaterialPageRoute(builder: (context) => const ExtensionsPage()),
+            );
+          } else {
+            Fluttertoast.showToast(
+              msg: 'Log in to view and install extensions!',
+            );
+          }
+        }
+      } catch (e) {
+        Fluttertoast.showToast(msg: 'Failed to add repository: $e');
+      }
+      return;
+    }
 
     if (uri.scheme == 'zenbu') {
       try {

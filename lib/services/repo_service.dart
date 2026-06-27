@@ -15,7 +15,7 @@ class RepoService {
     return raw.map((e) => ExtRepo.fromJson(json.decode(e))).toList();
   }
 
-  static Future<void> addRepo(String url) async {
+  static Future<void> addRepo(String url, {String? customName, String? customWebsite}) async {
     final prefs = await SharedPreferences.getInstance();
     final repos = await getRepos();
 
@@ -35,20 +35,22 @@ class RepoService {
       throw Exception('Invalid repository index format');
     }
 
-    String name = 'Community Repo';
-    String website = '';
-    try {
-      final match = RegExp(r'^(.*)/[^/]+\.json$').firstMatch(url);
-      if (match != null) {
-        final parentUrl = match.group(1)!;
-        final metaRes = await http.get(Uri.parse('$parentUrl/repo.json'));
-        if (metaRes.statusCode == 200) {
-          final meta = json.decode(metaRes.body);
-          name = meta['name'] ?? meta['meta']?['name'] ?? name;
-          website = meta['website'] ?? meta['meta']?['website'] ?? website;
+    String name = customName ?? 'Community Repo';
+    String website = customWebsite ?? '';
+    if (customName == null) {
+      try {
+        final match = RegExp(r'^(.*)/[^/]+\.json$').firstMatch(url);
+        if (match != null) {
+          final parentUrl = match.group(1)!;
+          final metaRes = await http.get(Uri.parse('$parentUrl/repo.json'));
+          if (metaRes.statusCode == 200) {
+            final meta = json.decode(metaRes.body);
+            name = meta['name'] ?? meta['meta']?['name'] ?? name;
+            website = meta['website'] ?? meta['meta']?['website'] ?? website;
+          }
         }
-      }
-    } catch (_) {}
+      } catch (_) {}
+    }
 
     final newRepo = ExtRepo(name: name, website: website, jsonUrl: url);
     repos.add(newRepo);
