@@ -12,6 +12,7 @@ class VideoPlayerHeader extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback? onNextEpisodePressed;
   final VoidCallback onSubtitlePressed;
   final VoidCallback onQualityPressed;
+  final VoidCallback onPipPressed;
 
   const VideoPlayerHeader({
     super.key,
@@ -26,6 +27,7 @@ class VideoPlayerHeader extends StatelessWidget implements PreferredSizeWidget {
     required this.onNextEpisodePressed,
     required this.onSubtitlePressed,
     required this.onQualityPressed,
+    required this.onPipPressed,
   });
 
   @override
@@ -57,6 +59,11 @@ class VideoPlayerHeader extends StatelessWidget implements PreferredSizeWidget {
         ],
       ),
       actions: [
+        IconButton(
+          icon: const Icon(Icons.picture_in_picture_alt, color: Colors.white),
+          tooltip: 'Picture in Picture',
+          onPressed: onPipPressed,
+        ),
         if (hasNextEpisode && onNextEpisodePressed != null)
           IconButton(
             icon: const Icon(Icons.skip_next, color: Colors.white),

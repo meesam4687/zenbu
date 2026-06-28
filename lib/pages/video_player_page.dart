@@ -301,6 +301,12 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
     }
   }
 
+  Future<void> _enterPipMode() async {
+    try {
+      await _pipChannel.invokeMethod('enterPip');
+    } catch (_) {}
+  }
+
   void _disposeEngine() {
     _jsEngine?.dispose();
     _jsEngine = null;
@@ -1048,6 +1054,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
                   _startControlsTimer();
                   _showQualitySelector();
                 },
+                onPipPressed: _enterPipMode,
               ),
             ),
 
