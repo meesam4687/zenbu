@@ -118,7 +118,11 @@ class VideoPlayerPage extends StatefulWidget {
   State<VideoPlayerPage> createState() => _VideoPlayerPageState();
 }
 
-class _VideoPlayerPageState extends State<VideoPlayerPage> {
+class _VideoPlayerPageState extends State<VideoPlayerPage>
+    with TickerProviderStateMixin {
+  static const _pipChannel = MethodChannel('zenbu/pip');
+  bool _isInPip = false;
+  bool _lastIsPlaying = false;
   List<ExtVideo> _videos = [];
   ExtVideo? _selectedVideo;
 
@@ -213,6 +217,47 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     _currentEpisode = widget.episode;
     _updateNextEpisode();
     _fetchVideoList();
+
+    _pipChannel.setMethodCallHandler((call) async {
+      switch (call.method) {
+        case 'onPipModeChanged':
+          final isInPip = call.arguments as bool;
+          if (mounted) {
+            setState(() {
+              _isInPip = isInPip;
+            });
+          }
+          break;
+        case 'onPipPlayPausePressed':
+          if (_videoPlayerController != null && _videoPlayerController!.value.isInitialized) {
+            if (_videoPlayerController!.value.isPlaying) {
+              await _videoPlayerController!.pause();
+            } else {
+              await _videoPlayerController!.play();
+            }
+          }
+          break;
+        case 'onPipRewindPressed':
+          if (_videoPlayerController != null && _videoPlayerController!.value.isInitialized) {
+            final current = _videoPlayerController!.value.position;
+            final target = current - const Duration(seconds: 10);
+            await _videoPlayerController!.seekTo(
+              target < Duration.zero ? Duration.zero : target,
+            );
+          }
+          break;
+        case 'onPipForwardPressed':
+          if (_videoPlayerController != null && _videoPlayerController!.value.isInitialized) {
+            final current = _videoPlayerController!.value.position;
+            final duration = _videoPlayerController!.value.duration;
+            final target = current + const Duration(seconds: 10);
+            await _videoPlayerController!.seekTo(
+              target > duration ? duration : target,
+            );
+          }
+          break;
+      }
+    });
   }
 
   @override
@@ -233,10 +278,22 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
 
   void _disposePlayer() {
     _videoPlayerController?.removeListener(_onPlayerPositionChanged);
+    _videoPlayerController?.removeListener(_onPlaybackStateChanged);
+    _pipChannel.invokeMethod('setVideoPlaying', {'isPlaying': false});
     _chewieController?.dispose();
     _videoPlayerController?.dispose();
     _chewieController = null;
     _videoPlayerController = null;
+    _lastIsPlaying = false;
+  }
+
+  void _onPlaybackStateChanged() {
+    if (_videoPlayerController == null) return;
+    final isPlaying = _videoPlayerController!.value.isPlaying;
+    if (isPlaying != _lastIsPlaying) {
+      _lastIsPlaying = isPlaying;
+      _pipChannel.invokeMethod('setVideoPlaying', {'isPlaying': isPlaying});
+    }
   }
 
   void _disposeEngine() {
@@ -420,6 +477,8 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
 
       await _videoPlayerController!.initialize();
       if (!mounted) return;
+
+      _videoPlayerController!.addListener(_onPlaybackStateChanged);
 
       if (widget.mediaId != null) {
         final pos = await ProgressService.getAnimeEpisodeProgressPosition(
@@ -1123,6 +1182,22 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (_isInPip) {
+      if (_videoPlayerController != null &&
+          _videoPlayerController!.value.isInitialized &&
+          _chewieController != null) {
+        return Scaffold(
+          backgroundColor: Colors.black,
+          body: Center(
+            child: AspectRatio(
+              aspectRatio: _videoPlayerController!.value.aspectRatio,
+              child: Chewie(controller: _chewieController!),
+            ),
+          ),
+        );
+      }
+    }
+
     return PopScope(
       canPop: !_isFullScreen,
       onPopInvokedWithResult: (didPop, result) {
