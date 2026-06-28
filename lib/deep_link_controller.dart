@@ -19,21 +19,12 @@ class DeepLinkController {
 
   DeepLinkController({required this.navigatorKey});
 
-  void init() async {
+  void init() {
     _linkSubscription = _appLinks.uriLinkStream.listen((Uri? uri) {
       if (uri != null) {
         _handleIncomingUri(uri);
       }
     });
-
-    try {
-      final initialUri = await _appLinks.getInitialLink();
-      if (initialUri != null) {
-        _handleIncomingUri(initialUri);
-      }
-    } catch (e) {
-      debugPrint('Failed to get initial link: $e');
-    }
   }
 
   void _handleIncomingUri(Uri uri) {
