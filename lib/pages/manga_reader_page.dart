@@ -6,6 +6,8 @@ import 'package:zenbu/services/js_engine.dart';
 import 'package:zenbu/services/repo_service.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:flutter/services.dart';
+import 'package:zenbu/components/manga_reader_page/manga_header.dart';
+import 'package:zenbu/components/manga_reader_page/manga_bottom_controls.dart';
 
 class MangaReaderPage extends StatefulWidget {
   final List<ExtEpisode> chapters;
@@ -338,7 +340,16 @@ class _MangaReaderPageState extends State<MangaReaderPage>
                 duration: const Duration(milliseconds: 350),
                 curve: Curves.fastOutSlowIn,
                 offset: _showControls ? Offset.zero : const Offset(0, -1),
-                child: _buildHeader(currentChapter),
+                child: MangaHeader(
+                  mangaTitle: widget.mangaTitle,
+                  chapter: currentChapter,
+                  isWebtoonMode: _isWebtoonMode,
+                  onToggleReadingMode: _toggleReadingMode,
+                  onBackPressed: () {
+                    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+                    Navigator.of(context).pop();
+                  },
+                ),
               ),
             ),
 
@@ -350,7 +361,18 @@ class _MangaReaderPageState extends State<MangaReaderPage>
                 duration: const Duration(milliseconds: 350),
                 curve: Curves.fastOutSlowIn,
                 offset: _showControls ? Offset.zero : const Offset(0, 1),
-                child: _buildBottomControls(),
+                child: MangaBottomControls(
+                  currentPageIndex: _currentPageIndex,
+                  totalPages: _pages.length,
+                  currentChapterIndex: _currentChapterIndex,
+                  totalChapters: widget.chapters.length,
+                  onPrevChapter: _currentChapterIndex > 0
+                      ? () => _goToChapter(_currentChapterIndex - 1)
+                      : null,
+                  onNextChapter: _currentChapterIndex < widget.chapters.length - 1
+                      ? () => _goToChapter(_currentChapterIndex + 1)
+                      : null,
+                ),
               ),
             ),
           ],
@@ -514,144 +536,5 @@ class _MangaReaderPageState extends State<MangaReaderPage>
     );
   }
 
-  Widget _buildHeader(ExtEpisode chapter) {
-    return Container(
-      padding: EdgeInsets.only(top: 0, bottom: 8),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Colors.black.withValues(alpha: 0.9), Colors.transparent],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-        ),
-      ),
-      child: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () {
-            SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-            Navigator.of(context).pop();
-          },
-        ),
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              widget.mangaTitle,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 15,
-                fontWeight: FontWeight.bold,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            Text(
-              chapter.name,
-              style: const TextStyle(color: Colors.white70, fontSize: 12),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(
-              _isWebtoonMode ? Icons.view_day : Icons.swap_horizontal_circle,
-              color: Colors.white,
-            ),
-            tooltip: _isWebtoonMode
-                ? 'Switch to Single Page'
-                : 'Switch to Webtoon Scroll',
-            onPressed: _toggleReadingMode,
-          ),
-        ],
-      ),
-    );
-  }
 
-  Widget _buildBottomControls() {
-    final hasPrev = _currentChapterIndex > 0;
-    final hasNext = _currentChapterIndex < widget.chapters.length - 1;
-
-    return Container(
-      padding: EdgeInsets.only(
-        top: 8,
-        bottom: MediaQuery.of(context).padding.bottom + 8,
-        left: 16,
-        right: 16,
-      ),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Colors.transparent, Colors.black.withValues(alpha: 0.95)],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-        ),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (_pages.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8.0),
-              child: Text(
-                'Page ${_currentPageIndex + 1} / ${_pages.length}',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              ElevatedButton.icon(
-                onPressed: hasPrev
-                    ? () => _goToChapter(_currentChapterIndex - 1)
-                    : null,
-                icon: const Icon(Icons.skip_previous, size: 18),
-                label: const Text('Prev'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white24,
-                  foregroundColor: Colors.white,
-                  disabledBackgroundColor: Colors.white10,
-                  disabledForegroundColor: Colors.white30,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                ),
-              ),
-
-              Text(
-                'Chapter ${_currentChapterIndex + 1} of ${widget.chapters.length}',
-                style: const TextStyle(color: Colors.white70, fontSize: 12),
-              ),
-
-              ElevatedButton.icon(
-                onPressed: hasNext
-                    ? () => _goToChapter(_currentChapterIndex + 1)
-                    : null,
-                icon: const Icon(Icons.skip_next, size: 18),
-                label: const Text('Next'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white24,
-                  foregroundColor: Colors.white,
-                  disabledBackgroundColor: Colors.white10,
-                  disabledForegroundColor: Colors.white30,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
 }
