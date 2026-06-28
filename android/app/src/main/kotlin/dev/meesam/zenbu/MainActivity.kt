@@ -79,6 +79,10 @@ class MainActivity : FlutterActivity() {
                 "isInPip" -> {
                     result.success(if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) isInPictureInPictureMode else false)
                 }
+                "enterPip" -> {
+                    enterPipMode()
+                    result.success(true)
+                }
                 "installApk" -> {
                     val path = call.argument<String>("path")
                     if (path != null) {
@@ -166,11 +170,15 @@ class MainActivity : FlutterActivity() {
             val forwardAction = RemoteAction(forwardIcon, "Forward 10s", "Forward 10s", forwardIntent)
             actions.add(forwardAction)
 
-            val params = PictureInPictureParams.Builder()
+            val builder = PictureInPictureParams.Builder()
                 .setAspectRatio(Rational(16, 9))
                 .setActions(actions)
-                .build()
-            setPictureInPictureParams(params)
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                builder.setAutoEnterEnabled(isPlaying)
+            }
+
+            setPictureInPictureParams(builder.build())
         }
     }
 
