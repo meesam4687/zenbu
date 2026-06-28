@@ -8,6 +8,7 @@ import 'package:zenbu/pages/extensions_page.dart';
 import 'package:zenbu/services/update_service.dart';
 import 'package:zenbu/pages/update_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class UserInfoModalSheet extends StatefulWidget {
   const UserInfoModalSheet({
@@ -84,9 +85,11 @@ class _UserInfoModalSheetState extends State<UserInfoModalSheet> {
           _updateInfo = null;
         });
         if (!silent) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('App is up to date!')));
+          Fluttertoast.showToast(
+            msg: "App is up to date!",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+          );
         }
       }
     }
