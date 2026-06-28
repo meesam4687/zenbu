@@ -150,10 +150,7 @@ class _EntireListViewState extends State<EntireListView> {
                 child: SizedBox(
                   height: MediaQuery.of(context).size.height - 120,
                   child: Center(
-                    child: Error(
-                      reload: _reload,
-                      message: _errorMessage,
-                    ),
+                    child: Error(reload: _reload, message: _errorMessage),
                   ),
                 ),
               )

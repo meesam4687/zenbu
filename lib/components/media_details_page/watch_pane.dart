@@ -58,6 +58,7 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
       });
     }
   }
+
   ExtSource? _selectedExtension;
   List<dynamic> _allRawEpisodes = [];
   List<dynamic> _rawEpisodes = [];
@@ -433,9 +434,13 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
                               '${target.isResume ? "Resume" : "Start"} Ep. ${(ProgressService.parseEpisodeNumber(target.episode.url, target.episode.name) ?? 1.0).toString().replaceAll(RegExp(r'\.0$'), '')}',
                             ),
                             style: TextButton.styleFrom(
-                              foregroundColor: Theme.of(context).colorScheme.primary,
+                              foregroundColor: Theme.of(
+                                context,
+                              ).colorScheme.primary,
                               visualDensity: VisualDensity.compact,
-                              padding: const EdgeInsets.symmetric(horizontal: 8),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                              ),
                             ),
                           ),
                       ],
@@ -495,7 +500,8 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
                               final ep = ExtEpisode.fromJson(
                                 Map<String, dynamic>.from(rawEp),
                               );
-                              final progressRatio = _episodesProgress[ep.url] ?? 0.0;
+                              final progressRatio =
+                                  _episodesProgress[ep.url] ?? 0.0;
 
                               return Card(
                                 color: Theme.of(
@@ -516,27 +522,33 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
                                 child: InkWell(
                                   onTap: () {
                                     final allEpisodes = _allRawEpisodes
-                                        .map((e) => ExtEpisode.fromJson(
-                                              Map<String, dynamic>.from(e),
-                                            ))
+                                        .map(
+                                          (e) => ExtEpisode.fromJson(
+                                            Map<String, dynamic>.from(e),
+                                          ),
+                                        )
                                         .toList();
-                                    Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                        builder: (context) => VideoPlayerPage(
-                                          episode: ep,
-                                          source: _selectedExtension!,
-                                          animeTitle: widget.animeTitle,
-                                          malId: widget.malId,
-                                          mediaId: widget.mediaId,
-                                          allEpisodes: allEpisodes,
-                                        ),
-                                      ),
-                                    ).then((_) {
-                                      _loadLocalProgress();
-                                    });
+                                    Navigator.of(context)
+                                        .push(
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                VideoPlayerPage(
+                                                  episode: ep,
+                                                  source: _selectedExtension!,
+                                                  animeTitle: widget.animeTitle,
+                                                  malId: widget.malId,
+                                                  mediaId: widget.mediaId,
+                                                  allEpisodes: allEpisodes,
+                                                ),
+                                          ),
+                                        )
+                                        .then((_) {
+                                          _loadLocalProgress();
+                                        });
                                   },
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.stretch,
                                     children: [
                                       Row(
                                         children: [
@@ -545,12 +557,18 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
                                             height: 80,
                                             child:
                                                 widget.coverImage != null &&
-                                                    widget.coverImage!.isNotEmpty
+                                                    widget
+                                                        .coverImage!
+                                                        .isNotEmpty
                                                 ? CachedNetworkImage(
-                                                    imageUrl: widget.coverImage!,
+                                                    imageUrl:
+                                                        widget.coverImage!,
                                                     fit: BoxFit.cover,
-                                                    placeholder: (context, url) =>
-                                                        const Center(
+                                                    placeholder:
+                                                        (
+                                                          context,
+                                                          url,
+                                                        ) => const Center(
                                                           child:
                                                               CircularProgressIndicator.adaptive(
                                                                 strokeWidth: 2,
@@ -565,10 +583,11 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
                                           const SizedBox(width: 16),
                                           Expanded(
                                             child: Padding(
-                                              padding: const EdgeInsets.symmetric(
-                                                vertical: 8,
-                                                horizontal: 8,
-                                              ),
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    vertical: 8,
+                                                    horizontal: 8,
+                                                  ),
                                               child: Column(
                                                 crossAxisAlignment:
                                                     CrossAxisAlignment.start,
@@ -578,11 +597,13 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
                                                   Text(
                                                     ep.name,
                                                     style: const TextStyle(
-                                                      fontWeight: FontWeight.bold,
+                                                      fontWeight:
+                                                          FontWeight.bold,
                                                       fontSize: 14,
                                                     ),
                                                     maxLines: 2,
-                                                    overflow: TextOverflow.ellipsis,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
                                                   ),
                                                   if (ep.description != null &&
                                                       ep
@@ -614,12 +635,17 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
                                       if (progressRatio > 0.0)
                                         Container(
                                           height: 3,
-                                          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary
+                                              .withValues(alpha: 0.3),
                                           alignment: Alignment.centerLeft,
                                           child: FractionallySizedBox(
                                             widthFactor: progressRatio,
                                             child: Container(
-                                              color: Theme.of(context).colorScheme.primary,
+                                              color: Theme.of(
+                                                context,
+                                              ).colorScheme.primary,
                                             ),
                                           ),
                                         ),
@@ -650,14 +676,15 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
   ResumeTarget? _getResumeTarget() {
     if (_allRawEpisodes.isEmpty) return null;
 
-    final bool isActiveState = widget.mediaState == 'CURRENT' || widget.mediaState == 'REPEATING';
+    final bool isActiveState =
+        widget.mediaState == 'CURRENT' || widget.mediaState == 'REPEATING';
     if (!isActiveState) {
       return null;
     }
 
-    final chronologicalEpisodes = _allRawEpisodes.map((e) => ExtEpisode.fromJson(
-      Map<String, dynamic>.from(e),
-    )).toList();
+    final chronologicalEpisodes = _allRawEpisodes
+        .map((e) => ExtEpisode.fromJson(Map<String, dynamic>.from(e)))
+        .toList();
     chronologicalEpisodes.sort((a, b) {
       final numA = ProgressService.parseEpisodeNumber(a.url, a.name) ?? 0.0;
       final numB = ProgressService.parseEpisodeNumber(b.url, b.name) ?? 0.0;
@@ -685,11 +712,13 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
     }
 
     final lastEp = chronologicalEpisodes.last;
-    final lastEpNum = ProgressService.parseEpisodeNumber(lastEp.url, lastEp.name) ?? 0.0;
-    
-    final isCompleted = widget.mediaState == 'COMPLETED' ||
-                        widget.anilistProgress >= chronologicalEpisodes.length ||
-                        highestWatchedEpisodeNum >= lastEpNum;
+    final lastEpNum =
+        ProgressService.parseEpisodeNumber(lastEp.url, lastEp.name) ?? 0.0;
+
+    final isCompleted =
+        widget.mediaState == 'COMPLETED' ||
+        widget.anilistProgress >= chronologicalEpisodes.length ||
+        highestWatchedEpisodeNum >= lastEpNum;
 
     if (isCompleted) {
       return null;
@@ -701,7 +730,8 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
 
     if (highestWatchedEpisodeNum >= 0) {
       for (final ep in chronologicalEpisodes) {
-        final epNum = ProgressService.parseEpisodeNumber(ep.url, ep.name) ?? 0.0;
+        final epNum =
+            ProgressService.parseEpisodeNumber(ep.url, ep.name) ?? 0.0;
         if (epNum > highestWatchedEpisodeNum) {
           return ResumeTarget(episode: ep, isResume: true);
         }
@@ -709,7 +739,10 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
     }
 
     if (chronologicalEpisodes.isNotEmpty) {
-      return ResumeTarget(episode: chronologicalEpisodes.first, isResume: hasAnyProgress);
+      return ResumeTarget(
+        episode: chronologicalEpisodes.first,
+        isResume: hasAnyProgress,
+      );
     }
 
     return null;
@@ -717,24 +750,24 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
 
   void _launchEpisode(ExtEpisode ep) {
     final allEpisodes = _allRawEpisodes
-        .map((e) => ExtEpisode.fromJson(
-              Map<String, dynamic>.from(e),
-            ))
+        .map((e) => ExtEpisode.fromJson(Map<String, dynamic>.from(e)))
         .toList();
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => VideoPlayerPage(
-          episode: ep,
-          source: _selectedExtension!,
-          animeTitle: widget.animeTitle,
-          malId: widget.malId,
-          mediaId: widget.mediaId,
-          allEpisodes: allEpisodes,
-        ),
-      ),
-    ).then((_) {
-      _loadLocalProgress();
-    });
+    Navigator.of(context)
+        .push(
+          MaterialPageRoute(
+            builder: (context) => VideoPlayerPage(
+              episode: ep,
+              source: _selectedExtension!,
+              animeTitle: widget.animeTitle,
+              malId: widget.malId,
+              mediaId: widget.mediaId,
+              allEpisodes: allEpisodes,
+            ),
+          ),
+        )
+        .then((_) {
+          _loadLocalProgress();
+        });
   }
 }
 

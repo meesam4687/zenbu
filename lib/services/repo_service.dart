@@ -15,7 +15,11 @@ class RepoService {
     return raw.map((e) => ExtRepo.fromJson(json.decode(e))).toList();
   }
 
-  static Future<void> addRepo(String url, {String? customName, String? customWebsite}) async {
+  static Future<void> addRepo(
+    String url, {
+    String? customName,
+    String? customWebsite,
+  }) async {
     final prefs = await SharedPreferences.getInstance();
     final repos = await getRepos();
 

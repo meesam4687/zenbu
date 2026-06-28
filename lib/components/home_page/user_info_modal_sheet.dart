@@ -5,8 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:zenbu/authentication_token_controller.dart';
 import 'package:provider/provider.dart';
 import 'package:zenbu/pages/extensions_page.dart';
+import 'package:zenbu/services/update_service.dart';
+import 'package:zenbu/pages/update_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class UserInfoModalSheet extends StatelessWidget {
+class UserInfoModalSheet extends StatefulWidget {
   const UserInfoModalSheet({
     super.key,
     required this.profileImage,
@@ -18,13 +21,91 @@ class UserInfoModalSheet extends StatelessWidget {
   final int userId;
 
   @override
+  State<UserInfoModalSheet> createState() => _UserInfoModalSheetState();
+}
+
+class _UserInfoModalSheetState extends State<UserInfoModalSheet> {
+  bool _isChecking = false;
+  UpdateInfo? _updateInfo;
+  bool _hasUpdate = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkCachedUpdate();
+  }
+
+  Future<void> _checkCachedUpdate() async {
+    final prefs = await SharedPreferences.getInstance();
+    final cachedVersion = prefs.getString('cached_update_version');
+    final cachedChangelog = prefs.getString('cached_update_changelog');
+    final cachedUrl = prefs.getString('cached_update_url');
+
+    if (cachedVersion != null && cachedChangelog != null && cachedUrl != null) {
+      setState(() {
+        _hasUpdate = true;
+        _updateInfo = UpdateInfo(
+          remoteVersion: cachedVersion,
+          changelog: cachedChangelog,
+          downloadUrl: cachedUrl,
+        );
+      });
+    }
+  }
+
+  Future<void> _runCheck({bool silent = false}) async {
+    if (_isChecking) return;
+    setState(() {
+      _isChecking = true;
+    });
+
+    final info = await UpdateService.checkUpdate(force: true);
+    final prefs = await SharedPreferences.getInstance();
+
+    if (info != null) {
+      await prefs.setString('cached_update_version', info.remoteVersion);
+      await prefs.setString('cached_update_changelog', info.changelog);
+      await prefs.setString('cached_update_url', info.downloadUrl);
+
+      if (mounted) {
+        setState(() {
+          _hasUpdate = true;
+          _updateInfo = info;
+        });
+      }
+    } else {
+      await prefs.remove('cached_update_version');
+      await prefs.remove('cached_update_changelog');
+      await prefs.remove('cached_update_url');
+
+      if (mounted) {
+        setState(() {
+          _hasUpdate = false;
+          _updateInfo = null;
+        });
+        if (!silent) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('App is up to date!')));
+        }
+      }
+    }
+
+    if (mounted) {
+      setState(() {
+        _isChecking = false;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 410,
+      height: _hasUpdate ? 490 : 430,
       child: Column(
         children: [
           Container(
-            margin: EdgeInsets.only(top: 50, left: 20, right: 20),
+            margin: const EdgeInsets.only(top: 50, left: 20, right: 20),
             child: Row(
               children: [
                 Container(
@@ -32,26 +113,29 @@ class UserInfoModalSheet extends StatelessWidget {
                     border: Border.all(
                       color: Theme.of(context).colorScheme.onSecondary,
                     ),
-                    borderRadius: BorderRadius.all(Radius.circular(360)),
+                    borderRadius: const BorderRadius.all(Radius.circular(360)),
                   ),
                   child: ClipOval(
                     child: Image(
                       height: 70,
                       width: 70,
                       fit: BoxFit.fill,
-                      image: NetworkImage(profileImage),
+                      image: NetworkImage(widget.profileImage),
                     ),
                   ),
                 ),
-                Padding(padding: EdgeInsetsGeometry.all(10)),
+                const Padding(padding: EdgeInsets.all(10)),
                 Text(
-                  username,
-                  style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+                  widget.username,
+                  style: const TextStyle(
+                    fontSize: 25,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
             ),
           ),
-          Padding(padding: EdgeInsetsGeometry.all(15)),
+          const Padding(padding: EdgeInsets.all(15)),
           InkWell(
             onTap: () {
               Navigator.of(context).pop();
@@ -60,14 +144,14 @@ class UserInfoModalSheet extends StatelessWidget {
               );
             },
             child: Container(
-              height: 70,
-              margin: EdgeInsets.only(left: 45),
+              height: 60,
+              margin: const EdgeInsets.only(left: 45),
               width: double.infinity,
-              child: Row(
+              child: const Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Icon(Icons.notifications),
-                  Padding(padding: EdgeInsetsGeometry.only(left: 20)),
+                  Padding(padding: EdgeInsets.only(left: 20)),
                   Text("Notifications", style: TextStyle(fontSize: 18)),
                 ],
               ),
@@ -81,31 +165,136 @@ class UserInfoModalSheet extends StatelessWidget {
               );
             },
             child: Container(
-              height: 70,
-              margin: EdgeInsets.only(left: 45),
+              height: 60,
+              margin: const EdgeInsets.only(left: 45),
               width: double.infinity,
-              child: Row(
+              child: const Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Icon(Icons.extension),
-                  Padding(padding: EdgeInsetsGeometry.only(left: 20)),
+                  Padding(padding: EdgeInsets.only(left: 20)),
                   Text("Extensions", style: TextStyle(fontSize: 18)),
                 ],
               ),
             ),
           ),
+          if (!_hasUpdate) ...[
+            InkWell(
+              onTap: _isChecking ? null : () => _runCheck(silent: false),
+              child: Container(
+                height: 60,
+                margin: const EdgeInsets.only(left: 45, right: 20),
+                width: double.infinity,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.update),
+                    const Padding(padding: EdgeInsets.only(left: 20)),
+                    const Expanded(
+                      child: Text(
+                        "Check for Updates",
+                        style: TextStyle(fontSize: 18),
+                      ),
+                    ),
+                    if (_isChecking)
+                      const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ] else ...[
+            Container(
+              margin: const EdgeInsets.only(
+                left: 45,
+                right: 20,
+                top: 8,
+                bottom: 8,
+              ),
+              width: double.infinity,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.system_update_alt,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      const Padding(padding: EdgeInsets.only(left: 20)),
+                      Text(
+                        "Update Available (${_updateInfo?.remoteVersion})",
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      OutlinedButton(
+                        onPressed: _isChecking
+                            ? null
+                            : () => _runCheck(silent: false),
+                        style: OutlinedButton.styleFrom(
+                          visualDensity: VisualDensity.compact,
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (_isChecking) ...[
+                              const SizedBox(
+                                width: 12,
+                                height: 12,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 1.5,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                            ],
+                            const Text("Check Again"),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      FilledButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  UpdatePage(updateInfo: _updateInfo!),
+                            ),
+                          );
+                        },
+                        style: FilledButton.styleFrom(
+                          visualDensity: VisualDensity.compact,
+                        ),
+                        child: const Text("View Update"),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
           InkWell(
             onTap: () {
               showDialog(
                 context: context,
                 builder: (context) {
                   return AlertDialog(
-                    title: Text("Logout"),
-                    content: Text("Do you want to log out?"),
+                    title: const Text("Logout"),
+                    content: const Text("Do you want to log out?"),
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.of(context).pop(),
-                        child: Text('Cancel'),
+                        child: const Text('Cancel'),
                       ),
                       FilledButton(
                         onPressed: () {
@@ -130,7 +319,7 @@ class UserInfoModalSheet extends StatelessWidget {
                             ),
                           );
                         },
-                        child: Text("Yes"),
+                        child: const Text("Yes"),
                       ),
                     ],
                   );
@@ -138,14 +327,14 @@ class UserInfoModalSheet extends StatelessWidget {
               );
             },
             child: Container(
-              height: 70,
-              margin: EdgeInsets.only(left: 45),
+              height: 60,
+              margin: const EdgeInsets.only(left: 45),
               width: double.infinity,
-              child: Row(
+              child: const Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Icon(Icons.logout),
-                  Padding(padding: EdgeInsetsGeometry.only(left: 20)),
+                  Padding(padding: EdgeInsets.only(left: 20)),
                   Text("Logout", style: TextStyle(fontSize: 18)),
                 ],
               ),

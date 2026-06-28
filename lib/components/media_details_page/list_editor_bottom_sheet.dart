@@ -89,355 +89,375 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
         final sheetWidth = constraints.maxWidth;
         return SingleChildScrollView(
           child: Container(
-            padding: const EdgeInsets.only(top: 40, left: 20, right: 20, bottom: 20),
+            padding: const EdgeInsets.only(
+              top: 40,
+              left: 20,
+              right: 20,
+              bottom: 20,
+            ),
             width: double.infinity,
             child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        spacing: 20,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                spacing: 10,
-                children: [
-                  const Text(
-                    "Status",
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-                  ),
-                  DropdownMenu(
-                    width: sheetWidth * 0.44,
-                    hintText: listStatusToText[widget.status],
-                    dropdownMenuEntries: widget.isAnime
-                        ? [
-                            const DropdownMenuEntry(
-                              value: "CURRENT",
-                              label: "Watching",
-                            ),
-                            const DropdownMenuEntry(
-                              value: "COMPLETED",
-                              label: "Completed",
-                            ),
-                            const DropdownMenuEntry(
-                              value: "PLANNING",
-                              label: "Planning",
-                            ),
-                            const DropdownMenuEntry(
-                              value: "DROPPED",
-                              label: "Dropped",
-                            ),
-                            const DropdownMenuEntry(
-                              value: "REPEATING",
-                              label: "Rewatching",
-                            ),
-                            const DropdownMenuEntry(
-                              value: "PAUSED",
-                              label: "Paused",
-                            ),
-                          ]
-                        : [
-                            const DropdownMenuEntry(
-                              value: "CURRENT",
-                              label: "Reading",
-                            ),
-                            const DropdownMenuEntry(
-                              value: "COMPLETED",
-                              label: "Completed",
-                            ),
-                            const DropdownMenuEntry(
-                              value: "PLANNING",
-                              label: "Planning",
-                            ),
-                            const DropdownMenuEntry(
-                              value: "DROPPED",
-                              label: "Dropped",
-                            ),
-                            const DropdownMenuEntry(
-                              value: "REPEATING",
-                              label: "Rereading",
-                            ),
-                            const DropdownMenuEntry(
-                              value: "PAUSED",
-                              label: "Paused",
-                            ),
-                          ],
-                    onSelected: (value) {
-                      selectedStatus = value as String;
-                    },
-                  ),
-                ],
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                spacing: 10,
-                children: [
-                  Text(
-                    widget.isAnime ? "Episodes Watched" : "Chapters Read",
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: 20,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      spacing: 10,
+                      children: [
+                        const Text(
+                          "Status",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 20,
+                          ),
+                        ),
+                        DropdownMenu(
+                          width: sheetWidth * 0.44,
+                          hintText: listStatusToText[widget.status],
+                          dropdownMenuEntries: widget.isAnime
+                              ? [
+                                  const DropdownMenuEntry(
+                                    value: "CURRENT",
+                                    label: "Watching",
+                                  ),
+                                  const DropdownMenuEntry(
+                                    value: "COMPLETED",
+                                    label: "Completed",
+                                  ),
+                                  const DropdownMenuEntry(
+                                    value: "PLANNING",
+                                    label: "Planning",
+                                  ),
+                                  const DropdownMenuEntry(
+                                    value: "DROPPED",
+                                    label: "Dropped",
+                                  ),
+                                  const DropdownMenuEntry(
+                                    value: "REPEATING",
+                                    label: "Rewatching",
+                                  ),
+                                  const DropdownMenuEntry(
+                                    value: "PAUSED",
+                                    label: "Paused",
+                                  ),
+                                ]
+                              : [
+                                  const DropdownMenuEntry(
+                                    value: "CURRENT",
+                                    label: "Reading",
+                                  ),
+                                  const DropdownMenuEntry(
+                                    value: "COMPLETED",
+                                    label: "Completed",
+                                  ),
+                                  const DropdownMenuEntry(
+                                    value: "PLANNING",
+                                    label: "Planning",
+                                  ),
+                                  const DropdownMenuEntry(
+                                    value: "DROPPED",
+                                    label: "Dropped",
+                                  ),
+                                  const DropdownMenuEntry(
+                                    value: "REPEATING",
+                                    label: "Rereading",
+                                  ),
+                                  const DropdownMenuEntry(
+                                    value: "PAUSED",
+                                    label: "Paused",
+                                  ),
+                                ],
+                          onSelected: (value) {
+                            selectedStatus = value as String;
+                          },
+                        ),
+                      ],
                     ),
-                  ),
-                  SizedBox(
-                    width: sheetWidth * 0.44,
-                    child: TextField(
-                      keyboardType: TextInputType.number,
-                      controller: chaptersController,
-                      decoration: InputDecoration(
-                        border: const OutlineInputBorder(),
-                        hintText: widget.progress.toString(),
-                      ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      spacing: 10,
+                      children: [
+                        Text(
+                          widget.isAnime ? "Episodes Watched" : "Chapters Read",
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 20,
+                          ),
+                        ),
+                        SizedBox(
+                          width: sheetWidth * 0.44,
+                          child: TextField(
+                            keyboardType: TextInputType.number,
+                            controller: chaptersController,
+                            decoration: InputDecoration(
+                              border: const OutlineInputBorder(),
+                              hintText: widget.progress.toString(),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                spacing: 10,
-                children: [
-                  const Text(
-                    "Start Date",
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-                  ),
-                  InkWell(
-                    borderRadius: BorderRadius.circular(4),
-                    child: SizedBox(
-                      width: sheetWidth * 0.44,
-                      height: 55,
-                      child: Container(
-                        alignment: Alignment.centerLeft,
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      spacing: 10,
+                      children: [
+                        const Text(
+                          "Start Date",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 20,
+                          ),
+                        ),
+                        InkWell(
                           borderRadius: BorderRadius.circular(4),
+                          child: SizedBox(
+                            width: sheetWidth * 0.44,
+                            height: 55,
+                            child: Container(
+                              alignment: Alignment.centerLeft,
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.grey),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                startDateString as String,
+                                style: const TextStyle(fontSize: 16),
+                              ),
+                            ),
+                          ),
+                          onTap: () async {
+                            startDate = await showDatePicker(
+                              context: context,
+                              initialDate: DateTime(
+                                DateTime.now().year,
+                                DateTime.now().month,
+                                DateTime.now().day,
+                              ),
+                              firstDate: DateTime(1970),
+                              lastDate: DateTime(
+                                DateTime.now().year,
+                                DateTime.now().month,
+                                DateTime.now().day,
+                              ),
+                            );
+                            if (startDate != null) {
+                              setState(() {
+                                startDateString =
+                                    '${startDate!.day.toString()}/${startDate!.month.toString()}/${startDate!.year.toString()}';
+                              });
+                            }
+                          },
                         ),
-                        child: Text(
-                          startDateString as String,
-                          style: const TextStyle(fontSize: 16),
-                        ),
-                      ),
+                      ],
                     ),
-                    onTap: () async {
-                      startDate = await showDatePicker(
-                        context: context,
-                        initialDate: DateTime(
-                          DateTime.now().year,
-                          DateTime.now().month,
-                          DateTime.now().day,
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      spacing: 10,
+                      children: [
+                        const Text(
+                          "End Date",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 20,
+                          ),
                         ),
-                        firstDate: DateTime(1970),
-                        lastDate: DateTime(
-                          DateTime.now().year,
-                          DateTime.now().month,
-                          DateTime.now().day,
-                        ),
-                      );
-                      if (startDate != null) {
-                        setState(() {
-                          startDateString =
-                              '${startDate!.day.toString()}/${startDate!.month.toString()}/${startDate!.year.toString()}';
-                        });
-                      }
-                    },
-                  ),
-                ],
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                spacing: 10,
-                children: [
-                  const Text(
-                    "End Date",
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-                  ),
-                  InkWell(
-                    borderRadius: BorderRadius.circular(4),
-                    child: SizedBox(
-                      width: sheetWidth * 0.44,
-                      height: 55,
-                      child: Container(
-                        alignment: Alignment.centerLeft,
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey),
+                        InkWell(
                           borderRadius: BorderRadius.circular(4),
+                          child: SizedBox(
+                            width: sheetWidth * 0.44,
+                            height: 55,
+                            child: Container(
+                              alignment: Alignment.centerLeft,
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.grey),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                endDateString as String,
+                                style: const TextStyle(fontSize: 16),
+                              ),
+                            ),
+                          ),
+                          onTap: () async {
+                            endDate = await showDatePicker(
+                              context: context,
+                              initialDate: DateTime(
+                                DateTime.now().year,
+                                DateTime.now().month,
+                                DateTime.now().day,
+                              ),
+                              firstDate: DateTime(1970),
+                              lastDate: DateTime(
+                                DateTime.now().year,
+                                DateTime.now().month,
+                                DateTime.now().day,
+                              ),
+                            );
+                            if (endDate != null) {
+                              setState(() {
+                                endDateString =
+                                    '${endDate!.day.toString()}/${endDate!.month.toString()}/${endDate!.year.toString()}';
+                              });
+                            }
+                          },
                         ),
-                        child: Text(
-                          endDateString as String,
-                          style: const TextStyle(fontSize: 16),
+                      ],
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      spacing: 10,
+                      children: [
+                        const Text(
+                          "Score",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 20,
+                          ),
                         ),
-                      ),
-                    ),
-                    onTap: () async {
-                      endDate = await showDatePicker(
-                        context: context,
-                        initialDate: DateTime(
-                          DateTime.now().year,
-                          DateTime.now().month,
-                          DateTime.now().day,
+                        SizedBox(
+                          width: sheetWidth * 0.44,
+                          child: TextField(
+                            keyboardType: TextInputType.number,
+                            controller: scoreController,
+                            decoration: InputDecoration(
+                              border: const OutlineInputBorder(),
+                              hintText: widget.score.toString(),
+                            ),
+                          ),
                         ),
-                        firstDate: DateTime(1970),
-                        lastDate: DateTime(
-                          DateTime.now().year,
-                          DateTime.now().month,
-                          DateTime.now().day,
+                      ],
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      spacing: 10,
+                      children: [
+                        Text(
+                          widget.isAnime ? "Total Rewatches" : "Total Rereads",
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 20,
+                          ),
                         ),
-                      );
-                      if (endDate != null) {
-                        setState(() {
-                          endDateString =
-                              '${endDate!.day.toString()}/${endDate!.month.toString()}/${endDate!.year.toString()}';
-                        });
-                      }
-                    },
-                  ),
-                ],
-              ),
-            ],
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                spacing: 10,
-                children: [
-                  const Text(
-                    "Score",
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-                  ),
-                  SizedBox(
-                    width: sheetWidth * 0.44,
-                    child: TextField(
-                      keyboardType: TextInputType.number,
-                      controller: scoreController,
-                      decoration: InputDecoration(
-                        border: const OutlineInputBorder(),
-                        hintText: widget.score.toString(),
-                      ),
+                        SizedBox(
+                          width: sheetWidth * 0.44,
+                          child: TextField(
+                            controller: rewatchController,
+                            keyboardType: TextInputType.number,
+                            decoration: InputDecoration(
+                              border: const OutlineInputBorder(),
+                              hintText: widget.repeatCount.toString(),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
+                  ],
+                ),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    onPressed: isLoading
+                        ? null
+                        : () async {
+                            setState(() {
+                              isLoading = true;
+                            });
+
+                            final response = await updateListItem(
+                              widget.mediaId,
+                              selectedStatus,
+                              (chaptersController.value.text.isEmpty)
+                                  ? widget.progress
+                                  : int.parse(chaptersController.value.text),
+                              (startDate == null)
+                                  ? widget.startDate
+                                  : {
+                                      "day": startDate!.day,
+                                      "month": startDate!.month,
+                                      "year": startDate!.year,
+                                    },
+                              (endDate == null)
+                                  ? widget.endDate
+                                  : {
+                                      "day": endDate!.day,
+                                      "month": endDate!.month,
+                                      "year": endDate!.year,
+                                    },
+                              (scoreController.value.text.isEmpty)
+                                  ? widget.score
+                                  : double.parse(scoreController.value.text),
+                              (rewatchController.value.text.isEmpty)
+                                  ? widget.repeatCount
+                                  : int.parse(rewatchController.value.text),
+                            );
+
+                            if (response["data"] != null &&
+                                response["data"]["SaveMediaListEntry"] !=
+                                    null) {
+                              final newStatus =
+                                  response["data"]["SaveMediaListEntry"]["status"];
+                              final newProgress =
+                                  response["data"]["SaveMediaListEntry"]["progress"];
+                              final newMediaListData =
+                                  response["data"]["SaveMediaListEntry"];
+
+                              widget.onUpdate(
+                                newStatus,
+                                newProgress,
+                                newMediaListData,
+                              );
+                            }
+
+                            Map newAlData = await getHomePageData();
+                            if (context.mounted) {
+                              Provider.of<StateProvider>(
+                                context,
+                                listen: false,
+                              ).updateData(newAlData);
+                            }
+
+                            if (context.mounted) {
+                              Navigator.of(context).pop();
+                            }
+
+                            setState(() {
+                              isLoading = false;
+                            });
+                          },
+                    icon: isLoading
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Icon(Icons.check),
+                    label: isLoading
+                        ? const Text(" Loading...")
+                        : const Text("Save"),
                   ),
-                ],
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                spacing: 10,
-                children: [
-                  Text(
-                    widget.isAnime ? "Total Rewatches" : "Total Rereads",
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20,
-                    ),
-                  ),
-                  SizedBox(
-                    width: sheetWidth * 0.44,
-                    child: TextField(
-                      controller: rewatchController,
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        border: const OutlineInputBorder(),
-                        hintText: widget.repeatCount.toString(),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton.icon(
-              onPressed: isLoading
-                  ? null
-                  : () async {
-                      setState(() {
-                        isLoading = true;
-                      });
-
-                      final response = await updateListItem(
-                        widget.mediaId,
-                        selectedStatus,
-                        (chaptersController.value.text.isEmpty)
-                            ? widget.progress
-                            : int.parse(chaptersController.value.text),
-                        (startDate == null)
-                            ? widget.startDate
-                            : {
-                                "day": startDate!.day,
-                                "month": startDate!.month,
-                                "year": startDate!.year,
-                              },
-                        (endDate == null)
-                            ? widget.endDate
-                            : {
-                                "day": endDate!.day,
-                                "month": endDate!.month,
-                                "year": endDate!.year,
-                              },
-                        (scoreController.value.text.isEmpty)
-                            ? widget.score
-                            : double.parse(scoreController.value.text),
-                        (rewatchController.value.text.isEmpty)
-                            ? widget.repeatCount
-                            : int.parse(rewatchController.value.text),
-                      );
-
-                      if (response["data"] != null &&
-                          response["data"]["SaveMediaListEntry"] != null) {
-                        final newStatus =
-                            response["data"]["SaveMediaListEntry"]["status"];
-                        final newProgress =
-                            response["data"]["SaveMediaListEntry"]["progress"];
-                        final newMediaListData =
-                            response["data"]["SaveMediaListEntry"];
-
-                        widget.onUpdate(
-                          newStatus,
-                          newProgress,
-                          newMediaListData,
-                        );
-                      }
-
-                      Map newAlData = await getHomePageData();
-                      if (context.mounted) {
-                        Provider.of<StateProvider>(
-                          context,
-                          listen: false,
-                        ).updateData(newAlData);
-                      }
-
-                      if (context.mounted) {
-                        Navigator.of(context).pop();
-                      }
-
-                      setState(() {
-                        isLoading = false;
-                      });
-                    },
-              icon: isLoading
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        color: Colors.white,
-                        strokeWidth: 2,
-                      ),
-                    )
-                  : const Icon(Icons.check),
-              label: isLoading ? const Text(" Loading...") : const Text("Save"),
+                ),
+              ],
             ),
           ),
-        ],
-      ),
-    ),
-  );
+        );
       },
     );
   }

@@ -79,11 +79,46 @@ class MainActivity : FlutterActivity() {
                 "isInPip" -> {
                     result.success(if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) isInPictureInPictureMode else false)
                 }
+                "installApk" -> {
+                    val path = call.argument<String>("path")
+                    if (path != null) {
+                        try {
+                            installApk(path)
+                            result.success(true)
+                        } catch (e: Exception) {
+                            result.error("INSTALL_FAILED", e.message, e.toString())
+                        }
+                    } else {
+                        result.error("INVALID_PATH", "Path is null", null)
+                    }
+                }
                 else -> {
                     result.notImplemented()
                 }
             }
         }
+    }
+
+    private fun installApk(filePath: String) {
+        val file = java.io.File(filePath)
+        if (!file.exists()) {
+            throw java.io.FileNotFoundException("APK file not found at: $filePath")
+        }
+
+        val intent = Intent(Intent.ACTION_VIEW)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            val apkUri = androidx.core.content.FileProvider.getUriForFile(
+                this,
+                "$packageName.fileprovider",
+                file
+            )
+            intent.setDataAndType(apkUri, "application/vnd.android.package-archive")
+        } else {
+            intent.setDataAndType(android.net.Uri.fromFile(file), "application/vnd.android.package-archive")
+        }
+        startActivity(intent)
     }
 
     override fun onUserLeaveHint() {

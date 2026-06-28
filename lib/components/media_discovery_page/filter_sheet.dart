@@ -257,440 +257,194 @@ class _FilterSheetState extends State<FilterSheet> {
             bottom: MediaQuery.of(context).viewInsets.bottom,
           ),
           child: SingleChildScrollView(
-        child: SizedBox(
-          width: double.infinity,
-          height: 670,
-          child: Column(
-            children: [
-              const Padding(padding: EdgeInsets.all(10)),
-              Container(
-                margin: const EdgeInsets.all(15),
-                width: double.infinity,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      "Genre",
-                      style: TextStyle(
-                        fontSize: 30,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const Padding(padding: EdgeInsets.all(6)),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 38,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: genres.length,
-                        itemBuilder: (context, index) {
-                          final genre = genres[index];
-                          final isIncluded = selectedGenres.contains(genre);
-                          final isExcluded = excludedGenres.contains(genre);
-                          return Padding(
-                            padding: const EdgeInsets.only(left: 4, right: 4),
-                            child: GestureDetector(
-                              onLongPress: () => _onGenreLongPress(genre),
-                              child: FilterChip(
-                                label: Text(genre),
-                                selected: isIncluded || isExcluded,
-                                showCheckmark: isIncluded,
-                                avatar: isExcluded
-                                    ? const Icon(Icons.remove, size: 16)
-                                    : null,
-                                onSelected: (selected) => _onGenreTap(genre),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    const Padding(padding: EdgeInsets.all(6)),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            child: SizedBox(
+              width: double.infinity,
+              height: 670,
+              child: Column(
+                children: [
+                  const Padding(padding: EdgeInsets.all(10)),
+                  Container(
+                    margin: const EdgeInsets.all(15),
+                    width: double.infinity,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
-                          "Tags",
+                          "Genre",
                           style: TextStyle(
                             fontSize: 30,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        TextButton.icon(
-                          onPressed: _showExpandedTags,
-                          icon: const Icon(Icons.grid_view),
-                          label: const Text("Expand"),
-                        ),
-                      ],
-                    ),
-                    const Padding(padding: EdgeInsets.all(6)),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 38,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: tags.length,
-                        itemBuilder: (context, index) {
-                          final tag = tags[index];
-                          final isIncluded = selectedTags.contains(tag);
-                          final isExcluded = excludedTags.contains(tag);
-                          return Padding(
-                            padding: const EdgeInsets.only(left: 4, right: 4),
-                            child: GestureDetector(
-                              onLongPress: () => _onTagLongPress(tag),
-                              child: FilterChip(
-                                label: Text(tag),
-                                selected: isIncluded || isExcluded,
-                                showCheckmark: isIncluded,
-                                avatar: isExcluded
-                                    ? const Icon(Icons.remove, size: 16)
-                                    : null,
-                                onSelected: (selected) => _onTagTap(tag),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    const Padding(padding: EdgeInsets.all(6)),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              "Release Year",
-                              style: TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const Padding(padding: EdgeInsets.all(5)),
-                            SizedBox(
-                              width: sheetWidth * 0.44,
-                              child: TypeAheadField(
-                                suggestionsCallback: (pattern) {
-                                  return yearArray
-                                      .where(
-                                        (item) => item.toLowerCase().contains(
-                                          pattern.toLowerCase(),
-                                        ),
-                                      )
-                                      .toList();
-                                },
-                                itemBuilder: (context, suggestion) {
-                                  return ListTile(title: Text(suggestion));
-                                },
-                                builder: (context, controller, focusNode) {
-                                  return TextField(
-                                    keyboardType: TextInputType.number,
-                                    controller: releaseYearController,
-                                    focusNode: focusNode,
-                                    decoration: InputDecoration(
-                                      hintText: releaseYear != null
-                                          ? releaseYear.toString()
-                                          : "Select year",
-                                      border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(4),
-                                      ),
-                                    ),
-                                  );
-                                },
-                                onSelected: (suggestion) {
-                                  releaseYearController.text = suggestion;
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
-                        if (widget.isAnime)
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              const Text(
-                                "Season",
-                                style: TextStyle(
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.bold,
+                        const Padding(padding: EdgeInsets.all(6)),
+                        SizedBox(
+                          width: double.infinity,
+                          height: 38,
+                          child: ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: genres.length,
+                            itemBuilder: (context, index) {
+                              final genre = genres[index];
+                              final isIncluded = selectedGenres.contains(genre);
+                              final isExcluded = excludedGenres.contains(genre);
+                              return Padding(
+                                padding: const EdgeInsets.only(
+                                  left: 4,
+                                  right: 4,
                                 ),
-                              ),
-                              const Padding(padding: EdgeInsets.all(5)),
-                              DropdownMenu(
-                                width: sheetWidth * 0.44,
-                                hintText: season != "" ? season : "Any",
-                                dropdownMenuEntries: const [
-                                  DropdownMenuEntry(
-                                    value: "SPRING",
-                                    label: "Spring",
+                                child: GestureDetector(
+                                  onLongPress: () => _onGenreLongPress(genre),
+                                  child: FilterChip(
+                                    label: Text(genre),
+                                    selected: isIncluded || isExcluded,
+                                    showCheckmark: isIncluded,
+                                    avatar: isExcluded
+                                        ? const Icon(Icons.remove, size: 16)
+                                        : null,
+                                    onSelected: (selected) =>
+                                        _onGenreTap(genre),
                                   ),
-                                  DropdownMenuEntry(
-                                    value: "SUMMER",
-                                    label: "Summer",
-                                  ),
-                                  DropdownMenuEntry(
-                                    value: "FALL",
-                                    label: "Fall",
-                                  ),
-                                  DropdownMenuEntry(
-                                    value: "WINTER",
-                                    label: "Winter",
-                                  ),
-                                  DropdownMenuEntry(value: "", label: "Any"),
-                                ],
-                                onSelected: (value) {
-                                  season = value as String;
-                                },
-                              ),
-                            ],
-                          )
-                        else
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              const Text(
-                                "Country of Origin",
-                                style: TextStyle(
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.bold,
                                 ),
-                              ),
-                              const Padding(padding: EdgeInsets.all(5)),
-                              DropdownMenu(
-                                width: sheetWidth * 0.44,
-                                hintText: countryOfOrigin != ""
-                                    ? countryOfOrigin
-                                    : "Any",
-                                dropdownMenuEntries: const [
-                                  DropdownMenuEntry(
-                                    value: "CN",
-                                    label: "China",
-                                  ),
-                                  DropdownMenuEntry(
-                                    value: "JP",
-                                    label: "Japan",
-                                  ),
-                                  DropdownMenuEntry(
-                                    value: "KR",
-                                    label: "Korea",
-                                  ),
-                                  DropdownMenuEntry(value: "", label: "Any"),
-                                ],
-                                onSelected: (value) {
-                                  countryOfOrigin = value as String;
-                                },
-                              ),
-                            ],
+                              );
+                            },
                           ),
-                      ],
-                    ),
-                    const Padding(padding: EdgeInsets.all(6)),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                        ),
+                        const Padding(padding: EdgeInsets.all(6)),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             const Text(
-                              "Format",
+                              "Tags",
                               style: TextStyle(
-                                fontSize: 22,
+                                fontSize: 30,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            const Padding(padding: EdgeInsets.all(5)),
-                            DropdownMenu(
-                              width: sheetWidth * 0.44,
-                              hintText: format != "" ? format : "Any",
-                              dropdownMenuEntries: widget.isAnime
-                                  ? const [
-                                      DropdownMenuEntry(
-                                        value: "TV",
-                                        label: "TV",
-                                      ),
-                                      DropdownMenuEntry(
-                                        value: "TV_SHORT",
-                                        label: "TV Short",
-                                      ),
-                                      DropdownMenuEntry(
-                                        value: "MOVIE",
-                                        label: "Movie",
-                                      ),
-                                      DropdownMenuEntry(
-                                        value: "SPECIAL",
-                                        label: "Special",
-                                      ),
-                                      DropdownMenuEntry(
-                                        value: "OVA",
-                                        label: "OVA",
-                                      ),
-                                      DropdownMenuEntry(
-                                        value: "ONA",
-                                        label: "ONA",
-                                      ),
-                                      DropdownMenuEntry(
-                                        value: "MUSIC",
-                                        label: "Music",
-                                      ),
-                                      DropdownMenuEntry(
-                                        value: "",
-                                        label: "Any",
-                                      ),
-                                    ]
-                                  : const [
-                                      DropdownMenuEntry(
-                                        value: "MANGA",
-                                        label: "Manga",
-                                      ),
-                                      DropdownMenuEntry(
-                                        value: "NOVEL",
-                                        label: "Novel",
-                                      ),
-                                      DropdownMenuEntry(
-                                        value: "ONE_SHOT",
-                                        label: "One Shot",
-                                      ),
-                                      DropdownMenuEntry(
-                                        value: "",
-                                        label: "Any",
-                                      ),
-                                    ],
-                              onSelected: (value) {
-                                format = value as String;
-                              },
+                            TextButton.icon(
+                              onPressed: _showExpandedTags,
+                              icon: const Icon(Icons.grid_view),
+                              label: const Text("Expand"),
                             ),
                           ],
                         ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
+                        const Padding(padding: EdgeInsets.all(6)),
+                        SizedBox(
+                          width: double.infinity,
+                          height: 38,
+                          child: ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: tags.length,
+                            itemBuilder: (context, index) {
+                              final tag = tags[index];
+                              final isIncluded = selectedTags.contains(tag);
+                              final isExcluded = excludedTags.contains(tag);
+                              return Padding(
+                                padding: const EdgeInsets.only(
+                                  left: 4,
+                                  right: 4,
+                                ),
+                                child: GestureDetector(
+                                  onLongPress: () => _onTagLongPress(tag),
+                                  child: FilterChip(
+                                    label: Text(tag),
+                                    selected: isIncluded || isExcluded,
+                                    showCheckmark: isIncluded,
+                                    avatar: isExcluded
+                                        ? const Icon(Icons.remove, size: 16)
+                                        : null,
+                                    onSelected: (selected) => _onTagTap(tag),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        const Padding(padding: EdgeInsets.all(6)),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
-                              widget.isAnime ? "Airing Status" : "Status",
-                              style: const TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const Padding(padding: EdgeInsets.all(5)),
-                            DropdownMenu(
-                              width: sheetWidth * 0.44,
-                              hintText: airingStatus != ""
-                                  ? airingStatus
-                                  : "Any",
-                              dropdownMenuEntries: const [
-                                DropdownMenuEntry(
-                                  value: "RELEASING",
-                                  label: "Releasing",
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  "Release Year",
+                                  style: TextStyle(
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
-                                DropdownMenuEntry(
-                                  value: "FINISHED",
-                                  label: "Finished",
+                                const Padding(padding: EdgeInsets.all(5)),
+                                SizedBox(
+                                  width: sheetWidth * 0.44,
+                                  child: TypeAheadField(
+                                    suggestionsCallback: (pattern) {
+                                      return yearArray
+                                          .where(
+                                            (item) =>
+                                                item.toLowerCase().contains(
+                                                  pattern.toLowerCase(),
+                                                ),
+                                          )
+                                          .toList();
+                                    },
+                                    itemBuilder: (context, suggestion) {
+                                      return ListTile(title: Text(suggestion));
+                                    },
+                                    builder: (context, controller, focusNode) {
+                                      return TextField(
+                                        keyboardType: TextInputType.number,
+                                        controller: releaseYearController,
+                                        focusNode: focusNode,
+                                        decoration: InputDecoration(
+                                          hintText: releaseYear != null
+                                              ? releaseYear.toString()
+                                              : "Select year",
+                                          border: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              4,
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    onSelected: (suggestion) {
+                                      releaseYearController.text = suggestion;
+                                    },
+                                  ),
                                 ),
-                                DropdownMenuEntry(
-                                  value: "NOT_YET_RELEASED",
-                                  label: "Not released yet",
-                                ),
-                                DropdownMenuEntry(
-                                  value: "CANCELLED",
-                                  label: "Cancelled",
-                                ),
-                                DropdownMenuEntry(
-                                  value: "HIATUS",
-                                  label: "Hiatus",
-                                ),
-                                DropdownMenuEntry(value: "", label: "Any"),
                               ],
-                              onSelected: (value) {
-                                airingStatus = value as String;
-                              },
                             ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    const Padding(padding: EdgeInsets.all(6)),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: widget.isAnime
-                          ? [
+                            if (widget.isAnime)
                               Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
                                   const Text(
-                                    "Source",
+                                    "Season",
                                     style: TextStyle(
-                                      fontSize: 16,
+                                      fontSize: 22,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
                                   const Padding(padding: EdgeInsets.all(5)),
                                   DropdownMenu(
-                                    width:
-                                        sheetWidth *
-                                        0.29,
-                                    hintText: sourceMaterial != ""
-                                        ? sourceMaterial
-                                        : "Any",
+                                    width: sheetWidth * 0.44,
+                                    hintText: season != "" ? season : "Any",
                                     dropdownMenuEntries: const [
                                       DropdownMenuEntry(
-                                        value: "ORIGINAL",
-                                        label: "Original",
+                                        value: "SPRING",
+                                        label: "Spring",
                                       ),
                                       DropdownMenuEntry(
-                                        value: "MANGA",
-                                        label: "Manga",
+                                        value: "SUMMER",
+                                        label: "Summer",
                                       ),
                                       DropdownMenuEntry(
-                                        value: "LIGHT_NOVEL",
-                                        label: "Light Novel",
+                                        value: "FALL",
+                                        label: "Fall",
                                       ),
                                       DropdownMenuEntry(
-                                        value: "VISUAL_NOVEL",
-                                        label: "Visual Novel",
-                                      ),
-                                      DropdownMenuEntry(
-                                        value: "VIDEO_GAME",
-                                        label: "Video Game",
-                                      ),
-                                      DropdownMenuEntry(
-                                        value: "OTHER",
-                                        label: "Other",
-                                      ),
-                                      DropdownMenuEntry(
-                                        value: "NOVEL",
-                                        label: "Novel",
-                                      ),
-                                      DropdownMenuEntry(
-                                        value: "DOUJINSHI",
-                                        label: "Doujinshi",
-                                      ),
-                                      DropdownMenuEntry(
-                                        value: "ANIME",
-                                        label: "Anime",
-                                      ),
-                                      DropdownMenuEntry(
-                                        value: "WEB_NOVEL",
-                                        label: "Web Novel",
-                                      ),
-                                      DropdownMenuEntry(
-                                        value: "LIVE_ACTION",
-                                        label: "Live Action",
-                                      ),
-                                      DropdownMenuEntry(
-                                        value: "GAME",
-                                        label: "Game",
-                                      ),
-                                      DropdownMenuEntry(
-                                        value: "COMIC",
-                                        label: "Comic",
-                                      ),
-                                      DropdownMenuEntry(
-                                        value: "MULTIMEDIA_PROJECT",
-                                        label: "Multimedia Project",
-                                      ),
-                                      DropdownMenuEntry(
-                                        value: "PICTURE_BOOK",
-                                        label: "Picture Book",
+                                        value: "WINTER",
+                                        label: "Winter",
                                       ),
                                       DropdownMenuEntry(
                                         value: "",
@@ -698,28 +452,25 @@ class _FilterSheetState extends State<FilterSheet> {
                                       ),
                                     ],
                                     onSelected: (value) {
-                                      setState(() {
-                                        sourceMaterial = value as String;
-                                      });
+                                      season = value as String;
                                     },
                                   ),
                                 ],
-                              ),
+                              )
+                            else
                               Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
                                   const Text(
-                                    "Origin",
+                                    "Country of Origin",
                                     style: TextStyle(
-                                      fontSize: 16,
+                                      fontSize: 22,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
                                   const Padding(padding: EdgeInsets.all(5)),
                                   DropdownMenu(
-                                    width:
-                                        sheetWidth *
-                                        0.29,
+                                    width: sheetWidth * 0.44,
                                     hintText: countryOfOrigin != ""
                                         ? countryOfOrigin
                                         : "Any",
@@ -742,258 +493,517 @@ class _FilterSheetState extends State<FilterSheet> {
                                       ),
                                     ],
                                     onSelected: (value) {
-                                      setState(() {
-                                        countryOfOrigin = value as String;
-                                      });
+                                      countryOfOrigin = value as String;
                                     },
                                   ),
                                 ],
                               ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    "Sort",
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const Padding(padding: EdgeInsets.all(5)),
-                                  DropdownMenu(
-                                    width:
-                                        sheetWidth *
-                                        0.29,
-                                    hintText: getSortByLabel(sortBy),
-                                    dropdownMenuEntries: const [
-                                      DropdownMenuEntry(
-                                        value: "TITLE_ROMAJI",
-                                        label: "Title (A-Z)",
-                                      ),
-                                      DropdownMenuEntry(
-                                        value: "POPULARITY_DESC",
-                                        label: "Popularity",
-                                      ),
-                                      DropdownMenuEntry(
-                                        value: "SCORE_DESC",
-                                        label: "Score",
-                                      ),
-                                      DropdownMenuEntry(
-                                        value: "TRENDING_DESC",
-                                        label: "Trending",
-                                      ),
-                                      DropdownMenuEntry(
-                                        value: "FAVOURITES_DESC",
-                                        label: "Favourites",
-                                      ),
-                                      DropdownMenuEntry(
-                                        value: "ID_DESC",
-                                        label: "Date Added",
-                                      ),
-                                      DropdownMenuEntry(
-                                        value: "START_DATE_DESC",
-                                        label: "Release Date",
-                                      ),
-                                    ],
-                                    onSelected: (value) {
-                                      setState(() {
-                                        sortBy = value as String;
-                                      });
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ]
-                          : [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    "Source Material",
-                                    style: TextStyle(
-                                      fontSize: 22,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const Padding(padding: EdgeInsets.all(5)),
-                                  DropdownMenu(
-                                    width:
-                                        sheetWidth *
-                                        0.44,
-                                    hintText: sourceMaterial != ""
-                                        ? sourceMaterial
-                                        : "Any",
-                                    dropdownMenuEntries: const [
-                                      DropdownMenuEntry(
-                                        value: "ORIGINAL",
-                                        label: "Original",
-                                      ),
-                                      DropdownMenuEntry(
-                                        value: "MANGA",
-                                        label: "Manga",
-                                      ),
-                                      DropdownMenuEntry(
-                                        value: "LIGHT_NOVEL",
-                                        label: "Light Novel",
-                                      ),
-                                      DropdownMenuEntry(
-                                        value: "VISUAL_NOVEL",
-                                        label: "Visual Novel",
-                                      ),
-                                      DropdownMenuEntry(
-                                        value: "VIDEO_GAME",
-                                        label: "Video Game",
-                                      ),
-                                      DropdownMenuEntry(
-                                        value: "OTHER",
-                                        label: "Other",
-                                      ),
-                                      DropdownMenuEntry(
-                                        value: "NOVEL",
-                                        label: "Novel",
-                                      ),
-                                      DropdownMenuEntry(
-                                        value: "DOUJINSHI",
-                                        label: "Doujinshi",
-                                      ),
-                                      DropdownMenuEntry(
-                                        value: "ANIME",
-                                        label: "Anime",
-                                      ),
-                                      DropdownMenuEntry(
-                                        value: "WEB_NOVEL",
-                                        label: "Web Novel",
-                                      ),
-                                      DropdownMenuEntry(
-                                        value: "LIVE_ACTION",
-                                        label: "Live Action",
-                                      ),
-                                      DropdownMenuEntry(
-                                        value: "GAME",
-                                        label: "Game",
-                                      ),
-                                      DropdownMenuEntry(
-                                        value: "COMIC",
-                                        label: "Comic",
-                                      ),
-                                      DropdownMenuEntry(
-                                        value: "MULTIMEDIA_PROJECT",
-                                        label: "Multimedia Project",
-                                      ),
-                                      DropdownMenuEntry(
-                                        value: "PICTURE_BOOK",
-                                        label: "Picture Book",
-                                      ),
-                                      DropdownMenuEntry(
-                                        value: "",
-                                        label: "Any",
-                                      ),
-                                    ],
-                                    onSelected: (value) {
-                                      setState(() {
-                                        sourceMaterial = value as String;
-                                      });
-                                    },
-                                  ),
-                                ],
-                              ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  const Text(
-                                    "Sort By",
-                                    style: TextStyle(
-                                      fontSize: 22,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const Padding(padding: EdgeInsets.all(5)),
-                                  DropdownMenu(
-                                    width:
-                                        sheetWidth *
-                                        0.44,
-                                    hintText: getSortByLabel(sortBy),
-                                    dropdownMenuEntries: const [
-                                      DropdownMenuEntry(
-                                        value: "TITLE_ROMAJI",
-                                        label: "Title (A-Z)",
-                                      ),
-                                      DropdownMenuEntry(
-                                        value: "POPULARITY_DESC",
-                                        label: "Popularity",
-                                      ),
-                                      DropdownMenuEntry(
-                                        value: "SCORE_DESC",
-                                        label: "Score",
-                                      ),
-                                      DropdownMenuEntry(
-                                        value: "TRENDING_DESC",
-                                        label: "Trending",
-                                      ),
-                                      DropdownMenuEntry(
-                                        value: "FAVOURITES_DESC",
-                                        label: "Favourites",
-                                      ),
-                                      DropdownMenuEntry(
-                                        value: "ID_DESC",
-                                        label: "Date Added",
-                                      ),
-                                      DropdownMenuEntry(
-                                        value: "START_DATE_DESC",
-                                        label: "Release Date",
-                                      ),
-                                    ],
-                                    onSelected: (value) {
-                                      setState(() {
-                                        sortBy = value as String;
-                                      });
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ],
-                    ),
-                    const Padding(padding: EdgeInsets.all(10)),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-
-                      children: [
-                        TextButton(
-                          style: TextButton.styleFrom(
-                            minimumSize: const Size(120, 56),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 24,
-                              vertical: 16,
-                            ),
-                          ),
-                          onPressed: () {
-                            _clearFilters();
-                            _applyFilters();
-                          },
-                          child: const Text("Clear Filters"),
+                          ],
                         ),
-                        const SizedBox(width: 10),
-                        FilledButton(
-                          style: FilledButton.styleFrom(
-                            minimumSize: const Size(180, 56),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 24,
-                              vertical: 16,
+                        const Padding(padding: EdgeInsets.all(6)),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  "Format",
+                                  style: TextStyle(
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const Padding(padding: EdgeInsets.all(5)),
+                                DropdownMenu(
+                                  width: sheetWidth * 0.44,
+                                  hintText: format != "" ? format : "Any",
+                                  dropdownMenuEntries: widget.isAnime
+                                      ? const [
+                                          DropdownMenuEntry(
+                                            value: "TV",
+                                            label: "TV",
+                                          ),
+                                          DropdownMenuEntry(
+                                            value: "TV_SHORT",
+                                            label: "TV Short",
+                                          ),
+                                          DropdownMenuEntry(
+                                            value: "MOVIE",
+                                            label: "Movie",
+                                          ),
+                                          DropdownMenuEntry(
+                                            value: "SPECIAL",
+                                            label: "Special",
+                                          ),
+                                          DropdownMenuEntry(
+                                            value: "OVA",
+                                            label: "OVA",
+                                          ),
+                                          DropdownMenuEntry(
+                                            value: "ONA",
+                                            label: "ONA",
+                                          ),
+                                          DropdownMenuEntry(
+                                            value: "MUSIC",
+                                            label: "Music",
+                                          ),
+                                          DropdownMenuEntry(
+                                            value: "",
+                                            label: "Any",
+                                          ),
+                                        ]
+                                      : const [
+                                          DropdownMenuEntry(
+                                            value: "MANGA",
+                                            label: "Manga",
+                                          ),
+                                          DropdownMenuEntry(
+                                            value: "NOVEL",
+                                            label: "Novel",
+                                          ),
+                                          DropdownMenuEntry(
+                                            value: "ONE_SHOT",
+                                            label: "One Shot",
+                                          ),
+                                          DropdownMenuEntry(
+                                            value: "",
+                                            label: "Any",
+                                          ),
+                                        ],
+                                  onSelected: (value) {
+                                    format = value as String;
+                                  },
+                                ),
+                              ],
                             ),
-                          ),
-                          onPressed: _applyFilters,
-                          child: const Text("Apply Filters"),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Text(
+                                  widget.isAnime ? "Airing Status" : "Status",
+                                  style: const TextStyle(
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const Padding(padding: EdgeInsets.all(5)),
+                                DropdownMenu(
+                                  width: sheetWidth * 0.44,
+                                  hintText: airingStatus != ""
+                                      ? airingStatus
+                                      : "Any",
+                                  dropdownMenuEntries: const [
+                                    DropdownMenuEntry(
+                                      value: "RELEASING",
+                                      label: "Releasing",
+                                    ),
+                                    DropdownMenuEntry(
+                                      value: "FINISHED",
+                                      label: "Finished",
+                                    ),
+                                    DropdownMenuEntry(
+                                      value: "NOT_YET_RELEASED",
+                                      label: "Not released yet",
+                                    ),
+                                    DropdownMenuEntry(
+                                      value: "CANCELLED",
+                                      label: "Cancelled",
+                                    ),
+                                    DropdownMenuEntry(
+                                      value: "HIATUS",
+                                      label: "Hiatus",
+                                    ),
+                                    DropdownMenuEntry(value: "", label: "Any"),
+                                  ],
+                                  onSelected: (value) {
+                                    airingStatus = value as String;
+                                  },
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        const Padding(padding: EdgeInsets.all(6)),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: widget.isAnime
+                              ? [
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      const Text(
+                                        "Source",
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      const Padding(padding: EdgeInsets.all(5)),
+                                      DropdownMenu(
+                                        width: sheetWidth * 0.29,
+                                        hintText: sourceMaterial != ""
+                                            ? sourceMaterial
+                                            : "Any",
+                                        dropdownMenuEntries: const [
+                                          DropdownMenuEntry(
+                                            value: "ORIGINAL",
+                                            label: "Original",
+                                          ),
+                                          DropdownMenuEntry(
+                                            value: "MANGA",
+                                            label: "Manga",
+                                          ),
+                                          DropdownMenuEntry(
+                                            value: "LIGHT_NOVEL",
+                                            label: "Light Novel",
+                                          ),
+                                          DropdownMenuEntry(
+                                            value: "VISUAL_NOVEL",
+                                            label: "Visual Novel",
+                                          ),
+                                          DropdownMenuEntry(
+                                            value: "VIDEO_GAME",
+                                            label: "Video Game",
+                                          ),
+                                          DropdownMenuEntry(
+                                            value: "OTHER",
+                                            label: "Other",
+                                          ),
+                                          DropdownMenuEntry(
+                                            value: "NOVEL",
+                                            label: "Novel",
+                                          ),
+                                          DropdownMenuEntry(
+                                            value: "DOUJINSHI",
+                                            label: "Doujinshi",
+                                          ),
+                                          DropdownMenuEntry(
+                                            value: "ANIME",
+                                            label: "Anime",
+                                          ),
+                                          DropdownMenuEntry(
+                                            value: "WEB_NOVEL",
+                                            label: "Web Novel",
+                                          ),
+                                          DropdownMenuEntry(
+                                            value: "LIVE_ACTION",
+                                            label: "Live Action",
+                                          ),
+                                          DropdownMenuEntry(
+                                            value: "GAME",
+                                            label: "Game",
+                                          ),
+                                          DropdownMenuEntry(
+                                            value: "COMIC",
+                                            label: "Comic",
+                                          ),
+                                          DropdownMenuEntry(
+                                            value: "MULTIMEDIA_PROJECT",
+                                            label: "Multimedia Project",
+                                          ),
+                                          DropdownMenuEntry(
+                                            value: "PICTURE_BOOK",
+                                            label: "Picture Book",
+                                          ),
+                                          DropdownMenuEntry(
+                                            value: "",
+                                            label: "Any",
+                                          ),
+                                        ],
+                                        onSelected: (value) {
+                                          setState(() {
+                                            sourceMaterial = value as String;
+                                          });
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      const Text(
+                                        "Origin",
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      const Padding(padding: EdgeInsets.all(5)),
+                                      DropdownMenu(
+                                        width: sheetWidth * 0.29,
+                                        hintText: countryOfOrigin != ""
+                                            ? countryOfOrigin
+                                            : "Any",
+                                        dropdownMenuEntries: const [
+                                          DropdownMenuEntry(
+                                            value: "CN",
+                                            label: "China",
+                                          ),
+                                          DropdownMenuEntry(
+                                            value: "JP",
+                                            label: "Japan",
+                                          ),
+                                          DropdownMenuEntry(
+                                            value: "KR",
+                                            label: "Korea",
+                                          ),
+                                          DropdownMenuEntry(
+                                            value: "",
+                                            label: "Any",
+                                          ),
+                                        ],
+                                        onSelected: (value) {
+                                          setState(() {
+                                            countryOfOrigin = value as String;
+                                          });
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      const Text(
+                                        "Sort",
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      const Padding(padding: EdgeInsets.all(5)),
+                                      DropdownMenu(
+                                        width: sheetWidth * 0.29,
+                                        hintText: getSortByLabel(sortBy),
+                                        dropdownMenuEntries: const [
+                                          DropdownMenuEntry(
+                                            value: "TITLE_ROMAJI",
+                                            label: "Title (A-Z)",
+                                          ),
+                                          DropdownMenuEntry(
+                                            value: "POPULARITY_DESC",
+                                            label: "Popularity",
+                                          ),
+                                          DropdownMenuEntry(
+                                            value: "SCORE_DESC",
+                                            label: "Score",
+                                          ),
+                                          DropdownMenuEntry(
+                                            value: "TRENDING_DESC",
+                                            label: "Trending",
+                                          ),
+                                          DropdownMenuEntry(
+                                            value: "FAVOURITES_DESC",
+                                            label: "Favourites",
+                                          ),
+                                          DropdownMenuEntry(
+                                            value: "ID_DESC",
+                                            label: "Date Added",
+                                          ),
+                                          DropdownMenuEntry(
+                                            value: "START_DATE_DESC",
+                                            label: "Release Date",
+                                          ),
+                                        ],
+                                        onSelected: (value) {
+                                          setState(() {
+                                            sortBy = value as String;
+                                          });
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ]
+                              : [
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      const Text(
+                                        "Source Material",
+                                        style: TextStyle(
+                                          fontSize: 22,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      const Padding(padding: EdgeInsets.all(5)),
+                                      DropdownMenu(
+                                        width: sheetWidth * 0.44,
+                                        hintText: sourceMaterial != ""
+                                            ? sourceMaterial
+                                            : "Any",
+                                        dropdownMenuEntries: const [
+                                          DropdownMenuEntry(
+                                            value: "ORIGINAL",
+                                            label: "Original",
+                                          ),
+                                          DropdownMenuEntry(
+                                            value: "MANGA",
+                                            label: "Manga",
+                                          ),
+                                          DropdownMenuEntry(
+                                            value: "LIGHT_NOVEL",
+                                            label: "Light Novel",
+                                          ),
+                                          DropdownMenuEntry(
+                                            value: "VISUAL_NOVEL",
+                                            label: "Visual Novel",
+                                          ),
+                                          DropdownMenuEntry(
+                                            value: "VIDEO_GAME",
+                                            label: "Video Game",
+                                          ),
+                                          DropdownMenuEntry(
+                                            value: "OTHER",
+                                            label: "Other",
+                                          ),
+                                          DropdownMenuEntry(
+                                            value: "NOVEL",
+                                            label: "Novel",
+                                          ),
+                                          DropdownMenuEntry(
+                                            value: "DOUJINSHI",
+                                            label: "Doujinshi",
+                                          ),
+                                          DropdownMenuEntry(
+                                            value: "ANIME",
+                                            label: "Anime",
+                                          ),
+                                          DropdownMenuEntry(
+                                            value: "WEB_NOVEL",
+                                            label: "Web Novel",
+                                          ),
+                                          DropdownMenuEntry(
+                                            value: "LIVE_ACTION",
+                                            label: "Live Action",
+                                          ),
+                                          DropdownMenuEntry(
+                                            value: "GAME",
+                                            label: "Game",
+                                          ),
+                                          DropdownMenuEntry(
+                                            value: "COMIC",
+                                            label: "Comic",
+                                          ),
+                                          DropdownMenuEntry(
+                                            value: "MULTIMEDIA_PROJECT",
+                                            label: "Multimedia Project",
+                                          ),
+                                          DropdownMenuEntry(
+                                            value: "PICTURE_BOOK",
+                                            label: "Picture Book",
+                                          ),
+                                          DropdownMenuEntry(
+                                            value: "",
+                                            label: "Any",
+                                          ),
+                                        ],
+                                        onSelected: (value) {
+                                          setState(() {
+                                            sourceMaterial = value as String;
+                                          });
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      const Text(
+                                        "Sort By",
+                                        style: TextStyle(
+                                          fontSize: 22,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      const Padding(padding: EdgeInsets.all(5)),
+                                      DropdownMenu(
+                                        width: sheetWidth * 0.44,
+                                        hintText: getSortByLabel(sortBy),
+                                        dropdownMenuEntries: const [
+                                          DropdownMenuEntry(
+                                            value: "TITLE_ROMAJI",
+                                            label: "Title (A-Z)",
+                                          ),
+                                          DropdownMenuEntry(
+                                            value: "POPULARITY_DESC",
+                                            label: "Popularity",
+                                          ),
+                                          DropdownMenuEntry(
+                                            value: "SCORE_DESC",
+                                            label: "Score",
+                                          ),
+                                          DropdownMenuEntry(
+                                            value: "TRENDING_DESC",
+                                            label: "Trending",
+                                          ),
+                                          DropdownMenuEntry(
+                                            value: "FAVOURITES_DESC",
+                                            label: "Favourites",
+                                          ),
+                                          DropdownMenuEntry(
+                                            value: "ID_DESC",
+                                            label: "Date Added",
+                                          ),
+                                          DropdownMenuEntry(
+                                            value: "START_DATE_DESC",
+                                            label: "Release Date",
+                                          ),
+                                        ],
+                                        onSelected: (value) {
+                                          setState(() {
+                                            sortBy = value as String;
+                                          });
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                        ),
+                        const Padding(padding: EdgeInsets.all(10)),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+                          children: [
+                            TextButton(
+                              style: TextButton.styleFrom(
+                                minimumSize: const Size(120, 56),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 24,
+                                  vertical: 16,
+                                ),
+                              ),
+                              onPressed: () {
+                                _clearFilters();
+                                _applyFilters();
+                              },
+                              child: const Text("Clear Filters"),
+                            ),
+                            const SizedBox(width: 10),
+                            FilledButton(
+                              style: FilledButton.styleFrom(
+                                minimumSize: const Size(180, 56),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 24,
+                                  vertical: 16,
+                                ),
+                              ),
+                              onPressed: _applyFilters,
+                              child: const Text("Apply Filters"),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
-      ),
-    );
+        );
       },
     );
   }

@@ -284,9 +284,9 @@ class _TitlePaneState extends State<TitlePane> {
                                   child: Material(
                                     color: _isIncrementing
                                         ? Colors.grey.shade600
-                                        : Theme.of(context)
-                                            .colorScheme
-                                            .primaryContainer,
+                                        : Theme.of(
+                                            context,
+                                          ).colorScheme.primaryContainer,
                                     child: InkWell(
                                       onTap: _isIncrementing
                                           ? null
@@ -302,8 +302,9 @@ class _TitlePaneState extends State<TitlePane> {
                                                   child: CircularProgressIndicator(
                                                     strokeWidth: 2,
                                                     valueColor:
-                                                        AlwaysStoppedAnimation<Color>(
-                                                            Colors.white),
+                                                        AlwaysStoppedAnimation<
+                                                          Color
+                                                        >(Colors.white),
                                                   ),
                                                 )
                                               : Text(
@@ -338,12 +339,14 @@ class _TitlePaneState extends State<TitlePane> {
                           color: _isTogglingFavourite
                               ? Colors.grey.shade600
                               : (isFavourite
-                                  ? Colors.red.shade600
-                                  : Theme.of(context)
-                                      .colorScheme
-                                      .primaryContainer),
+                                    ? Colors.red.shade600
+                                    : Theme.of(
+                                        context,
+                                      ).colorScheme.primaryContainer),
                           child: InkWell(
-                            onTap: _isTogglingFavourite ? null : _toggleFavourite,
+                            onTap: _isTogglingFavourite
+                                ? null
+                                : _toggleFavourite,
                             child: SizedBox(
                               width: 40,
                               height: 40,
@@ -356,7 +359,8 @@ class _TitlePaneState extends State<TitlePane> {
                                           strokeWidth: 2,
                                           valueColor:
                                               AlwaysStoppedAnimation<Color>(
-                                                  Colors.white),
+                                                Colors.white,
+                                              ),
                                         ),
                                       )
                                     : Icon(
