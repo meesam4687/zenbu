@@ -71,7 +71,7 @@ class MainActivity : FlutterActivity() {
             when (call.method) {
                 "setVideoPlaying" -> {
                     isVideoPlaying = call.argument<Boolean>("isPlaying") ?: false
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && isInPictureInPictureMode) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                         updatePipParams(isVideoPlaying)
                     }
                     result.success(null)
@@ -127,7 +127,7 @@ class MainActivity : FlutterActivity() {
 
     override fun onUserLeaveHint() {
         super.onUserLeaveHint()
-        if (isVideoPlaying) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S && isVideoPlaying) {
             enterPipMode()
         }
     }
