@@ -8,6 +8,7 @@ import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:flutter/services.dart';
 import 'package:zenbu/components/manga_reader_page/manga_header.dart';
 import 'package:zenbu/components/manga_reader_page/manga_bottom_controls.dart';
+import 'package:zenbu/services/progress_service.dart';
 
 class MangaReaderPage extends StatefulWidget {
   final List<ExtEpisode> chapters;
@@ -172,6 +173,7 @@ class _MangaReaderPageState extends State<MangaReaderPage>
           setState(() {
             _currentPageIndex = estimatedPage;
           });
+          _saveCurrentPageProgress();
         }
       }
     }
@@ -220,6 +222,7 @@ class _MangaReaderPageState extends State<MangaReaderPage>
           _pageController = PageController(initialPage: 0);
         }
       });
+      _restoreProgress();
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -478,6 +481,7 @@ class _MangaReaderPageState extends State<MangaReaderPage>
           setState(() {
             _isZoomed = false;
           });
+          _saveCurrentPageProgress();
         },
         itemBuilder: (context, index) {
           final page = _pages[index];
@@ -536,5 +540,44 @@ class _MangaReaderPageState extends State<MangaReaderPage>
     );
   }
 
+  void _saveCurrentPageProgress() {
+    if (widget.mediaId == null || _pages.isEmpty) return;
+    final currentChapter = widget.chapters[_currentChapterIndex];
+    ProgressService.saveMangaProgress(
+      mediaId: widget.mediaId!,
+      chapterUrl: currentChapter.url,
+      chapterName: currentChapter.name,
+      pagesRead: _currentPageIndex + 1,
+      totalPages: _pages.length,
+    );
+  }
 
+  Future<void> _restoreProgress() async {
+    if (widget.mediaId == null || _pages.isEmpty) return;
+    final currentChapter = widget.chapters[_currentChapterIndex];
+    final progress = await ProgressService.getMangaChapterProgress(
+      mediaId: widget.mediaId!,
+      chapterUrl: currentChapter.url,
+      chapterName: currentChapter.name,
+    );
+    if (progress != null && progress['pagesRead'] != null && progress['pagesRead']! <= _pages.length) {
+      final targetPage = progress['pagesRead']! - 1;
+      if (mounted) {
+        setState(() {
+          _currentPageIndex = targetPage;
+        });
+        if (_isWebtoonMode) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (_scrollController.hasClients) {
+              final maxScroll = _scrollController.position.maxScrollExtent;
+              final targetScroll = (targetPage / (_pages.length - 1)) * maxScroll;
+              _scrollController.jumpTo(targetScroll);
+            }
+          });
+        } else {
+          _pageController?.jumpToPage(targetPage);
+        }
+      }
+    }
+  }
 }

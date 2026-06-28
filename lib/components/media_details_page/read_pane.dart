@@ -5,17 +5,22 @@ import 'package:zenbu/services/js_engine.dart';
 import 'package:zenbu/pages/manga_reader_page.dart';
 import 'package:zenbu/pages/extensions_page.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:zenbu/services/progress_service.dart';
 
 class MangaReadPane extends StatefulWidget {
   final int mediaId;
   final String mangaTitle;
   final String? coverImage;
+  final int anilistProgress;
+  final String mediaState;
 
   const MangaReadPane({
     super.key,
     required this.mediaId,
     required this.mangaTitle,
     this.coverImage,
+    required this.anilistProgress,
+    required this.mediaState,
   });
 
   @override
@@ -24,6 +29,43 @@ class MangaReadPane extends StatefulWidget {
 
 class _MangaReadPaneState extends State<MangaReadPane> {
   List<ExtSource> _installedExtensions = [];
+  Map<String, bool> _chaptersReadStatus = {};
+  Map<String, Map<String, int>> _chaptersPartialProgress = {};
+
+  Future<void> _loadLocalProgress() async {
+    final Map<String, bool> readStatus = {};
+    final Map<String, Map<String, int>> partialProgress = {};
+
+    for (final chap in _allRawChapters) {
+      final extChapter = ExtEpisode.fromJson(Map<String, dynamic>.from(chap));
+      
+      final isRead = await ProgressService.isMangaChapterRead(
+        mediaId: widget.mediaId,
+        chapterUrl: extChapter.url,
+        chapterName: extChapter.name,
+        anilistProgress: widget.anilistProgress,
+      );
+      if (isRead) {
+        readStatus[extChapter.url] = true;
+      } else {
+        final progress = await ProgressService.getMangaChapterProgress(
+          mediaId: widget.mediaId,
+          chapterUrl: extChapter.url,
+          chapterName: extChapter.name,
+        );
+        if (progress != null) {
+          partialProgress[extChapter.url] = progress;
+        }
+      }
+    }
+
+    if (mounted) {
+      setState(() {
+        _chaptersReadStatus = readStatus;
+        _chaptersPartialProgress = partialProgress;
+      });
+    }
+  }
   ExtSource? _selectedExtension;
   List<dynamic> _allRawChapters = [];
   List<dynamic> _rawChapters = [];
@@ -174,6 +216,7 @@ class _MangaReadPaneState extends State<MangaReadPane> {
       setState(() {
         _setChapters(rawChapters);
       });
+      _loadLocalProgress();
     } catch (e) {
       if (!mounted) return;
       final is403 =
@@ -372,13 +415,34 @@ class _MangaReadPaneState extends State<MangaReadPane> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Chapters (${_allRawChapters.length})',
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  (() {
+                    final target = _getResumeTarget();
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Chapters (${_allRawChapters.length})',
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        if (target != null)
+                          TextButton.icon(
+                            onPressed: () => _launchChapter(target.episode),
+                            icon: const Icon(Icons.chrome_reader_mode),
+                            label: Text(
+                              '${target.isResume ? "Resume" : "Start"} Ch. ${(ProgressService.parseEpisodeNumber(target.episode.url, target.episode.name) ?? 1.0).toString().replaceAll(RegExp(r'\.0$'), '')}',
+                            ),
+                            style: TextButton.styleFrom(
+                              foregroundColor: Theme.of(context).colorScheme.primary,
+                              visualDensity: VisualDensity.compact,
+                              padding: const EdgeInsets.symmetric(horizontal: 8),
+                            ),
+                          ),
+                      ],
+                    );
+                  })(),
                   const SizedBox(height: 12),
                   (() {
                     final totalPages = (_allRawChapters.length / 30).ceil();
@@ -433,6 +497,9 @@ class _MangaReadPaneState extends State<MangaReadPane> {
                               final chap = ExtEpisode.fromJson(
                                 Map<String, dynamic>.from(rawChap),
                               );
+                              final isRead = _chaptersReadStatus[chap.url] ?? false;
+                              final progress = _chaptersPartialProgress[chap.url];
+                              final isPartial = progress != null;
 
                               return Card(
                                 color: Theme.of(
@@ -476,7 +543,9 @@ class _MangaReadPaneState extends State<MangaReadPane> {
                                           mediaId: widget.mediaId,
                                         ),
                                       ),
-                                    );
+                                    ).then((_) {
+                                      _loadLocalProgress();
+                                    });
                                   },
                                   child: Padding(
                                     padding: const EdgeInsets.symmetric(
@@ -485,10 +554,32 @@ class _MangaReadPaneState extends State<MangaReadPane> {
                                     ),
                                     child: Row(
                                       children: [
-                                        const Icon(
-                                          Icons.menu_book,
-                                          color: Colors.blueGrey,
-                                        ),
+                                        if (isRead)
+                                          const Icon(
+                                            Icons.check_circle,
+                                            color: Colors.green,
+                                          )
+                                        else if (isPartial)
+                                          SizedBox(
+                                            width: 24,
+                                            height: 24,
+                                            child: CircularProgressIndicator(
+                                              value: progress['pagesRead']! / progress['totalPages']!,
+                                              strokeWidth: 3.0,
+                                              valueColor: AlwaysStoppedAnimation<Color>(
+                                                Theme.of(context).colorScheme.primary,
+                                              ),
+                                              backgroundColor: Theme.of(context)
+                                                  .colorScheme
+                                                  .outlineVariant
+                                                  .withValues(alpha: 0.3),
+                                            ),
+                                          )
+                                        else
+                                          const Icon(
+                                            Icons.menu_book,
+                                            color: Colors.blueGrey,
+                                          ),
                                         const SizedBox(width: 16),
                                         Expanded(
                                           child: Column(
@@ -547,4 +638,110 @@ class _MangaReadPaneState extends State<MangaReadPane> {
       ),
     );
   }
+
+  ResumeTarget? _getResumeTarget() {
+    if (_allRawChapters.isEmpty) return null;
+
+    final bool isActiveState = widget.mediaState == 'CURRENT' || widget.mediaState == 'REPEATING';
+    if (!isActiveState) {
+      return null;
+    }
+
+    final chronologicalChapters = _allRawChapters.map((e) => ExtEpisode.fromJson(
+      Map<String, dynamic>.from(e),
+    )).toList();
+    chronologicalChapters.sort((a, b) {
+      final numA = ProgressService.parseEpisodeNumber(a.url, a.name) ?? 0.0;
+      final numB = ProgressService.parseEpisodeNumber(b.url, b.name) ?? 0.0;
+      return numA.compareTo(numB);
+    });
+
+    ExtEpisode? lastStarted;
+    double highestReadChapterNum = -1.0;
+    bool hasAnyProgress = false;
+
+    for (final chap in chronologicalChapters) {
+      final isRead = _chaptersReadStatus[chap.url] ?? false;
+      final progress = _chaptersPartialProgress[chap.url];
+      final chapNum = ProgressService.parseEpisodeNumber(chap.url, chap.name) ?? 0.0;
+      
+      if (isRead || progress != null) {
+        hasAnyProgress = true;
+      }
+      if (progress != null && !isRead) {
+        lastStarted = chap;
+      }
+      if (isRead) {
+        if (chapNum > highestReadChapterNum) {
+          highestReadChapterNum = chapNum;
+        }
+      }
+    }
+
+    final lastChap = chronologicalChapters.last;
+    final lastChapNum = ProgressService.parseEpisodeNumber(lastChap.url, lastChap.name) ?? 0.0;
+    
+    final isCompleted = widget.mediaState == 'COMPLETED' ||
+                        widget.anilistProgress >= chronologicalChapters.length ||
+                        highestReadChapterNum >= lastChapNum;
+
+    if (isCompleted) {
+      return null;
+    }
+
+    if (lastStarted != null) {
+      return ResumeTarget(episode: lastStarted, isResume: true);
+    }
+
+    if (highestReadChapterNum >= 0) {
+      for (final chap in chronologicalChapters) {
+        final chapNum = ProgressService.parseEpisodeNumber(chap.url, chap.name) ?? 0.0;
+        if (chapNum > highestReadChapterNum) {
+          return ResumeTarget(episode: chap, isResume: true);
+        }
+      }
+    }
+
+    if (chronologicalChapters.isNotEmpty) {
+      return ResumeTarget(episode: chronologicalChapters.first, isResume: hasAnyProgress);
+    }
+
+    return null;
+  }
+
+  void _launchChapter(ExtEpisode chap) {
+    final chronologicalChapters =
+        _allRawChapters.reversed
+            .map(
+              (e) => ExtEpisode.fromJson(
+                Map<String, dynamic>.from(e),
+              ),
+            )
+            .toList();
+
+    final curIdx = chronologicalChapters
+        .indexWhere((c) => c.url == chap.url);
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => MangaReaderPage(
+          chapters: chronologicalChapters,
+          currentIndex: curIdx >= 0
+              ? curIdx
+              : 0,
+          source: _selectedExtension!,
+          mangaTitle: widget.mangaTitle,
+          mediaId: widget.mediaId,
+        ),
+      ),
+    ).then((_) {
+      _loadLocalProgress();
+    });
+  }
+}
+
+class ResumeTarget {
+  final ExtEpisode episode;
+  final bool isResume;
+  ResumeTarget({required this.episode, required this.isResume});
 }

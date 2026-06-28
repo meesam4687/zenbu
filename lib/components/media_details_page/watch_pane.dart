@@ -6,6 +6,7 @@ import 'package:zenbu/services/js_engine.dart';
 import 'package:zenbu/pages/video_player_page.dart';
 import 'package:zenbu/pages/extensions_page.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:zenbu/services/progress_service.dart';
 
 class AnimeWatchPane extends StatefulWidget {
   final int mediaId;
@@ -13,6 +14,8 @@ class AnimeWatchPane extends StatefulWidget {
   final String animeTitle;
   final String? coverImage;
   final List? streamingEpisodes;
+  final int anilistProgress;
+  final String mediaState;
 
   const AnimeWatchPane({
     super.key,
@@ -21,6 +24,8 @@ class AnimeWatchPane extends StatefulWidget {
     required this.animeTitle,
     this.coverImage,
     this.streamingEpisodes,
+    required this.anilistProgress,
+    required this.mediaState,
   });
 
   @override
@@ -29,6 +34,30 @@ class AnimeWatchPane extends StatefulWidget {
 
 class _AnimeWatchPaneState extends State<AnimeWatchPane> {
   List<ExtSource> _installedExtensions = [];
+  Map<String, double> _episodesProgress = {};
+
+  Future<void> _loadLocalProgress() async {
+    final Map<String, double> progressMap = {};
+
+    for (final epJson in _allRawEpisodes) {
+      final extEpisode = ExtEpisode.fromJson(Map<String, dynamic>.from(epJson));
+      final ratio = await ProgressService.getAnimeEpisodeProgressRatio(
+        mediaId: widget.mediaId,
+        episodeUrl: extEpisode.url,
+        episodeName: extEpisode.name,
+        anilistProgress: widget.anilistProgress,
+      );
+      if (ratio > 0.0) {
+        progressMap[extEpisode.url] = ratio;
+      }
+    }
+
+    if (mounted) {
+      setState(() {
+        _episodesProgress = progressMap;
+      });
+    }
+  }
   ExtSource? _selectedExtension;
   List<dynamic> _allRawEpisodes = [];
   List<dynamic> _rawEpisodes = [];
@@ -184,6 +213,7 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
       setState(() {
         _setEpisodes(rawEpisodes);
       });
+      _loadLocalProgress();
     } catch (e) {
       if (!mounted) return;
       debugPrint("[WATCH PANE ERROR] Failed to load episodes: $e");
@@ -383,13 +413,34 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Episodes (${_allRawEpisodes.length})',
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  (() {
+                    final target = _getResumeTarget();
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Episodes (${_allRawEpisodes.length})',
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        if (target != null)
+                          TextButton.icon(
+                            onPressed: () => _launchEpisode(target.episode),
+                            icon: const Icon(Icons.play_arrow),
+                            label: Text(
+                              '${target.isResume ? "Resume" : "Start"} Ep. ${(ProgressService.parseEpisodeNumber(target.episode.url, target.episode.name) ?? 1.0).toString().replaceAll(RegExp(r'\.0$'), '')}',
+                            ),
+                            style: TextButton.styleFrom(
+                              foregroundColor: Theme.of(context).colorScheme.primary,
+                              visualDensity: VisualDensity.compact,
+                              padding: const EdgeInsets.symmetric(horizontal: 8),
+                            ),
+                          ),
+                      ],
+                    );
+                  })(),
                   const SizedBox(height: 12),
                   (() {
                     final totalPages = (_allRawEpisodes.length / 30).ceil();
@@ -444,6 +495,7 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
                               final ep = ExtEpisode.fromJson(
                                 Map<String, dynamic>.from(rawEp),
                               );
+                              final progressRatio = _episodesProgress[ep.url] ?? 0.0;
 
                               return Card(
                                 color: Theme.of(
@@ -475,82 +527,102 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
                                           source: _selectedExtension!,
                                           animeTitle: widget.animeTitle,
                                           malId: widget.malId,
+                                          mediaId: widget.mediaId,
                                           allEpisodes: allEpisodes,
                                         ),
                                       ),
-                                    );
+                                    ).then((_) {
+                                      _loadLocalProgress();
+                                    });
                                   },
-                                  child: Row(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.stretch,
                                     children: [
-                                      SizedBox(
-                                        width: 140,
-                                        height: 80,
-                                        child:
-                                            widget.coverImage != null &&
-                                                widget.coverImage!.isNotEmpty
-                                            ? CachedNetworkImage(
-                                                imageUrl: widget.coverImage!,
-                                                fit: BoxFit.cover,
-                                                placeholder: (context, url) =>
-                                                    const Center(
-                                                      child:
-                                                          CircularProgressIndicator.adaptive(
-                                                            strokeWidth: 2,
-                                                          ),
-                                                    ),
-                                                errorWidget:
-                                                    (context, url, error) =>
-                                                        _buildPlaceholderThumbnail(),
-                                              )
-                                            : _buildPlaceholderThumbnail(),
-                                      ),
-                                      const SizedBox(width: 16),
-                                      Expanded(
-                                        child: Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                            vertical: 8,
-                                            horizontal: 8,
+                                      Row(
+                                        children: [
+                                          SizedBox(
+                                            width: 140,
+                                            height: 80,
+                                            child:
+                                                widget.coverImage != null &&
+                                                    widget.coverImage!.isNotEmpty
+                                                ? CachedNetworkImage(
+                                                    imageUrl: widget.coverImage!,
+                                                    fit: BoxFit.cover,
+                                                    placeholder: (context, url) =>
+                                                        const Center(
+                                                          child:
+                                                              CircularProgressIndicator.adaptive(
+                                                                strokeWidth: 2,
+                                                              ),
+                                                        ),
+                                                    errorWidget:
+                                                        (context, url, error) =>
+                                                            _buildPlaceholderThumbnail(),
+                                                  )
+                                                : _buildPlaceholderThumbnail(),
                                           ),
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              Text(
-                                                ep.name,
-                                                style: const TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 14,
-                                                ),
-                                                maxLines: 2,
-                                                overflow: TextOverflow.ellipsis,
+                                          const SizedBox(width: 16),
+                                          Expanded(
+                                            child: Padding(
+                                              padding: const EdgeInsets.symmetric(
+                                                vertical: 8,
+                                                horizontal: 8,
                                               ),
-                                              if (ep.description != null &&
-                                                  ep
-                                                      .description!
-                                                      .isNotEmpty) ...[
-                                                const SizedBox(height: 4),
-                                                Text(
-                                                  ep.description!,
-                                                  style: TextStyle(
-                                                    fontSize: 12,
-                                                    color:
-                                                        Theme.of(context)
-                                                            .textTheme
-                                                            .bodySmall
-                                                            ?.color ??
-                                                        Colors.grey,
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                children: [
+                                                  Text(
+                                                    ep.name,
+                                                    style: const TextStyle(
+                                                      fontWeight: FontWeight.bold,
+                                                      fontSize: 14,
+                                                    ),
+                                                    maxLines: 2,
+                                                    overflow: TextOverflow.ellipsis,
                                                   ),
-                                                  maxLines: 1,
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                ),
-                                              ],
-                                            ],
+                                                  if (ep.description != null &&
+                                                      ep
+                                                          .description!
+                                                          .isNotEmpty) ...[
+                                                    const SizedBox(height: 4),
+                                                    Text(
+                                                      ep.description!,
+                                                      style: TextStyle(
+                                                        fontSize: 12,
+                                                        color:
+                                                            Theme.of(context)
+                                                                .textTheme
+                                                                .bodySmall
+                                                                ?.color ??
+                                                            Colors.grey,
+                                                      ),
+                                                      maxLines: 1,
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                    ),
+                                                  ],
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      if (progressRatio > 0.0)
+                                        Container(
+                                          height: 3,
+                                          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+                                          alignment: Alignment.centerLeft,
+                                          child: FractionallySizedBox(
+                                            widthFactor: progressRatio,
+                                            child: Container(
+                                              color: Theme.of(context).colorScheme.primary,
+                                            ),
                                           ),
                                         ),
-                                      ),
                                     ],
                                   ),
                                 ),
@@ -574,4 +646,100 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
       ),
     );
   }
+
+  ResumeTarget? _getResumeTarget() {
+    if (_allRawEpisodes.isEmpty) return null;
+
+    final bool isActiveState = widget.mediaState == 'CURRENT' || widget.mediaState == 'REPEATING';
+    if (!isActiveState) {
+      return null;
+    }
+
+    final chronologicalEpisodes = _allRawEpisodes.map((e) => ExtEpisode.fromJson(
+      Map<String, dynamic>.from(e),
+    )).toList();
+    chronologicalEpisodes.sort((a, b) {
+      final numA = ProgressService.parseEpisodeNumber(a.url, a.name) ?? 0.0;
+      final numB = ProgressService.parseEpisodeNumber(b.url, b.name) ?? 0.0;
+      return numA.compareTo(numB);
+    });
+
+    ExtEpisode? lastStarted;
+    double highestWatchedEpisodeNum = -1.0;
+    bool hasAnyProgress = false;
+
+    for (final ep in chronologicalEpisodes) {
+      final ratio = _episodesProgress[ep.url] ?? 0.0;
+      final epNum = ProgressService.parseEpisodeNumber(ep.url, ep.name) ?? 0.0;
+      if (ratio > 0.0) {
+        hasAnyProgress = true;
+      }
+      if (ratio > 0.0 && ratio < 0.95) {
+        lastStarted = ep;
+      }
+      if (ratio >= 0.95) {
+        if (epNum > highestWatchedEpisodeNum) {
+          highestWatchedEpisodeNum = epNum;
+        }
+      }
+    }
+
+    final lastEp = chronologicalEpisodes.last;
+    final lastEpNum = ProgressService.parseEpisodeNumber(lastEp.url, lastEp.name) ?? 0.0;
+    
+    final isCompleted = widget.mediaState == 'COMPLETED' ||
+                        widget.anilistProgress >= chronologicalEpisodes.length ||
+                        highestWatchedEpisodeNum >= lastEpNum;
+
+    if (isCompleted) {
+      return null;
+    }
+
+    if (lastStarted != null) {
+      return ResumeTarget(episode: lastStarted, isResume: true);
+    }
+
+    if (highestWatchedEpisodeNum >= 0) {
+      for (final ep in chronologicalEpisodes) {
+        final epNum = ProgressService.parseEpisodeNumber(ep.url, ep.name) ?? 0.0;
+        if (epNum > highestWatchedEpisodeNum) {
+          return ResumeTarget(episode: ep, isResume: true);
+        }
+      }
+    }
+
+    if (chronologicalEpisodes.isNotEmpty) {
+      return ResumeTarget(episode: chronologicalEpisodes.first, isResume: hasAnyProgress);
+    }
+
+    return null;
+  }
+
+  void _launchEpisode(ExtEpisode ep) {
+    final allEpisodes = _allRawEpisodes
+        .map((e) => ExtEpisode.fromJson(
+              Map<String, dynamic>.from(e),
+            ))
+        .toList();
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => VideoPlayerPage(
+          episode: ep,
+          source: _selectedExtension!,
+          animeTitle: widget.animeTitle,
+          malId: widget.malId,
+          mediaId: widget.mediaId,
+          allEpisodes: allEpisodes,
+        ),
+      ),
+    ).then((_) {
+      _loadLocalProgress();
+    });
+  }
+}
+
+class ResumeTarget {
+  final ExtEpisode episode;
+  final bool isResume;
+  ResumeTarget({required this.episode, required this.isResume});
 }

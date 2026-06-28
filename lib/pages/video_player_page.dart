@@ -10,6 +10,7 @@ import 'package:zenbu/models/extensions_models.dart';
 import 'package:zenbu/services/js_engine.dart';
 import 'package:zenbu/services/repo_service.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
+import 'package:zenbu/services/progress_service.dart';
 import 'package:zenbu/components/video_player_page/video_player_header.dart';
 import 'package:zenbu/components/video_player_page/video_player_center_controls.dart';
 import 'package:zenbu/components/video_player_page/video_player_bottom_controls.dart';
@@ -100,6 +101,7 @@ class VideoPlayerPage extends StatefulWidget {
   final ExtSource source;
   final String animeTitle;
   final int? malId;
+  final int? mediaId;
   final List<ExtEpisode>? allEpisodes;
 
   const VideoPlayerPage({
@@ -108,6 +110,7 @@ class VideoPlayerPage extends StatefulWidget {
     required this.source,
     required this.animeTitle,
     this.malId,
+    this.mediaId,
     this.allEpisodes,
   });
 
@@ -131,6 +134,18 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
 
   late ExtEpisode _currentEpisode;
   ExtEpisode? _nextEpisode;
+  DateTime? _lastProgressSaveTime;
+
+  void _saveEpisodeProgress(int posSec, int durSec) {
+    if (widget.mediaId == null || durSec <= 0) return;
+    ProgressService.saveAnimeProgress(
+      mediaId: widget.mediaId!,
+      episodeUrl: _currentEpisode.url,
+      episodeName: _currentEpisode.name,
+      positionSeconds: posSec,
+      durationSeconds: durSec,
+    );
+  }
 
   void _updateNextEpisode() {
     if (widget.allEpisodes == null || widget.allEpisodes!.isEmpty) {
@@ -142,6 +157,12 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
 
   void _playNextEpisode() {
     if (_nextEpisode == null) return;
+
+    if (_videoPlayerController != null && _videoPlayerController!.value.isInitialized) {
+      final pos = _videoPlayerController!.value.position.inSeconds;
+      final dur = _videoPlayerController!.value.duration.inSeconds;
+      _saveEpisodeProgress(pos, dur);
+    }
 
     setState(() {
       _currentEpisode = _nextEpisode!;
@@ -198,6 +219,11 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   void dispose() {
     WakelockPlus.disable();
     _activeSkipTimeNotifier.dispose();
+    if (_videoPlayerController != null && _videoPlayerController!.value.isInitialized) {
+      final pos = _videoPlayerController!.value.position.inSeconds;
+      final dur = _videoPlayerController!.value.duration.inSeconds;
+      _saveEpisodeProgress(pos, dur);
+    }
     _disposePlayer();
     _disposeEngine();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
@@ -394,6 +420,17 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
 
       await _videoPlayerController!.initialize();
       if (!mounted) return;
+
+      if (widget.mediaId != null) {
+        final pos = await ProgressService.getAnimeEpisodeProgressPosition(
+          mediaId: widget.mediaId!,
+          episodeUrl: _currentEpisode.url,
+          episodeName: _currentEpisode.name,
+        );
+        if (pos != null) {
+          await _videoPlayerController!.seekTo(Duration(seconds: pos));
+        }
+      }
 
       _chewieController = ChewieController(
         videoPlayerController: _videoPlayerController!,
@@ -746,6 +783,15 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
 
     if (!_isDraggingSlider) {
       setState(() {});
+    }
+
+    final currentPosSec = _videoPlayerController!.value.position.inSeconds;
+    final totalDurSec = _videoPlayerController!.value.duration.inSeconds;
+    final now = DateTime.now();
+    if (_lastProgressSaveTime == null ||
+        now.difference(_lastProgressSaveTime!) > const Duration(seconds: 5)) {
+      _lastProgressSaveTime = now;
+      _saveEpisodeProgress(currentPosSec, totalDurSec);
     }
 
     final currentSec =

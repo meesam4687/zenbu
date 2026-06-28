@@ -136,6 +136,8 @@ class _MediaDetailsPageState extends State<MediaDetailsPage>
                               coverImage: media["coverImage"]["extraLarge"],
                               streamingEpisodes:
                                   media["streamingEpisodes"] as List?,
+                              anilistProgress: int.tryParse(currentProgress.toString()) ?? 0,
+                              mediaState: media["mediaListEntry"]?["status"] ?? 'NONE',
                             ),
                           ),
                         ),
@@ -161,6 +163,8 @@ class _MediaDetailsPageState extends State<MediaDetailsPage>
                                   mediaId: widget.id as int,
                                   mangaTitle: media["title"]["romaji"] ?? '',
                                   coverImage: media["coverImage"]["extraLarge"],
+                                  anilistProgress: int.tryParse(currentProgress.toString()) ?? 0,
+                                  mediaState: media["mediaListEntry"]?["status"] ?? 'NONE',
                                 ),
                               ),
                             ),
