@@ -21,13 +21,12 @@
   <img src="https://cdn.meesam.dev/zenbu/Screenshot_20260629_171223.jpg" width="220">
   <img src="https://cdn.meesam.dev/zenbu/Screenshot_20260629_171235.jpg" width="220">
   <img src="https://cdn.meesam.dev/zenbu/Screenshot_20260629_171244.jpg" width="220">
-  <img src="https://cdn.meesam.dev/zenbu/Screenshot_20260629_171551.jpg" width="220">
 </p>
 
 <p align="center">
+  <img src="https://cdn.meesam.dev/zenbu/Screenshot_20260629_171551.jpg" width="220">
   <img src="https://cdn.meesam.dev/zenbu/Screenshot_20260629_171730.jpg" width="220">
   <img src="https://cdn.meesam.dev/zenbu/Screenshot_20260629_171800.jpg" width="220">
-  <img src="https://cdn.meesam.dev/zenbu/Screenshot_20260629_171837.jpg" width="220">
 </p>
 
 ---
