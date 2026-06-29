@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:zenbu/components/global/custom_image.dart';
 
 class CharacterHeader extends StatelessWidget {
   const CharacterHeader({
@@ -25,11 +26,12 @@ class CharacterHeader extends StatelessWidget {
               borderRadius: BorderRadius.circular(18),
             ),
             clipBehavior: Clip.antiAlias,
-            child: Image.network(
+            child: CustomImage(
               height: 280,
               width: 186.66,
-              characterImage,
+              imageUrl: characterImage,
               fit: BoxFit.cover,
+              borderRadius: BorderRadius.circular(18),
             ),
           ),
           Container(

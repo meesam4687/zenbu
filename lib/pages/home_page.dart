@@ -2,6 +2,7 @@ import 'package:zenbu/components/home_page/user_info_modal_sheet.dart';
 import 'package:zenbu/pages/error_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:zenbu/components/global/custom_image.dart';
 import 'package:zenbu/services/anilist/anilist.dart';
 import 'package:zenbu/state_provider.dart';
 import 'package:zenbu/components/home_page/media_list.dart';
@@ -116,23 +117,21 @@ class _HomePageState extends State<HomePage> {
                                 );
                               }
                               final data = snapshot.data!;
-                              return Image(
+                              return CustomImage(
                                 height: 40,
                                 width: 40,
                                 fit: BoxFit.fill,
-                                image: NetworkImage(
-                                  data['data']['Viewer']['avatar']['large'],
-                                ),
+                                imageUrl: data['data']['Viewer']['avatar']['large'] as String,
+                                borderRadius: BorderRadius.circular(360),
                               );
                             },
                           )
-                        : Image(
+                        : CustomImage(
                             height: 40,
                             width: 40,
                             fit: BoxFit.fill,
-                            image: NetworkImage(
-                              providerData['data']['Viewer']['avatar']['large'],
-                            ),
+                            imageUrl: providerData['data']['Viewer']['avatar']['large'] as String,
+                            borderRadius: BorderRadius.circular(360),
                           ),
                   ),
                 ),

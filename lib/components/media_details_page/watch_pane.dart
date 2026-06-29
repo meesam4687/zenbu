@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:zenbu/models/extensions_models.dart';
 import 'package:zenbu/services/repo_service.dart';
+import 'package:zenbu/components/global/custom_image.dart';
 import 'package:zenbu/services/js_engine.dart';
 import 'package:zenbu/pages/video_player_page.dart';
 import 'package:zenbu/pages/extensions_page.dart';
@@ -555,28 +555,14 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
                                           SizedBox(
                                             width: 140,
                                             height: 80,
-                                            child:
-                                                widget.coverImage != null &&
+                                            child: widget.coverImage != null &&
                                                     widget
                                                         .coverImage!
                                                         .isNotEmpty
-                                                ? CachedNetworkImage(
-                                                    imageUrl:
-                                                        widget.coverImage!,
+                                                ? CustomImage(
+                                                    imageUrl: widget.coverImage!,
                                                     fit: BoxFit.cover,
-                                                    placeholder:
-                                                        (
-                                                          context,
-                                                          url,
-                                                        ) => const Center(
-                                                          child:
-                                                              CircularProgressIndicator.adaptive(
-                                                                strokeWidth: 2,
-                                                              ),
-                                                        ),
-                                                    errorWidget:
-                                                        (context, url, error) =>
-                                                            _buildPlaceholderThumbnail(),
+                                                    errorWidget: _buildPlaceholderThumbnail(),
                                                   )
                                                 : _buildPlaceholderThumbnail(),
                                           ),

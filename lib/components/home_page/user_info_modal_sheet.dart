@@ -4,6 +4,7 @@ import 'package:zenbu/state_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:zenbu/authentication_token_controller.dart';
 import 'package:provider/provider.dart';
+import 'package:zenbu/components/global/custom_image.dart';
 import 'package:zenbu/pages/extensions_page.dart';
 import 'package:zenbu/services/update_service.dart';
 import 'package:zenbu/pages/update_page.dart';
@@ -118,13 +119,12 @@ class _UserInfoModalSheetState extends State<UserInfoModalSheet> {
                     ),
                     borderRadius: const BorderRadius.all(Radius.circular(360)),
                   ),
-                  child: ClipOval(
-                    child: Image(
-                      height: 70,
-                      width: 70,
-                      fit: BoxFit.fill,
-                      image: NetworkImage(widget.profileImage),
-                    ),
+                  child: CustomImage(
+                    height: 70,
+                    width: 70,
+                    fit: BoxFit.fill,
+                    imageUrl: widget.profileImage,
+                    borderRadius: BorderRadius.circular(360),
                   ),
                 ),
                 const Padding(padding: EdgeInsets.all(10)),

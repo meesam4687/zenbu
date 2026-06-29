@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:zenbu/pages/error_page.dart';
 import 'package:zenbu/pages/review_page.dart';
 import 'package:zenbu/services/anilist/anilist.dart';
+import 'package:zenbu/components/global/custom_image.dart';
 
 class ReviewsPane extends StatefulWidget {
   const ReviewsPane({super.key, required this.mediaId});
@@ -206,17 +207,15 @@ class _ReviewsPaneState extends State<ReviewsPane> {
                         Row(
                           children: [
                             if (avatarUrl != null) ...[
-                              ClipOval(
-                                child: Image.network(
-                                  avatarUrl,
-                                  width: 28,
-                                  height: 28,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) =>
-                                      const Icon(
-                                        Icons.account_circle,
-                                        size: 28,
-                                      ),
+                              CustomImage(
+                                imageUrl: avatarUrl,
+                                width: 28,
+                                height: 28,
+                                fit: BoxFit.cover,
+                                borderRadius: BorderRadius.circular(360),
+                                errorWidget: const Icon(
+                                  Icons.account_circle,
+                                  size: 28,
                                 ),
                               ),
                               const SizedBox(width: 8),

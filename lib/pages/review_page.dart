@@ -3,6 +3,7 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:html/parser.dart' show parseFragment;
 import 'package:video_player/video_player.dart';
 import 'package:zenbu/components/global/spoiler.dart';
+import 'package:zenbu/components/global/custom_image.dart';
 
 class ReviewSegment {
   final String type;
@@ -211,15 +212,13 @@ class ReviewPage extends StatelessWidget {
                           style: TextStyle(fontSize: 14, color: Colors.grey),
                         ),
                         if (avatarUrl != null) ...[
-                          ClipOval(
-                            child: Image.network(
-                              avatarUrl!,
-                              width: 24,
-                              height: 24,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) =>
-                                  const Icon(Icons.account_circle, size: 24),
-                            ),
+                          CustomImage(
+                            imageUrl: avatarUrl!,
+                            width: 24,
+                            height: 24,
+                            fit: BoxFit.cover,
+                            borderRadius: BorderRadius.circular(360),
+                            errorWidget: const Icon(Icons.account_circle, size: 24),
                           ),
                           const SizedBox(width: 8),
                         ],
@@ -241,19 +240,18 @@ class ReviewPage extends StatelessWidget {
                             borderRadius: BorderRadius.circular(8),
                           ),
                           clipBehavior: Clip.antiAlias,
-                          child: Image.network(
-                            segment.content,
+                          child: CustomImage(
+                            imageUrl: segment.content,
                             fit: BoxFit.contain,
-                            errorBuilder: (context, error, stackTrace) =>
-                                Container(
-                                  height: 100,
-                                  color: Colors.black12,
-                                  alignment: Alignment.center,
-                                  child: const Icon(
-                                    Icons.broken_image,
-                                    color: Colors.grey,
-                                  ),
-                                ),
+                            errorWidget: Container(
+                              height: 100,
+                              color: Colors.black12,
+                              alignment: Alignment.center,
+                              child: const Icon(
+                                Icons.broken_image,
+                                color: Colors.grey,
+                              ),
+                            ),
                           ),
                         );
                       } else if (segment.type == 'video') {

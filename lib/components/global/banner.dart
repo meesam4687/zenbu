@@ -3,6 +3,7 @@ import 'package:zenbu/pages/media_details_page.dart';
 import 'package:zenbu/pages/character_details_page.dart';
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
+import 'package:zenbu/components/global/custom_image.dart';
 
 class AiringBanner extends StatelessWidget {
   const AiringBanner({
@@ -56,11 +57,10 @@ class AiringBanner extends StatelessWidget {
                     borderRadius: BorderRadius.circular(cardRadius),
                     child: ImageFiltered(
                       imageFilter: ui.ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-                      child: Image.network(
-                        bannerImage,
+                      child: CustomImage(
+                        imageUrl: bannerImage,
                         fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) =>
-                            Container(),
+                        errorWidget: Container(),
                       ),
                     ),
                   ),
@@ -82,11 +82,11 @@ class AiringBanner extends StatelessWidget {
                           ),
                           elevation: 5,
                           clipBehavior: Clip.antiAlias,
-                          child: Image.network(
-                            coverImage,
+                          child: CustomImage(
+                            imageUrl: coverImage,
                             fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) =>
-                                const Icon(Icons.error),
+                            borderRadius: const BorderRadius.all(Radius.circular(14)),
+                            errorWidget: const Icon(Icons.error),
                           ),
                         ),
                       ),

@@ -1,6 +1,7 @@
 import 'package:zenbu/pages/media_details_page.dart';
 import 'package:flutter/material.dart';
 import 'package:animations/animations.dart';
+import 'package:zenbu/components/global/custom_image.dart';
 
 class NotificationCard extends StatelessWidget {
   const NotificationCard({
@@ -70,11 +71,11 @@ class NotificationCard extends StatelessWidget {
                           ),
                           elevation: 5,
                           clipBehavior: Clip.antiAlias,
-                          child: Image.network(
-                            notificationData["media"]["coverImage"]["large"],
+                          child: CustomImage(
+                            imageUrl: notificationData["media"]["coverImage"]["large"],
                             fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) =>
-                                const Icon(Icons.error),
+                            borderRadius: const BorderRadius.all(Radius.circular(10)),
+                            errorWidget: const Icon(Icons.error),
                           ),
                         ),
                       ),

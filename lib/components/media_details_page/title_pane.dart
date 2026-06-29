@@ -3,6 +3,7 @@ import 'package:zenbu/components/media_details_page/list_editor_bottom_sheet.dar
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:zenbu/services/anilist/anilist.dart';
+import 'package:zenbu/components/global/custom_image.dart';
 import 'package:provider/provider.dart';
 import 'package:zenbu/state_provider.dart';
 
@@ -210,8 +211,8 @@ class _TitlePaneState extends State<TitlePane> {
                 ? Container()
                 : ImageFiltered(
                     imageFilter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                    child: Image.network(
-                      widget.banner as String,
+                    child: CustomImage(
+                      imageUrl: widget.banner as String,
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -244,11 +245,12 @@ class _TitlePaneState extends State<TitlePane> {
                           borderRadius: BorderRadius.circular(10),
                         ),
                         clipBehavior: Clip.antiAlias,
-                        child: Image.network(
-                          widget.cover,
+                        child: CustomImage(
+                          imageUrl: widget.cover,
                           fit: BoxFit.cover,
                           height: 180,
                           width: 127.38,
+                          borderRadius: BorderRadius.circular(10),
                         ),
                       ),
                     ),

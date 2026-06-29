@@ -4,6 +4,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:zenbu/models/extensions_models.dart';
 import 'package:zenbu/services/repo_service.dart';
+import 'package:zenbu/components/global/custom_image.dart';
 
 class ExtensionsPage extends StatefulWidget {
   const ExtensionsPage({super.key});
@@ -288,15 +289,15 @@ class _ExtensionsPageState extends State<ExtensionsPage>
                 child: ext.iconUrl.isNotEmpty
                     ? ClipRRect(
                         borderRadius: BorderRadius.circular(8),
-                        child: Image.network(
-                          ext.iconUrl,
+                        child: CustomImage(
+                          imageUrl: ext.iconUrl,
                           fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) =>
-                              const Icon(
-                                Icons.extension,
-                                color: Colors.blueGrey,
-                                size: 28,
-                              ),
+                          borderRadius: BorderRadius.circular(8),
+                          errorWidget: const Icon(
+                            Icons.extension,
+                            color: Colors.blueGrey,
+                            size: 28,
+                          ),
                         ),
                       )
                     : const Icon(
@@ -862,10 +863,11 @@ class _ExtensionSettingsSheetState extends State<_ExtensionSettingsSheet> {
                       child: widget.ext.iconUrl.isNotEmpty
                           ? ClipRRect(
                               borderRadius: BorderRadius.circular(8),
-                              child: Image.network(
-                                widget.ext.iconUrl,
+                              child: CustomImage(
+                                imageUrl: widget.ext.iconUrl,
                                 fit: BoxFit.cover,
-                                errorBuilder: (c, e, s) => const Icon(
+                                borderRadius: BorderRadius.circular(8),
+                                errorWidget: const Icon(
                                   Icons.extension,
                                   color: Colors.blueGrey,
                                   size: 28,

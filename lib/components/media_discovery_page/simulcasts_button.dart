@@ -2,6 +2,7 @@ import 'dart:math';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:zenbu/pages/simulcasts_page.dart';
+import 'package:zenbu/components/global/custom_image.dart';
 
 class SimulcastsButton extends StatefulWidget {
   const SimulcastsButton({super.key, required this.medias});
@@ -59,10 +60,10 @@ class _SimulcastsButtonState extends State<SimulcastsButton> {
                 borderRadius: BorderRadius.circular(15),
                 child: ImageFiltered(
                   imageFilter: ui.ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-                  child: Image.network(
-                    randomBanner,
+                  child: CustomImage(
+                    imageUrl: randomBanner,
                     fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => Container(),
+                    errorWidget: Container(),
                   ),
                 ),
               ),

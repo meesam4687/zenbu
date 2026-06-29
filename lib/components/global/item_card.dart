@@ -3,6 +3,7 @@ import 'package:zenbu/pages/character_details_page.dart';
 import 'package:zenbu/pages/staff_details_page.dart';
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
+import 'package:zenbu/components/global/custom_image.dart';
 
 class ItemCard extends StatelessWidget {
   const ItemCard({
@@ -44,12 +45,22 @@ class ItemCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(10),
                     ),
                     clipBehavior: Clip.antiAlias,
-                    child: Ink.image(
-                      image: NetworkImage(image as String),
-                      height: 180,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                      child: InkWell(onTap: openContainer),
+                    child: Stack(
+                      children: [
+                        CustomImage(
+                          imageUrl: image as String,
+                          height: 180,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        Positioned.fill(
+                          child: Material(
+                            color: Colors.transparent,
+                            child: InkWell(onTap: openContainer),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(height: 4),
