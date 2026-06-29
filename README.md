@@ -15,6 +15,17 @@ Users are solely responsible for how they use the app and any third-party servic
 
 Zenbu is not affiliated with, endorsed by, or connected to any content providers or services accessed through the app. The developers of Zenbu disclaim any liability arising from the use or misuse of third-party content or services.
 
+# Screenshots
+<div style="display: flex;">
+<img src="https://cdn.meesam.dev/zenbu/Screenshot_20260629_171223.jpg" width="200px">
+<img src="https://cdn.meesam.dev/zenbu/Screenshot_20260629_171235.jpg" width="200px">
+<img src="https://cdn.meesam.dev/zenbu/Screenshot_20260629_171244.jpg" width="200px">
+<img src="https://cdn.meesam.dev/zenbu/Screenshot_20260629_171551.jpg" width="200px">
+<img src="https://cdn.meesam.dev/zenbu/Screenshot_20260629_171730.jpg" width="200px">
+<img src="https://cdn.meesam.dev/zenbu/Screenshot_20260629_171800.jpg" width="200px">
+<img src="https://cdn.meesam.dev/zenbu/Screenshot_20260629_171837.jpg" width="200px">
+</div>
+
 # Downloads
 
 You can download the latest release from the GitHub releases page [here](https://github.com/meesam4687/zenbu/releases).
