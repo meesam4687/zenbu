@@ -14,7 +14,7 @@ Future<Map<String, dynamic>> executeQuery(
 
     if (requireAuth) {
       String? token = await TokenStorage.getAccessToken();
-      if (token == null) throw 'No authentication token';
+      if (token == null) throw Exception('No authentication token');
       headers["Authorization"] = 'Bearer $token';
     }
 
@@ -25,25 +25,28 @@ Future<Map<String, dynamic>> executeQuery(
     );
 
     if (res.statusCode == 429) {
-      throw 'Rate limited, try again later';
+      throw Exception('Rate limited, try again later');
     }
     if (res.statusCode == 403) {
-      throw 'Access forbidden (403)';
+      throw Exception('Access forbidden (403)');
     }
     if (res.statusCode != 200) {
-      throw 'Request failed with status: ${res.statusCode}';
+      throw Exception('Request failed with status: ${res.statusCode}');
     }
 
     final data = jsonDecode(res.body) as Map<String, dynamic>;
     if (data.containsKey("errors") && data["errors"] != null) {
       final errorsList = data["errors"] as List;
       if (errorsList.isNotEmpty) {
-        throw errorsList[0]["message"] ?? "An error occurred";
+        throw Exception(errorsList[0]["message"] ?? "An error occurred");
       }
     }
     return data;
   } catch (e) {
-    throw e.toString();
+    if (e is Exception) {
+      rethrow;
+    }
+    throw Exception(e.toString());
   }
 }
 

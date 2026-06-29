@@ -223,7 +223,7 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
           _cachedEngine?.lastStatusCode == 503;
       final failedUrl = _cachedEngine?.lastRequestUrl;
       setState(() {
-        _errorMessage = 'An error occurred while loading episodes.';
+        _errorMessage = 'An error occurred while loading episodes: $e';
         _is403Error = is403;
         _failedUrl = failedUrl;
       });

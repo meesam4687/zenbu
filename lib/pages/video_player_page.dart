@@ -389,8 +389,8 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
   ) async {
     String currentUrl = url;
     String? contentType;
+    final client = http.Client();
     try {
-      final client = http.Client();
       var request = http.Request('GET', Uri.parse(currentUrl))
         ..followRedirects = false;
       headers.forEach((k, v) => request.headers[k] = v);
@@ -417,7 +417,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
         contentType = response.headers['content-type'];
         await response.stream.listen((_) {}).cancel();
       }
-    } catch (_) {}
+    } catch (_) {} finally {
+      client.close();
+    }
     return _ResolvedStream(currentUrl, contentType);
   }
 

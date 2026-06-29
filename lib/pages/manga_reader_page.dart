@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:zenbu/models/extensions_models.dart';
-import 'package:zenbu/components/global/shimmer_placeholder.dart';
 import 'package:zenbu/services/js_engine.dart';
 import 'package:zenbu/services/repo_service.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
@@ -418,9 +417,21 @@ class _MangaReaderPageState extends State<MangaReaderPage>
                 httpHeaders: headers,
                 fit: BoxFit.fitWidth,
                 width: double.infinity,
-                placeholder: (context, url) => const ShimmerPlaceholder(
+                placeholder: (context, url) => Container(
                   height: 400,
-                  width: double.infinity,
+                  color: Colors.black,
+                  child: const Center(
+                    child: SizedBox(
+                      width: 32,
+                      height: 32,
+                      child: CircularProgressIndicator.adaptive(
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          Colors.white30,
+                        ),
+                        strokeWidth: 2,
+                      ),
+                    ),
+                  ),
                 ),
                 errorWidget: (context, url, error) => Container(
                   height: 300,
@@ -490,9 +501,15 @@ class _MangaReaderPageState extends State<MangaReaderPage>
                 imageUrl: url,
                 httpHeaders: headers,
                 fit: BoxFit.contain,
-                placeholder: (context, url) => const ShimmerPlaceholder(
-                  width: double.infinity,
-                  height: double.infinity,
+                placeholder: (context, url) => const Center(
+                  child: SizedBox(
+                    width: 32,
+                    height: 32,
+                    child: CircularProgressIndicator.adaptive(
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white30),
+                      strokeWidth: 2,
+                    ),
+                  ),
                 ),
                 errorWidget: (context, url, error) => Container(
                   height: 300,

@@ -30,6 +30,7 @@ class _EntireListViewState extends State<EntireListView> {
   final ScrollController _scrollController = ScrollController();
   bool _isLoading = false;
   String? _errorMessage;
+  bool _hasMore = true;
 
   @override
   void initState() {
@@ -41,12 +42,14 @@ class _EntireListViewState extends State<EntireListView> {
   void _onScroll() {
     if (_scrollController.position.pixels >=
             _scrollController.position.maxScrollExtent - 100 &&
-        !_isLoading) {
+        !_isLoading &&
+        _hasMore) {
       _loadMore();
     }
   }
 
   void _loadMore() async {
+    if (!_hasMore) return;
     setState(() {
       _isLoading = true;
       _errorMessage = null;
@@ -69,9 +72,13 @@ class _EntireListViewState extends State<EntireListView> {
       final data = await apiCall(page, 48);
 
       if (mounted) {
+        final List fetchedList = data["data"]["list"]["media"] as List;
         setState(() {
-          for (var media in (data["data"]["list"]["media"] as List)) {
+          for (var media in fetchedList) {
             medias.add(media);
+          }
+          if (fetchedList.length < 48) {
+            _hasMore = false;
           }
           page++;
           _isLoading = false;
@@ -92,6 +99,7 @@ class _EntireListViewState extends State<EntireListView> {
       medias.clear();
       page = 1;
       _errorMessage = null;
+      _hasMore = true;
     });
     _loadMore();
   }
@@ -120,13 +128,15 @@ class _EntireListViewState extends State<EntireListView> {
     try {
       final data = await apiCall(1, 48);
       if (mounted) {
+        final List fetchedList = data["data"]["list"]["media"] as List;
         setState(() {
           medias.clear();
-          for (var media in (data["data"]["list"]["media"] as List)) {
+          for (var media in fetchedList) {
             medias.add(media);
           }
           page = 2;
           _errorMessage = null;
+          _hasMore = fetchedList.length >= 48;
         });
       }
     } catch (e) {

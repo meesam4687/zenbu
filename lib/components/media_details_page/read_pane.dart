@@ -220,12 +220,13 @@ class _MangaReadPaneState extends State<MangaReadPane> {
       _loadLocalProgress();
     } catch (e) {
       if (!mounted) return;
+      debugPrint("[READ PANE ERROR] Failed to load chapters: $e");
       final is403 =
           _cachedEngine?.lastStatusCode == 403 ||
           _cachedEngine?.lastStatusCode == 503;
       final failedUrl = _cachedEngine?.lastRequestUrl;
       setState(() {
-        _errorMessage = 'An error occurred while loading chapters.';
+        _errorMessage = 'An error occurred while loading chapters: $e';
         _is403Error = is403;
         _failedUrl = failedUrl;
       });

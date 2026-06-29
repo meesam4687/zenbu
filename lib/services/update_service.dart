@@ -111,47 +111,45 @@ class UpdateService {
     required Function(double progress) onProgress,
   }) async {
     final client = http.Client();
-    final request = http.Request('GET', Uri.parse(downloadUrl));
-    final response = await client.send(request);
+    IOSink? sink;
+    try {
+      final request = http.Request('GET', Uri.parse(downloadUrl));
+      final response = await client.send(request);
 
-    if (response.statusCode != 200) {
-      throw Exception('Failed to download update: ${response.statusCode}');
+      if (response.statusCode != 200) {
+        throw Exception('Failed to download update: ${response.statusCode}');
+      }
+
+      final contentLength = response.contentLength ?? 0;
+      int downloadedBytes = 0;
+
+      final cacheDir = await getTemporaryDirectory();
+      final apkFile = File('${cacheDir.path}/app-release.apk');
+      if (await apkFile.exists()) {
+        await apkFile.delete();
+      }
+
+      sink = apkFile.openWrite();
+      await for (final chunk in response.stream) {
+        sink.add(chunk);
+        downloadedBytes += chunk.length;
+        if (contentLength > 0) {
+          onProgress(downloadedBytes / contentLength);
+        }
+      }
+      await sink.flush();
+      await sink.close();
+      sink = null;
+
+      await _pipChannel.invokeMethod('installApk', {'path': apkFile.path});
+    } catch (e) {
+      if (sink != null) {
+        await sink.close();
+      }
+      rethrow;
+    } finally {
+      client.close();
     }
-
-    final contentLength = response.contentLength ?? 0;
-    int downloadedBytes = 0;
-
-    final cacheDir = await getTemporaryDirectory();
-    final apkFile = File('${cacheDir.path}/app-release.apk');
-    if (await apkFile.exists()) {
-      await apkFile.delete();
-    }
-
-    final sink = apkFile.openWrite();
-    await response.stream
-        .listen(
-          (chunk) {
-            sink.add(chunk);
-            downloadedBytes += chunk.length;
-            if (contentLength > 0) {
-              onProgress(downloadedBytes / contentLength);
-            }
-          },
-          onDone: () async {
-            await sink.close();
-            client.close();
-            await _pipChannel.invokeMethod('installApk', {
-              'path': apkFile.path,
-            });
-          },
-          onError: (err) async {
-            await sink.close();
-            client.close();
-            throw err;
-          },
-          cancelOnError: true,
-        )
-        .asFuture();
   }
 
   static Future<void> installCachedApk() async {

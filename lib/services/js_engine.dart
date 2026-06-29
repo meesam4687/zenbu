@@ -478,27 +478,56 @@ class JsEngine {
 
   final Map<int, html_dom.Element?> _elements = {};
   int _elementKey = 0;
+  final Map<int, html_dom.Document> _documents = {};
+  int _documentKey = 0;
+
+  int _asInt(dynamic val) {
+    if (val is int) return val;
+    if (val is num) return val.toInt();
+    if (val != null) {
+      return int.tryParse(val.toString()) ?? 0;
+    }
+    return 0;
+  }
+
+  void _clearCache() {
+    _elements.clear();
+    _elementKey = 0;
+    _documents.clear();
+    _documentKey = 0;
+  }
 
   void _setupDomParser() {
+    _runtime.onMessage('parse_html', (dynamic args) {
+      final html = args[0] as String;
+      final doc = html_parser.parse(html);
+      _documentKey++;
+      _documents[_documentKey] = doc;
+      return _documentKey;
+    });
+
     _runtime.onMessage('get_doc_element', (dynamic args) {
-      final input = args[0] as String;
+      final docKey = _asInt(args[0]);
       final type = args[1] as String;
-      final doc = html_parser.parse(input);
-      final element = switch (type) {
-        'body' => doc.body,
-        'documentElement' => doc.documentElement,
-        'head' => doc.head,
-        _ => doc.parent,
-      };
+      final doc = _documents[docKey];
+      final element = doc == null
+          ? null
+          : switch (type) {
+            'body' => doc.body,
+            'documentElement' => doc.documentElement,
+            'head' => doc.head,
+            _ => doc.parent,
+          };
       _elementKey++;
       _elements[_elementKey] = element;
       return _elementKey;
     });
 
     _runtime.onMessage('get_doc_string', (dynamic args) {
-      final input = args[0] as String;
+      final docKey = _asInt(args[0]);
       final type = args[1] as String;
-      final doc = html_parser.parse(input);
+      final doc = _documents[docKey];
+      if (doc == null) return "";
       final res = switch (type) {
         'text' => doc.text,
         _ => doc.outerHtml,
@@ -508,7 +537,7 @@ class JsEngine {
 
     _runtime.onMessage('get_element_string', (dynamic args) {
       final type = args[0] as String;
-      final key = args[1] as int;
+      final key = _asInt(args[1]);
       final element = _elements[key];
       if (element == null) return "";
       final res = switch (type) {
@@ -535,11 +564,12 @@ class JsEngine {
     });
 
     _runtime.onMessage('doc_select_first', (dynamic args) {
-      final input = args[0] as String;
+      final docKey = _asInt(args[0]);
       final selector = args[1] as String;
-      final doc = html_parser.parse(input);
+      final doc = _documents[docKey];
       _elementKey++;
-      _elements[_elementKey] = _docSelectFirst(doc, selector);
+      _elements[_elementKey] =
+          doc == null ? null : _docSelectFirst(doc, selector);
       return _elementKey;
     });
 
@@ -548,12 +578,12 @@ class JsEngine {
       final dynamic second = args[1];
       String selector;
       int key;
-      if (first is int) {
-        key = first;
+      if (first is int || first is num || (first != null && int.tryParse(first.toString()) != null)) {
+        key = _asInt(first);
         selector = second as String;
       } else {
         selector = first as String;
-        key = second as int;
+        key = _asInt(second);
       }
       final element = _elements[key];
       _elementKey++;
@@ -565,7 +595,7 @@ class JsEngine {
 
     _runtime.onMessage('ele_element_sibling', (dynamic args) {
       final type = args[0] as String;
-      final key = args[1] as int;
+      final key = _asInt(args[1]);
       final ele = _elements[key];
       final element = type == 'nextElementSibling'
           ? ele?.nextElementSibling
@@ -580,21 +610,21 @@ class JsEngine {
       final dynamic second = args[1];
       String attrName;
       int key;
-      if (first is int) {
-        key = first;
+      if (first is int || first is num || (first != null && int.tryParse(first.toString()) != null)) {
+        key = _asInt(first);
         attrName = second as String;
       } else {
         attrName = first as String;
-        key = second as int;
+        key = _asInt(second);
       }
       return _elements[key]?.attributes[attrName] ?? "";
     });
 
     _runtime.onMessage('doc_attr', (dynamic args) {
-      final input = args[0] as String;
+      final docKey = _asInt(args[0]);
       final attr = args[1] as String;
-      final doc = html_parser.parse(input);
-      return doc.attributes[attr] ?? "";
+      final doc = _documents[docKey];
+      return doc?.attributes[attr] ?? "";
     });
 
     _runtime.onMessage('ele_has_attr', (dynamic args) {
@@ -602,28 +632,28 @@ class JsEngine {
       final dynamic second = args[1];
       String attr;
       int key;
-      if (first is int) {
-        key = first;
+      if (first is int || first is num || (first != null && int.tryParse(first.toString()) != null)) {
+        key = _asInt(first);
         attr = second as String;
       } else {
         attr = first as String;
-        key = second as int;
+        key = _asInt(second);
       }
       return _elements[key]?.attributes.containsKey(attr) ?? false;
     });
 
     _runtime.onMessage('doc_has_attr', (dynamic args) {
-      final input = args[0] as String;
+      final docKey = _asInt(args[0]);
       final attr = args[1] as String;
-      final doc = html_parser.parse(input);
-      return doc.attributes.containsKey(attr);
+      final doc = _documents[docKey];
+      return doc?.attributes.containsKey(attr) ?? false;
     });
 
     _runtime.onMessage('doc_xpath_first', (dynamic args) {
-      final input = args[0] as String;
+      final docKey = _asInt(args[0]);
       final xpath = args[1] as String;
-      final doc = html_parser.parse(input);
-      return _docXpathFirst(doc, xpath);
+      final doc = _documents[docKey];
+      return doc == null ? "" : _docXpathFirst(doc, xpath);
     });
 
     _runtime.onMessage('ele_xpathFirst', (dynamic args) {
@@ -631,12 +661,12 @@ class JsEngine {
       final dynamic second = args[1];
       String xpath;
       int key;
-      if (first is int) {
-        key = first;
+      if (first is int || first is num || (first != null && int.tryParse(first.toString()) != null)) {
+        key = _asInt(first);
         xpath = second as String;
       } else {
         xpath = first as String;
-        key = second as int;
+        key = _asInt(second);
       }
       final element = _elements[key];
       return element == null ? "" : _eleXpathFirst(element, xpath);
@@ -644,16 +674,16 @@ class JsEngine {
 
     _runtime.onMessage('xpathFirst', (dynamic args) {
       final xpath = args[0] as String;
-      final key = args[1] as int;
+      final key = _asInt(args[1]);
       final element = _elements[key];
       return element == null ? "" : _eleXpathFirst(element, xpath);
     });
 
     _runtime.onMessage('doc_xpath', (dynamic args) {
-      final input = args[0] as String;
+      final docKey = _asInt(args[0]);
       final xpath = args[1] as String;
-      final doc = html_parser.parse(input);
-      return json.encode(_docXpath(doc, xpath));
+      final doc = _documents[docKey];
+      return json.encode(doc == null ? <String>[] : _docXpath(doc, xpath));
     });
 
     _runtime.onMessage('ele_xpath', (dynamic args) {
@@ -661,12 +691,12 @@ class JsEngine {
       final dynamic second = args[1];
       String xpath;
       int key;
-      if (first is int) {
-        key = first;
+      if (first is int || first is num || (first != null && int.tryParse(first.toString()) != null)) {
+        key = _asInt(first);
         xpath = second as String;
       } else {
         xpath = first as String;
-        key = second as int;
+        key = _asInt(second);
       }
       final element = _elements[key];
       return json.encode(
@@ -676,7 +706,7 @@ class JsEngine {
 
     _runtime.onMessage('xpath', (dynamic args) {
       final xpath = args[0] as String;
-      final key = args[1] as int;
+      final key = _asInt(args[1]);
       final element = _elements[key];
       return json.encode(
         element == null ? <String>[] : _eleXpath(element, xpath),
@@ -684,10 +714,11 @@ class JsEngine {
     });
 
     _runtime.onMessage('doc_get_elements_by', (dynamic args) {
-      final input = args[0] as String;
+      final docKey = _asInt(args[0]);
       final type = args[1] as String;
       final name = args[2] as String;
-      final doc = html_parser.parse(input);
+      final doc = _documents[docKey];
+      if (doc == null) return json.encode(<int>[]);
       final elements = switch (type) {
         'children' => doc.children,
         'getElementsByTagName' => doc.getElementsByTagName(name),
@@ -705,7 +736,7 @@ class JsEngine {
     _runtime.onMessage('ele_get_elements_by', (dynamic args) {
       final type = args[0] as String;
       final name = args[1] as String;
-      final key = args[2] as int;
+      final key = _asInt(args[2]);
       final element = _elements[key];
       if (element == null) return json.encode(<int>[]);
       final elements = switch (type) {
@@ -723,18 +754,19 @@ class JsEngine {
     });
 
     _runtime.onMessage('doc_get_element_by_id', (dynamic args) {
-      final input = args[0] as String;
+      final docKey = _asInt(args[0]);
       final id = args[1] as String;
-      final doc = html_parser.parse(input);
+      final doc = _documents[docKey];
       _elementKey++;
-      _elements[_elementKey] = doc.getElementById(id);
+      _elements[_elementKey] = doc?.getElementById(id);
       return _elementKey;
     });
 
     _runtime.onMessage('doc_select', (dynamic args) {
-      final input = args[0] as String;
+      final docKey = _asInt(args[0]);
       final selector = args[1] as String;
-      final doc = html_parser.parse(input);
+      final doc = _documents[docKey];
+      if (doc == null) return json.encode(<int>[]);
       final elements = _docSelect(doc, selector);
       final List<int> elementKeys = [];
       for (var element in elements) {
@@ -750,12 +782,12 @@ class JsEngine {
       final dynamic second = args[1];
       String selector;
       int key;
-      if (first is int) {
-        key = first;
+      if (first is int || first is num || (first != null && int.tryParse(first.toString()) != null)) {
+        key = _asInt(first);
         selector = second as String;
       } else {
         selector = first as String;
-        key = second as int;
+        key = _asInt(second);
       }
       final element = _elements[key];
       if (element == null) return json.encode(<int>[]);
@@ -771,11 +803,15 @@ class JsEngine {
 
     _runtime.evaluate('''
       class Document {
-        constructor(html) {
-          this.html = html;
+        constructor(htmlOrKey) {
+          if (typeof htmlOrKey === 'string') {
+            this.key = sendMessage('parse_html', JSON.stringify([htmlOrKey]));
+          } else {
+            this.key = htmlOrKey;
+          }
         }
         getElement(type) {
-          const key = sendMessage('get_doc_element', JSON.stringify([this.html, type]));
+          const key = sendMessage('get_doc_element', JSON.stringify([this.key, type]));
           return new Element(key);
         }
         get body() {
@@ -791,7 +827,7 @@ class JsEngine {
           return this.getElement('parent');
         }
         getString(type) {
-          return sendMessage('get_doc_string', JSON.stringify([this.html, type]));
+          return sendMessage('get_doc_string', JSON.stringify([this.key, type]));
         }
         get text() {
           return this.getString('text');
@@ -800,29 +836,29 @@ class JsEngine {
           return this.getString('outerHtml');
         }
         selectFirst(selector) {
-          const key = sendMessage('doc_select_first', JSON.stringify([this.html, selector]));
+          const key = sendMessage('doc_select_first', JSON.stringify([this.key, selector]));
           return new Element(key);
         }
         select(selector) {
           let elements = [];
           JSON.parse(
-            sendMessage("doc_select", JSON.stringify([this.html, selector]))
+            sendMessage("doc_select", JSON.stringify([this.key, selector]))
           ).forEach((key) => {
             elements.push(new Element(key));
           });
           return elements;
         }
         xpathFirst(xpath) {
-          return sendMessage('doc_xpath_first', JSON.stringify([this.html, xpath]));
+          return sendMessage('doc_xpath_first', JSON.stringify([this.key, xpath]));
         }
         xpath(xpath) {
-          return JSON.parse(sendMessage('doc_xpath', JSON.stringify([this.html, xpath])));
+          return JSON.parse(sendMessage('doc_xpath', JSON.stringify([this.key, xpath])));
         }
         getElementsListBy(type, name) {
           name = name || '';
           let elements = [];
           JSON.parse(
-            sendMessage("doc_get_elements_by", JSON.stringify([this.html, type, name]))
+            sendMessage("doc_get_elements_by", JSON.stringify([this.key, type, name]))
           ).forEach((key) => {
             elements.push(new Element(key));
           });
@@ -838,14 +874,14 @@ class JsEngine {
           return this.getElementsListBy('getElementsByClassName', name);
         }
         getElementById(id) {
-          const key = sendMessage('doc_get_element_by_id', JSON.stringify([this.html, id]));
+          const key = sendMessage('doc_get_element_by_id', JSON.stringify([this.key, id]));
           return new Element(key);
         }
         attr(attr) {
-          return sendMessage('doc_attr', JSON.stringify([this.html, attr]));
+          return sendMessage('doc_attr', JSON.stringify([this.key, attr]));
         }
         hasAttr(attr) {
-          return sendMessage('doc_has_attr', JSON.stringify([this.html, attr]));
+          return sendMessage('doc_has_attr', JSON.stringify([this.key, attr]));
         }
       }
 
@@ -1152,6 +1188,7 @@ class JsEngine {
   }
 
   Future<List<Map<String, dynamic>>> getPopular(int page) async {
+    _clearCache();
     final res = _runtime.evaluate('jsonStringify(extension.getPopular($page))');
     final resolved = await _runtime.handlePromise(res);
     final data = json.decode(resolved.stringResult);
@@ -1159,6 +1196,7 @@ class JsEngine {
   }
 
   Future<List<Map<String, dynamic>>> search(String query, int page) async {
+    _clearCache();
     final escapedQuery = query.replaceAll('"', '\\"');
     final res = _runtime.evaluate(
       'jsonStringify(extension.search("$escapedQuery", $page, typeof extension.getFilterList === "function" ? (function() { try { return extension.getFilterList() || []; } catch(e) { return []; } })() : []))',
@@ -1170,6 +1208,7 @@ class JsEngine {
   }
 
   Future<Map<String, dynamic>> getDetail(String url) async {
+    _clearCache();
     final escapedUrl = url.replaceAll('"', '\\"');
     final res = _runtime.evaluate(
       'jsonStringify(extension.getDetail("$escapedUrl"))',
@@ -1179,6 +1218,7 @@ class JsEngine {
   }
 
   Future<List<dynamic>> getVideoList(String url) async {
+    _clearCache();
     final escapedUrl = url.replaceAll('"', '\\"');
     final res = _runtime.evaluate(
       'jsonStringify(extension.getVideoList("$escapedUrl"))',
@@ -1188,6 +1228,7 @@ class JsEngine {
   }
 
   Future<List<dynamic>> getPageList(String url) async {
+    _clearCache();
     final escapedUrl = url.replaceAll('"', '\\"');
     final res = _runtime.evaluate(
       'jsonStringify(extension.getPageList("$escapedUrl"))',
