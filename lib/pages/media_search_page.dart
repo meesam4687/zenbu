@@ -46,6 +46,7 @@ class _SearchPageState extends State<SearchPage> {
   int page = 1;
   final ScrollController _scrollController = ScrollController();
   bool _isLoading = false;
+  bool _hasMore = true;
 
   @override
   void initState() {
@@ -57,65 +58,79 @@ class _SearchPageState extends State<SearchPage> {
   void _onScroll() {
     if (_scrollController.position.pixels >=
             _scrollController.position.maxScrollExtent - 100 &&
-        !_isLoading) {
+        !_isLoading &&
+        _hasMore) {
       _loadMore();
     }
   }
 
   void _loadMore() async {
+    if (!_hasMore) return;
     setState(() {
       _isLoading = true;
     });
 
     dynamic data;
-    if (widget.isAnime) {
-      data = await searchAnime(
-        page,
-        48,
-        widget.query,
-        widget.genres,
-        widget.tags,
-        widget.season,
-        widget.releaseYear,
-        widget.format,
-        widget.airingStatus,
-        widget.countryOfOrigin,
-        widget.sourceMaterial,
-        widget.sortBy,
-        widget.genresNotIn,
-        widget.tagsNotIn,
-      );
-    } else {
-      data = await searchManga(
-        page,
-        48,
-        widget.query,
-        widget.genres,
-        widget.tags,
-        widget.releaseYear,
-        widget.format,
-        widget.airingStatus,
-        widget.countryOfOrigin,
-        widget.sourceMaterial,
-        widget.sortBy,
-        widget.genresNotIn,
-        widget.tagsNotIn,
-      );
-    }
+    try {
+      if (widget.isAnime) {
+        data = await searchAnime(
+          page,
+          48,
+          widget.query,
+          widget.genres,
+          widget.tags,
+          widget.season,
+          widget.releaseYear,
+          widget.format,
+          widget.airingStatus,
+          widget.countryOfOrigin,
+          widget.sourceMaterial,
+          widget.sortBy,
+          widget.genresNotIn,
+          widget.tagsNotIn,
+        );
+      } else {
+        data = await searchManga(
+          page,
+          48,
+          widget.query,
+          widget.genres,
+          widget.tags,
+          widget.releaseYear,
+          widget.format,
+          widget.airingStatus,
+          widget.countryOfOrigin,
+          widget.sourceMaterial,
+          widget.sortBy,
+          widget.genresNotIn,
+          widget.tagsNotIn,
+        );
+      }
 
-    if (mounted) {
-      setState(() {
-        if (data != null &&
-            data["data"] != null &&
-            data["data"]["Page"] != null &&
-            data["data"]["Page"]["media"] != null) {
-          for (var media in (data["data"]["Page"]["media"] as List)) {
+      if (mounted) {
+        final List fetchedList = (data != null &&
+                data["data"] != null &&
+                data["data"]["Page"] != null &&
+                data["data"]["Page"]["media"] != null)
+            ? (data["data"]["Page"]["media"] as List)
+            : [];
+        setState(() {
+          for (var media in fetchedList) {
             medias.add(media);
           }
-        }
-        page++;
-        _isLoading = false;
-      });
+          if (fetchedList.length < 48) {
+            _hasMore = false;
+          }
+          page++;
+          _isLoading = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -164,17 +179,19 @@ class _SearchPageState extends State<SearchPage> {
       }
 
       if (mounted) {
+        final List fetchedList = (data != null &&
+                data["data"] != null &&
+                data["data"]["Page"] != null &&
+                data["data"]["Page"]["media"] != null)
+            ? (data["data"]["Page"]["media"] as List)
+            : [];
         setState(() {
           medias.clear();
-          if (data != null &&
-              data["data"] != null &&
-              data["data"]["Page"] != null &&
-              data["data"]["Page"]["media"] != null) {
-            for (var media in (data["data"]["Page"]["media"] as List)) {
-              medias.add(media);
-            }
+          for (var media in fetchedList) {
+            medias.add(media);
           }
           page = 2;
+          _hasMore = fetchedList.length >= 48;
         });
       }
     } catch (_) {}
