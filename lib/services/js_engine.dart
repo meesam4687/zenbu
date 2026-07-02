@@ -513,11 +513,11 @@ class JsEngine {
       final element = doc == null
           ? null
           : switch (type) {
-            'body' => doc.body,
-            'documentElement' => doc.documentElement,
-            'head' => doc.head,
-            _ => doc.parent,
-          };
+              'body' => doc.body,
+              'documentElement' => doc.documentElement,
+              'head' => doc.head,
+              _ => doc.parent,
+            };
       _elementKey++;
       _elements[_elementKey] = element;
       return _elementKey;
@@ -568,8 +568,9 @@ class JsEngine {
       final selector = args[1] as String;
       final doc = _documents[docKey];
       _elementKey++;
-      _elements[_elementKey] =
-          doc == null ? null : _docSelectFirst(doc, selector);
+      _elements[_elementKey] = doc == null
+          ? null
+          : _docSelectFirst(doc, selector);
       return _elementKey;
     });
 
@@ -578,7 +579,9 @@ class JsEngine {
       final dynamic second = args[1];
       String selector;
       int key;
-      if (first is int || first is num || (first != null && int.tryParse(first.toString()) != null)) {
+      if (first is int ||
+          first is num ||
+          (first != null && int.tryParse(first.toString()) != null)) {
         key = _asInt(first);
         selector = second as String;
       } else {
@@ -610,7 +613,9 @@ class JsEngine {
       final dynamic second = args[1];
       String attrName;
       int key;
-      if (first is int || first is num || (first != null && int.tryParse(first.toString()) != null)) {
+      if (first is int ||
+          first is num ||
+          (first != null && int.tryParse(first.toString()) != null)) {
         key = _asInt(first);
         attrName = second as String;
       } else {
@@ -632,7 +637,9 @@ class JsEngine {
       final dynamic second = args[1];
       String attr;
       int key;
-      if (first is int || first is num || (first != null && int.tryParse(first.toString()) != null)) {
+      if (first is int ||
+          first is num ||
+          (first != null && int.tryParse(first.toString()) != null)) {
         key = _asInt(first);
         attr = second as String;
       } else {
@@ -661,7 +668,9 @@ class JsEngine {
       final dynamic second = args[1];
       String xpath;
       int key;
-      if (first is int || first is num || (first != null && int.tryParse(first.toString()) != null)) {
+      if (first is int ||
+          first is num ||
+          (first != null && int.tryParse(first.toString()) != null)) {
         key = _asInt(first);
         xpath = second as String;
       } else {
@@ -691,7 +700,9 @@ class JsEngine {
       final dynamic second = args[1];
       String xpath;
       int key;
-      if (first is int || first is num || (first != null && int.tryParse(first.toString()) != null)) {
+      if (first is int ||
+          first is num ||
+          (first != null && int.tryParse(first.toString()) != null)) {
         key = _asInt(first);
         xpath = second as String;
       } else {
@@ -782,7 +793,9 @@ class JsEngine {
       final dynamic second = args[1];
       String selector;
       int key;
-      if (first is int || first is num || (first != null && int.tryParse(first.toString()) != null)) {
+      if (first is int ||
+          first is num ||
+          (first != null && int.tryParse(first.toString()) != null)) {
         key = _asInt(first);
         selector = second as String;
       } else {
@@ -1107,6 +1120,13 @@ class JsEngine {
     ExtSource source,
     Map<String, dynamic> prefs,
   ) async {
+    if (sourceCode.contains('.map(rel => rel.attributes.name)')) {
+      sourceCode = sourceCode.replaceAll(
+        '.map(rel => rel.attributes.name)',
+        '.map(rel => (rel.attributes && rel.attributes.name) ? rel.attributes.name : "")',
+      );
+    }
+
     final prefsJson = json.encode(prefs);
     final sourceJson = json.encode(source.toJson());
     _runtime.evaluate('var _userPrefs = $prefsJson;');
@@ -1180,6 +1200,51 @@ class JsEngine {
               }
             }
             return this.originalGetDetail(url);
+          };
+        }
+        if (typeof DefaultExtension.prototype.getFilterList === 'function') {
+          DefaultExtension.prototype.originalGetFilterList = DefaultExtension.prototype.getFilterList;
+          DefaultExtension.prototype.getFilterList = function() {
+            try {
+              const list = this.originalGetFilterList() || [];
+              for (let i = 0; i < list.length; i++) {
+                const filter = list[i];
+                if (filter && filter.type_name === 'SelectFilter' && filter.state === undefined) {
+                  filter.state = 0;
+                }
+              }
+              return list;
+            } catch (e) {
+              console.log("Error in getFilterList: " + e);
+              return [];
+            }
+          };
+        }
+        if (typeof DefaultExtension.prototype.search === 'function') {
+          DefaultExtension.prototype.originalSearch = DefaultExtension.prototype.search;
+          DefaultExtension.prototype.search = function(query, page, filters) {
+            try {
+              filters = filters || [];
+              for (let i = 0; i < filters.length; i++) {
+                const filter = filters[i];
+                if (filter) {
+                  if (filter.type_name === 'SelectFilter' && filter.state === undefined) {
+                    filter.state = 0;
+                  }
+                  if (filter.state === undefined) {
+                    if (filter.values !== undefined) {
+                      filter.state = 0;
+                    } else {
+                      filter.state = [];
+                    }
+                  }
+                }
+              }
+              return this.originalSearch(query, page, filters);
+            } catch (e) {
+              console.log("Error in search: " + e);
+              throw e;
+            }
           };
         }
       }
