@@ -70,7 +70,7 @@ class _StaffDetailsPageState extends State<StaffDetailsPage> {
                 ),
                 CharacterRelations(
                   relations:
-                      data["data"]["Staff"]["staffMedia"]["nodes"] as List,
+                      data["data"]["Staff"]["staffMedia"]["edges"] as List,
                 ),
               ],
             ),

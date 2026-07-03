@@ -3,29 +3,32 @@ import 'package:zenbu/services/anilist/anilist_client.dart';
 Future<Map<String, dynamic>> getStaffData(int id) async {
   const String query = '''
     query(\$id: Int) {
-      Staff(id: \$id) {
+      Staff(id: \$id) { 
         name { 
-          full
-          native
+          full 
+          native 
           alternative
-        }
+        } 
         image {
-          large
+          large 
         } 
         gender 
-        description(asHtml: false) 
-        staffMedia { 
-          nodes { 
-            id 
-            title { 
-              romaji 
+        description(asHtml: false)
+        staffMedia {
+          edges { 
+            node { 
+              id 
+              title { 
+                romaji 
+              } 
+              type 
+              coverImage { 
+                extraLarge 
+              } 
             } 
-            type
-            coverImage {
-              extraLarge
-            }
-          }
-        }
+            staffRole
+          } 
+        } 
       }
     }
   ''';
