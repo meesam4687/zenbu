@@ -2,6 +2,7 @@ import 'package:zenbu/services/anilist/anilist.dart';
 import 'package:zenbu/components/character_details_page/character_description.dart';
 import 'package:zenbu/components/character_details_page/character_header.dart';
 import 'package:zenbu/components/character_details_page/character_relations.dart';
+import 'package:zenbu/components/character_details_page/character_vas.dart';
 import 'package:zenbu/pages/error_page.dart';
 import 'package:flutter/material.dart';
 
@@ -9,7 +10,6 @@ class CharacterDetailsPage extends StatefulWidget {
   const CharacterDetailsPage({super.key, required this.id});
 
   final int id;
-
   @override
   State<CharacterDetailsPage> createState() => _CharacterDetailsPageState();
 }
@@ -49,6 +49,23 @@ class _CharacterDetailsPageState extends State<CharacterDetailsPage> {
             data["data"]["Character"]["name"]["native"],
           ...((data["data"]["Character"]["name"]["alternative"] as List)),
         ];
+
+        final List<dynamic> characterVAs;
+        final character = data["data"]["Character"];
+        final mediaEdges = character["media"]?["edges"] as List? ?? [];
+        final Map<int, dynamic> uniqueVAs = {};
+        for (var edge in mediaEdges) {
+          final List<dynamic>? edgeVAs = edge["voiceActors"];
+          if (edgeVAs != null) {
+            for (var va in edgeVAs) {
+              if (va != null && va["id"] != null) {
+                uniqueVAs[va["id"]] = va;
+              }
+            }
+          }
+        }
+        characterVAs = uniqueVAs.values.toList();
+
         return Scaffold(
           appBar: AppBar(),
           body: SingleChildScrollView(
@@ -70,8 +87,9 @@ class _CharacterDetailsPageState extends State<CharacterDetailsPage> {
                 ),
                 CharacterRelations(
                   relations:
-                      data["data"]["Character"]["media"]["nodes"] as List,
+                      data["data"]["Character"]["media"]["edges"] as List,
                 ),
+                if (characterVAs.isNotEmpty) CharacterVAs(vas: characterVAs),
               ],
             ),
           ),

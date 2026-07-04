@@ -14,15 +14,27 @@ Future<Map<String, dynamic>> getCharacterData(int id) async {
         } 
         gender 
         description(asHtml: false) 
-        media { 
-          nodes { 
-            id 
-            title { 
-              romaji 
-            } 
-            type
-            coverImage {
-              extraLarge
+        media {
+          edges { 
+            node { 
+              id 
+              title { 
+                romaji 
+              } 
+              type 
+              coverImage { 
+                extraLarge 
+              } 
+            }
+            voiceActors {
+              id
+              name {
+                full
+              }
+              image {
+                large
+              }
+              languageV2
             }
           }
         }
