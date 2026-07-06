@@ -121,7 +121,9 @@ class _HomePageState extends State<HomePage> {
                                 height: 40,
                                 width: 40,
                                 fit: BoxFit.fill,
-                                imageUrl: data['data']['Viewer']['avatar']['large'] as String,
+                                imageUrl:
+                                    data['data']['Viewer']['avatar']['large']
+                                        as String,
                                 borderRadius: BorderRadius.circular(360),
                               );
                             },
@@ -130,7 +132,9 @@ class _HomePageState extends State<HomePage> {
                             height: 40,
                             width: 40,
                             fit: BoxFit.fill,
-                            imageUrl: providerData['data']['Viewer']['avatar']['large'] as String,
+                            imageUrl:
+                                providerData['data']['Viewer']['avatar']['large']
+                                    as String,
                             borderRadius: BorderRadius.circular(360),
                           ),
                   ),

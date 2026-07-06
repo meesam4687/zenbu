@@ -251,7 +251,6 @@ class _FilterSheetState extends State<FilterSheet> {
     List<String> yearArray = yearOptions(widget.maxYear);
     return LayoutBuilder(
       builder: (context, constraints) {
-        final sheetWidth = constraints.maxWidth;
         return Padding(
           padding: EdgeInsets.only(
             bottom: MediaQuery.of(context).viewInsets.bottom,
@@ -361,288 +360,300 @@ class _FilterSheetState extends State<FilterSheet> {
                         ),
                         const Padding(padding: EdgeInsets.all(6)),
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  "Release Year",
-                                  style: TextStyle(
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.bold,
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    "Release Year",
+                                    style: TextStyle(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
-                                ),
-                                const Padding(padding: EdgeInsets.all(5)),
-                                SizedBox(
-                                  width: sheetWidth * 0.44,
-                                  child: TypeAheadField(
-                                    suggestionsCallback: (pattern) {
-                                      return yearArray
-                                          .where(
-                                            (item) =>
-                                                item.toLowerCase().contains(
-                                                  pattern.toLowerCase(),
+                                  const Padding(padding: EdgeInsets.all(5)),
+                                  LayoutBuilder(
+                                    builder: (context, c) => TypeAheadField(
+                                      suggestionsCallback: (pattern) {
+                                        return yearArray
+                                            .where(
+                                              (item) =>
+                                                  item.toLowerCase().contains(
+                                                    pattern.toLowerCase(),
+                                                  ),
+                                            )
+                                            .toList();
+                                      },
+                                      itemBuilder: (context, suggestion) {
+                                        return ListTile(
+                                          title: Text(suggestion),
+                                        );
+                                      },
+                                      builder:
+                                          (context, controller, focusNode) {
+                                            return TextField(
+                                              keyboardType:
+                                                  TextInputType.number,
+                                              controller: releaseYearController,
+                                              focusNode: focusNode,
+                                              decoration: InputDecoration(
+                                                hintText: releaseYear != null
+                                                    ? releaseYear.toString()
+                                                    : "Select year",
+                                                border: OutlineInputBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(4),
                                                 ),
-                                          )
-                                          .toList();
-                                    },
-                                    itemBuilder: (context, suggestion) {
-                                      return ListTile(title: Text(suggestion));
-                                    },
-                                    builder: (context, controller, focusNode) {
-                                      return TextField(
-                                        keyboardType: TextInputType.number,
-                                        controller: releaseYearController,
-                                        focusNode: focusNode,
-                                        decoration: InputDecoration(
-                                          hintText: releaseYear != null
-                                              ? releaseYear.toString()
-                                              : "Select year",
-                                          border: OutlineInputBorder(
-                                            borderRadius: BorderRadius.circular(
-                                              4,
-                                            ),
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                    onSelected: (suggestion) {
-                                      releaseYearController.text = suggestion;
-                                    },
-                                  ),
-                                ),
-                              ],
-                            ),
-                            if (widget.isAnime)
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  const Text(
-                                    "Season",
-                                    style: TextStyle(
-                                      fontSize: 22,
-                                      fontWeight: FontWeight.bold,
+                                              ),
+                                            );
+                                          },
+                                      onSelected: (suggestion) {
+                                        releaseYearController.text = suggestion;
+                                      },
                                     ),
-                                  ),
-                                  const Padding(padding: EdgeInsets.all(5)),
-                                  DropdownMenu(
-                                    width: sheetWidth * 0.44,
-                                    hintText: season != "" ? season : "Any",
-                                    dropdownMenuEntries: const [
-                                      DropdownMenuEntry(
-                                        value: "SPRING",
-                                        label: "Spring",
-                                      ),
-                                      DropdownMenuEntry(
-                                        value: "SUMMER",
-                                        label: "Summer",
-                                      ),
-                                      DropdownMenuEntry(
-                                        value: "FALL",
-                                        label: "Fall",
-                                      ),
-                                      DropdownMenuEntry(
-                                        value: "WINTER",
-                                        label: "Winter",
-                                      ),
-                                      DropdownMenuEntry(
-                                        value: "",
-                                        label: "Any",
-                                      ),
-                                    ],
-                                    onSelected: (value) {
-                                      season = value as String;
-                                    },
-                                  ),
-                                ],
-                              )
-                            else
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  const Text(
-                                    "Country of Origin",
-                                    style: TextStyle(
-                                      fontSize: 22,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const Padding(padding: EdgeInsets.all(5)),
-                                  DropdownMenu(
-                                    width: sheetWidth * 0.44,
-                                    hintText: countryOfOrigin != ""
-                                        ? countryOfOrigin
-                                        : "Any",
-                                    dropdownMenuEntries: const [
-                                      DropdownMenuEntry(
-                                        value: "CN",
-                                        label: "China",
-                                      ),
-                                      DropdownMenuEntry(
-                                        value: "JP",
-                                        label: "Japan",
-                                      ),
-                                      DropdownMenuEntry(
-                                        value: "KR",
-                                        label: "Korea",
-                                      ),
-                                      DropdownMenuEntry(
-                                        value: "",
-                                        label: "Any",
-                                      ),
-                                    ],
-                                    onSelected: (value) {
-                                      countryOfOrigin = value as String;
-                                    },
                                   ),
                                 ],
                               ),
-                          ],
-                        ),
-                        const Padding(padding: EdgeInsets.all(6)),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  "Format",
-                                  style: TextStyle(
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.bold,
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    widget.isAnime ? "Season" : "Origin",
+                                    style: const TextStyle(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
-                                ),
-                                const Padding(padding: EdgeInsets.all(5)),
-                                DropdownMenu(
-                                  width: sheetWidth * 0.44,
-                                  hintText: format != "" ? format : "Any",
-                                  dropdownMenuEntries: widget.isAnime
-                                      ? const [
+                                  const Padding(padding: EdgeInsets.all(5)),
+                                  if (widget.isAnime)
+                                    LayoutBuilder(
+                                      builder: (context, c) => DropdownMenu(
+                                        width: c.maxWidth,
+                                        hintText: season != "" ? season : "Any",
+                                        dropdownMenuEntries: const [
                                           DropdownMenuEntry(
-                                            value: "TV",
-                                            label: "TV",
+                                            value: "SPRING",
+                                            label: "Spring",
                                           ),
                                           DropdownMenuEntry(
-                                            value: "TV_SHORT",
-                                            label: "TV Short",
+                                            value: "SUMMER",
+                                            label: "Summer",
                                           ),
                                           DropdownMenuEntry(
-                                            value: "MOVIE",
-                                            label: "Movie",
+                                            value: "FALL",
+                                            label: "Fall",
                                           ),
                                           DropdownMenuEntry(
-                                            value: "SPECIAL",
-                                            label: "Special",
-                                          ),
-                                          DropdownMenuEntry(
-                                            value: "OVA",
-                                            label: "OVA",
-                                          ),
-                                          DropdownMenuEntry(
-                                            value: "ONA",
-                                            label: "ONA",
-                                          ),
-                                          DropdownMenuEntry(
-                                            value: "MUSIC",
-                                            label: "Music",
-                                          ),
-                                          DropdownMenuEntry(
-                                            value: "",
-                                            label: "Any",
-                                          ),
-                                        ]
-                                      : const [
-                                          DropdownMenuEntry(
-                                            value: "MANGA",
-                                            label: "Manga",
-                                          ),
-                                          DropdownMenuEntry(
-                                            value: "NOVEL",
-                                            label: "Novel",
-                                          ),
-                                          DropdownMenuEntry(
-                                            value: "ONE_SHOT",
-                                            label: "One Shot",
+                                            value: "WINTER",
+                                            label: "Winter",
                                           ),
                                           DropdownMenuEntry(
                                             value: "",
                                             label: "Any",
                                           ),
                                         ],
-                                  onSelected: (value) {
-                                    format = value as String;
-                                  },
-                                ),
-                              ],
-                            ),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Text(
-                                  widget.isAnime ? "Airing Status" : "Status",
-                                  style: const TextStyle(
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                const Padding(padding: EdgeInsets.all(5)),
-                                DropdownMenu(
-                                  width: sheetWidth * 0.44,
-                                  hintText: airingStatus != ""
-                                      ? airingStatus
-                                      : "Any",
-                                  dropdownMenuEntries: const [
-                                    DropdownMenuEntry(
-                                      value: "RELEASING",
-                                      label: "Releasing",
+                                        onSelected: (value) {
+                                          season = value as String;
+                                        },
+                                      ),
+                                    )
+                                  else
+                                    LayoutBuilder(
+                                      builder: (context, c) => DropdownMenu(
+                                        width: c.maxWidth,
+                                        hintText: countryOfOrigin != ""
+                                            ? countryOfOrigin
+                                            : "Any",
+                                        dropdownMenuEntries: const [
+                                          DropdownMenuEntry(
+                                            value: "CN",
+                                            label: "China",
+                                          ),
+                                          DropdownMenuEntry(
+                                            value: "JP",
+                                            label: "Japan",
+                                          ),
+                                          DropdownMenuEntry(
+                                            value: "KR",
+                                            label: "Korea",
+                                          ),
+                                          DropdownMenuEntry(
+                                            value: "",
+                                            label: "Any",
+                                          ),
+                                        ],
+                                        onSelected: (value) {
+                                          countryOfOrigin = value as String;
+                                        },
+                                      ),
                                     ),
-                                    DropdownMenuEntry(
-                                      value: "FINISHED",
-                                      label: "Finished",
-                                    ),
-                                    DropdownMenuEntry(
-                                      value: "NOT_YET_RELEASED",
-                                      label: "Not released yet",
-                                    ),
-                                    DropdownMenuEntry(
-                                      value: "CANCELLED",
-                                      label: "Cancelled",
-                                    ),
-                                    DropdownMenuEntry(
-                                      value: "HIATUS",
-                                      label: "Hiatus",
-                                    ),
-                                    DropdownMenuEntry(value: "", label: "Any"),
-                                  ],
-                                  onSelected: (value) {
-                                    airingStatus = value as String;
-                                  },
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ],
                         ),
                         const Padding(padding: EdgeInsets.all(6)),
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: widget.isAnime
-                              ? [
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      const Text(
-                                        "Source",
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    "Format",
+                                    style: TextStyle(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const Padding(padding: EdgeInsets.all(5)),
+                                  LayoutBuilder(
+                                    builder: (context, c) => DropdownMenu(
+                                      width: c.maxWidth,
+                                      hintText: format != "" ? format : "Any",
+                                      dropdownMenuEntries: widget.isAnime
+                                          ? const [
+                                              DropdownMenuEntry(
+                                                value: "TV",
+                                                label: "TV",
+                                              ),
+                                              DropdownMenuEntry(
+                                                value: "TV_SHORT",
+                                                label: "TV Short",
+                                              ),
+                                              DropdownMenuEntry(
+                                                value: "MOVIE",
+                                                label: "Movie",
+                                              ),
+                                              DropdownMenuEntry(
+                                                value: "SPECIAL",
+                                                label: "Special",
+                                              ),
+                                              DropdownMenuEntry(
+                                                value: "OVA",
+                                                label: "OVA",
+                                              ),
+                                              DropdownMenuEntry(
+                                                value: "ONA",
+                                                label: "ONA",
+                                              ),
+                                              DropdownMenuEntry(
+                                                value: "MUSIC",
+                                                label: "Music",
+                                              ),
+                                              DropdownMenuEntry(
+                                                value: "",
+                                                label: "Any",
+                                              ),
+                                            ]
+                                          : const [
+                                              DropdownMenuEntry(
+                                                value: "MANGA",
+                                                label: "Manga",
+                                              ),
+                                              DropdownMenuEntry(
+                                                value: "NOVEL",
+                                                label: "Novel",
+                                              ),
+                                              DropdownMenuEntry(
+                                                value: "ONE_SHOT",
+                                                label: "One Shot",
+                                              ),
+                                              DropdownMenuEntry(
+                                                value: "",
+                                                label: "Any",
+                                              ),
+                                            ],
+                                      onSelected: (value) {
+                                        format = value as String;
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    widget.isAnime ? "Airing Status" : "Status",
+                                    style: const TextStyle(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const Padding(padding: EdgeInsets.all(5)),
+                                  LayoutBuilder(
+                                    builder: (context, c) => DropdownMenu(
+                                      width: c.maxWidth,
+                                      hintText: airingStatus != ""
+                                          ? airingStatus
+                                          : "Any",
+                                      dropdownMenuEntries: const [
+                                        DropdownMenuEntry(
+                                          value: "RELEASING",
+                                          label: "Releasing",
                                         ),
+                                        DropdownMenuEntry(
+                                          value: "FINISHED",
+                                          label: "Finished",
+                                        ),
+                                        DropdownMenuEntry(
+                                          value: "NOT_YET_RELEASED",
+                                          label: "Not released yet",
+                                        ),
+                                        DropdownMenuEntry(
+                                          value: "CANCELLED",
+                                          label: "Cancelled",
+                                        ),
+                                        DropdownMenuEntry(
+                                          value: "HIATUS",
+                                          label: "Hiatus",
+                                        ),
+                                        DropdownMenuEntry(
+                                          value: "",
+                                          label: "Any",
+                                        ),
+                                      ],
+                                      onSelected: (value) {
+                                        airingStatus = value as String;
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const Padding(padding: EdgeInsets.all(6)),
+                        if (widget.isAnime)
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text(
+                                      "Source",
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
                                       ),
-                                      const Padding(padding: EdgeInsets.all(5)),
-                                      DropdownMenu(
-                                        width: sheetWidth * 0.29,
+                                    ),
+                                    const Padding(padding: EdgeInsets.all(5)),
+                                    LayoutBuilder(
+                                      builder: (context, c) => DropdownMenu(
+                                        width: c.maxWidth,
                                         hintText: sourceMaterial != ""
                                             ? sourceMaterial
                                             : "Any",
@@ -718,22 +729,26 @@ class _FilterSheetState extends State<FilterSheet> {
                                           });
                                         },
                                       ),
-                                    ],
-                                  ),
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      const Text(
-                                        "Origin",
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text(
+                                      "Origin",
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
                                       ),
-                                      const Padding(padding: EdgeInsets.all(5)),
-                                      DropdownMenu(
-                                        width: sheetWidth * 0.29,
+                                    ),
+                                    const Padding(padding: EdgeInsets.all(5)),
+                                    LayoutBuilder(
+                                      builder: (context, c) => DropdownMenu(
+                                        width: c.maxWidth,
                                         hintText: countryOfOrigin != ""
                                             ? countryOfOrigin
                                             : "Any",
@@ -761,22 +776,26 @@ class _FilterSheetState extends State<FilterSheet> {
                                           });
                                         },
                                       ),
-                                    ],
-                                  ),
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      const Text(
-                                        "Sort",
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text(
+                                      "Sort",
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
                                       ),
-                                      const Padding(padding: EdgeInsets.all(5)),
-                                      DropdownMenu(
-                                        width: sheetWidth * 0.29,
+                                    ),
+                                    const Padding(padding: EdgeInsets.all(5)),
+                                    LayoutBuilder(
+                                      builder: (context, c) => DropdownMenu(
+                                        width: c.maxWidth,
                                         hintText: getSortByLabel(sortBy),
                                         dropdownMenuEntries: const [
                                           DropdownMenuEntry(
@@ -814,24 +833,32 @@ class _FilterSheetState extends State<FilterSheet> {
                                           });
                                         },
                                       ),
-                                    ],
-                                  ),
-                                ]
-                              : [
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      const Text(
-                                        "Source Material",
-                                        style: TextStyle(
-                                          fontSize: 22,
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          )
+                        else
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text(
+                                      "Source Material",
+                                      style: TextStyle(
+                                        fontSize: 22,
+                                        fontWeight: FontWeight.bold,
                                       ),
-                                      const Padding(padding: EdgeInsets.all(5)),
-                                      DropdownMenu(
-                                        width: sheetWidth * 0.44,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    const Padding(padding: EdgeInsets.all(5)),
+                                    LayoutBuilder(
+                                      builder: (context, c) => DropdownMenu(
+                                        width: c.maxWidth,
                                         hintText: sourceMaterial != ""
                                             ? sourceMaterial
                                             : "Any",
@@ -907,21 +934,26 @@ class _FilterSheetState extends State<FilterSheet> {
                                           });
                                         },
                                       ),
-                                    ],
-                                  ),
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                    children: [
-                                      const Text(
-                                        "Sort By",
-                                        style: TextStyle(
-                                          fontSize: 22,
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text(
+                                      "Sort By",
+                                      style: TextStyle(
+                                        fontSize: 22,
+                                        fontWeight: FontWeight.bold,
                                       ),
-                                      const Padding(padding: EdgeInsets.all(5)),
-                                      DropdownMenu(
-                                        width: sheetWidth * 0.44,
+                                    ),
+                                    const Padding(padding: EdgeInsets.all(5)),
+                                    LayoutBuilder(
+                                      builder: (context, c) => DropdownMenu(
+                                        width: c.maxWidth,
                                         hintText: getSortByLabel(sortBy),
                                         dropdownMenuEntries: const [
                                           DropdownMenuEntry(
@@ -959,10 +991,12 @@ class _FilterSheetState extends State<FilterSheet> {
                                           });
                                         },
                                       ),
-                                    ],
-                                  ),
-                                ],
-                        ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
                         const Padding(padding: EdgeInsets.all(10)),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,

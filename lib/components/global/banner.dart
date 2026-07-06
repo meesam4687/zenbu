@@ -75,7 +75,7 @@ class AiringBanner extends StatelessWidget {
                     children: [
                       SizedBox(
                         height: 190,
-                        width: 140,
+                        width: 135,
                         child: Card(
                           shape: const RoundedRectangleBorder(
                             borderRadius: BorderRadius.all(Radius.circular(14)),
@@ -85,7 +85,9 @@ class AiringBanner extends StatelessWidget {
                           child: CustomImage(
                             imageUrl: coverImage,
                             fit: BoxFit.cover,
-                            borderRadius: const BorderRadius.all(Radius.circular(14)),
+                            borderRadius: const BorderRadius.all(
+                              Radius.circular(14),
+                            ),
                             errorWidget: const Icon(Icons.error),
                           ),
                         ),

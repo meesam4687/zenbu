@@ -36,8 +36,8 @@ class ItemCard extends StatelessWidget {
           onTap: openContainer,
           child: Material(
             child: Ink(
-              height: 260,
-              width: 126.41,
+              height: 248,
+              width: 120.7,
               child: Column(
                 children: [
                   Card(
@@ -49,7 +49,7 @@ class ItemCard extends StatelessWidget {
                       children: [
                         CustomImage(
                           imageUrl: image as String,
-                          height: 180,
+                          height: 172,
                           width: double.infinity,
                           fit: BoxFit.cover,
                           borderRadius: BorderRadius.circular(10),

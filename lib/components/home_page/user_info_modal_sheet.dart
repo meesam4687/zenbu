@@ -104,246 +104,252 @@ class _UserInfoModalSheetState extends State<UserInfoModalSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: _hasUpdate ? 490 : 430,
-      child: Column(
-        children: [
-          Container(
-            margin: const EdgeInsets.only(top: 50, left: 20, right: 20),
-            child: Row(
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: Theme.of(context).colorScheme.onSecondary,
+    return SingleChildScrollView(
+      child: Padding(
+        padding: EdgeInsets.only(bottom: 30),
+        child: Column(
+          children: [
+            Container(
+              margin: const EdgeInsets.only(top: 50, left: 20, right: 20),
+              child: Row(
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.onSecondary,
+                      ),
+                      borderRadius: const BorderRadius.all(
+                        Radius.circular(360),
+                      ),
                     ),
-                    borderRadius: const BorderRadius.all(Radius.circular(360)),
+                    child: CustomImage(
+                      height: 70,
+                      width: 70,
+                      fit: BoxFit.fill,
+                      imageUrl: widget.profileImage,
+                      borderRadius: BorderRadius.circular(360),
+                    ),
                   ),
-                  child: CustomImage(
-                    height: 70,
-                    width: 70,
-                    fit: BoxFit.fill,
-                    imageUrl: widget.profileImage,
-                    borderRadius: BorderRadius.circular(360),
+                  const Padding(padding: EdgeInsets.all(10)),
+                  Text(
+                    widget.username,
+                    style: const TextStyle(
+                      fontSize: 25,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                const Padding(padding: EdgeInsets.all(10)),
-                Text(
-                  widget.username,
-                  style: const TextStyle(
-                    fontSize: 25,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const Padding(padding: EdgeInsets.all(15)),
-          InkWell(
-            onTap: () {
-              Navigator.of(context).pop();
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => NotificationPage()),
-              );
-            },
-            child: Container(
-              height: 60,
-              margin: const EdgeInsets.only(left: 45),
-              width: double.infinity,
-              child: const Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Icon(Icons.notifications),
-                  Padding(padding: EdgeInsets.only(left: 20)),
-                  Text("Notifications", style: TextStyle(fontSize: 18)),
                 ],
               ),
             ),
-          ),
-          InkWell(
-            onTap: () {
-              Navigator.of(context).pop();
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => const ExtensionsPage()),
-              );
-            },
-            child: Container(
-              height: 60,
-              margin: const EdgeInsets.only(left: 45),
-              width: double.infinity,
-              child: const Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Icon(Icons.extension),
-                  Padding(padding: EdgeInsets.only(left: 20)),
-                  Text("Extensions", style: TextStyle(fontSize: 18)),
-                ],
-              ),
-            ),
-          ),
-          if (!_hasUpdate) ...[
+            const Padding(padding: EdgeInsets.all(15)),
             InkWell(
-              onTap: _isChecking ? null : () => _runCheck(silent: false),
+              onTap: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => NotificationPage()),
+                );
+              },
               child: Container(
                 height: 60,
-                margin: const EdgeInsets.only(left: 45, right: 20),
+                margin: const EdgeInsets.only(left: 45),
                 width: double.infinity,
-                child: Row(
+                child: const Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    const Icon(Icons.update),
-                    const Padding(padding: EdgeInsets.only(left: 20)),
-                    const Expanded(
-                      child: Text(
-                        "Check for Updates",
-                        style: TextStyle(fontSize: 18),
-                      ),
-                    ),
-                    if (_isChecking)
-                      const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      ),
+                    Icon(Icons.notifications),
+                    Padding(padding: EdgeInsets.only(left: 20)),
+                    Text("Notifications", style: TextStyle(fontSize: 18)),
                   ],
                 ),
               ),
             ),
-          ] else ...[
-            Container(
-              margin: const EdgeInsets.only(
-                left: 45,
-                right: 20,
-                top: 8,
-                bottom: 8,
+            InkWell(
+              onTap: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const ExtensionsPage(),
+                  ),
+                );
+              },
+              child: Container(
+                height: 60,
+                margin: const EdgeInsets.only(left: 45),
+                width: double.infinity,
+                child: const Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Icon(Icons.extension),
+                    Padding(padding: EdgeInsets.only(left: 20)),
+                    Text("Extensions", style: TextStyle(fontSize: 18)),
+                  ],
+                ),
               ),
-              width: double.infinity,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
+            ),
+            if (!_hasUpdate) ...[
+              InkWell(
+                onTap: _isChecking ? null : () => _runCheck(silent: false),
+                child: Container(
+                  height: 60,
+                  margin: const EdgeInsets.only(left: 45, right: 20),
+                  width: double.infinity,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Icon(
-                        Icons.system_update_alt,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
+                      const Icon(Icons.update),
                       const Padding(padding: EdgeInsets.only(left: 20)),
-                      Text(
-                        "Update Available (${_updateInfo?.remoteVersion})",
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                      const Expanded(
+                        child: Text(
+                          "Check for Updates",
+                          style: TextStyle(fontSize: 18),
                         ),
                       ),
+                      if (_isChecking)
+                        const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
                     ],
                   ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      OutlinedButton(
-                        onPressed: _isChecking
-                            ? null
-                            : () => _runCheck(silent: false),
-                        style: OutlinedButton.styleFrom(
-                          visualDensity: VisualDensity.compact,
+                ),
+              ),
+            ] else ...[
+              Container(
+                margin: const EdgeInsets.only(
+                  left: 45,
+                  right: 20,
+                  top: 8,
+                  bottom: 8,
+                ),
+                width: double.infinity,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.system_update_alt,
+                          color: Theme.of(context).colorScheme.primary,
                         ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            if (_isChecking) ...[
-                              const SizedBox(
-                                width: 12,
-                                height: 12,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 1.5,
+                        const Padding(padding: EdgeInsets.only(left: 20)),
+                        Text(
+                          "Update Available (${_updateInfo?.remoteVersion})",
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        OutlinedButton(
+                          onPressed: _isChecking
+                              ? null
+                              : () => _runCheck(silent: false),
+                          style: OutlinedButton.styleFrom(
+                            visualDensity: VisualDensity.compact,
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (_isChecking) ...[
+                                const SizedBox(
+                                  width: 12,
+                                  height: 12,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 1.5,
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(width: 8),
+                                const SizedBox(width: 8),
+                              ],
+                              const Text("Check Again"),
                             ],
-                            const Text("Check Again"),
-                          ],
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      FilledButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  UpdatePage(updateInfo: _updateInfo!),
-                            ),
-                          );
-                        },
-                        style: FilledButton.styleFrom(
-                          visualDensity: VisualDensity.compact,
+                        const SizedBox(width: 12),
+                        FilledButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    UpdatePage(updateInfo: _updateInfo!),
+                              ),
+                            );
+                          },
+                          style: FilledButton.styleFrom(
+                            visualDensity: VisualDensity.compact,
+                          ),
+                          child: const Text("View Update"),
                         ),
-                        child: const Text("View Update"),
-                      ),
-                    ],
-                  ),
-                ],
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+            InkWell(
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      title: const Text("Logout"),
+                      content: const Text("Do you want to log out?"),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          child: const Text('Cancel'),
+                        ),
+                        FilledButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                            TokenStorage.clearTokens();
+                            Provider.of<StateProvider>(
+                              context,
+                              listen: false,
+                            ).alData = {};
+                            Provider.of<StateProvider>(
+                              context,
+                              listen: false,
+                            ).mangaDiscoveryData = {};
+                            Provider.of<StateProvider>(
+                              context,
+                              listen: false,
+                            ).animeDiscoveryData = {};
+                            Navigator.of(context).pop();
+                            Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(
+                                builder: (context) => AuthenticationPage(),
+                              ),
+                            );
+                          },
+                          child: const Text("Yes"),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+              child: Container(
+                height: 60,
+                margin: const EdgeInsets.only(left: 45),
+                width: double.infinity,
+                child: const Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Icon(Icons.logout),
+                    Padding(padding: EdgeInsets.only(left: 20)),
+                    Text("Logout", style: TextStyle(fontSize: 18)),
+                  ],
+                ),
               ),
             ),
           ],
-          InkWell(
-            onTap: () {
-              showDialog(
-                context: context,
-                builder: (context) {
-                  return AlertDialog(
-                    title: const Text("Logout"),
-                    content: const Text("Do you want to log out?"),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        child: const Text('Cancel'),
-                      ),
-                      FilledButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                          TokenStorage.clearTokens();
-                          Provider.of<StateProvider>(
-                            context,
-                            listen: false,
-                          ).alData = {};
-                          Provider.of<StateProvider>(
-                            context,
-                            listen: false,
-                          ).mangaDiscoveryData = {};
-                          Provider.of<StateProvider>(
-                            context,
-                            listen: false,
-                          ).animeDiscoveryData = {};
-                          Navigator.of(context).pop();
-                          Navigator.of(context).pushReplacement(
-                            MaterialPageRoute(
-                              builder: (context) => AuthenticationPage(),
-                            ),
-                          );
-                        },
-                        child: const Text("Yes"),
-                      ),
-                    ],
-                  );
-                },
-              );
-            },
-            child: Container(
-              height: 60,
-              margin: const EdgeInsets.only(left: 45),
-              width: double.infinity,
-              child: const Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Icon(Icons.logout),
-                  Padding(padding: EdgeInsets.only(left: 20)),
-                  Text("Logout", style: TextStyle(fontSize: 18)),
-                ],
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

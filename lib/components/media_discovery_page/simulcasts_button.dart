@@ -78,6 +78,7 @@ class _SimulcastsButtonState extends State<SimulcastsButton> {
                 children: [
                   Padding(padding: EdgeInsets.only(left: 10)),
                   Icon(
+                    color: Colors.white,
                     Icons.calendar_month,
                     // Flutter shadow ghosting bug apparently
                     // TODO: Add back when fixed
@@ -94,6 +95,7 @@ class _SimulcastsButtonState extends State<SimulcastsButton> {
                     "Simulcasts",
                     style: TextStyle(
                       fontSize: 17,
+                      color: Colors.white,
                       // Flutter shadow ghosting bug apparently
                       // TODO: Add back when fixed
                       // shadows: [
@@ -107,6 +109,7 @@ class _SimulcastsButtonState extends State<SimulcastsButton> {
                   ),
                   Spacer(),
                   Icon(
+                    color: Colors.white,
                     Icons.arrow_forward,
                     // Flutter shadow ghosting bug apparently
                     // TODO: Add back when fixed

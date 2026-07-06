@@ -182,8 +182,8 @@ class _EntireListViewState extends State<EntireListView> {
                         controller: _scrollController,
                         gridDelegate:
                             const SliverGridDelegateWithMaxCrossAxisExtent(
-                              maxCrossAxisExtent: 137.142,
-                              childAspectRatio: 100 / 200,
+                              maxCrossAxisExtent: 130.7,
+                              childAspectRatio: 120.7 / 248,
                             ),
                         itemCount: _isLoading
                             ? medias.length + 1

@@ -86,7 +86,6 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final sheetWidth = constraints.maxWidth;
         return SingleChildScrollView(
           child: Container(
             padding: const EdgeInsets.only(
@@ -101,95 +100,100 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
               spacing: 20,
               children: [
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      spacing: 10,
-                      children: [
-                        const Text(
-                          "Status",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 20,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        spacing: 10,
+                        children: [
+                          const Text(
+                            "Status",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20,
+                            ),
                           ),
-                        ),
-                        DropdownMenu(
-                          width: sheetWidth * 0.44,
-                          hintText: listStatusToText[widget.status],
-                          dropdownMenuEntries: widget.isAnime
-                              ? [
-                                  const DropdownMenuEntry(
-                                    value: "CURRENT",
-                                    label: "Watching",
-                                  ),
-                                  const DropdownMenuEntry(
-                                    value: "COMPLETED",
-                                    label: "Completed",
-                                  ),
-                                  const DropdownMenuEntry(
-                                    value: "PLANNING",
-                                    label: "Planning",
-                                  ),
-                                  const DropdownMenuEntry(
-                                    value: "DROPPED",
-                                    label: "Dropped",
-                                  ),
-                                  const DropdownMenuEntry(
-                                    value: "REPEATING",
-                                    label: "Rewatching",
-                                  ),
-                                  const DropdownMenuEntry(
-                                    value: "PAUSED",
-                                    label: "Paused",
-                                  ),
-                                ]
-                              : [
-                                  const DropdownMenuEntry(
-                                    value: "CURRENT",
-                                    label: "Reading",
-                                  ),
-                                  const DropdownMenuEntry(
-                                    value: "COMPLETED",
-                                    label: "Completed",
-                                  ),
-                                  const DropdownMenuEntry(
-                                    value: "PLANNING",
-                                    label: "Planning",
-                                  ),
-                                  const DropdownMenuEntry(
-                                    value: "DROPPED",
-                                    label: "Dropped",
-                                  ),
-                                  const DropdownMenuEntry(
-                                    value: "REPEATING",
-                                    label: "Rereading",
-                                  ),
-                                  const DropdownMenuEntry(
-                                    value: "PAUSED",
-                                    label: "Paused",
-                                  ),
-                                ],
-                          onSelected: (value) {
-                            selectedStatus = value as String;
-                          },
-                        ),
-                      ],
+                          LayoutBuilder(
+                            builder: (context, c) => DropdownMenu(
+                              width: c.maxWidth,
+                              hintText: listStatusToText[widget.status],
+                              dropdownMenuEntries: widget.isAnime
+                                  ? [
+                                      const DropdownMenuEntry(
+                                        value: "CURRENT",
+                                        label: "Watching",
+                                      ),
+                                      const DropdownMenuEntry(
+                                        value: "COMPLETED",
+                                        label: "Completed",
+                                      ),
+                                      const DropdownMenuEntry(
+                                        value: "PLANNING",
+                                        label: "Planning",
+                                      ),
+                                      const DropdownMenuEntry(
+                                        value: "DROPPED",
+                                        label: "Dropped",
+                                      ),
+                                      const DropdownMenuEntry(
+                                        value: "REPEATING",
+                                        label: "Rewatching",
+                                      ),
+                                      const DropdownMenuEntry(
+                                        value: "PAUSED",
+                                        label: "Paused",
+                                      ),
+                                    ]
+                                  : [
+                                      const DropdownMenuEntry(
+                                        value: "CURRENT",
+                                        label: "Reading",
+                                      ),
+                                      const DropdownMenuEntry(
+                                        value: "COMPLETED",
+                                        label: "Completed",
+                                      ),
+                                      const DropdownMenuEntry(
+                                        value: "PLANNING",
+                                        label: "Planning",
+                                      ),
+                                      const DropdownMenuEntry(
+                                        value: "DROPPED",
+                                        label: "Dropped",
+                                      ),
+                                      const DropdownMenuEntry(
+                                        value: "REPEATING",
+                                        label: "Rereading",
+                                      ),
+                                      const DropdownMenuEntry(
+                                        value: "PAUSED",
+                                        label: "Paused",
+                                      ),
+                                    ],
+                              onSelected: (value) {
+                                selectedStatus = value as String;
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      spacing: 10,
-                      children: [
-                        Text(
-                          widget.isAnime ? "Episodes Watched" : "Chapters Read",
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 20,
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        spacing: 10,
+                        children: [
+                          Text(
+                            "Progress",
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
-                        ),
-                        SizedBox(
-                          width: sheetWidth * 0.44,
-                          child: TextField(
+                          TextField(
                             keyboardType: TextInputType.number,
                             controller: chaptersController,
                             decoration: InputDecoration(
@@ -197,141 +201,143 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                               hintText: widget.progress.toString(),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ],
                 ),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      spacing: 10,
-                      children: [
-                        const Text(
-                          "Start Date",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 20,
-                          ),
-                        ),
-                        InkWell(
-                          borderRadius: BorderRadius.circular(4),
-                          child: SizedBox(
-                            width: sheetWidth * 0.44,
-                            height: 55,
-                            child: Container(
-                              alignment: Alignment.centerLeft,
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                border: Border.all(color: Colors.grey),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: Text(
-                                startDateString as String,
-                                style: const TextStyle(fontSize: 16),
-                              ),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        spacing: 10,
+                        children: [
+                          const Text(
+                            "Start Date",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20,
                             ),
                           ),
-                          onTap: () async {
-                            startDate = await showDatePicker(
-                              context: context,
-                              initialDate: DateTime(
-                                DateTime.now().year,
-                                DateTime.now().month,
-                                DateTime.now().day,
+                          InkWell(
+                            borderRadius: BorderRadius.circular(4),
+                            child: SizedBox(
+                              height: 55,
+                              child: Container(
+                                alignment: Alignment.centerLeft,
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  border: Border.all(color: Colors.grey),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(
+                                  startDateString as String,
+                                  style: const TextStyle(fontSize: 16),
+                                ),
                               ),
-                              firstDate: DateTime(1970),
-                              lastDate: DateTime(
-                                DateTime.now().year,
-                                DateTime.now().month,
-                                DateTime.now().day,
-                              ),
-                            );
-                            if (startDate != null) {
-                              setState(() {
-                                startDateString =
-                                    '${startDate!.day.toString()}/${startDate!.month.toString()}/${startDate!.year.toString()}';
-                              });
-                            }
-                          },
-                        ),
-                      ],
+                            ),
+                            onTap: () async {
+                              startDate = await showDatePicker(
+                                context: context,
+                                initialDate: DateTime(
+                                  DateTime.now().year,
+                                  DateTime.now().month,
+                                  DateTime.now().day,
+                                ),
+                                firstDate: DateTime(1970),
+                                lastDate: DateTime(
+                                  DateTime.now().year,
+                                  DateTime.now().month,
+                                  DateTime.now().day,
+                                ),
+                              );
+                              if (startDate != null) {
+                                setState(() {
+                                  startDateString =
+                                      '${startDate!.day.toString()}/${startDate!.month.toString()}/${startDate!.year.toString()}';
+                                });
+                              }
+                            },
+                          ),
+                        ],
+                      ),
                     ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      spacing: 10,
-                      children: [
-                        const Text(
-                          "End Date",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 20,
-                          ),
-                        ),
-                        InkWell(
-                          borderRadius: BorderRadius.circular(4),
-                          child: SizedBox(
-                            width: sheetWidth * 0.44,
-                            height: 55,
-                            child: Container(
-                              alignment: Alignment.centerLeft,
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                border: Border.all(color: Colors.grey),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: Text(
-                                endDateString as String,
-                                style: const TextStyle(fontSize: 16),
-                              ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        spacing: 10,
+                        children: [
+                          const Text(
+                            "End Date",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20,
                             ),
                           ),
-                          onTap: () async {
-                            endDate = await showDatePicker(
-                              context: context,
-                              initialDate: DateTime(
-                                DateTime.now().year,
-                                DateTime.now().month,
-                                DateTime.now().day,
+                          InkWell(
+                            borderRadius: BorderRadius.circular(4),
+                            child: SizedBox(
+                              height: 55,
+                              child: Container(
+                                alignment: Alignment.centerLeft,
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  border: Border.all(color: Colors.grey),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(
+                                  endDateString as String,
+                                  style: const TextStyle(fontSize: 16),
+                                ),
                               ),
-                              firstDate: DateTime(1970),
-                              lastDate: DateTime(
-                                DateTime.now().year,
-                                DateTime.now().month,
-                                DateTime.now().day,
-                              ),
-                            );
-                            if (endDate != null) {
-                              setState(() {
-                                endDateString =
-                                    '${endDate!.day.toString()}/${endDate!.month.toString()}/${endDate!.year.toString()}';
-                              });
-                            }
-                          },
-                        ),
-                      ],
+                            ),
+                            onTap: () async {
+                              endDate = await showDatePicker(
+                                context: context,
+                                initialDate: DateTime(
+                                  DateTime.now().year,
+                                  DateTime.now().month,
+                                  DateTime.now().day,
+                                ),
+                                firstDate: DateTime(1970),
+                                lastDate: DateTime(
+                                  DateTime.now().year,
+                                  DateTime.now().month,
+                                  DateTime.now().day,
+                                ),
+                              );
+                              if (endDate != null) {
+                                setState(() {
+                                  endDateString =
+                                      '${endDate!.day.toString()}/${endDate!.month.toString()}/${endDate!.year.toString()}';
+                                });
+                              }
+                            },
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      spacing: 10,
-                      children: [
-                        const Text(
-                          "Score",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 20,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        spacing: 10,
+                        children: [
+                          const Text(
+                            "Score",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20,
+                            ),
                           ),
-                        ),
-                        SizedBox(
-                          width: sheetWidth * 0.44,
-                          child: TextField(
+                          TextField(
                             keyboardType: TextInputType.number,
                             controller: scoreController,
                             decoration: InputDecoration(
@@ -339,23 +345,26 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                               hintText: widget.score.toString(),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      spacing: 10,
-                      children: [
-                        Text(
-                          widget.isAnime ? "Total Rewatches" : "Total Rereads",
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 20,
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        spacing: 10,
+                        children: [
+                          Text(
+                            widget.isAnime
+                                ? "Total Rewatches"
+                                : "Total Rereads",
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
-                        ),
-                        SizedBox(
-                          width: sheetWidth * 0.44,
-                          child: TextField(
+                          TextField(
                             controller: rewatchController,
                             keyboardType: TextInputType.number,
                             decoration: InputDecoration(
@@ -363,8 +372,8 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                               hintText: widget.repeatCount.toString(),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ],
                 ),

@@ -12,9 +12,9 @@ class MediaList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(top: isAnime ? 20 : 0),
+      margin: EdgeInsets.only(top: isAnime ? 10 : 15),
       width: double.infinity,
-      height: 310,
+      height: 288,
       child: Column(
         children: [
           SizedBox(
@@ -64,7 +64,7 @@ class MediaList extends StatelessWidget {
           items.isEmpty
               ? Container(
                   width: double.infinity,
-                  height: 260,
+                  height: 248,
                   alignment: Alignment.center,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -127,7 +127,7 @@ class MediaList extends StatelessWidget {
                 )
               : Container(
                   width: double.infinity,
-                  height: 260,
+                  height: 248,
                   margin: const EdgeInsets.only(left: 12, right: 12),
                   child: ListView.builder(
                     scrollDirection: Axis.horizontal,

@@ -59,31 +59,41 @@ class NotificationCard extends StatelessWidget {
                     ),
                   ),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      SizedBox(
-                        height: 160,
-                        width: 110,
-                        child: Card(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(10)),
-                          ),
-                          elevation: 5,
-                          clipBehavior: Clip.antiAlias,
-                          child: CustomImage(
-                            imageUrl: notificationData["media"]["coverImage"]["large"],
-                            fit: BoxFit.cover,
-                            borderRadius: const BorderRadius.all(Radius.circular(10)),
-                            errorWidget: const Icon(Icons.error),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 12),
+                        child: SizedBox(
+                          height: 160,
+                          width: 110,
+                          child: Card(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(10),
+                              ),
+                            ),
+                            elevation: 5,
+                            clipBehavior: Clip.antiAlias,
+                            child: CustomImage(
+                              imageUrl:
+                                  notificationData["media"]["coverImage"]["large"],
+                              fit: BoxFit.cover,
+                              borderRadius: const BorderRadius.all(
+                                Radius.circular(10),
+                              ),
+                              errorWidget: const Icon(Icons.error),
+                            ),
                           ),
                         ),
                       ),
-                      SizedBox(
-                        width: 200,
-                        child: Text(
-                          notificationText,
-                          style: TextStyle(fontSize: 16),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          child: Text(
+                            notificationText,
+                            style: TextStyle(fontSize: 16),
+                          ),
                         ),
                       ),
                     ],

@@ -17,7 +17,7 @@ class HorizontalList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 305,
+      height: 290,
       width: double.infinity,
       margin: const EdgeInsets.only(left: 15, right: 15),
       child: Column(
@@ -51,7 +51,7 @@ class HorizontalList extends StatelessWidget {
           Container(
             margin: const EdgeInsets.only(top: 12),
             width: double.infinity,
-            height: 245,
+            height: 230,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               itemCount: mediaArray.length,

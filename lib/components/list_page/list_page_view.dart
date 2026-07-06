@@ -38,8 +38,8 @@ class ListPageView extends StatelessWidget {
       child: GridView.builder(
         itemCount: list.length,
         gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-          maxCrossAxisExtent: 137.142,
-          childAspectRatio: 100 / 200,
+          maxCrossAxisExtent: 130.7,
+          childAspectRatio: 120.7 / 248,
         ),
         itemBuilder: (context, index) {
           return Padding(
