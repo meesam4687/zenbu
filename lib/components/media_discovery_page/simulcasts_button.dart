@@ -80,15 +80,13 @@ class _SimulcastsButtonState extends State<SimulcastsButton> {
                   Icon(
                     color: Colors.white,
                     Icons.calendar_month,
-                    // Flutter shadow ghosting bug apparently
-                    // TODO: Add back when fixed
-                    // shadows: [
-                    //   Shadow(
-                    //     blurRadius: 5.0,
-                    //     color: Colors.black,
-                    //     offset: Offset(0, 0),
-                    //   ),
-                    // ],
+                    shadows: [
+                      Shadow(
+                        blurRadius: 5.0,
+                        color: Colors.black,
+                        offset: Offset(0, 0),
+                      ),
+                    ],
                   ),
                   Padding(padding: EdgeInsets.only(left: 10)),
                   Text(
@@ -96,30 +94,26 @@ class _SimulcastsButtonState extends State<SimulcastsButton> {
                     style: TextStyle(
                       fontSize: 17,
                       color: Colors.white,
-                      // Flutter shadow ghosting bug apparently
-                      // TODO: Add back when fixed
-                      // shadows: [
-                      //   Shadow(
-                      //     blurRadius: 5.0,
-                      //     color: Colors.black,
-                      //     offset: Offset(0, 0),
-                      //   ),
-                      // ],
+                      shadows: [
+                        Shadow(
+                          blurRadius: 5.0,
+                          color: Colors.black,
+                          offset: Offset(0, 0),
+                        ),
+                      ],
                     ),
                   ),
                   Spacer(),
                   Icon(
                     color: Colors.white,
                     Icons.arrow_forward,
-                    // Flutter shadow ghosting bug apparently
-                    // TODO: Add back when fixed
-                    // shadows: [
-                    //   Shadow(
-                    //     blurRadius: 5.0,
-                    //     color: Colors.black,
-                    //     offset: Offset(0, 0),
-                    //   ),
-                    // ],
+                    shadows: [
+                      Shadow(
+                        blurRadius: 5.0,
+                        color: Colors.black,
+                        offset: Offset(0, 0),
+                      ),
+                    ],
                   ),
                   Padding(padding: EdgeInsets.only(right: 10)),
                 ],
