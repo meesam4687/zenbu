@@ -1,5 +1,7 @@
 import 'package:zenbu/components/global/item_card.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:zenbu/state_provider.dart';
 
 class ListPageView extends StatelessWidget {
   const ListPageView({super.key, required this.list, required this.mediaType});
@@ -35,21 +37,27 @@ class ListPageView extends StatelessWidget {
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.only(top: 10, left: 10, right: 10),
-      child: GridView.builder(
-        itemCount: list.length,
-        gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-          maxCrossAxisExtent: 130.7,
-          childAspectRatio: 120.7 / 248,
-        ),
-        itemBuilder: (context, index) {
-          return Padding(
-            padding: const EdgeInsets.only(left: 3.0),
-            child: ItemCard(
-              title: (list[index]["media"]["title"]["romaji"] as String),
-              image: list[index]["media"]["coverImage"]["extraLarge"],
-              id: list[index]["media"]["id"],
-              type: mediaType,
+      child: Consumer<StateProvider>(
+        builder: (context, provider, _) {
+          return GridView.builder(
+            itemCount: list.length,
+            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: 130.7,
+              childAspectRatio: 120.7 / 248,
             ),
+            itemBuilder: (context, index) {
+              return Padding(
+                padding: const EdgeInsets.only(left: 3.0),
+                child: ItemCard(
+                  title: provider.resolveTitle(
+                    list[index]["media"]["title"] as Map?,
+                  ),
+                  image: list[index]["media"]["coverImage"]["extraLarge"],
+                  id: list[index]["media"]["id"],
+                  type: mediaType,
+                ),
+              );
+            },
           );
         },
       ),

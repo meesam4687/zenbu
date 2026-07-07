@@ -2,6 +2,8 @@ import 'package:zenbu/pages/list_page.dart';
 import 'package:flutter/material.dart';
 import 'package:zenbu/components/global/item_card.dart';
 import 'package:zenbu/main_page_view.dart';
+import 'package:provider/provider.dart';
+import 'package:zenbu/state_provider.dart';
 
 class MediaList extends StatelessWidget {
   const MediaList({super.key, required this.items, required this.isAnime});
@@ -129,29 +131,35 @@ class MediaList extends StatelessWidget {
                   width: double.infinity,
                   height: 248,
                   margin: const EdgeInsets.only(left: 12, right: 12),
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: items.length,
-                    itemBuilder: (context, index) {
-                      final item = items[index];
-                      final int id = item['media']['id'];
-                      final progress =
-                          item["media"]["mediaListEntry"]["progress"];
-                      final total = isAnime
-                          ? (item["media"]["episodes"] ?? '?')
-                          : (item["media"]["chapters"] ?? '?');
+                  child: Consumer<StateProvider>(
+                    builder: (context, provider, _) {
+                      return ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: items.length,
+                        itemBuilder: (context, index) {
+                          final item = items[index];
+                          final int id = item['media']['id'];
+                          final progress =
+                              item["media"]["mediaListEntry"]["progress"];
+                          final total = isAnime
+                              ? (item["media"]["episodes"] ?? '?')
+                              : (item["media"]["chapters"] ?? '?');
 
-                      return Padding(
-                        padding: const EdgeInsets.only(left: 3),
-                        child: ItemCard(
-                          type: isAnime ? "anime" : "manga",
-                          id: id,
-                          title: item["media"]["title"]["romaji"] as String,
-                          state: "$progress/$total",
-                          image:
-                              item["media"]["coverImage"]["extraLarge"]
-                                  as String,
-                        ),
+                          return Padding(
+                            padding: const EdgeInsets.only(left: 3),
+                            child: ItemCard(
+                              type: isAnime ? "anime" : "manga",
+                              id: id,
+                              title: provider.resolveTitle(
+                                item["media"]["title"] as Map?,
+                              ),
+                              state: "$progress/$total",
+                              image:
+                                  item["media"]["coverImage"]["extraLarge"]
+                                      as String,
+                            ),
+                          );
+                        },
                       );
                     },
                   ),

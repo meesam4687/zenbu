@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:zenbu/services/anilist/anilist.dart';
 import 'package:zenbu/components/media_details_page/details_pane.dart';
 import 'package:zenbu/components/media_details_page/title_pane.dart';
@@ -6,6 +7,7 @@ import 'package:zenbu/components/media_details_page/watch_pane.dart';
 import 'package:zenbu/components/media_details_page/reviews_pane.dart';
 import 'package:zenbu/components/media_details_page/read_pane.dart';
 import 'package:zenbu/pages/error_page.dart';
+import 'package:zenbu/state_provider.dart';
 
 class MediaDetailsPage extends StatefulWidget {
   const MediaDetailsPage({super.key, required this.id, required this.isAnime});
@@ -55,6 +57,9 @@ class _MediaDetailsPageState extends State<MediaDetailsPage>
         }
 
         final media = snapshot.data!["data"]["Media"];
+        final titleMap = media["title"] as Map?;
+        final provider = Provider.of<StateProvider>(context, listen: false);
+        final resolvedTitle = provider.resolveTitle(titleMap);
         final totalChapters = media["chapters"]?.toString() ?? '?';
         final totalEpisodes = media["episodes"]?.toString() ?? '?';
         final progressLimit = widget.isAnime ? totalEpisodes : totalChapters;
@@ -81,13 +86,13 @@ class _MediaDetailsPageState extends State<MediaDetailsPage>
                     background: TitlePane(
                       id: widget.id as int,
                       totalEpisodes: progressLimit,
-                      title: media["title"]["romaji"] ?? '',
+                      title: resolvedTitle,
                       progress: "Progress: $currentProgress/$progressLimit",
                       cover: media["coverImage"]["extraLarge"],
                       banner: media["bannerImage"],
                       mediaState: media["mediaListEntry"]?["status"] ?? 'NONE',
                       mediaListEntry: media["mediaListEntry"],
-                      fullTitle: media["title"]["romaji"] ?? '',
+                      fullTitle: resolvedTitle,
                       isAnime: widget.isAnime,
                       isFavourite: media["isFavourite"] ?? false,
                     ),
@@ -132,7 +137,7 @@ class _MediaDetailsPageState extends State<MediaDetailsPage>
                             child: AnimeWatchPane(
                               mediaId: widget.id as int,
                               malId: media["idMal"] as int?,
-                              animeTitle: media["title"]["romaji"] ?? '',
+                              animeTitle: resolvedTitle,
                               coverImage: media["coverImage"]["extraLarge"],
                               streamingEpisodes:
                                   media["streamingEpisodes"] as List?,
@@ -161,7 +166,7 @@ class _MediaDetailsPageState extends State<MediaDetailsPage>
                               child: SizedBox(
                                 child: MangaReadPane(
                                   mediaId: widget.id as int,
-                                  mangaTitle: media["title"]["romaji"] ?? '',
+                                  mangaTitle: resolvedTitle,
                                   coverImage: media["coverImage"]["extraLarge"],
                                   anilistProgress: int.tryParse(currentProgress.toString()) ?? 0,
                                   mediaState: media["mediaListEntry"]?["status"] ?? 'NONE',

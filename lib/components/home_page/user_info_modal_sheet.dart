@@ -6,12 +6,9 @@ import 'package:zenbu/authentication_token_controller.dart';
 import 'package:provider/provider.dart';
 import 'package:zenbu/components/global/custom_image.dart';
 import 'package:zenbu/pages/extensions_page.dart';
-import 'package:zenbu/services/update_service.dart';
-import 'package:zenbu/pages/update_page.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:zenbu/pages/settings_page.dart';
 
-class UserInfoModalSheet extends StatefulWidget {
+class UserInfoModalSheet extends StatelessWidget {
   const UserInfoModalSheet({
     super.key,
     required this.profileImage,
@@ -21,86 +18,6 @@ class UserInfoModalSheet extends StatefulWidget {
   final String profileImage;
   final String username;
   final int userId;
-
-  @override
-  State<UserInfoModalSheet> createState() => _UserInfoModalSheetState();
-}
-
-class _UserInfoModalSheetState extends State<UserInfoModalSheet> {
-  bool _isChecking = false;
-  UpdateInfo? _updateInfo;
-  bool _hasUpdate = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _checkCachedUpdate();
-  }
-
-  Future<void> _checkCachedUpdate() async {
-    final prefs = await SharedPreferences.getInstance();
-    final cachedVersion = prefs.getString('cached_update_version');
-    final cachedChangelog = prefs.getString('cached_update_changelog');
-    final cachedUrl = prefs.getString('cached_update_url');
-
-    if (cachedVersion != null && cachedChangelog != null && cachedUrl != null) {
-      setState(() {
-        _hasUpdate = true;
-        _updateInfo = UpdateInfo(
-          remoteVersion: cachedVersion,
-          changelog: cachedChangelog,
-          downloadUrl: cachedUrl,
-        );
-      });
-    }
-  }
-
-  Future<void> _runCheck({bool silent = false}) async {
-    if (_isChecking) return;
-    setState(() {
-      _isChecking = true;
-    });
-
-    final info = await UpdateService.checkUpdate(force: true);
-    final prefs = await SharedPreferences.getInstance();
-
-    if (info != null) {
-      await prefs.setString('cached_update_version', info.remoteVersion);
-      await prefs.setString('cached_update_changelog', info.changelog);
-      await prefs.setString('cached_update_url', info.downloadUrl);
-
-      if (mounted) {
-        setState(() {
-          _hasUpdate = true;
-          _updateInfo = info;
-        });
-      }
-    } else {
-      await prefs.remove('cached_update_version');
-      await prefs.remove('cached_update_changelog');
-      await prefs.remove('cached_update_url');
-
-      if (mounted) {
-        setState(() {
-          _hasUpdate = false;
-          _updateInfo = null;
-        });
-        if (!silent) {
-          Fluttertoast.showToast(
-            msg: "App is up to date!",
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.BOTTOM,
-          );
-        }
-      }
-    }
-
-    if (mounted) {
-      setState(() {
-        _isChecking = false;
-      });
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -126,13 +43,13 @@ class _UserInfoModalSheetState extends State<UserInfoModalSheet> {
                       height: 70,
                       width: 70,
                       fit: BoxFit.fill,
-                      imageUrl: widget.profileImage,
+                      imageUrl: profileImage,
                       borderRadius: BorderRadius.circular(360),
                     ),
                   ),
                   const Padding(padding: EdgeInsets.all(10)),
                   Text(
-                    widget.username,
+                    username,
                     style: const TextStyle(
                       fontSize: 25,
                       fontWeight: FontWeight.bold,
@@ -186,111 +103,27 @@ class _UserInfoModalSheetState extends State<UserInfoModalSheet> {
                 ),
               ),
             ),
-            if (!_hasUpdate) ...[
-              InkWell(
-                onTap: _isChecking ? null : () => _runCheck(silent: false),
-                child: Container(
-                  height: 60,
-                  margin: const EdgeInsets.only(left: 45, right: 20),
-                  width: double.infinity,
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.update),
-                      const Padding(padding: EdgeInsets.only(left: 20)),
-                      const Expanded(
-                        child: Text(
-                          "Check for Updates",
-                          style: TextStyle(fontSize: 18),
-                        ),
-                      ),
-                      if (_isChecking)
-                        const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-            ] else ...[
-              Container(
-                margin: const EdgeInsets.only(
-                  left: 45,
-                  right: 20,
-                  top: 8,
-                  bottom: 8,
-                ),
+            InkWell(
+              onTap: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => const SettingsPage()),
+                );
+              },
+              child: Container(
+                height: 60,
+                margin: const EdgeInsets.only(left: 45),
                 width: double.infinity,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                child: const Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.system_update_alt,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                        const Padding(padding: EdgeInsets.only(left: 20)),
-                        Text(
-                          "Update Available (${_updateInfo?.remoteVersion})",
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        OutlinedButton(
-                          onPressed: _isChecking
-                              ? null
-                              : () => _runCheck(silent: false),
-                          style: OutlinedButton.styleFrom(
-                            visualDensity: VisualDensity.compact,
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              if (_isChecking) ...[
-                                const SizedBox(
-                                  width: 12,
-                                  height: 12,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 1.5,
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                              ],
-                              const Text("Check Again"),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        FilledButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    UpdatePage(updateInfo: _updateInfo!),
-                              ),
-                            );
-                          },
-                          style: FilledButton.styleFrom(
-                            visualDensity: VisualDensity.compact,
-                          ),
-                          child: const Text("View Update"),
-                        ),
-                      ],
-                    ),
+                    Icon(Icons.settings),
+                    Padding(padding: EdgeInsets.only(left: 20)),
+                    Text("Settings", style: TextStyle(fontSize: 18)),
                   ],
                 ),
               ),
-            ],
+            ),
             InkWell(
               onTap: () {
                 showDialog(

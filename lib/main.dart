@@ -38,34 +38,47 @@ class _MyAppState extends State<MyApp> {
     super.dispose();
   }
 
-  static final defaultColorScheme = ColorScheme.fromSeed(
+  static final _defaultLightScheme = ColorScheme.fromSeed(
     seedColor: Colors.deepPurple,
+  );
+  static final _defaultDarkScheme = ColorScheme.fromSeed(
+    seedColor: Colors.deepPurple,
+    brightness: Brightness.dark,
   );
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (context) {
-        return StateProvider();
-      },
-      child: DynamicColorBuilder(
-        builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
-          ColorScheme lightScheme = lightDynamic ?? defaultColorScheme;
-          ColorScheme darkScheme =
-              darkDynamic ??
-              ColorScheme.fromSeed(
-                seedColor: Colors.deepPurple,
-                brightness: Brightness.dark,
-              );
+      create: (_) => StateProvider(),
+      child: Consumer<StateProvider>(
+        builder: (context, provider, _) {
+          return DynamicColorBuilder(
+            builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
+              final seedColor = provider.seedColor;
 
-          return MaterialApp(
-            navigatorKey: _navigatorKey,
-            debugShowCheckedModeBanner: false,
-            title: 'Zenbu',
-            theme: ThemeData(colorScheme: lightScheme, useMaterial3: true),
-            darkTheme: ThemeData(colorScheme: darkScheme, useMaterial3: true),
-            themeMode: ThemeMode.system,
-            home: (token == null) ? AuthenticationPage() : MainPageView(),
+              final ColorScheme lightScheme = seedColor != null
+                  ? ColorScheme.fromSeed(seedColor: seedColor)
+                  : lightDynamic ?? _defaultLightScheme;
+              final ColorScheme darkScheme = seedColor != null
+                  ? ColorScheme.fromSeed(
+                      seedColor: seedColor,
+                      brightness: Brightness.dark,
+                    )
+                  : darkDynamic ?? _defaultDarkScheme;
+
+              return MaterialApp(
+                navigatorKey: _navigatorKey,
+                debugShowCheckedModeBanner: false,
+                title: 'Zenbu',
+                theme: ThemeData(colorScheme: lightScheme, useMaterial3: true),
+                darkTheme: ThemeData(
+                  colorScheme: darkScheme,
+                  useMaterial3: true,
+                ),
+                themeMode: provider.themeMode,
+                home: (token == null) ? AuthenticationPage() : MainPageView(),
+              );
+            },
           );
         },
       ),

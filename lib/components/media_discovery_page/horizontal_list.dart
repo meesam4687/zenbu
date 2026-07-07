@@ -1,6 +1,8 @@
 import 'package:zenbu/components/global/item_card.dart';
 import 'package:zenbu/pages/entire_list_view.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:zenbu/state_provider.dart';
 
 class HorizontalList extends StatelessWidget {
   const HorizontalList({
@@ -52,19 +54,23 @@ class HorizontalList extends StatelessWidget {
             margin: const EdgeInsets.only(top: 12),
             width: double.infinity,
             height: 230,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: mediaArray.length,
-              itemBuilder: (context, index) {
-                final Map media = mediaArray[index];
-                return Padding(
-                  padding: const EdgeInsets.only(right: 3),
-                  child: ItemCard(
-                    title: media["title"]["romaji"] ?? '',
-                    image: media["coverImage"]["large"] ?? '',
-                    id: media["id"],
-                    type: media["type"].toString().toLowerCase(),
-                  ),
+            child: Consumer<StateProvider>(
+              builder: (context, provider, _) {
+                return ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: mediaArray.length,
+                  itemBuilder: (context, index) {
+                    final Map media = mediaArray[index];
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 3),
+                      child: ItemCard(
+                        title: provider.resolveTitle(media["title"] as Map?),
+                        image: media["coverImage"]["large"] ?? '',
+                        id: media["id"],
+                        type: media["type"].toString().toLowerCase(),
+                      ),
+                    );
+                  },
                 );
               },
             ),

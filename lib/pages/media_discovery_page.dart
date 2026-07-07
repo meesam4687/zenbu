@@ -149,7 +149,8 @@ class _MediaDiscoveryPageState extends State<MediaDiscoveryPage> {
                   id: media["id"],
                   bannerImage: media["bannerImage"]?.toString() ?? '',
                   coverImage: media["coverImage"]?["large"]?.toString() ?? '',
-                  title: media["title"]?["romaji"]?.toString() ?? '',
+                  title: Provider.of<StateProvider>(context, listen: false)
+                      .resolveTitle(media["title"] as Map?),
                   totalEpisodes: widget.isAnime
                       ? (media["episodes"] != null
                             ? media["episodes"].toString()

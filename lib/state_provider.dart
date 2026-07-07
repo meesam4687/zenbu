@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class StateProvider extends ChangeNotifier {
   Map _alData = {};
@@ -8,6 +9,86 @@ class StateProvider extends ChangeNotifier {
   Map _currentMangaFilters = _defaultMangaFilters();
   String _animeSearchQuery = "";
   String _mangaSearchQuery = "";
+
+  String _titleLanguage = 'ROMAJI';
+  ThemeMode _themeMode = ThemeMode.system;
+
+  Color? _seedColor;
+
+  StateProvider() {
+    _loadSettings();
+  }
+
+  Future<void> _loadSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    _titleLanguage = prefs.getString('setting_title_language') ?? 'ROMAJI';
+    final tm = prefs.getString('setting_theme_mode') ?? 'system';
+    _themeMode = tm == 'light'
+        ? ThemeMode.light
+        : tm == 'dark'
+        ? ThemeMode.dark
+        : ThemeMode.system;
+    final seedColorValue = prefs.getInt('setting_seed_color');
+    _seedColor = seedColorValue != null ? Color(seedColorValue) : null;
+    notifyListeners();
+  }
+
+  String get titleLanguage => _titleLanguage;
+  set titleLanguage(String value) {
+    _titleLanguage = value;
+    _saveString('setting_title_language', value);
+    notifyListeners();
+  }
+
+  ThemeMode get themeMode => _themeMode;
+  set themeMode(ThemeMode value) {
+    _themeMode = value;
+    final str = value == ThemeMode.light
+        ? 'light'
+        : value == ThemeMode.dark
+        ? 'dark'
+        : 'system';
+    _saveString('setting_theme_mode', str);
+    notifyListeners();
+  }
+
+  Color? get seedColor => _seedColor;
+  set seedColor(Color? value) {
+    _seedColor = value;
+    _saveOptionalInt('setting_seed_color', value?.toARGB32());
+    notifyListeners();
+  }
+
+  Future<void> _saveString(String key, String value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(key, value);
+  }
+
+  Future<void> _saveOptionalInt(String key, int? value) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (value == null) {
+      await prefs.remove(key);
+    } else {
+      await prefs.setInt(key, value);
+    }
+  }
+
+  String resolveTitle(Map? titleMap, {String fallback = ''}) {
+    if (titleMap == null) return fallback;
+    switch (_titleLanguage) {
+      case 'ENGLISH':
+        return (titleMap['english'] as String?)?.isNotEmpty == true
+            ? titleMap['english'] as String
+            : (titleMap['romaji'] as String?) ?? fallback;
+      case 'NATIVE':
+        return (titleMap['native'] as String?)?.isNotEmpty == true
+            ? titleMap['native'] as String
+            : (titleMap['romaji'] as String?) ?? fallback;
+      case 'ROMAJI':
+      default:
+        return (titleMap['romaji'] as String?) ?? fallback;
+    }
+  }
 
   Map get alData => _alData;
   set alData(Map value) {
@@ -109,6 +190,15 @@ class StateProvider extends ChangeNotifier {
 
   void updateData(Map newData) {
     _alData = newData;
+    final lang =
+        newData['data']?['Viewer']?['options']?['titleLanguage'] as String?;
+    if (lang != null) {
+      SharedPreferences.getInstance().then((prefs) {
+        if (!prefs.containsKey('setting_title_language')) {
+          titleLanguage = lang;
+        }
+      });
+    }
     notifyListeners();
   }
 

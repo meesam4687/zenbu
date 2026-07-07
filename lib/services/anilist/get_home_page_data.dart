@@ -15,6 +15,9 @@ Future<Map<String, dynamic>> getHomePageData() async {
         name
         avatar { large }
         unreadNotificationCount
+        options {
+          titleLanguage
+        }
       }
       animeList: MediaListCollection(type: \$type, userId: \$userId, status_in: [CURRENT, REPEATING], sort: UPDATED_TIME_DESC) {
         lists {
