@@ -14,7 +14,7 @@ class MediaList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(top: isAnime ? 10 : 15),
+      margin: EdgeInsets.only(top: isAnime ? 18 : 10),
       width: double.infinity,
       height: 288,
       child: Column(
