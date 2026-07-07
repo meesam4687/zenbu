@@ -273,6 +273,7 @@ class _SearchPageState extends State<SearchPage> {
                                     .toLowerCase(),
                                 mediaListEntry:
                                     medias[index]["mediaListEntry"] as Map?,
+                                listDataPreloaded: true,
                               ),
                             );
                           },

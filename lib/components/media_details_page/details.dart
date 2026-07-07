@@ -12,6 +12,7 @@ class Details extends StatelessWidget {
       children: items.map((item) {
         return Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               item.label,
@@ -19,13 +20,16 @@ class Details extends StatelessWidget {
             ),
             const SizedBox(width: 12),
             Flexible(
-              child: Text(
-                item.value ?? "N/A",
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+              child: Container(
+                margin: EdgeInsets.only(left: 10),
+                child: Text(
+                  item.value ?? "N/A",
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.end,
                 ),
-                textAlign: TextAlign.end,
               ),
             ),
           ],

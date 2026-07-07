@@ -209,6 +209,7 @@ class _EntireListViewState extends State<EntireListView> {
                                   .toLowerCase(),
                               mediaListEntry:
                                   medias[index]["mediaListEntry"] as Map?,
+                              listDataPreloaded: true,
                             ),
                           );
                         },

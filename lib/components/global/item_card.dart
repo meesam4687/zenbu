@@ -2,7 +2,6 @@ import 'package:zenbu/pages/media_details_page.dart';
 import 'package:zenbu/pages/character_details_page.dart';
 import 'package:zenbu/pages/staff_details_page.dart';
 import 'package:zenbu/components/media_details_page/list_editor_bottom_sheet.dart';
-import 'package:zenbu/services/anilist/anilist.dart';
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -17,6 +16,7 @@ class ItemCard extends StatefulWidget {
     required this.id,
     required this.type,
     this.mediaListEntry,
+    this.listDataPreloaded = false,
   });
   final String? title;
   final String? state;
@@ -26,13 +26,13 @@ class ItemCard extends StatefulWidget {
 
   final Map? mediaListEntry;
 
+  final bool listDataPreloaded;
+
   @override
   State<ItemCard> createState() => _ItemCardState();
 }
 
 class _ItemCardState extends State<ItemCard> {
-  bool _isLoadingEditor = false;
-
   void _openListEditor(BuildContext context, Map? entry) {
     HapticFeedback.mediumImpact();
     showModalBottomSheet(
@@ -65,28 +65,9 @@ class _ItemCardState extends State<ItemCard> {
     );
   }
 
-  Future<void> _onLongPress(BuildContext context) async {
-    if (widget.mediaListEntry != null) {
-      _openListEditor(context, widget.mediaListEntry);
-      return;
-    }
-
-    if (_isLoadingEditor) return;
-    setState(() => _isLoadingEditor = true);
-    HapticFeedback.mediumImpact();
-
-    try {
-      final Map<String, dynamic> data = widget.type == 'anime'
-          ? await getAnimeData(widget.id)
-          : await getMangaData(widget.id);
-
-      if (!context.mounted) return;
-      final entry = data['data']['Media']['mediaListEntry'];
-      _openListEditor(context, entry);
-    } catch (_) {
-    } finally {
-      if (mounted) setState(() => _isLoadingEditor = false);
-    }
+  void _onLongPress(BuildContext context) {
+    if (!widget.listDataPreloaded) return;
+    _openListEditor(context, widget.mediaListEntry);
   }
 
   @override
@@ -132,22 +113,6 @@ class _ItemCardState extends State<ItemCard> {
                             child: InkWell(onTap: openContainer),
                           ),
                         ),
-                        if (_isLoadingEditor)
-                          Positioned.fill(
-                            child: Container(
-                              color: Colors.black45,
-                              child: const Center(
-                                child: SizedBox(
-                                  width: 24,
-                                  height: 24,
-                                  child: CircularProgressIndicator(
-                                    color: Colors.white,
-                                    strokeWidth: 2,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
                       ],
                     ),
                   ),

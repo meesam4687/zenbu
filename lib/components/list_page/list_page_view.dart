@@ -57,6 +57,7 @@ class ListPageView extends StatelessWidget {
                   type: mediaType,
                   mediaListEntry:
                       list[index]["media"]["mediaListEntry"] as Map?,
+                  listDataPreloaded: true,
                 ),
               );
             },

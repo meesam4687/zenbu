@@ -159,6 +159,7 @@ class MediaList extends StatelessWidget {
                                       as String,
                               mediaListEntry:
                                   item["media"]["mediaListEntry"] as Map?,
+                              listDataPreloaded: true,
                             ),
                           );
                         },

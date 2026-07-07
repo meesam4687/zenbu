@@ -349,6 +349,7 @@ class _DetailsPaneState extends State<DetailsPane>
                                         media["relations"]["edges"][index]["relationType"],
                                     mediaListEntry:
                                         media["relations"]["edges"][index]["node"]["mediaListEntry"] as Map?,
+                                    listDataPreloaded: true,
                                   ),
                                 );
                               },
@@ -447,6 +448,7 @@ class _DetailsPaneState extends State<DetailsPane>
                                         nodeMedia["coverImage"]["extraLarge"],
                                     mediaListEntry:
                                         nodeMedia["mediaListEntry"] as Map?,
+                                    listDataPreloaded: true,
                                   ),
                                 );
                               },
