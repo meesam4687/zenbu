@@ -21,6 +21,14 @@ Future<Map<String, dynamic>> getPopularSeason(int page, int perPage) async {
             episode
           }
           type
+          mediaListEntry {
+            status
+            progress
+            score
+            repeat
+            startedAt { day month year }
+            completedAt { day month year }
+          }
         }
       }
     }
@@ -57,6 +65,14 @@ Future<Map<String, dynamic>> getPopularAllTimeAnime(
             large
           }
           type
+          mediaListEntry {
+            status
+            progress
+            score
+            repeat
+            startedAt { day month year }
+            completedAt { day month year }
+          }
         }
       }
     }
@@ -83,6 +99,14 @@ Future<Map<String, dynamic>> getPopularAllTimeManga(
             large
           }
           type
+          mediaListEntry {
+            status
+            progress
+            score
+            repeat
+            startedAt { day month year }
+            completedAt { day month year }
+          }
         }
       }
     }

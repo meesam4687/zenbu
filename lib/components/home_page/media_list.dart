@@ -157,6 +157,8 @@ class MediaList extends StatelessWidget {
                               image:
                                   item["media"]["coverImage"]["extraLarge"]
                                       as String,
+                              mediaListEntry:
+                                  item["media"]["mediaListEntry"] as Map?,
                             ),
                           );
                         },

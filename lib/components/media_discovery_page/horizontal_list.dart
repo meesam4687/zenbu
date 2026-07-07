@@ -68,6 +68,7 @@ class HorizontalList extends StatelessWidget {
                         image: media["coverImage"]["large"] ?? '',
                         id: media["id"],
                         type: media["type"].toString().toLowerCase(),
+                        mediaListEntry: media["mediaListEntry"] as Map?,
                       ),
                     );
                   },

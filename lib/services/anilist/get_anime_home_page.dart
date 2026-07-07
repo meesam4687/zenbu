@@ -15,6 +15,14 @@ Future<Map<String, dynamic>> getAnimeHomePage(int page, int perPage) async {
             large
           }
           type
+          mediaListEntry {
+            status
+            progress
+            score
+            repeat
+            startedAt { day month year }
+            completedAt { day month year }
+          }
         }
       }
       popularSeason: Page(page: \$page, perPage: \$perPage) {
@@ -35,6 +43,14 @@ Future<Map<String, dynamic>> getAnimeHomePage(int page, int perPage) async {
             episode
           }
           type
+          mediaListEntry {
+            status
+            progress
+            score
+            repeat
+            startedAt { day month year }
+            completedAt { day month year }
+          }
         }
       }
       upcoming: Page(page: \$page, perPage: \$perPage) {
@@ -49,6 +65,14 @@ Future<Map<String, dynamic>> getAnimeHomePage(int page, int perPage) async {
             large
           }
           type
+          mediaListEntry {
+            status
+            progress
+            score
+            repeat
+            startedAt { day month year }
+            completedAt { day month year }
+          }
         }
       }
       allTimePopular: Page(page: \$page, perPage: \$perPage) {
@@ -63,6 +87,14 @@ Future<Map<String, dynamic>> getAnimeHomePage(int page, int perPage) async {
             large
           }
           type
+          mediaListEntry {
+            status
+            progress
+            score
+            repeat
+            startedAt { day month year }
+            completedAt { day month year }
+          }
         }
       }
       highestRated: Page(page: \$page, perPage: \$perPage) {
@@ -77,6 +109,14 @@ Future<Map<String, dynamic>> getAnimeHomePage(int page, int perPage) async {
             large
           }
           type
+          mediaListEntry {
+            status
+            progress
+            score
+            repeat
+            startedAt { day month year }
+            completedAt { day month year }
+          }
         }
       }
     }

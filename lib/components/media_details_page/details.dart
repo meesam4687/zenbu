@@ -17,9 +17,16 @@ class Details extends StatelessWidget {
               item.label,
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w300),
             ),
-            Text(
-              item.value ?? "N/A",
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            const SizedBox(width: 12),
+            Flexible(
+              child: Text(
+                item.value ?? "N/A",
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.end,
+              ),
             ),
           ],
         );

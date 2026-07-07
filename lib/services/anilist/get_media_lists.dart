@@ -20,9 +20,16 @@ Future<Map<String, dynamic>> getMediaLists() async {
               title { romaji english native }
               coverImage { extraLarge }
               episodes
-              mediaListEntry { status progress }
               status
               bannerImage
+              mediaListEntry {
+                status
+                progress
+                score
+                repeat
+                startedAt { day month year }
+                completedAt { day month year }
+              }
             }
           }
         }
@@ -37,7 +44,14 @@ Future<Map<String, dynamic>> getMediaLists() async {
               title { romaji english native }
               coverImage { extraLarge }
               chapters
-              mediaListEntry { status progress }
+              mediaListEntry {
+                status
+                progress
+                score
+                repeat
+                startedAt { day month year }
+                completedAt { day month year }
+              }
             }
           }
         }
@@ -50,9 +64,16 @@ Future<Map<String, dynamic>> getMediaLists() async {
               title { romaji english native }
               coverImage { extraLarge }
               episodes
-              mediaListEntry { status progress }
               status
               bannerImage
+              mediaListEntry {
+                status
+                progress
+                score
+                repeat
+                startedAt { day month year }
+                completedAt { day month year }
+              }
             }
           }
           manga {
@@ -61,7 +82,14 @@ Future<Map<String, dynamic>> getMediaLists() async {
               title { romaji english native }
               coverImage { extraLarge }
               chapters
-              mediaListEntry { status progress }
+              mediaListEntry {
+                status
+                progress
+                score
+                repeat
+                startedAt { day month year }
+                completedAt { day month year }
+              }
             }
           }
         }

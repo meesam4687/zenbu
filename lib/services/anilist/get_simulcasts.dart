@@ -19,7 +19,15 @@ Future<Map<String, dynamic>> getSimulcasts(
             coverImage {
               large
             } 
-            type 
+            type
+            mediaListEntry {
+              status
+              progress
+              score
+              repeat
+              startedAt { day month year }
+              completedAt { day month year }
+            }
           } 
           airingAt
         }

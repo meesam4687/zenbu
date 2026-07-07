@@ -271,6 +271,8 @@ class _SearchPageState extends State<SearchPage> {
                                 id: medias[index]["id"] as int,
                                 type: (medias[index]["type"] as String)
                                     .toLowerCase(),
+                                mediaListEntry:
+                                    medias[index]["mediaListEntry"] as Map?,
                               ),
                             );
                           },

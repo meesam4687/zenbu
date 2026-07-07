@@ -58,6 +58,8 @@ class _SimulcastPageViewState extends State<SimulcastPageView>
                   type: "anime",
                   state:
                       "Episode: ${data["data"]["Page"]["airingSchedules"][index]["episode"].toString()}",
+                  mediaListEntry:
+                      data["data"]["Page"]["airingSchedules"][index]["media"]["mediaListEntry"] as Map?,
                 ),
               );
             },

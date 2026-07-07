@@ -64,7 +64,15 @@ Future<Map<String, dynamic>> searchAnime(
           id 
           title { romaji english native }
           coverImage { large } 
-          type 
+          type
+          mediaListEntry {
+            status
+            progress
+            score
+            repeat
+            startedAt { day month year }
+            completedAt { day month year }
+          }
         }
       } 
     }
@@ -137,7 +145,15 @@ Future<Map<String, dynamic>> searchManga(
           id 
           title { romaji english native }
           coverImage { large } 
-          type 
+          type
+          mediaListEntry {
+            status
+            progress
+            score
+            repeat
+            startedAt { day month year }
+            completedAt { day month year }
+          }
         }
       } 
     }

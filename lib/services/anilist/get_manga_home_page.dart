@@ -19,6 +19,14 @@ Future<Map<String, dynamic>> getMangaHomePage(int page, int perPage) async {
           chapters
           volumes
           type
+          mediaListEntry {
+            status
+            progress
+            score
+            repeat
+            startedAt { day month year }
+            completedAt { day month year }
+          }
         }
       }
       allTimePopular: Page(page: \$page, perPage: \$perPage) {
@@ -33,6 +41,14 @@ Future<Map<String, dynamic>> getMangaHomePage(int page, int perPage) async {
             large
           }
           type
+          mediaListEntry {
+            status
+            progress
+            score
+            repeat
+            startedAt { day month year }
+            completedAt { day month year }
+          }
         }
       }
       highestRated: Page(page: \$page, perPage: \$perPage) {
@@ -47,6 +63,14 @@ Future<Map<String, dynamic>> getMangaHomePage(int page, int perPage) async {
             large
           }
           type
+          mediaListEntry {
+            status
+            progress
+            score
+            repeat
+            startedAt { day month year }
+            completedAt { day month year }
+          }
         }
       }
     }

@@ -347,6 +347,8 @@ class _DetailsPaneState extends State<DetailsPane>
                                         media["relations"]["edges"][index]["node"]["coverImage"]["extraLarge"],
                                     state:
                                         media["relations"]["edges"][index]["relationType"],
+                                    mediaListEntry:
+                                        media["relations"]["edges"][index]["node"]["mediaListEntry"] as Map?,
                                   ),
                                 );
                               },
@@ -443,6 +445,8 @@ class _DetailsPaneState extends State<DetailsPane>
                                             as String),
                                     image:
                                         nodeMedia["coverImage"]["extraLarge"],
+                                    mediaListEntry:
+                                        nodeMedia["mediaListEntry"] as Map?,
                                   ),
                                 );
                               },

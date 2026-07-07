@@ -71,6 +71,14 @@ Future<Map<String, dynamic>> getAnimeData(int id) async {
                   extraLarge
                 } 
                 type
+                mediaListEntry {
+                  status
+                  progress
+                  score
+                  repeat
+                  startedAt { day month year }
+                  completedAt { day month year }
+                }
               }
             }
           }
@@ -89,6 +97,14 @@ Future<Map<String, dynamic>> getAnimeData(int id) async {
                 }
                 coverImage {
                   extraLarge
+                }
+                mediaListEntry {
+                  status
+                  progress
+                  score
+                  repeat
+                  startedAt { day month year }
+                  completedAt { day month year }
                 }
               }
           }

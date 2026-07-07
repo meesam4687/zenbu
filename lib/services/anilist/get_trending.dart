@@ -15,6 +15,14 @@ Future<Map<String, dynamic>> getTrendingAnime(int page, int perPage) async {
             large
           }
           type
+          mediaListEntry {
+            status
+            progress
+            score
+            repeat
+            startedAt { day month year }
+            completedAt { day month year }
+          }
         }
       }
     }
@@ -42,6 +50,14 @@ Future<Map<String, dynamic>> getTrendingManga(int page, int perPage) async {
           chapters
           volumes
           type
+          mediaListEntry {
+            status
+            progress
+            score
+            repeat
+            startedAt { day month year }
+            completedAt { day month year }
+          }
         }
       }
     }
