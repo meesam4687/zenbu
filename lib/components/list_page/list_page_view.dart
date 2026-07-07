@@ -1,4 +1,5 @@
 import 'package:zenbu/components/global/item_card.dart';
+import 'package:zenbu/components/global/constant_sliver_grid_delegate.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:zenbu/state_provider.dart';
@@ -41,23 +42,25 @@ class ListPageView extends StatelessWidget {
         builder: (context, provider, _) {
           return GridView.builder(
             itemCount: list.length,
-            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-              maxCrossAxisExtent: 130.7,
-              childAspectRatio: 120.7 / 248,
+            gridDelegate: const ConstantSliverGridDelegate(
+              itemWidth: 110.0,
+              itemHeight: 226.0,
             ),
             itemBuilder: (context, index) {
-              return Padding(
-                padding: const EdgeInsets.only(left: 3.0),
-                child: ItemCard(
-                  title: provider.resolveTitle(
-                    list[index]["media"]["title"] as Map?,
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 3.0),
+                  child: ItemCard(
+                    title: provider.resolveTitle(
+                      list[index]["media"]["title"] as Map?,
+                    ),
+                    image: list[index]["media"]["coverImage"]["extraLarge"],
+                    id: list[index]["media"]["id"],
+                    type: mediaType,
+                    mediaListEntry:
+                        list[index]["media"]["mediaListEntry"] as Map?,
+                    listDataPreloaded: true,
                   ),
-                  image: list[index]["media"]["coverImage"]["extraLarge"],
-                  id: list[index]["media"]["id"],
-                  type: mediaType,
-                  mediaListEntry:
-                      list[index]["media"]["mediaListEntry"] as Map?,
-                  listDataPreloaded: true,
                 ),
               );
             },

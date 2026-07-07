@@ -1,6 +1,7 @@
 import 'package:provider/provider.dart';
 import 'package:zenbu/services/anilist/anilist.dart';
 import 'package:zenbu/components/global/item_card.dart';
+import 'package:zenbu/components/global/constant_sliver_grid_delegate.dart';
 import 'package:flutter/material.dart';
 import 'package:zenbu/components/media_discovery_page/search_segment.dart';
 import 'package:zenbu/state_provider.dart';
@@ -243,11 +244,10 @@ class _SearchPageState extends State<SearchPage> {
                         child: GridView.builder(
                           physics: const AlwaysScrollableScrollPhysics(),
                           controller: _scrollController,
-                          gridDelegate:
-                              const SliverGridDelegateWithMaxCrossAxisExtent(
-                                maxCrossAxisExtent: 130.7,
-                                childAspectRatio: 120.7 / 248,
-                              ),
+                          gridDelegate: const ConstantSliverGridDelegate(
+                            itemWidth: 110.0,
+                            itemHeight: 226.0,
+                          ),
                           itemCount: _isLoading
                               ? medias.length + 1
                               : medias.length,
@@ -260,20 +260,22 @@ class _SearchPageState extends State<SearchPage> {
                                 ),
                               );
                             }
-                            return Padding(
-                              padding: const EdgeInsets.only(left: 3.0),
-                              child: ItemCard(
-                                title:
-                                    medias[index]["title"]["romaji"] as String,
-                                image:
-                                    medias[index]["coverImage"]["large"]
-                                        as String,
-                                id: medias[index]["id"] as int,
-                                type: (medias[index]["type"] as String)
-                                    .toLowerCase(),
-                                mediaListEntry:
-                                    medias[index]["mediaListEntry"] as Map?,
-                                listDataPreloaded: true,
+                            return Center(
+                              child: Padding(
+                                padding: const EdgeInsets.only(left: 3.0),
+                                child: ItemCard(
+                                  title:
+                                      medias[index]["title"]["romaji"] as String,
+                                  image:
+                                      medias[index]["coverImage"]["large"]
+                                          as String,
+                                  id: medias[index]["id"] as int,
+                                  type: (medias[index]["type"] as String)
+                                      .toLowerCase(),
+                                  mediaListEntry:
+                                      medias[index]["mediaListEntry"] as Map?,
+                                  listDataPreloaded: true,
+                                ),
                               ),
                             );
                           },

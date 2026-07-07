@@ -89,8 +89,8 @@ class _ItemCardState extends State<ItemCard> {
           onLongPress: isMedia ? () => _onLongPress(context) : null,
           child: Material(
             child: Ink(
-              height: 248,
-              width: 120.7,
+              height: 226,
+              width: 110.0,
               child: Column(
                 children: [
                   Card(
@@ -102,7 +102,7 @@ class _ItemCardState extends State<ItemCard> {
                       children: [
                         CustomImage(
                           imageUrl: widget.image as String,
-                          height: 172,
+                          height: 156,
                           width: double.infinity,
                           fit: BoxFit.cover,
                           borderRadius: BorderRadius.circular(10),
