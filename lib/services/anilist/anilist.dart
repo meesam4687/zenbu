@@ -16,3 +16,4 @@ export 'get_notifications.dart';
 export 'get_simulcasts.dart';
 export 'toggle_favorite.dart';
 export 'get_media_reviews.dart';
+export 'get_user_profile.dart';

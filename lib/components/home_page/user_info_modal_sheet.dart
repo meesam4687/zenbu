@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:zenbu/components/global/custom_image.dart';
 import 'package:zenbu/pages/extensions_page.dart';
 import 'package:zenbu/pages/settings_page.dart';
+import 'package:zenbu/pages/user_profile_page.dart';
 
 class UserInfoModalSheet extends StatelessWidget {
   const UserInfoModalSheet({
@@ -28,34 +29,51 @@ class UserInfoModalSheet extends StatelessWidget {
           children: [
             Container(
               margin: const EdgeInsets.only(top: 50, left: 20, right: 20),
-              child: Row(
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: Theme.of(context).colorScheme.onSecondary,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(12),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => UserProfilePage(userId: userId),
+                    ),
+                  );
+                },
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: Theme.of(context).colorScheme.onSecondary,
+                          ),
+                          borderRadius: const BorderRadius.all(
+                            Radius.circular(360),
+                          ),
+                        ),
+                        child: CustomImage(
+                          height: 70,
+                          width: 70,
+                          fit: BoxFit.fill,
+                          imageUrl: profileImage,
+                          borderRadius: BorderRadius.circular(360),
+                        ),
                       ),
-                      borderRadius: const BorderRadius.all(
-                        Radius.circular(360),
+                      const Padding(padding: EdgeInsets.all(10)),
+                      Expanded(
+                        child: Text(
+                          username,
+                          style: const TextStyle(
+                            fontSize: 25,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                    ),
-                    child: CustomImage(
-                      height: 70,
-                      width: 70,
-                      fit: BoxFit.fill,
-                      imageUrl: profileImage,
-                      borderRadius: BorderRadius.circular(360),
-                    ),
+                    ],
                   ),
-                  const Padding(padding: EdgeInsets.all(10)),
-                  Text(
-                    username,
-                    style: const TextStyle(
-                      fontSize: 25,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
             const Padding(padding: EdgeInsets.all(15)),

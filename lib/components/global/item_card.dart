@@ -1,6 +1,7 @@
 import 'package:zenbu/pages/media_details_page.dart';
 import 'package:zenbu/pages/character_details_page.dart';
 import 'package:zenbu/pages/staff_details_page.dart';
+import 'package:zenbu/pages/studio_details_page.dart';
 import 'package:zenbu/components/media_details_page/list_editor_bottom_sheet.dart';
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
@@ -106,6 +107,22 @@ class _ItemCardState extends State<ItemCard> {
                           width: double.infinity,
                           fit: BoxFit.cover,
                           borderRadius: BorderRadius.circular(10),
+                          errorWidget: widget.type == 'studio'
+                              ? Container(
+                                  height: 156,
+                                  width: double.infinity,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.primaryContainer,
+                                  child: Icon(
+                                    Icons.business,
+                                    size: 40,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onPrimaryContainer,
+                                  ),
+                                )
+                              : null,
                         ),
                         Positioned.fill(
                           child: Material(
@@ -148,6 +165,11 @@ class _ItemCardState extends State<ItemCard> {
           return CharacterDetailsPage(id: widget.id);
         } else if (widget.type == "staff") {
           return StaffDetailsPage(id: widget.id);
+        } else if (widget.type == "studio") {
+          return StudioDetailsPage(
+            studioId: widget.id,
+            studioName: widget.title,
+          );
         }
         return const Placeholder();
       },

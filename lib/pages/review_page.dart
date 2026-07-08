@@ -4,6 +4,7 @@ import 'package:html/parser.dart' show parseFragment;
 import 'package:video_player/video_player.dart';
 import 'package:zenbu/components/global/spoiler.dart';
 import 'package:zenbu/components/global/custom_image.dart';
+import 'package:zenbu/pages/user_profile_page.dart';
 
 class ReviewSegment {
   final String type;
@@ -211,24 +212,57 @@ class ReviewPage extends StatelessWidget {
                           "Written by ",
                           style: TextStyle(fontSize: 14, color: Colors.grey),
                         ),
-                        if (avatarUrl != null) ...[
-                          CustomImage(
-                            imageUrl: avatarUrl!,
-                            width: 24,
-                            height: 24,
-                            fit: BoxFit.cover,
-                            borderRadius: BorderRadius.circular(360),
-                            errorWidget: const Icon(Icons.account_circle, size: 24),
+                        if (username != null)
+                          InkWell(
+                            borderRadius: BorderRadius.circular(8),
+                            onTap: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      UserProfilePage(username: username),
+                                ),
+                              );
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 4.0,
+                                vertical: 2.0,
+                              ),
+                              child: Row(
+                                children: [
+                                  if (avatarUrl != null) ...[
+                                    CustomImage(
+                                      imageUrl: avatarUrl!,
+                                      width: 24,
+                                      height: 24,
+                                      fit: BoxFit.cover,
+                                      borderRadius: BorderRadius.circular(360),
+                                      errorWidget: const Icon(
+                                        Icons.account_circle,
+                                        size: 24,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                  ],
+                                  Text(
+                                    username!,
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )
+                        else
+                          const Text(
+                            "Anonymous",
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                          const SizedBox(width: 8),
-                        ],
-                        Text(
-                          username ?? "Anonymous",
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
                       ],
                     ),
                     const Divider(height: 32),
