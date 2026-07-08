@@ -1,7 +1,100 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:zenbu/services/update_service.dart';
 
 class StateProvider extends ChangeNotifier {
+  bool _isDownloadingUpdate = false;
+  double _updateDownloadProgress = 0.0;
+  UpdateInfo? _downloadingUpdateInfo;
+  bool _isUpdateApkDownloaded = false;
+
+  bool get isDownloadingUpdate => _isDownloadingUpdate;
+  double get updateDownloadProgress => _updateDownloadProgress;
+  UpdateInfo? get downloadingUpdateInfo => _downloadingUpdateInfo;
+  bool get isUpdateApkDownloaded => _isUpdateApkDownloaded;
+
+  Future<void> checkDownloadedApk(String remoteVersion) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final downloadedVersion = prefs.getString('downloaded_apk_version');
+      if (downloadedVersion == remoteVersion) {
+        final tempDir = await getTemporaryDirectory();
+        final file = File('${tempDir.path}/app-release.apk');
+        if (await file.exists()) {
+          _isUpdateApkDownloaded = true;
+          notifyListeners();
+          return;
+        }
+      }
+    } catch (_) {}
+    _isUpdateApkDownloaded = false;
+    notifyListeners();
+  }
+
+  bool _isCancelledByUser = false;
+
+  void cancelUpdateDownload() {
+    _isCancelledByUser = true;
+    UpdateService.cancelDownload();
+    _isDownloadingUpdate = false;
+    notifyListeners();
+  }
+
+  Future<void> startUpdateDownload(UpdateInfo info) async {
+    if (_isDownloadingUpdate) return;
+    _isDownloadingUpdate = true;
+    _updateDownloadProgress = 0.0;
+    _downloadingUpdateInfo = info;
+    _isUpdateApkDownloaded = false;
+    _isCancelledByUser = false;
+    notifyListeners();
+
+    int lastNotifiedProgress = -1;
+
+    try {
+      try {
+        await const MethodChannel('zenbu/pip').invokeMethod('showDownloadingNotification', {'progress': 0});
+      } catch (_) {}
+
+      await UpdateService.downloadAndInstallApk(
+        downloadUrl: info.downloadUrl,
+        onProgress: (progress) {
+          if (_isCancelledByUser) return;
+          _updateDownloadProgress = progress;
+          notifyListeners();
+          
+          final progressPercent = (progress * 100).toInt();
+          if (progressPercent != lastNotifiedProgress) {
+            lastNotifiedProgress = progressPercent;
+            const MethodChannel('zenbu/pip').invokeMethod(
+              'showDownloadingNotification',
+              {'progress': progressPercent},
+            );
+          }
+        },
+      );
+
+      if (_isCancelledByUser) return;
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('downloaded_apk_version', info.remoteVersion);
+      _isUpdateApkDownloaded = true;
+    } catch (e) {
+      if (!_isCancelledByUser) {
+        rethrow;
+      }
+    } finally {
+      _isDownloadingUpdate = false;
+      notifyListeners();
+      try {
+        await const MethodChannel('zenbu/pip').invokeMethod('dismissDownloadingNotification');
+      } catch (_) {}
+    }
+  }
+
   Map _alData = {};
   Map _animeDiscoveryData = {};
   Map _mangaDiscoveryData = {};

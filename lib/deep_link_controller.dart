@@ -11,6 +11,9 @@ import 'package:zenbu/pages/staff_details_page.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:zenbu/pages/extensions_page.dart';
 import 'package:zenbu/services/repo_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:zenbu/services/update_service.dart';
+import 'package:zenbu/pages/update_page.dart';
 
 class DeepLinkController {
   final GlobalKey<NavigatorState> navigatorKey;
@@ -94,6 +97,28 @@ class DeepLinkController {
     }
 
     if (uri.scheme == 'zenbu') {
+      if (uri.host == 'update') {
+        try {
+          final prefs = await SharedPreferences.getInstance();
+          final v = prefs.getString('cached_update_version');
+          final c = prefs.getString('cached_update_changelog');
+          final u = prefs.getString('cached_update_url');
+          if (v != null && c != null && u != null) {
+            final info = UpdateInfo(
+              remoteVersion: v,
+              changelog: c,
+              downloadUrl: u,
+            );
+            navigatorKey.currentState?.push(
+              MaterialPageRoute(builder: (context) => UpdatePage(updateInfo: info)),
+            );
+          }
+        } catch (e) {
+          debugPrint('Failed to open update page from deep link: $e');
+        }
+        return;
+      }
+
       try {
         final fragment = uri.fragment;
         final params = Uri.splitQueryString(fragment);

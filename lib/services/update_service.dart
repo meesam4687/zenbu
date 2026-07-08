@@ -21,6 +21,12 @@ class UpdateInfo {
 
 class UpdateService {
   static const _pipChannel = MethodChannel('zenbu/pip');
+  static http.Client? _activeClient;
+
+  static void cancelDownload() {
+    _activeClient?.close();
+    _activeClient = null;
+  }
 
   static Future<UpdateInfo?> checkUpdate({bool force = false}) async {
     try {
@@ -111,6 +117,7 @@ class UpdateService {
     required Function(double progress) onProgress,
   }) async {
     final client = http.Client();
+    _activeClient = client;
     IOSink? sink;
     try {
       final request = http.Request('GET', Uri.parse(downloadUrl));
@@ -149,6 +156,9 @@ class UpdateService {
       rethrow;
     } finally {
       client.close();
+      if (_activeClient == client) {
+        _activeClient = null;
+      }
     }
   }
 
