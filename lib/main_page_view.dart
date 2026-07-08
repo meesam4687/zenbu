@@ -51,6 +51,8 @@ class MainPageViewState extends State<MainPageView> {
             builder: (context) => UpdatePage(updateInfo: updateInfo),
           ),
         );
+      } else {
+        await UpdateService.clearUpdateCache();
       }
     });
   }

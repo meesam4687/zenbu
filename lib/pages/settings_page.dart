@@ -64,9 +64,7 @@ class _SettingsPageState extends State<SettingsPage> {
         });
       }
     } else {
-      await prefs.remove('cached_update_version');
-      await prefs.remove('cached_update_changelog');
-      await prefs.remove('cached_update_url');
+      await UpdateService.clearUpdateCache();
       if (mounted) {
         setState(() {
           _hasUpdate = false;

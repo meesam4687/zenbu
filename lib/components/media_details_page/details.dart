@@ -24,9 +24,12 @@ class Details extends StatelessWidget {
                 margin: EdgeInsets.only(left: 10),
                 child: Text(
                   item.value ?? "N/A",
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
+                    color: (item.label == "Next Episode in")
+                        ? Theme.of(context).colorScheme.surfaceTint
+                        : null,
                   ),
                   textAlign: TextAlign.end,
                 ),

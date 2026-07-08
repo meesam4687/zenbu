@@ -170,6 +170,22 @@ class UpdateService {
     }
   }
 
+  static Future<void> clearUpdateCache() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('cached_update_version');
+      await prefs.remove('cached_update_changelog');
+      await prefs.remove('cached_update_url');
+      await prefs.remove('downloaded_apk_version');
+
+      final tempDir = await getTemporaryDirectory();
+      final apkFile = File('${tempDir.path}/app-release.apk');
+      if (await apkFile.exists()) {
+        await apkFile.delete();
+      }
+    } catch (_) {}
+  }
+
   static Future<void> markAsIgnore(String versionStr) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('update_later_version', versionStr);

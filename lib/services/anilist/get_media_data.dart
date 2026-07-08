@@ -36,6 +36,10 @@ Future<Map<String, dynamic>> getAnimeData(int id) async {
         seasonYear
         description
         duration
+        nextAiringEpisode {
+          airingAt
+          episode
+        }
         countryOfOrigin
         source
         genres

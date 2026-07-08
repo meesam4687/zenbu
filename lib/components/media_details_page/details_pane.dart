@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:zenbu/services/anilist/anilist.dart';
 import 'package:zenbu/components/media_details_page/details.dart';
 import 'package:zenbu/pages/error_page.dart';
@@ -48,6 +49,7 @@ class DetailsPane extends StatefulWidget {
 class _DetailsPaneState extends State<DetailsPane>
     with AutomaticKeepAliveClientMixin {
   late Future<Map<String, dynamic>> mediaData;
+  Timer? _countdownTimer;
 
   @override
   bool get wantKeepAlive => true;
@@ -58,6 +60,38 @@ class _DetailsPaneState extends State<DetailsPane>
     mediaData = widget.isAnime
         ? getAnimeData(widget.mediaId)
         : getMangaData(widget.mediaId);
+
+    if (widget.isAnime) {
+      _countdownTimer = Timer.periodic(const Duration(minutes: 1), (timer) {
+        if (mounted) {
+          setState(() {});
+        }
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _countdownTimer?.cancel();
+    super.dispose();
+  }
+
+  String _formatTimeRemaining(int seconds) {
+    int days = seconds ~/ 86400;
+    int hours = (seconds % 86400) ~/ 3600;
+
+    List<String> parts = [];
+    if (days > 0) {
+      parts.add("$days ${days == 1 ? 'day' : 'days'}");
+    }
+    if (hours > 0) {
+      parts.add("$hours ${hours == 1 ? 'hour' : 'hours'}");
+    }
+
+    if (parts.isEmpty) {
+      return "Less than an hour";
+    }
+    return parts.join(" ");
   }
 
   @override
@@ -111,7 +145,16 @@ class _DetailsPaneState extends State<DetailsPane>
         final media = data["data"]["Media"];
 
         final List<({String label, String? value})> detailsItems = [];
-
+        if (widget.isAnime && media["nextAiringEpisode"] != null) {
+          final nextEp = media["nextAiringEpisode"];
+          final airingAt = nextEp["airingAt"] as int;
+          final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+          final secondsRemaining = airingAt - now;
+          if (secondsRemaining > 0) {
+            final formattedTime = _formatTimeRemaining(secondsRemaining);
+            detailsItems.add((label: "Next Episode in", value: formattedTime));
+          }
+        }
         final meanScoreVal = media["meanScore"] != null
             ? "${(media["meanScore"] as int) / 10}/10"
             : "N/A";
@@ -178,7 +221,6 @@ class _DetailsPaneState extends State<DetailsPane>
               : "N/A";
           detailsItems.add((label: "Season", value: seasonVal));
         }
-
         return Container(
           width: double.infinity,
           margin: const EdgeInsets.only(top: 10, left: 20, right: 20),
@@ -348,7 +390,8 @@ class _DetailsPaneState extends State<DetailsPane>
                                     state:
                                         media["relations"]["edges"][index]["relationType"],
                                     mediaListEntry:
-                                        media["relations"]["edges"][index]["node"]["mediaListEntry"] as Map?,
+                                        media["relations"]["edges"][index]["node"]["mediaListEntry"]
+                                            as Map?,
                                     listDataPreloaded: true,
                                   ),
                                 );
