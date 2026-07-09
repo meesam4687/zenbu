@@ -11,9 +11,9 @@ import 'package:zenbu/services/js_engine.dart';
 import 'package:zenbu/services/repo_service.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:zenbu/services/progress_service.dart';
-import 'package:zenbu/components/video_player_page/video_player_header.dart';
-import 'package:zenbu/components/video_player_page/video_player_center_controls.dart';
-import 'package:zenbu/components/video_player_page/video_player_bottom_controls.dart';
+import 'package:zenbu/components/video_player_page/video_player_gesture_handler.dart';
+import 'package:zenbu/components/video_player_page/buffered_seek_bar_painter.dart';
+import 'package:zenbu/components/video_player_page/video_player_controls_overlay.dart';
 
 class SkipTime {
   final double startTime;
@@ -25,75 +25,6 @@ class SkipTime {
     required this.endTime,
     required this.skipType,
   });
-}
-
-class _BufferedSeekBarPainter extends CustomPainter {
-  final double played;
-  final double buffered;
-  final Color playedColor;
-  final Color bufferedColor;
-  final Color trackColor;
-  final double trackHeight;
-  final double thumbRadius;
-
-  _BufferedSeekBarPainter({
-    required this.played,
-    required this.buffered,
-    required this.playedColor,
-    required this.bufferedColor,
-    required this.trackColor,
-    required this.trackHeight,
-    required this.thumbRadius,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final double cy = size.height / 2;
-    final double startX = thumbRadius;
-    final double endX = size.width - thumbRadius;
-    final double totalWidth = endX - startX;
-
-    final trackPaint = Paint()
-      ..color = trackColor
-      ..strokeWidth = trackHeight
-      ..strokeCap = StrokeCap.round;
-
-    final bufferedPaint = Paint()
-      ..color = bufferedColor
-      ..strokeWidth = trackHeight
-      ..strokeCap = StrokeCap.round;
-
-    final playedPaint = Paint()
-      ..color = playedColor
-      ..strokeWidth = trackHeight
-      ..strokeCap = StrokeCap.round;
-
-    canvas.drawLine(Offset(startX, cy), Offset(endX, cy), trackPaint);
-
-    final double bufX = startX + buffered.clamp(0.0, 1.0) * totalWidth;
-    if (bufX > startX) {
-      canvas.drawLine(Offset(startX, cy), Offset(bufX, cy), bufferedPaint);
-    }
-
-    final double playX = startX + played.clamp(0.0, 1.0) * totalWidth;
-    if (playX > startX) {
-      canvas.drawLine(Offset(startX, cy), Offset(playX, cy), playedPaint);
-    }
-
-    canvas.drawCircle(
-      Offset(playX, cy),
-      thumbRadius,
-      Paint()..color = playedColor,
-    );
-  }
-
-  @override
-  bool shouldRepaint(_BufferedSeekBarPainter old) =>
-      old.played != played ||
-      old.buffered != buffered ||
-      old.playedColor != playedColor ||
-      old.bufferedColor != bufferedColor ||
-      old.trackColor != trackColor;
 }
 
 class VideoPlayerPage extends StatefulWidget {
@@ -178,6 +109,25 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
     });
 
     _fetchVideoList();
+  }
+
+  void _skipSeconds(int seconds) {
+    if (_videoPlayerController == null ||
+        !_videoPlayerController!.value.isInitialized) {
+      return;
+    }
+
+    final currentPos = _videoPlayerController!.value.position;
+    final totalDuration = _videoPlayerController!.value.duration;
+
+    Duration newPos = currentPos + Duration(seconds: seconds);
+    if (newPos < Duration.zero) {
+      newPos = Duration.zero;
+    } else if (newPos > totalDuration) {
+      newPos = totalDuration;
+    }
+
+    _videoPlayerController!.seekTo(newPos);
   }
 
   final ValueNotifier<SkipTime?> _activeSkipTimeNotifier =
@@ -417,7 +367,8 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
         contentType = response.headers['content-type'];
         await response.stream.listen((_) {}).cancel();
       }
-    } catch (_) {} finally {
+    } catch (_) {
+    } finally {
       client.close();
     }
     return _ResolvedStream(currentUrl, contentType);
@@ -953,7 +904,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
         key: _seekBarKey,
         height: 28,
         child: CustomPaint(
-          painter: _BufferedSeekBarPainter(
+          painter: BufferedSeekBarPainter(
             played: played,
             buffered: buffered,
             playedColor: primaryColor,
@@ -985,215 +936,208 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
 
     final primaryColor = Theme.of(context).colorScheme.primary;
 
-    return GestureDetector(
-      onTap: _toggleControlsVisibility,
-      behavior: HitTestBehavior.opaque,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        Center(
+          child: AspectRatio(
+            aspectRatio: _videoPlayerController!.value.aspectRatio,
+            child: Chewie(controller: _chewieController!),
+          ),
+        ),
+
+        Positioned.fill(
+          child: Row(
+            children: [
+              Expanded(
+                child: VideoPlayerGestureHandler(
+                  isLeft: true,
+                  onTap: _toggleControlsVisibility,
+                  onDoubleTap: () => _skipSeconds(-10),
+                ),
+              ),
+              Expanded(
+                child: VideoPlayerGestureHandler(
+                  isLeft: false,
+                  onTap: _toggleControlsVisibility,
+                  onDoubleTap: () => _skipSeconds(10),
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        if (isBuffering)
           Center(
-            child: AspectRatio(
-              aspectRatio: _videoPlayerController!.value.aspectRatio,
-              child: Chewie(controller: _chewieController!),
+            child: Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: Colors.black54,
+                borderRadius: BorderRadius.circular(28),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: CircularProgressIndicator(
+                  strokeWidth: 3,
+                  valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
+                ),
+              ),
             ),
           ),
 
-          if (isBuffering)
-            Center(
-              child: Container(
-                width: 56,
-                height: 56,
-                decoration: BoxDecoration(
-                  color: Colors.black54,
-                  borderRadius: BorderRadius.circular(28),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: CircularProgressIndicator(
-                    strokeWidth: 3,
-                    valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
-                  ),
-                ),
-              ),
+        if (_showControls)
+          VideoPlayerControlsOverlay(
+            animeTitle: widget.animeTitle,
+            episodeName: _currentEpisode.name,
+            isFullScreen: _isFullScreen,
+            hasNextEpisode: _nextEpisode != null,
+            hasSubtitles: _allSubtitles.isNotEmpty,
+            hasMultipleVideos: _videos.length > 1,
+            isSubtitleActive: _selectedSubtitle != null,
+            isPlaying: _videoPlayerController!.value.isPlaying,
+            currentPositionText: _formatDuration(currentPosition),
+            totalDurationText: _formatDuration(totalDuration),
+            seekBar: _buildSeekBar(
+              currentPosition,
+              totalDuration,
+              primaryColor,
             ),
+            onBackPressed: () {
+              if (_isFullScreen) {
+                _toggleFullScreen();
+              } else {
+                Navigator.of(context).pop();
+              }
+            },
+            onNextEpisodePressed: () {
+              _startControlsTimer();
+              _playNextEpisode();
+            },
+            onSubtitlePressed: () {
+              _startControlsTimer();
+              _showSubtitleSelector();
+            },
+            onQualityPressed: () {
+              _startControlsTimer();
+              _showQualitySelector();
+            },
+            onPipPressed: _enterPipMode,
+            onPlayPausePressed: () async {
+              _startControlsTimer();
+              if (_videoPlayerController!.value.isPlaying) {
+                await _videoPlayerController!.pause();
+                await WakelockPlus.disable();
+              } else {
+                await _videoPlayerController!.play();
+                await WakelockPlus.enable();
+              }
+              setState(() {});
+            },
+            onReplayPressed: () {
+              _startControlsTimer();
+              final newPos =
+                  _videoPlayerController!.value.position -
+                  const Duration(seconds: 10);
+              _videoPlayerController!.seekTo(
+                newPos < Duration.zero ? Duration.zero : newPos,
+              );
+            },
+            onForwardPressed: () {
+              _startControlsTimer();
+              final newPos =
+                  _videoPlayerController!.value.position +
+                  const Duration(seconds: 10);
+              _videoPlayerController!.seekTo(
+                newPos > totalDuration ? totalDuration : newPos,
+              );
+            },
+            onSkip85Pressed: () {
+              _startControlsTimer();
+              final newPos =
+                  _videoPlayerController!.value.position +
+                  const Duration(seconds: 85);
+              _videoPlayerController!.seekTo(
+                newPos > totalDuration ? totalDuration : newPos,
+              );
+            },
+            onFullscreenPressed: _toggleFullScreen,
+            onBackgroundTap: _toggleControlsVisibility,
+          ),
 
-          if (_showControls) ...[
-            Positioned.fill(
-              child: GestureDetector(
-                onTap: _toggleControlsVisibility,
-                child: Container(color: Colors.black45),
-              ),
-            ),
-
-            Positioned(
-              top: _isFullScreen ? 24.0 : 0.0,
-              left: 8.0,
-              right: 8.0,
-              child: VideoPlayerHeader(
-                animeTitle: widget.animeTitle,
-                episodeName: _currentEpisode.name,
-                isFullScreen: _isFullScreen,
-                hasNextEpisode: _nextEpisode != null,
-                hasSubtitles: _allSubtitles.isNotEmpty,
-                hasMultipleVideos: _videos.length > 1,
-                isSubtitleActive: _selectedSubtitle != null,
-                onBackPressed: () {
-                  if (_isFullScreen) {
-                    _toggleFullScreen();
-                  } else {
-                    Navigator.of(context).pop();
-                  }
-                },
-                onNextEpisodePressed: () {
-                  _startControlsTimer();
-                  _playNextEpisode();
-                },
-                onSubtitlePressed: () {
-                  _startControlsTimer();
-                  _showSubtitleSelector();
-                },
-                onQualityPressed: () {
-                  _startControlsTimer();
-                  _showQualitySelector();
-                },
-                onPipPressed: _enterPipMode,
-              ),
-            ),
-
-            VideoPlayerCenterControls(
-              isPlaying: _videoPlayerController!.value.isPlaying,
-              onPlayPausePressed: () async {
-                _startControlsTimer();
-                if (_videoPlayerController!.value.isPlaying) {
-                  await _videoPlayerController!.pause();
-                  await WakelockPlus.disable();
-                } else {
-                  await _videoPlayerController!.play();
-                  await WakelockPlus.enable();
-                }
-                setState(() {});
-              },
-              onReplayPressed: () {
-                _startControlsTimer();
-                final newPos =
-                    _videoPlayerController!.value.position -
-                    const Duration(seconds: 10);
-                _videoPlayerController!.seekTo(
-                  newPos < Duration.zero ? Duration.zero : newPos,
-                );
-              },
-              onForwardPressed: () {
-                _startControlsTimer();
-                final newPos =
-                    _videoPlayerController!.value.position +
-                    const Duration(seconds: 10);
-                _videoPlayerController!.seekTo(
-                  newPos > totalDuration ? totalDuration : newPos,
-                );
-              },
-            ),
-
-            Positioned(
-              bottom: _isFullScreen ? 16.0 : 8.0,
-              left: 16.0,
-              right: 16.0,
-              child: VideoPlayerBottomControls(
-                currentPositionText: _formatDuration(currentPosition),
-                totalDurationText: _formatDuration(totalDuration),
-                isFullScreen: _isFullScreen,
-                seekBar: _buildSeekBar(
-                  currentPosition,
-                  totalDuration,
-                  primaryColor,
-                ),
-                onSkip85Pressed: () {
-                  _startControlsTimer();
-                  final newPos =
-                      _videoPlayerController!.value.position +
-                      const Duration(seconds: 85);
-                  _videoPlayerController!.seekTo(
-                    newPos > totalDuration ? totalDuration : newPos,
+        if (_activeSubtitleCtrl != null && _videoPlayerController != null)
+          Positioned(
+            bottom: _isFullScreen ? (_showControls ? 76.0 : 20.0) : 80.0,
+            left: 16.0,
+            right: 16.0,
+            child: IgnorePointer(
+              child: ValueListenableBuilder<VideoPlayerValue>(
+                valueListenable: _videoPlayerController!,
+                builder: (context, value, child) {
+                  final posMs = value.position.inMilliseconds;
+                  final text = _activeSubtitleCtrl!.textFromMilliseconds(
+                    posMs,
+                    _activeSubtitleCtrl!.subtitles,
+                  );
+                  if (text.isEmpty) return const SizedBox.shrink();
+                  return SubtitleView(
+                    text: text,
+                    backgroundColor: Colors.transparent,
+                    subtitleStyle: SubtitleStyle(
+                      fontSize: _isFullScreen ? 20.0 : 16.0,
+                      textColor: Colors.white,
+                      bordered: true,
+                      borderStyle: const SubtitleBorderStyle(
+                        strokeWidth: 2.0,
+                        color: Colors.black,
+                      ),
+                    ),
                   );
                 },
-                onFullscreenPressed: _toggleFullScreen,
               ),
-            ),
-          ],
-
-          if (_activeSubtitleCtrl != null && _videoPlayerController != null)
-            Positioned(
-              bottom: _isFullScreen ? (_showControls ? 76.0 : 20.0) : 80.0,
-              left: 16.0,
-              right: 16.0,
-              child: IgnorePointer(
-                child: ValueListenableBuilder<VideoPlayerValue>(
-                  valueListenable: _videoPlayerController!,
-                  builder: (context, value, child) {
-                    final posMs = value.position.inMilliseconds;
-                    final text = _activeSubtitleCtrl!.textFromMilliseconds(
-                      posMs,
-                      _activeSubtitleCtrl!.subtitles,
-                    );
-                    if (text.isEmpty) return const SizedBox.shrink();
-                    return SubtitleView(
-                      text: text,
-                      backgroundColor: Colors.transparent,
-                      subtitleStyle: SubtitleStyle(
-                        fontSize: _isFullScreen ? 20.0 : 16.0,
-                        textColor: Colors.white,
-                        bordered: true,
-                        borderStyle: const SubtitleBorderStyle(
-                          strokeWidth: 2.0,
-                          color: Colors.black,
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ),
-
-          Positioned(
-            bottom: _isFullScreen ? 90.0 : 100.0,
-            right: 24.0,
-            child: ValueListenableBuilder<SkipTime?>(
-              valueListenable: _activeSkipTimeNotifier,
-              builder: (context, activeSkip, child) {
-                if (activeSkip == null) return const SizedBox.shrink();
-                return ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.black87,
-                    foregroundColor: Colors.white,
-                    side: const BorderSide(color: Colors.white30),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 12,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  onPressed: () {
-                    _videoPlayerController!.seekTo(
-                      Duration(seconds: activeSkip.endTime.toInt()),
-                    );
-                  },
-                  icon: const Icon(Icons.skip_next),
-                  label: Text(
-                    activeSkip.skipType == 'op' ||
-                            activeSkip.skipType == 'mixed-op'
-                        ? 'Skip Opening'
-                        : activeSkip.skipType == 'ed' ||
-                              activeSkip.skipType == 'mixed-ed'
-                        ? 'Skip Ending'
-                        : 'Skip Recap',
-                  ),
-                );
-              },
             ),
           ),
-        ],
-      ),
+
+        Positioned(
+          bottom: _isFullScreen ? 90.0 : 100.0,
+          right: 24.0,
+          child: ValueListenableBuilder<SkipTime?>(
+            valueListenable: _activeSkipTimeNotifier,
+            builder: (context, activeSkip, child) {
+              if (activeSkip == null) return const SizedBox.shrink();
+              return ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.black87,
+                  foregroundColor: Colors.white,
+                  side: const BorderSide(color: Colors.white30),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                onPressed: () {
+                  _videoPlayerController!.seekTo(
+                    Duration(seconds: activeSkip.endTime.toInt()),
+                  );
+                },
+                icon: const Icon(Icons.skip_next),
+                label: Text(
+                  activeSkip.skipType == 'op' ||
+                          activeSkip.skipType == 'mixed-op'
+                      ? 'Skip Opening'
+                      : activeSkip.skipType == 'ed' ||
+                            activeSkip.skipType == 'mixed-ed'
+                      ? 'Skip Ending'
+                      : 'Skip Recap',
+                ),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 
