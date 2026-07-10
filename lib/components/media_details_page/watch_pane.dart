@@ -536,6 +536,7 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
                                                   episode: ep,
                                                   source: _selectedExtension!,
                                                   animeTitle: widget.animeTitle,
+                                                  coverImage: widget.coverImage,
                                                   malId: widget.malId,
                                                   mediaId: widget.mediaId,
                                                   allEpisodes: allEpisodes,
@@ -555,14 +556,17 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
                                           SizedBox(
                                             width: 140,
                                             height: 80,
-                                            child: widget.coverImage != null &&
+                                            child:
+                                                widget.coverImage != null &&
                                                     widget
                                                         .coverImage!
                                                         .isNotEmpty
                                                 ? CustomImage(
-                                                    imageUrl: widget.coverImage!,
+                                                    imageUrl:
+                                                        widget.coverImage!,
                                                     fit: BoxFit.cover,
-                                                    errorWidget: _buildPlaceholderThumbnail(),
+                                                    errorWidget:
+                                                        _buildPlaceholderThumbnail(),
                                                   )
                                                 : _buildPlaceholderThumbnail(),
                                           ),
@@ -745,6 +749,7 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
               episode: ep,
               source: _selectedExtension!,
               animeTitle: widget.animeTitle,
+              coverImage: widget.coverImage,
               malId: widget.malId,
               mediaId: widget.mediaId,
               allEpisodes: allEpisodes,

@@ -14,6 +14,7 @@ import 'package:zenbu/services/repo_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:zenbu/services/update_service.dart';
 import 'package:zenbu/pages/update_page.dart';
+import 'package:zenbu/services/discord_service.dart';
 
 class DeepLinkController {
   final GlobalKey<NavigatorState> navigatorKey;
@@ -96,7 +97,23 @@ class DeepLinkController {
       return;
     }
 
+    if (uri.scheme == 'discord-1525102908377530468') {
+      final code = uri.queryParameters['code'];
+      if (code != null) {
+        DiscordService.handleAuthCode(code);
+      }
+      return;
+    }
+
     if (uri.scheme == 'zenbu') {
+      if (uri.host == 'discord-auth') {
+        final code = uri.queryParameters['code'];
+        if (code != null) {
+          DiscordService.handleAuthCode(code);
+        }
+        return;
+      }
+
       if (uri.host == 'update') {
         try {
           final prefs = await SharedPreferences.getInstance();
@@ -110,7 +127,9 @@ class DeepLinkController {
               downloadUrl: u,
             );
             navigatorKey.currentState?.push(
-              MaterialPageRoute(builder: (context) => UpdatePage(updateInfo: info)),
+              MaterialPageRoute(
+                builder: (context) => UpdatePage(updateInfo: info),
+              ),
             );
           }
         } catch (e) {

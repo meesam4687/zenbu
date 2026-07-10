@@ -552,6 +552,7 @@ class _MangaReadPaneState extends State<MangaReadPane> {
                                                   source: _selectedExtension!,
                                                   mangaTitle: widget.mangaTitle,
                                                   mediaId: widget.mediaId,
+                                                  coverImage: widget.coverImage,
                                                 ),
                                           ),
                                         )
@@ -750,6 +751,7 @@ class _MangaReadPaneState extends State<MangaReadPane> {
               source: _selectedExtension!,
               mangaTitle: widget.mangaTitle,
               mediaId: widget.mediaId,
+              coverImage: widget.coverImage,
             ),
           ),
         )

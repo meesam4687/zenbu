@@ -11,6 +11,7 @@ import 'package:zenbu/services/js_engine.dart';
 import 'package:zenbu/services/repo_service.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:zenbu/services/progress_service.dart';
+import 'package:zenbu/services/discord_service.dart';
 import 'package:zenbu/components/video_player_page/video_player_gesture_handler.dart';
 import 'package:zenbu/components/video_player_page/buffered_seek_bar_painter.dart';
 import 'package:zenbu/components/video_player_page/video_player_controls_overlay.dart';
@@ -31,6 +32,7 @@ class VideoPlayerPage extends StatefulWidget {
   final ExtEpisode episode;
   final ExtSource source;
   final String animeTitle;
+  final String? coverImage;
   final int? malId;
   final int? mediaId;
   final List<ExtEpisode>? allEpisodes;
@@ -40,6 +42,7 @@ class VideoPlayerPage extends StatefulWidget {
     required this.episode,
     required this.source,
     required this.animeTitle,
+    this.coverImage,
     this.malId,
     this.mediaId,
     this.allEpisodes,
@@ -228,6 +231,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
     _disposeEngine();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+    DiscordService.clearPresence();
     super.dispose();
   }
 
@@ -248,6 +252,22 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
     if (isPlaying != _lastIsPlaying) {
       _lastIsPlaying = isPlaying;
       _pipChannel.invokeMethod('setVideoPlaying', {'isPlaying': isPlaying});
+      if (isPlaying) {
+        final epNumDouble = parseEpisodeNumber(_currentEpisode);
+        final epNumStr = epNumDouble != null
+            ? epNumDouble.toString().replaceAll(RegExp(r'\.0$'), '')
+            : _currentEpisode.name;
+        final episodeText = epNumDouble != null
+            ? "Episode: $epNumStr"
+            : epNumStr;
+
+        DiscordService.updateWatchingStatus(
+          animeTitle: widget.animeTitle,
+          episodeDetails: episodeText,
+          imageUrl: widget.coverImage,
+          mediaId: widget.mediaId,
+        );
+      }
     }
   }
 

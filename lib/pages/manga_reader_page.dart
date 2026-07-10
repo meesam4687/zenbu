@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:zenbu/components/manga_reader_page/manga_header.dart';
 import 'package:zenbu/components/manga_reader_page/manga_bottom_controls.dart';
 import 'package:zenbu/services/progress_service.dart';
+import 'package:zenbu/services/discord_service.dart';
 
 class MangaReaderPage extends StatefulWidget {
   final List<ExtEpisode> chapters;
@@ -16,6 +17,7 @@ class MangaReaderPage extends StatefulWidget {
   final ExtSource source;
   final String mangaTitle;
   final int? mediaId;
+  final String? coverImage;
 
   const MangaReaderPage({
     super.key,
@@ -24,6 +26,7 @@ class MangaReaderPage extends StatefulWidget {
     required this.source,
     required this.mangaTitle,
     this.mediaId,
+    this.coverImage,
   });
 
   @override
@@ -79,6 +82,7 @@ class _MangaReaderPageState extends State<MangaReaderPage>
     _zoomAnimationController.dispose();
     _transformationController.removeListener(_onTransformationChanged);
     _transformationController.dispose();
+    DiscordService.clearPresence();
     super.dispose();
   }
 
@@ -223,6 +227,24 @@ class _MangaReaderPageState extends State<MangaReaderPage>
         }
       });
       _restoreProgress();
+
+      final chapNumDouble = ProgressService.parseEpisodeNumber(
+        currentChapter.url,
+        currentChapter.name,
+      );
+      final chapNumStr = chapNumDouble != null
+          ? chapNumDouble.toString().replaceAll(RegExp(r'\.0$'), '')
+          : currentChapter.name;
+      final chapterText = chapNumDouble != null
+          ? "Chapter: $chapNumStr"
+          : chapNumStr;
+
+      DiscordService.updateReadingStatus(
+        mangaTitle: widget.mangaTitle,
+        chapterDetails: chapterText,
+        imageUrl: widget.coverImage,
+        mediaId: widget.mediaId,
+      );
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -349,7 +371,9 @@ class _MangaReaderPageState extends State<MangaReaderPage>
                   isWebtoonMode: _isWebtoonMode,
                   onToggleReadingMode: _toggleReadingMode,
                   onBackPressed: () {
-                    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+                    SystemChrome.setEnabledSystemUIMode(
+                      SystemUiMode.edgeToEdge,
+                    );
                     Navigator.of(context).pop();
                   },
                 ),
@@ -372,7 +396,8 @@ class _MangaReaderPageState extends State<MangaReaderPage>
                   onPrevChapter: _currentChapterIndex > 0
                       ? () => _goToChapter(_currentChapterIndex - 1)
                       : null,
-                  onNextChapter: _currentChapterIndex < widget.chapters.length - 1
+                  onNextChapter:
+                      _currentChapterIndex < widget.chapters.length - 1
                       ? () => _goToChapter(_currentChapterIndex + 1)
                       : null,
                 ),
@@ -560,7 +585,9 @@ class _MangaReaderPageState extends State<MangaReaderPage>
       chapterUrl: currentChapter.url,
       chapterName: currentChapter.name,
     );
-    if (progress != null && progress['pagesRead'] != null && progress['pagesRead']! <= _pages.length) {
+    if (progress != null &&
+        progress['pagesRead'] != null &&
+        progress['pagesRead']! <= _pages.length) {
       final targetPage = progress['pagesRead']! - 1;
       if (mounted) {
         setState(() {
@@ -570,7 +597,8 @@ class _MangaReaderPageState extends State<MangaReaderPage>
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (_scrollController.hasClients) {
               final maxScroll = _scrollController.position.maxScrollExtent;
-              final targetScroll = (targetPage / (_pages.length - 1)) * maxScroll;
+              final targetScroll =
+                  (targetPage / (_pages.length - 1)) * maxScroll;
               _scrollController.jumpTo(targetScroll);
             }
           });

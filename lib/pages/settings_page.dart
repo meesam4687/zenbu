@@ -9,6 +9,7 @@ import 'package:zenbu/services/anilist/update_user.dart';
 import 'package:zenbu/services/update_service.dart';
 import 'package:zenbu/pages/update_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:zenbu/services/discord_service.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -28,6 +29,7 @@ class _SettingsPageState extends State<SettingsPage> {
   void initState() {
     super.initState();
     _loadCachedUpdate();
+    DiscordService.isLinked();
   }
 
   Future<void> _loadCachedUpdate() async {
@@ -258,6 +260,119 @@ class _SettingsPageState extends State<SettingsPage> {
                     ),
                   ],
                 ),
+              ),
+            ),
+          ),
+
+          _SectionHeader(label: 'Integrations'),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+            child: Card(
+              elevation: 0,
+              color: cs.surfaceContainerLow,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: ValueListenableBuilder<bool>(
+                valueListenable: DiscordService.discordLinked,
+                builder: (context, isLinked, _) {
+                  if (!isLinked) {
+                    return ListTile(
+                      leading: SvgPicture.asset(
+                        'assets/discord.svg',
+                        width: 24,
+                        height: 24,
+                        colorFilter: ColorFilter.mode(
+                          cs.primary,
+                          BlendMode.srcIn,
+                        ),
+                      ),
+                      title: const Text('Discord'),
+                      subtitle: const Text('Not linked  •  Tap to connect'),
+                      trailing: TextButton(
+                        onPressed: () async {
+                          await DiscordService.startAuthorizationFlow();
+                        },
+                        child: Text(
+                          'Link',
+                          style: TextStyle(
+                            color: cs.primary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    );
+                  }
+
+                  return ValueListenableBuilder<bool>(
+                    valueListenable: DiscordService.presenceEnabled,
+                    builder: (context, isEnabled, _) {
+                      return Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ListTile(
+                            leading: SvgPicture.asset(
+                              'assets/discord.svg',
+                              width: 24,
+                              height: 24,
+                              colorFilter: ColorFilter.mode(
+                                cs.primary,
+                                BlendMode.srcIn,
+                              ),
+                            ),
+                            title: const Text('Discord'),
+                            subtitle: Text(
+                              isEnabled
+                                  ? 'Linked  •  Presence active'
+                                  : 'Linked  •  Presence paused',
+                            ),
+                            trailing: Switch(
+                              value: isEnabled,
+                              onChanged: (val) async {
+                                await DiscordService.setPresenceEnabled(val);
+                              },
+                            ),
+                            shape: const RoundedRectangleBorder(
+                              borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(14),
+                                topRight: Radius.circular(14),
+                              ),
+                            ),
+                          ),
+                          const Divider(height: 1, indent: 16, endIndent: 16),
+                          ListTile(
+                            leading: Icon(
+                              Icons.link_off_rounded,
+                              color: cs.error,
+                            ),
+                            title: Text(
+                              'Unlink Account',
+                              style: TextStyle(
+                                color: cs.error,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            onTap: () async {
+                              await DiscordService.unlink();
+                              Fluttertoast.showToast(
+                                msg: 'Discord account unlinked',
+                              );
+                            },
+                            shape: const RoundedRectangleBorder(
+                              borderRadius: BorderRadius.only(
+                                bottomLeft: Radius.circular(14),
+                                bottomRight: Radius.circular(14),
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                },
               ),
             ),
           ),
