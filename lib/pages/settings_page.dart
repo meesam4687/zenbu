@@ -207,6 +207,9 @@ class _SettingsPageState extends State<SettingsPage> {
                           ),
                         ),
                       ),
+                      onTap: () async {
+                        await DiscordService.startAuthorizationFlow();
+                      },
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14),
                       ),
@@ -241,6 +244,9 @@ class _SettingsPageState extends State<SettingsPage> {
                                 await DiscordService.setPresenceEnabled(val);
                               },
                             ),
+                            onTap: () async {
+                              await DiscordService.setPresenceEnabled(!isEnabled);
+                            },
                             shape: const RoundedRectangleBorder(
                               borderRadius: BorderRadius.only(
                                 topLeft: Radius.circular(14),
