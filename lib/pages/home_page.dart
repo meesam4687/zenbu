@@ -6,6 +6,7 @@ import 'package:zenbu/components/global/custom_image.dart';
 import 'package:zenbu/services/anilist/anilist.dart';
 import 'package:zenbu/state_provider.dart';
 import 'package:zenbu/components/home_page/media_list.dart';
+import 'package:zenbu/components/home_page/global_search_bar.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -65,6 +66,7 @@ class _HomePageState extends State<HomePage> {
         toolbarHeight: 60,
         title: const Text("Home"),
         actions: [
+          const GlobalSearchBar(),
           Padding(
             padding: const EdgeInsets.only(right: 5),
             child: IconButton(

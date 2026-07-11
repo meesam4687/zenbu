@@ -2,6 +2,8 @@ import 'package:zenbu/pages/media_details_page.dart';
 import 'package:zenbu/pages/character_details_page.dart';
 import 'package:zenbu/pages/staff_details_page.dart';
 import 'package:zenbu/pages/studio_details_page.dart';
+import 'package:zenbu/pages/user_profile_page.dart';
+
 import 'package:zenbu/components/media_details_page/list_editor_bottom_sheet.dart';
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
@@ -102,7 +104,7 @@ class _ItemCardState extends State<ItemCard> {
                     child: Stack(
                       children: [
                         CustomImage(
-                          imageUrl: widget.image as String,
+                          imageUrl: widget.image ?? "",
                           height: 156,
                           width: double.infinity,
                           fit: BoxFit.cover,
@@ -116,6 +118,21 @@ class _ItemCardState extends State<ItemCard> {
                                   ).colorScheme.primaryContainer,
                                   child: Icon(
                                     Icons.business,
+                                    size: 40,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onPrimaryContainer,
+                                  ),
+                                )
+                              : widget.type == 'user'
+                              ? Container(
+                                  height: 156,
+                                  width: double.infinity,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.primaryContainer,
+                                  child: Icon(
+                                    Icons.person,
                                     size: 40,
                                     color: Theme.of(
                                       context,
@@ -170,6 +187,8 @@ class _ItemCardState extends State<ItemCard> {
             studioId: widget.id,
             studioName: widget.title,
           );
+        } else if (widget.type == "user") {
+          return UserProfilePage(userId: widget.id, username: widget.title);
         }
         return const Placeholder();
       },
