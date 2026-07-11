@@ -17,6 +17,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   late Future<Map<String, dynamic>> _alData;
+  bool _isSearching = false;
 
   @override
   void initState() {
@@ -64,9 +65,15 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 60,
-        title: const Text("Home"),
+        title: _isSearching ? const SizedBox() : const Text("Home"),
         actions: [
-          const GlobalSearchBar(),
+          GlobalSearchBar(
+            onSearchStateChanged: (isSearching) {
+              setState(() {
+                _isSearching = isSearching;
+              });
+            },
+          ),
           Padding(
             padding: const EdgeInsets.only(right: 5),
             child: IconButton(

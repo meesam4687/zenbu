@@ -71,7 +71,7 @@ class _MediaDiscoveryPageState extends State<MediaDiscoveryPage> {
     return Scaffold(
       appBar: AppBar(
         flexibleSpace: SearchSegment(isAnime: widget.isAnime),
-        toolbarHeight: 75,
+        toolbarHeight: 85,
       ),
       body: RefreshIndicator(
         onRefresh: _handleRefresh,
@@ -149,8 +149,10 @@ class _MediaDiscoveryPageState extends State<MediaDiscoveryPage> {
                   id: media["id"],
                   bannerImage: media["bannerImage"]?.toString() ?? '',
                   coverImage: media["coverImage"]?["large"]?.toString() ?? '',
-                  title: Provider.of<StateProvider>(context, listen: false)
-                      .resolveTitle(media["title"] as Map?),
+                  title: Provider.of<StateProvider>(
+                    context,
+                    listen: false,
+                  ).resolveTitle(media["title"] as Map?),
                   totalEpisodes: widget.isAnime
                       ? (media["episodes"] != null
                             ? media["episodes"].toString()

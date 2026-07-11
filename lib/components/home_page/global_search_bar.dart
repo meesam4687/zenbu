@@ -3,7 +3,9 @@ import 'package:zenbu/pages/media_search_page.dart';
 import 'package:zenbu/pages/others_search_page.dart';
 
 class GlobalSearchBar extends StatefulWidget {
-  const GlobalSearchBar({super.key});
+  const GlobalSearchBar({super.key, required this.onSearchStateChanged});
+
+  final ValueChanged<bool> onSearchStateChanged;
 
   @override
   State<GlobalSearchBar> createState() => _GlobalSearchBarState();
@@ -20,10 +22,12 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
     _hideOverlay();
     if (!mounted) return;
 
+    final double expandedWidth = MediaQuery.of(context).size.width - 80;
+
     _overlayEntry = OverlayEntry(
       builder: (context) {
         return Positioned(
-          width: 280,
+          width: expandedWidth,
           child: CompositedTransformFollower(
             link: _layerLink,
             showWhenUnlinked: false,
@@ -143,6 +147,7 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
       _isSearching = false;
       _searchController.clear();
     });
+    widget.onSearchStateChanged(false);
     _hideOverlay();
     _searchFocusNode.unfocus();
 
@@ -165,6 +170,7 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
   void _onSearchTapped() {
     setState(() {
       _isSearching = !_isSearching;
+      widget.onSearchStateChanged(_isSearching);
       if (_isSearching) {
         _searchFocusNode.requestFocus();
         _showOverlay();
@@ -186,6 +192,8 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
 
   @override
   Widget build(BuildContext context) {
+    final double expandedWidth = MediaQuery.of(context).size.width - 80;
+
     return CompositedTransformTarget(
       link: _layerLink,
       child: TapRegion(
@@ -198,7 +206,7 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 250),
           curve: Curves.easeOutQuart,
-          width: _isSearching ? 280.0 : 40.0,
+          width: _isSearching ? expandedWidth : 40.0,
           height: 40.0,
           decoration: BoxDecoration(
             color: _isSearching
