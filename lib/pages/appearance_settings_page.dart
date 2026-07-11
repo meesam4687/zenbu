@@ -12,7 +12,9 @@ class AppearanceSettingsPage extends StatelessWidget {
     final tt = Theme.of(context).textTheme;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Appearance')),
+      appBar: AppBar(
+        title: const Text('Appearance'),
+      ),
       body: ListView(
         padding: const EdgeInsets.symmetric(vertical: 8),
         children: [
@@ -55,7 +57,16 @@ class AppearanceSettingsPage extends StatelessWidget {
                       ],
                       selected: {provider.themeMode},
                       onSelectionChanged: (Set<ThemeMode> selection) {
-                        provider.themeMode = selection.first;
+                        final newMode = selection.first;
+                        provider.themeMode = newMode;
+                        
+                        if (provider.selectedCustomTheme == 'Midnight') {
+                          final systemBrightness = MediaQuery.platformBrightnessOf(context);
+                          if (newMode == ThemeMode.light ||
+                              (newMode == ThemeMode.system && systemBrightness == Brightness.light)) {
+                            provider.selectedCustomTheme = null;
+                          }
+                        }
                       },
                       style: SegmentedButton.styleFrom(
                         selectedBackgroundColor: cs.primaryContainer,
@@ -88,8 +99,25 @@ class AppearanceSettingsPage extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
                     _ColorSwatchRow(
-                      selected: provider.seedColor,
-                      onSelected: (color) => provider.seedColor = color,
+                      selectedCustomTheme: provider.selectedCustomTheme,
+                      selectedSeedColor: provider.seedColor,
+                      onSelected: (color, customThemeName) {
+                        if (customThemeName != null) {
+                          if (customThemeName == 'Midnight') {
+                            final systemBrightness = MediaQuery.platformBrightnessOf(context);
+                            if (provider.themeMode == ThemeMode.light ||
+                                (provider.themeMode == ThemeMode.system &&
+                                    systemBrightness == Brightness.light)) {
+                              provider.themeMode = ThemeMode.dark;
+                            }
+                          }
+                          provider.selectedCustomTheme = customThemeName;
+                          provider.seedColor = null;
+                        } else {
+                          provider.selectedCustomTheme = null;
+                          provider.seedColor = color;
+                        }
+                      },
                     ),
                   ],
                 ),
@@ -123,13 +151,19 @@ class _SectionHeader extends StatelessWidget {
 }
 
 class _ColorSwatchRow extends StatelessWidget {
-  final Color? selected;
-  final ValueChanged<Color?> onSelected;
+  final String? selectedCustomTheme;
+  final Color? selectedSeedColor;
+  final void Function(Color? color, String? customThemeName) onSelected;
 
-  const _ColorSwatchRow({required this.selected, required this.onSelected});
+  const _ColorSwatchRow({
+    required this.selectedCustomTheme,
+    required this.selectedSeedColor,
+    required this.onSelected,
+  });
 
   static const _swatches = [
     _Swatch(label: 'System', color: null),
+    _Swatch(label: 'Midnight', color: Colors.black, customThemeName: 'Midnight'),
     _Swatch(label: 'Purple', color: Color(0xFF6750A4)),
     _Swatch(label: 'Blue', color: Color(0xFF1565C0)),
     _Swatch(label: 'Teal', color: Color(0xFF00695C)),
@@ -146,11 +180,14 @@ class _ColorSwatchRow extends StatelessWidget {
       spacing: 10,
       runSpacing: 10,
       children: _swatches.map((s) {
-        final isSelected = s.color == selected;
+        final isSelected = s.customThemeName != null
+            ? selectedCustomTheme == s.customThemeName
+            : (selectedCustomTheme == null && s.color == selectedSeedColor);
+
         return _ColorSwatch(
           swatch: s,
           isSelected: isSelected,
-          onTap: () => onSelected(s.color),
+          onTap: () => onSelected(s.color, s.customThemeName),
         );
       }).toList(),
     );
@@ -160,7 +197,8 @@ class _ColorSwatchRow extends StatelessWidget {
 class _Swatch {
   final String label;
   final Color? color;
-  const _Swatch({required this.label, required this.color});
+  final String? customThemeName;
+  const _Swatch({required this.label, this.color, this.customThemeName});
 }
 
 class _ColorSwatch extends StatelessWidget {

@@ -108,6 +108,7 @@ class StateProvider extends ChangeNotifier {
 
   Color? _seedColor;
   bool _displayAdultContent = false;
+  String? _selectedCustomTheme;
 
   StateProvider() {
     _loadSettings();
@@ -125,6 +126,7 @@ class StateProvider extends ChangeNotifier {
     final seedColorValue = prefs.getInt('setting_seed_color');
     _seedColor = seedColorValue != null ? Color(seedColorValue) : null;
     _displayAdultContent = prefs.getBool('setting_display_adult_content') ?? false;
+    _selectedCustomTheme = prefs.getString('setting_custom_theme');
     notifyListeners();
   }
 
@@ -173,6 +175,15 @@ class StateProvider extends ChangeNotifier {
     }
   }
 
+  Future<void> _saveOptionalString(String key, String? value) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (value == null) {
+      await prefs.remove(key);
+    } else {
+      await prefs.setString(key, value);
+    }
+  }
+
   bool get displayAdultContent => _displayAdultContent;
   set displayAdultContent(bool value) {
     _displayAdultContent = value;
@@ -182,6 +193,15 @@ class StateProvider extends ChangeNotifier {
     _saveBool('setting_display_adult_content', value);
     notifyListeners();
   }
+
+  String? get selectedCustomTheme => _selectedCustomTheme;
+  set selectedCustomTheme(String? value) {
+    _selectedCustomTheme = value;
+    _saveOptionalString('setting_custom_theme', value);
+    notifyListeners();
+  }
+
+  bool get midnightTheme => _selectedCustomTheme == 'Midnight';
 
   String resolveTitle(Map? titleMap, {String fallback = ''}) {
     if (titleMap == null) return fallback;

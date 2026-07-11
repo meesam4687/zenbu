@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:zenbu/state_provider.dart';
+import 'package:zenbu/theme/custom_themes.dart';
 import 'package:zenbu/main_page_view.dart';
 import 'package:zenbu/pages/authentication_page.dart';
 import 'package:zenbu/authentication_token_controller.dart';
@@ -56,23 +57,55 @@ class _MyAppState extends State<MyApp> {
             builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
               final seedColor = provider.seedColor;
 
-              final ColorScheme lightScheme = seedColor != null
+              ColorScheme lightScheme = seedColor != null
                   ? ColorScheme.fromSeed(seedColor: seedColor)
                   : lightDynamic ?? _defaultLightScheme;
-              final ColorScheme darkScheme = seedColor != null
+              ColorScheme darkScheme = seedColor != null
                   ? ColorScheme.fromSeed(
                       seedColor: seedColor,
                       brightness: Brightness.dark,
                     )
                   : darkDynamic ?? _defaultDarkScheme;
 
+              final customTheme = provider.selectedCustomTheme != null
+                  ? customThemes.firstWhere(
+                      (t) => t.name == provider.selectedCustomTheme,
+                      orElse: () => customThemes[0],
+                    )
+                  : null;
+
+              if (customTheme != null) {
+                if (customTheme.isLightOnly) {
+                  lightScheme = customTheme.colorScheme;
+                } else if (customTheme.isDarkOnly) {
+                  darkScheme = customTheme.colorScheme;
+                } else {
+                  if (customTheme.colorScheme.brightness == Brightness.dark) {
+                    darkScheme = customTheme.colorScheme;
+                  } else {
+                    lightScheme = customTheme.colorScheme;
+                  }
+                }
+              }
+
               return MaterialApp(
                 navigatorKey: _navigatorKey,
                 debugShowCheckedModeBanner: false,
                 title: 'Zenbu',
-                theme: ThemeData(colorScheme: lightScheme, useMaterial3: true),
+                theme: ThemeData(
+                  colorScheme: lightScheme,
+                  scaffoldBackgroundColor:
+                      (customTheme != null && customTheme.isLightOnly)
+                      ? customTheme.scaffoldBackgroundColor
+                      : null,
+                  useMaterial3: true,
+                ),
                 darkTheme: ThemeData(
                   colorScheme: darkScheme,
+                  scaffoldBackgroundColor:
+                      (customTheme != null && customTheme.isDarkOnly)
+                      ? customTheme.scaffoldBackgroundColor
+                      : null,
                   useMaterial3: true,
                 ),
                 themeMode: provider.themeMode,
