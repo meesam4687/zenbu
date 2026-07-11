@@ -92,7 +92,7 @@ class _ItemCardState extends State<ItemCard> {
           onLongPress: isMedia ? () => _onLongPress(context) : null,
           child: Material(
             child: Ink(
-              height: 226,
+              height: 230,
               width: 110.0,
               child: Column(
                 children: [

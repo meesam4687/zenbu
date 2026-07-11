@@ -5,9 +5,10 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:zenbu/state_provider.dart';
-import 'package:zenbu/services/anilist/update_user.dart';
 import 'package:zenbu/services/update_service.dart';
 import 'package:zenbu/pages/update_page.dart';
+import 'package:zenbu/pages/anilist_settings_page.dart';
+import 'package:zenbu/pages/appearance_settings_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:zenbu/services/discord_service.dart';
 
@@ -22,8 +23,6 @@ class _SettingsPageState extends State<SettingsPage> {
   bool _isCheckingUpdate = false;
   UpdateInfo? _updateInfo;
   bool _hasUpdate = false;
-
-  bool _isSavingLang = false;
 
   @override
   void initState() {
@@ -78,21 +77,7 @@ class _SettingsPageState extends State<SettingsPage> {
     }
   }
 
-  Future<void> _setTitleLanguage(String lang, StateProvider provider) async {
-    if (_isSavingLang) return;
-    setState(() => _isSavingLang = true);
-    try {
-      await updateUserTitleLanguage(lang);
-      provider.titleLanguage = lang;
-    } catch (e) {
-      Fluttertoast.showToast(
-        msg: 'Failed to update title language: $e',
-        toastLength: Toast.LENGTH_LONG,
-      );
-    } finally {
-      if (mounted) setState(() => _isSavingLang = false);
-    }
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -105,7 +90,7 @@ class _SettingsPageState extends State<SettingsPage> {
       body: ListView(
         padding: const EdgeInsets.symmetric(vertical: 8),
         children: [
-          _SectionHeader(label: 'Display'),
+          _SectionHeader(label: 'AniList'),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
             child: Card(
@@ -114,63 +99,36 @@ class _SettingsPageState extends State<SettingsPage> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14),
               ),
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.translate_rounded,
-                          size: 20,
-                          color: cs.primary,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Title Language',
-                          style: tt.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        if (_isSavingLang) ...[
-                          const SizedBox(width: 10),
-                          SizedBox(
-                            width: 14,
-                            height: 14,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 1.5,
-                              color: cs.primary,
-                            ),
-                          ),
-                        ],
-                      ],
+              child: ListTile(
+                leading: SvgPicture.asset(
+                  'assets/alLogo.svg',
+                  width: 24,
+                  height: 24,
+                  colorFilter: ColorFilter.mode(
+                    cs.primary,
+                    BlendMode.srcIn,
+                  ),
+                ),
+                title: Text(
+                  'AniList Settings',
+                  style: tt.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                subtitle: Text(
+                  'Configure metadata language and content preferences.',
+                  style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+                ),
+                trailing: const Icon(Icons.chevron_right_rounded),
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const AnilistSettingsPage(),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'How titles are shown throughout the app. Synced with your AniList account.',
-                      style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
-                    ),
-                    const SizedBox(height: 14),
-                    SegmentedButton<String>(
-                      segments: const [
-                        ButtonSegment(value: 'ROMAJI', label: Text('Romaji')),
-                        ButtonSegment(value: 'ENGLISH', label: Text('English')),
-                        ButtonSegment(value: 'NATIVE', label: Text('Native')),
-                      ],
-                      selected: {provider.titleLanguage},
-                      onSelectionChanged: _isSavingLang
-                          ? null
-                          : (Set<String> selection) {
-                              _setTitleLanguage(selection.first, provider);
-                            },
-                      style: SegmentedButton.styleFrom(
-                        selectedBackgroundColor: cs.primaryContainer,
-                        selectedForegroundColor: cs.onPrimaryContainer,
-                        textStyle: const TextStyle(fontSize: 12),
-                      ),
-                    ),
-                  ],
+                  );
+                },
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
                 ),
               ),
             ),
@@ -185,80 +143,28 @@ class _SettingsPageState extends State<SettingsPage> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14),
               ),
-              child: Theme(
-                data: Theme.of(
-                  context,
-                ).copyWith(dividerColor: Colors.transparent),
-                child: ExpansionTile(
-                  leading: Icon(Icons.palette_rounded, color: cs.primary),
-                  title: Text(
-                    'Theme',
-                    style: tt.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+              child: ListTile(
+                leading: Icon(Icons.palette_rounded, color: cs.primary),
+                title: Text(
+                  'Theme & Colours',
+                  style: tt.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
                   ),
-                  subtitle: Text(
-                    _themeModeLabel(provider.themeMode),
-                    style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
-                  ),
-                  tilePadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 4,
-                  ),
-                  childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                  expandedCrossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Mode',
-                      style: tt.labelMedium?.copyWith(
-                        color: cs.onSurfaceVariant,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 0.4,
-                      ),
+                ),
+                subtitle: Text(
+                  _themeModeLabel(provider.themeMode),
+                  style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+                ),
+                trailing: const Icon(Icons.chevron_right_rounded),
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const AppearanceSettingsPage(),
                     ),
-                    const SizedBox(height: 8),
-                    SegmentedButton<ThemeMode>(
-                      segments: const [
-                        ButtonSegment(
-                          value: ThemeMode.system,
-                          label: Text('System'),
-                          icon: Icon(Icons.brightness_auto_rounded),
-                        ),
-                        ButtonSegment(
-                          value: ThemeMode.light,
-                          label: Text('Light'),
-                          icon: Icon(Icons.light_mode_rounded),
-                        ),
-                        ButtonSegment(
-                          value: ThemeMode.dark,
-                          label: Text('Dark'),
-                          icon: Icon(Icons.dark_mode_rounded),
-                        ),
-                      ],
-                      selected: {provider.themeMode},
-                      onSelectionChanged: (Set<ThemeMode> selection) {
-                        provider.themeMode = selection.first;
-                      },
-                      style: SegmentedButton.styleFrom(
-                        selectedBackgroundColor: cs.primaryContainer,
-                        selectedForegroundColor: cs.onPrimaryContainer,
-                        textStyle: const TextStyle(fontSize: 12),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-
-                    Text(
-                      'Accent Colour',
-                      style: tt.labelMedium?.copyWith(
-                        color: cs.onSurfaceVariant,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 0.4,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    _ColorSwatchRow(
-                      selected: provider.seedColor,
-                      onSelected: (color) => provider.seedColor = color,
-                    ),
-                  ],
+                  );
+                },
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
                 ),
               ),
             ),
@@ -488,115 +394,7 @@ class _SectionHeader extends StatelessWidget {
   }
 }
 
-class _ColorSwatchRow extends StatelessWidget {
-  final Color? selected;
-  final ValueChanged<Color?> onSelected;
 
-  const _ColorSwatchRow({required this.selected, required this.onSelected});
-
-  static const _swatches = [
-    _Swatch(label: 'System', color: null),
-    _Swatch(label: 'Purple', color: Color(0xFF6750A4)),
-    _Swatch(label: 'Blue', color: Color(0xFF1565C0)),
-    _Swatch(label: 'Teal', color: Color(0xFF00695C)),
-    _Swatch(label: 'Green', color: Color(0xFF2E7D32)),
-    _Swatch(label: 'Amber', color: Color(0xFFE65100)),
-    _Swatch(label: 'Red', color: Color(0xFFC62828)),
-    _Swatch(label: 'Pink', color: Color(0xFFAD1457)),
-    _Swatch(label: 'Indigo', color: Color(0xFF283593)),
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return Wrap(
-      spacing: 10,
-      runSpacing: 10,
-      children: _swatches.map((s) {
-        final isSelected = s.color == selected;
-        return _ColorSwatch(
-          swatch: s,
-          isSelected: isSelected,
-          onTap: () => onSelected(s.color),
-        );
-      }).toList(),
-    );
-  }
-}
-
-class _Swatch {
-  final String label;
-  final Color? color;
-  const _Swatch({required this.label, required this.color});
-}
-
-class _ColorSwatch extends StatelessWidget {
-  final _Swatch swatch;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const _ColorSwatch({
-    required this.swatch,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final displayColor = swatch.color ?? cs.primary;
-
-    return GestureDetector(
-      onTap: onTap,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 180),
-            curve: Curves.easeInOut,
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: swatch.color == null
-                  ? cs.surfaceContainerHighest
-                  : displayColor,
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: isSelected ? cs.onSurface : Colors.transparent,
-                width: 2.5,
-              ),
-              boxShadow: isSelected
-                  ? [
-                      BoxShadow(
-                        color: displayColor.withAlpha(100),
-                        blurRadius: 8,
-                        spreadRadius: 1,
-                      ),
-                    ]
-                  : null,
-            ),
-            child: swatch.color == null
-                ? Icon(
-                    Icons.auto_awesome_rounded,
-                    size: 20,
-                    color: cs.onSurfaceVariant,
-                  )
-                : isSelected
-                ? const Icon(Icons.check_rounded, size: 20, color: Colors.white)
-                : null,
-          ),
-          const SizedBox(height: 4),
-          Text(
-            swatch.label,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: isSelected ? cs.primary : cs.onSurfaceVariant,
-              fontWeight: isSelected ? FontWeight.w700 : FontWeight.normal,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 class _AppFooter extends StatefulWidget {
   const _AppFooter();

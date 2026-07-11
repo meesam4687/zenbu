@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:zenbu/state_provider.dart';
 import 'package:zenbu/services/anilist/anilist.dart';
 import 'package:zenbu/components/global/item_card.dart';
 import 'package:zenbu/components/global/constant_sliver_grid_delegate.dart';
@@ -31,37 +33,54 @@ class _SimulcastPageViewState extends State<SimulcastPageView>
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    final provider = Provider.of<StateProvider>(context);
+    final displayAdultContent = provider.displayAdultContent;
+
     return FutureBuilder(
       future: simulcastData,
       builder: (context, asyncSnapshot) {
         if (asyncSnapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator.adaptive());
         }
+        if (asyncSnapshot.hasError || asyncSnapshot.data == null) {
+          return const Center(child: Text("Error loading simulcasts"));
+        }
         Map data = asyncSnapshot.data!;
+
+        List airingSchedules =
+            data["data"]?["Page"]?["airingSchedules"] as List? ?? [];
+        if (!displayAdultContent) {
+          airingSchedules = airingSchedules.where((item) {
+            final media = item["media"];
+            final isAdult = media != null
+                ? (media["isAdult"] as bool? ?? false)
+                : false;
+            return !isAdult;
+          }).toList();
+        }
+
         return Container(
           width: double.infinity,
-          margin: EdgeInsets.only(top: 10, left: 10, right: 10),
+          margin: const EdgeInsets.only(top: 10, left: 10, right: 10),
           child: GridView.builder(
-            itemCount: (data["data"]["Page"]["airingSchedules"] as List).length,
+            itemCount: airingSchedules.length,
             gridDelegate: const ConstantSliverGridDelegate(
               itemWidth: 110.0,
-              itemHeight: 226.0,
+              itemHeight: 230.0,
             ),
             itemBuilder: (context, index) {
+              final schedule = airingSchedules[index];
+              final media = schedule["media"] ?? {};
               return Center(
                 child: Padding(
                   padding: const EdgeInsets.only(left: 3.0),
                   child: ItemCard(
-                    title:
-                        data["data"]["Page"]["airingSchedules"][index]["media"]["title"]["romaji"],
-                    image:
-                        data["data"]["Page"]["airingSchedules"][index]["media"]["coverImage"]["large"],
-                    id: data["data"]["Page"]["airingSchedules"][index]["media"]["id"],
+                    title: media["title"]?["romaji"] ?? "",
+                    image: media["coverImage"]?["large"] ?? "",
+                    id: media["id"],
                     type: "anime",
-                    state:
-                        "Episode: ${data["data"]["Page"]["airingSchedules"][index]["episode"].toString()}",
-                    mediaListEntry:
-                        data["data"]["Page"]["airingSchedules"][index]["media"]["mediaListEntry"] as Map?,
+                    state: "Episode: ${schedule["episode"].toString()}",
+                    mediaListEntry: media["mediaListEntry"] as Map?,
                     listDataPreloaded: true,
                   ),
                 ),

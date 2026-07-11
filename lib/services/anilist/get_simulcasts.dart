@@ -11,6 +11,7 @@ Future<Map<String, dynamic>> getSimulcasts(
           episode
           media {
             id
+            isAdult
             title { 
               romaji
               english

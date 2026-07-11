@@ -107,6 +107,7 @@ class StateProvider extends ChangeNotifier {
   ThemeMode _themeMode = ThemeMode.system;
 
   Color? _seedColor;
+  bool _displayAdultContent = false;
 
   StateProvider() {
     _loadSettings();
@@ -123,6 +124,7 @@ class StateProvider extends ChangeNotifier {
         : ThemeMode.system;
     final seedColorValue = prefs.getInt('setting_seed_color');
     _seedColor = seedColorValue != null ? Color(seedColorValue) : null;
+    _displayAdultContent = prefs.getBool('setting_display_adult_content') ?? false;
     notifyListeners();
   }
 
@@ -157,6 +159,11 @@ class StateProvider extends ChangeNotifier {
     await prefs.setString(key, value);
   }
 
+  Future<void> _saveBool(String key, bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(key, value);
+  }
+
   Future<void> _saveOptionalInt(String key, int? value) async {
     final prefs = await SharedPreferences.getInstance();
     if (value == null) {
@@ -164,6 +171,16 @@ class StateProvider extends ChangeNotifier {
     } else {
       await prefs.setInt(key, value);
     }
+  }
+
+  bool get displayAdultContent => _displayAdultContent;
+  set displayAdultContent(bool value) {
+    _displayAdultContent = value;
+    if (_alData['data']?['Viewer']?['options'] != null) {
+      _alData['data']['Viewer']['options']['displayAdultContent'] = value;
+    }
+    _saveBool('setting_display_adult_content', value);
+    notifyListeners();
   }
 
   String resolveTitle(Map? titleMap, {String fallback = ''}) {
@@ -291,6 +308,12 @@ class StateProvider extends ChangeNotifier {
           titleLanguage = lang;
         }
       });
+    }
+    final adult =
+        newData['data']?['Viewer']?['options']?['displayAdultContent'] as bool?;
+    if (adult != null && adult != _displayAdultContent) {
+      _displayAdultContent = adult;
+      _saveBool('setting_display_adult_content', adult);
     }
     notifyListeners();
   }

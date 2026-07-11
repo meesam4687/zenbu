@@ -17,6 +17,7 @@ Future<Map<String, dynamic>> getHomePageData() async {
         unreadNotificationCount
         options {
           titleLanguage
+          displayAdultContent
         }
       }
       animeList: MediaListCollection(type: \$type, userId: \$userId, status_in: [CURRENT, REPEATING], sort: UPDATED_TIME_DESC) {
