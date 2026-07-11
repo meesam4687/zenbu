@@ -71,7 +71,7 @@ class _MediaDiscoveryPageState extends State<MediaDiscoveryPage> {
     return Scaffold(
       appBar: AppBar(
         flexibleSpace: SearchSegment(isAnime: widget.isAnime),
-        toolbarHeight: 90,
+        toolbarHeight: 75,
       ),
       body: RefreshIndicator(
         onRefresh: _handleRefresh,

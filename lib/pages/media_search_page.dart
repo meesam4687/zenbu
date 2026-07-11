@@ -224,7 +224,7 @@ class _SearchPageState extends State<SearchPage> {
             searchText: widget.query,
             isAnime: widget.isAnime,
           ),
-          toolbarHeight: 100,
+          toolbarHeight: 80,
         ),
         body: RefreshIndicator(
           onRefresh: _handleRefresh,
@@ -265,7 +265,8 @@ class _SearchPageState extends State<SearchPage> {
                                 padding: const EdgeInsets.only(left: 3.0),
                                 child: ItemCard(
                                   title:
-                                      medias[index]["title"]["romaji"] as String,
+                                      medias[index]["title"]["romaji"]
+                                          as String,
                                   image:
                                       medias[index]["coverImage"]["large"]
                                           as String,
