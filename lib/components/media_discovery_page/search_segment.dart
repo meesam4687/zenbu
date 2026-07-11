@@ -18,7 +18,7 @@ class SearchSegment extends StatelessWidget {
         : provider.isMangaFilterActive;
 
     return Container(
-      margin: const EdgeInsets.only(top: 30, left: 12, right: 12),
+      margin: const EdgeInsets.only(top: 45, left: 12, right: 12),
       child: Row(
         children: [
           Expanded(
