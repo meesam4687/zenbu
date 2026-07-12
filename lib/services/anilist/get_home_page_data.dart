@@ -50,6 +50,22 @@ Future<Map<String, dynamic>> getHomePageData() async {
                 score 
                 repeat
               }
+              recommendations(sort: [RATING_DESC], perPage: 5) {
+                nodes {
+                  rating
+                  mediaRecommendation {
+                    id
+                    title { romaji english native }
+                    coverImage { extraLarge }
+                    type
+                    episodes
+                    chapters
+                    status
+                    meanScore
+                    mediaListEntry { id progress status }
+                  }
+                }
+              }
             }
           }
         }

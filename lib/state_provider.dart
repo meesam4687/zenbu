@@ -109,6 +109,12 @@ class StateProvider extends ChangeNotifier {
   Color? _seedColor;
   bool _displayAdultContent = false;
   String? _selectedCustomTheme;
+  bool _showAnimeList = true;
+  bool _showMangaList = true;
+  bool _showRecommendationsList = true;
+  List<String> _homeListOrder = ['anime', 'manga', 'recommendations'];
+
+  List<dynamic> _recommendations = [];
 
   StateProvider() {
     _loadSettings();
@@ -127,6 +133,22 @@ class StateProvider extends ChangeNotifier {
     _seedColor = seedColorValue != null ? Color(seedColorValue) : null;
     _displayAdultContent = prefs.getBool('setting_display_adult_content') ?? false;
     _selectedCustomTheme = prefs.getString('setting_custom_theme');
+    _showAnimeList = prefs.getBool('setting_show_anime_list') ?? true;
+    _showMangaList = prefs.getBool('setting_show_manga_list') ?? true;
+    _showRecommendationsList = prefs.getBool('setting_show_recommendations_list') ?? true;
+    
+    final loadedOrder = prefs.getStringList('setting_home_list_order');
+    if (loadedOrder != null && loadedOrder.isNotEmpty) {
+      final validItems = ['anime', 'manga', 'recommendations'];
+      _homeListOrder = loadedOrder.where((item) => validItems.contains(item)).toList();
+      for (var item in validItems) {
+        if (!_homeListOrder.contains(item)) {
+          _homeListOrder.add(item);
+        }
+      }
+    } else {
+      _homeListOrder = ['anime', 'manga', 'recommendations'];
+    }
     notifyListeners();
   }
 
@@ -149,6 +171,34 @@ class StateProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  bool get showAnimeList => _showAnimeList;
+  set showAnimeList(bool value) {
+    _showAnimeList = value;
+    _saveBool('setting_show_anime_list', value);
+    notifyListeners();
+  }
+
+  bool get showMangaList => _showMangaList;
+  set showMangaList(bool value) {
+    _showMangaList = value;
+    _saveBool('setting_show_manga_list', value);
+    notifyListeners();
+  }
+
+  bool get showRecommendationsList => _showRecommendationsList;
+  set showRecommendationsList(bool value) {
+    _showRecommendationsList = value;
+    _saveBool('setting_show_recommendations_list', value);
+    notifyListeners();
+  }
+
+  List<String> get homeListOrder => _homeListOrder;
+  set homeListOrder(List<String> value) {
+    _homeListOrder = value;
+    _saveStringList('setting_home_list_order', value);
+    notifyListeners();
+  }
+
   Color? get seedColor => _seedColor;
   set seedColor(Color? value) {
     _seedColor = value;
@@ -164,6 +214,11 @@ class StateProvider extends ChangeNotifier {
   Future<void> _saveBool(String key, bool value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(key, value);
+  }
+
+  Future<void> _saveStringList(String key, List<String> value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(key, value);
   }
 
   Future<void> _saveOptionalInt(String key, int? value) async {
@@ -219,6 +274,8 @@ class StateProvider extends ChangeNotifier {
         return (titleMap['romaji'] as String?) ?? fallback;
     }
   }
+
+  List<dynamic> get recommendations => _recommendations;
 
   Map get alData => _alData;
   set alData(Map value) {
@@ -320,6 +377,7 @@ class StateProvider extends ChangeNotifier {
 
   void updateData(Map newData) {
     _alData = newData;
+    _loadRecommendations(newData);
     final lang =
         newData['data']?['Viewer']?['options']?['titleLanguage'] as String?;
     if (lang != null) {
@@ -336,6 +394,73 @@ class StateProvider extends ChangeNotifier {
       _saveBool('setting_display_adult_content', adult);
     }
     notifyListeners();
+  }
+
+  void _loadRecommendations(Map newData) {
+    final List<dynamic> rawRecommendations = [];
+    final Set<int> allActiveIds = {};
+    final Set<int> seenRecIds = {};
+
+    final animeLists = newData['data']?['animeList']?['lists'] as List?;
+    if (animeLists != null) {
+      for (var list in animeLists) {
+        final entries = list['entries'] as List?;
+        if (entries != null) {
+          for (var entry in entries) {
+            final media = entry['media'];
+            if (media != null) {
+              final int id = media['id'];
+              allActiveIds.add(id);
+
+              final recs = media['recommendations']?['nodes'] as List?;
+              if (recs != null) {
+                for (var rec in recs) {
+                  final recMedia = rec['mediaRecommendation'];
+                  if (recMedia != null) {
+                    final int recId = recMedia['id'];
+                    if (!seenRecIds.contains(recId)) {
+                      seenRecIds.add(recId);
+                      rawRecommendations.add({
+                        'rating': rec['rating'] ?? 0,
+                        'media': recMedia,
+                      });
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    final mangaLists = newData['data']?['mangaList']?['lists'] as List?;
+    if (mangaLists != null) {
+      for (var list in mangaLists) {
+        final entries = list['entries'] as List?;
+        if (entries != null) {
+          for (var entry in entries) {
+            final media = entry['media'];
+            if (media != null) {
+              allActiveIds.add(media['id']);
+            }
+          }
+        }
+      }
+    }
+
+    final filtered = rawRecommendations.where((rec) {
+      final media = rec['media'];
+      if (media['mediaListEntry'] != null) {
+        return false;
+      }
+      final int id = media['id'];
+      return !allActiveIds.contains(id);
+    }).toList();
+
+    filtered.sort((a, b) => (b['rating'] as int).compareTo(a['rating'] as int));
+
+    _recommendations = filtered;
   }
 
   void clearAnimeFilters() {

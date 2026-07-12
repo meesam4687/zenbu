@@ -1,7 +1,9 @@
 import 'package:zenbu/components/home_page/user_info_modal_sheet.dart';
 import 'package:zenbu/pages/error_page.dart';
+import 'package:zenbu/pages/appearance_settings_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:zenbu/components/global/custom_image.dart';
 import 'package:zenbu/services/anilist/anilist.dart';
 import 'package:zenbu/state_provider.dart';
@@ -60,7 +62,12 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    Map providerData = Provider.of<StateProvider>(context).alData;
+    final provider = Provider.of<StateProvider>(context);
+    Map providerData = provider.alData;
+    final showAnime = provider.showAnimeList;
+    final showManga = provider.showMangaList;
+    final showRecommendations = provider.showRecommendationsList;
+    final homeListOrder = provider.homeListOrder;
 
     return Scaffold(
       appBar: AppBar(
@@ -192,32 +199,171 @@ class _HomePageState extends State<HomePage> {
                   });
                   final animeData = _extractListEntries(data, "animeList");
                   final mangaData = _extractListEntries(data, "mangaList");
+
+                  if (!showAnime && !showManga && !showRecommendations) {
+                    return const _BothDisabledView();
+                  }
+
+                  final bool recommendationsActive = showRecommendations && provider.recommendations.isNotEmpty;
+                  final int activeCount = (showAnime ? 1 : 0) + (showManga ? 1 : 0) + (recommendationsActive ? 1 : 0);
+                  final bool singleListActive = activeCount == 1;
+
+                  final List<Widget> listWidgets = [];
+                  for (var key in homeListOrder) {
+                    if (key == 'anime' && showAnime) {
+                      listWidgets.add(
+                        MediaList(
+                          items: animeData,
+                          isAnime: true,
+                          multiRow: singleListActive,
+                        ),
+                      );
+                    } else if (key == 'manga' && showManga) {
+                      listWidgets.add(
+                        MediaList(
+                          items: mangaData,
+                          isAnime: false,
+                          multiRow: singleListActive,
+                        ),
+                      );
+                    } else if (key == 'recommendations' && recommendationsActive) {
+                      listWidgets.add(
+                        MediaList(
+                          items: provider.recommendations,
+                          isAnime: true,
+                          title: "Recommended for You",
+                          multiRow: singleListActive,
+                        ),
+                      );
+                    }
+                  }
+
+                  final bool firstIsAnime = listWidgets.isNotEmpty && (listWidgets.first as MediaList).isAnime;
+                  final double topSpacing = firstIsAnime ? 24.0 : 16.0;
+
                   return SingleChildScrollView(
                     physics: const AlwaysScrollableScrollPhysics(),
                     child: Column(
                       children: [
-                        MediaList(items: animeData, isAnime: true),
-                        MediaList(items: mangaData, isAnime: false),
+                        SizedBox(height: topSpacing),
+                        ...listWidgets,
                       ],
                     ),
                   );
                 },
               )
+            : (!showAnime && !showManga && !showRecommendations)
+            ? const _BothDisabledView()
             : SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                child: Column(
-                  children: [
-                    MediaList(
-                      items: _extractListEntries(providerData, "animeList"),
-                      isAnime: true,
-                    ),
-                    MediaList(
-                      items: _extractListEntries(providerData, "mangaList"),
-                      isAnime: false,
-                    ),
-                  ],
+                child: Builder(
+                  builder: (context) {
+                    final bool recommendationsActive = showRecommendations && provider.recommendations.isNotEmpty;
+                    final int activeCount = (showAnime ? 1 : 0) + (showManga ? 1 : 0) + (recommendationsActive ? 1 : 0);
+                    final bool singleListActive = activeCount == 1;
+
+                    final List<Widget> listWidgets = [];
+                    for (var key in homeListOrder) {
+                      if (key == 'anime' && showAnime) {
+                        listWidgets.add(
+                          MediaList(
+                            items: _extractListEntries(providerData, "animeList"),
+                            isAnime: true,
+                            multiRow: singleListActive,
+                          ),
+                        );
+                      } else if (key == 'manga' && showManga) {
+                        listWidgets.add(
+                          MediaList(
+                            items: _extractListEntries(providerData, "mangaList"),
+                            isAnime: false,
+                            multiRow: singleListActive,
+                          ),
+                        );
+                      } else if (key == 'recommendations' && recommendationsActive) {
+                        listWidgets.add(
+                          MediaList(
+                            items: provider.recommendations,
+                            isAnime: true,
+                            title: "Recommended for You",
+                            multiRow: singleListActive,
+                          ),
+                        );
+                      }
+                    }
+
+                    final bool firstIsAnime = listWidgets.isNotEmpty && (listWidgets.first as MediaList).isAnime;
+                    final double topSpacing = firstIsAnime ? 24.0 : 16.0;
+
+                    return Column(
+                      children: [
+                        SizedBox(height: topSpacing),
+                        ...listWidgets,
+                        const SizedBox(height: 16),
+                      ],
+                    );
+                  }
                 ),
               ),
+      ),
+    );
+  }
+}
+
+class _BothDisabledView extends StatelessWidget {
+  const _BothDisabledView();
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SvgPicture.asset(
+              'assets/oops.svg',
+              height: 120,
+              width: 120,
+              colorFilter: ColorFilter.mode(
+                cs.outline,
+                BlendMode.srcIn,
+              ),
+              placeholderBuilder: (context) => const SizedBox(
+                height: 120,
+                width: 120,
+                child: CircularProgressIndicator.adaptive(),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Home Screen is empty',
+              style: tt.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'You put nothing on the homescreen.',
+              style: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            FilledButton.icon(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const AppearanceSettingsPage(),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.settings_suggest_rounded),
+              label: const Text('Open Appearance Settings'),
+            ),
+          ],
+        ),
       ),
     );
   }

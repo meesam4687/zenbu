@@ -35,16 +35,13 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
             child: TapRegion(
               groupId: 'search_group',
               child: Material(
-                elevation: 4,
-                shadowColor: Colors.black.withAlpha(50),
+                elevation: 8,
+                shadowColor: Colors.black.withAlpha(80),
                 color: Theme.of(context).colorScheme.onInverseSurface,
                 clipBehavior: Clip.antiAlias,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
-                  side: BorderSide(
-                    color: Theme.of(context).colorScheme.outline.withAlpha(80),
-                    width: 1,
-                  ),
+                  side: BorderSide.none,
                 ),
                 child: ValueListenableBuilder<TextEditingValue>(
                   valueListenable: _searchController,
@@ -213,12 +210,22 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
                 ? Theme.of(context).colorScheme.onInverseSurface
                 : Colors.transparent,
             borderRadius: BorderRadius.circular(28),
-            border: Border.all(
-              color: _isSearching
-                  ? Theme.of(context).colorScheme.outline.withAlpha(80)
-                  : Theme.of(context).colorScheme.onSecondary,
-              width: 1,
-            ),
+            border: _isSearching
+                ? null
+                : Border.all(
+                    color: Theme.of(context).colorScheme.onSecondary,
+                    width: 1,
+                  ),
+            boxShadow: _isSearching
+                ? [
+                    BoxShadow(
+                      color: Colors.black.withAlpha(25),
+                      blurRadius: 10,
+                      spreadRadius: 1,
+                      offset: const Offset(0, 3),
+                    ),
+                  ]
+                : null,
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(28),

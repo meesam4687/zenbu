@@ -6,17 +6,25 @@ import 'package:provider/provider.dart';
 import 'package:zenbu/state_provider.dart';
 
 class MediaList extends StatelessWidget {
-  const MediaList({super.key, required this.items, required this.isAnime});
+  const MediaList({
+    super.key,
+    required this.items,
+    required this.isAnime,
+    this.multiRow = false,
+    this.title,
+  });
 
   final List<dynamic> items;
   final bool isAnime;
+  final bool multiRow;
+  final String? title;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(top: isAnime ? 18 : 10),
+      margin: EdgeInsets.zero,
       width: double.infinity,
-      height: 288,
+      height: multiRow ? 536 : 288,
       child: Column(
         children: [
           SizedBox(
@@ -32,31 +40,32 @@ class MediaList extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    isAnime ? "Currently Watching" : "Currently Reading",
+                    title ?? (isAnime ? "Currently Watching" : "Currently Reading"),
                     style: const TextStyle(fontSize: 20),
                   ),
-                  MaterialButton(
-                    padding: const EdgeInsets.only(left: 10, right: 10),
-                    shape: const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(100)),
-                    ),
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) {
-                            return ListPage(
-                              title: isAnime ? "Anime List" : "Manga List",
-                              mediaListType: isAnime
-                                  ? MediaType.anime
-                                  : MediaType.manga,
-                            );
-                          },
-                        ),
-                      );
-                    },
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [Text('View All  '), Icon(Icons.arrow_forward)],
+                  if (title == null)
+                    MaterialButton(
+                      padding: const EdgeInsets.only(left: 10, right: 10),
+                      shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(100)),
+                      ),
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) {
+                              return ListPage(
+                                title: isAnime ? "Anime List" : "Manga List",
+                                mediaListType: isAnime
+                                    ? MediaType.anime
+                                    : MediaType.manga,
+                              );
+                            },
+                          ),
+                        );
+                      },
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [Text('View All  '), Icon(Icons.arrow_forward)],
                     ),
                   ),
                 ],
@@ -66,7 +75,7 @@ class MediaList extends StatelessWidget {
           items.isEmpty
               ? Container(
                   width: double.infinity,
-                  height: 248,
+                  height: multiRow ? 496 : 248,
                   alignment: Alignment.center,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -129,41 +138,95 @@ class MediaList extends StatelessWidget {
                 )
               : Container(
                   width: double.infinity,
-                  height: 248,
+                  height: multiRow ? 496 : 248,
                   margin: const EdgeInsets.only(left: 12, right: 12),
                   child: Consumer<StateProvider>(
                     builder: (context, provider, _) {
-                      return ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: items.length,
-                        itemBuilder: (context, index) {
-                          final item = items[index];
-                          final int id = item['media']['id'];
-                          final progress =
-                              item["media"]["mediaListEntry"]["progress"];
-                          final total = isAnime
-                              ? (item["media"]["episodes"] ?? '?')
-                              : (item["media"]["chapters"] ?? '?');
+                      if (multiRow) {
+                        return GridView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: items.length,
+                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            mainAxisExtent: 113,
+                            mainAxisSpacing: 0,
+                            crossAxisSpacing: 0,
+                          ),
+                          itemBuilder: (context, index) {
+                            final item = items[index];
+                            final int id = item['media']['id'];
+                            final mediaListEntry = item["media"]["mediaListEntry"] as Map?;
+                            final progress = mediaListEntry?["progress"];
+                            final String mediaType = item["media"]["type"]?.toString().toLowerCase() ?? (isAnime ? "anime" : "manga");
+                            final bool isItemAnime = mediaType == "anime";
+                            
+                            final total = isItemAnime
+                                ? (item["media"]["episodes"] ?? '?')
+                                : (item["media"]["chapters"] ?? '?');
+                            final stateText = progress != null 
+                                ? "$progress/$total" 
+                                : (item["media"]["meanScore"] != null
+                                    ? "${item["media"]["meanScore"]}%"
+                                    : "$total ${isItemAnime ? 'eps' : 'ch'}");
 
-                          return Padding(
-                            padding: const EdgeInsets.only(left: 3),
-                            child: ItemCard(
-                              type: isAnime ? "anime" : "manga",
-                              id: id,
-                              title: provider.resolveTitle(
-                                item["media"]["title"] as Map?,
+                            return Padding(
+                              padding: const EdgeInsets.only(left: 3),
+                              child: ItemCard(
+                                type: mediaType,
+                                id: id,
+                                title: provider.resolveTitle(
+                                  item["media"]["title"] as Map?,
+                                ),
+                                state: stateText,
+                                image:
+                                    item["media"]["coverImage"]["extraLarge"]
+                                        as String,
+                                mediaListEntry: mediaListEntry,
+                                listDataPreloaded: true,
                               ),
-                              state: "$progress/$total",
-                              image:
-                                  item["media"]["coverImage"]["extraLarge"]
-                                      as String,
-                              mediaListEntry:
-                                  item["media"]["mediaListEntry"] as Map?,
-                              listDataPreloaded: true,
-                            ),
-                          );
-                        },
-                      );
+                            );
+                          },
+                        );
+                      } else {
+                        return ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: items.length,
+                          itemBuilder: (context, index) {
+                            final item = items[index];
+                            final int id = item['media']['id'];
+                            final mediaListEntry = item["media"]["mediaListEntry"] as Map?;
+                            final progress = mediaListEntry?["progress"];
+                            final String mediaType = item["media"]["type"]?.toString().toLowerCase() ?? (isAnime ? "anime" : "manga");
+                            final bool isItemAnime = mediaType == "anime";
+
+                            final total = isItemAnime
+                                ? (item["media"]["episodes"] ?? '?')
+                                : (item["media"]["chapters"] ?? '?');
+                            final stateText = progress != null 
+                                ? "$progress/$total" 
+                                : (item["media"]["meanScore"] != null
+                                    ? "${item["media"]["meanScore"]}%"
+                                    : "$total ${isItemAnime ? 'eps' : 'ch'}");
+
+                            return Padding(
+                              padding: const EdgeInsets.only(left: 3),
+                              child: ItemCard(
+                                type: mediaType,
+                                id: id,
+                                title: provider.resolveTitle(
+                                  item["media"]["title"] as Map?,
+                                ),
+                                state: stateText,
+                                image:
+                                    item["media"]["coverImage"]["extraLarge"]
+                                        as String,
+                                mediaListEntry: mediaListEntry,
+                                listDataPreloaded: true,
+                              ),
+                            );
+                          },
+                        );
+                      }
                     },
                   ),
                 ),

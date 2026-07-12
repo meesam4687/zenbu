@@ -124,6 +124,92 @@ class AppearanceSettingsPage extends StatelessWidget {
               ),
             ),
           ),
+          _SectionHeader(label: 'Home Screen Layout'),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+            child: Card(
+              elevation: 0,
+              color: cs.surfaceContainerLow,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: ReorderableListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  buildDefaultDragHandles: false,
+                  itemCount: provider.homeListOrder.length,
+                  onReorderItem: (oldIndex, newIndex) {
+                    final items = List<String>.from(provider.homeListOrder);
+                    final item = items.removeAt(oldIndex);
+                    items.insert(newIndex, item);
+                    provider.homeListOrder = items;
+                  },
+                  itemBuilder: (context, index) {
+                    final key = provider.homeListOrder[index];
+                    
+                    Widget tile;
+                    if (key == 'anime') {
+                      tile = ListTile(
+                        leading: ReorderableDragStartListener(
+                          index: index,
+                          child: Icon(Icons.drag_indicator_rounded, color: cs.outline),
+                        ),
+                        title: const Text('Show Anime List'),
+                        subtitle: const Text('Display currently watching anime'),
+                        trailing: Switch.adaptive(
+                          value: provider.showAnimeList,
+                          onChanged: (bool value) {
+                            provider.showAnimeList = value;
+                          },
+                        ),
+                      );
+                    } else if (key == 'manga') {
+                      tile = ListTile(
+                        leading: ReorderableDragStartListener(
+                          index: index,
+                          child: Icon(Icons.drag_indicator_rounded, color: cs.outline),
+                        ),
+                        title: const Text('Show Manga List'),
+                        subtitle: const Text('Display currently reading manga'),
+                        trailing: Switch.adaptive(
+                          value: provider.showMangaList,
+                          onChanged: (bool value) {
+                            provider.showMangaList = value;
+                          },
+                        ),
+                      );
+                    } else {
+                      tile = ListTile(
+                        leading: ReorderableDragStartListener(
+                          index: index,
+                          child: Icon(Icons.drag_indicator_rounded, color: cs.outline),
+                        ),
+                        title: const Text('Show Recommendations'),
+                        subtitle: const Text('Display recommendations based on anime list'),
+                        trailing: Switch.adaptive(
+                          value: provider.showRecommendationsList,
+                          onChanged: (bool value) {
+                            provider.showRecommendationsList = value;
+                          },
+                        ),
+                      );
+                    }
+                    
+                    return Column(
+                      key: ValueKey(key),
+                      children: [
+                        tile,
+                        if (index < provider.homeListOrder.length - 1)
+                          const Divider(height: 1, indent: 56, endIndent: 16),
+                      ],
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
