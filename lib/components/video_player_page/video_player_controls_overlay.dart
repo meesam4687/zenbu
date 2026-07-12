@@ -26,7 +26,6 @@ class VideoPlayerControlsOverlay extends StatelessWidget {
   final VoidCallback onForwardPressed;
   final VoidCallback onSkip85Pressed;
   final VoidCallback onFullscreenPressed;
-  final VoidCallback onBackgroundTap;
 
   const VideoPlayerControlsOverlay({
     super.key,
@@ -51,7 +50,6 @@ class VideoPlayerControlsOverlay extends StatelessWidget {
     required this.onForwardPressed,
     required this.onSkip85Pressed,
     required this.onFullscreenPressed,
-    required this.onBackgroundTap,
   });
 
   @override
@@ -59,8 +57,7 @@ class VideoPlayerControlsOverlay extends StatelessWidget {
     return Stack(
       children: [
         Positioned.fill(
-          child: GestureDetector(
-            onTap: onBackgroundTap,
+          child: IgnorePointer(
             child: Container(color: Colors.black45),
           ),
         ),

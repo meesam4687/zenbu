@@ -296,6 +296,13 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
     if (_showControls) _startControlsTimer();
   }
 
+  void _hideControls() {
+    _controlsTimer?.cancel();
+    if (mounted && _showControls) {
+      setState(() => _showControls = false);
+    }
+  }
+
   void _toggleFullScreen() {
     setState(() => _isFullScreen = !_isFullScreen);
     if (_isFullScreen) {
@@ -974,6 +981,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
                   isLeft: true,
                   onTap: _toggleControlsVisibility,
                   onDoubleTap: () => _skipSeconds(-10),
+                  onGestureTriggered: _hideControls,
                 ),
               ),
               Expanded(
@@ -981,6 +989,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
                   isLeft: false,
                   onTap: _toggleControlsVisibility,
                   onDoubleTap: () => _skipSeconds(10),
+                  onGestureTriggered: _hideControls,
                 ),
               ),
             ],
@@ -1082,7 +1091,6 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
               );
             },
             onFullscreenPressed: _toggleFullScreen,
-            onBackgroundTap: _toggleControlsVisibility,
           ),
 
         if (_activeSubtitleCtrl != null && _videoPlayerController != null)

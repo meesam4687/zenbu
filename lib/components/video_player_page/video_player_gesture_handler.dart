@@ -7,12 +7,14 @@ class VideoPlayerGestureHandler extends StatefulWidget {
   final bool isLeft;
   final VoidCallback onTap;
   final VoidCallback onDoubleTap;
+  final VoidCallback? onGestureTriggered;
 
   const VideoPlayerGestureHandler({
     super.key,
     required this.isLeft,
     required this.onTap,
     required this.onDoubleTap,
+    this.onGestureTriggered,
   });
 
   @override
@@ -33,6 +35,9 @@ class _VideoPlayerGestureHandlerState extends State<VideoPlayerGestureHandler>
   double _initialValue = 0.5;
   double _dragStartPos = 0.0;
   Timer? _overlayFadeTimer;
+
+  int _lastTapTime = 0;
+  Timer? _singleTapTimer;
 
   @override
   void initState() {
@@ -100,6 +105,22 @@ class _VideoPlayerGestureHandlerState extends State<VideoPlayerGestureHandler>
     } catch (_) {}
   }
 
+  void _handleTap() {
+    _singleTapTimer?.cancel();
+    final now = DateTime.now().millisecondsSinceEpoch;
+    if (now - _lastTapTime < 200) {
+      _onDoubleTap();
+      _lastTapTime = 0;
+    } else {
+      _lastTapTime = now;
+      _singleTapTimer = Timer(const Duration(milliseconds: 200), () {
+        if (mounted) {
+          widget.onTap();
+        }
+      });
+    }
+  }
+
   void _onDoubleTap() {
     _resetTimer?.cancel();
     setState(() {
@@ -107,6 +128,7 @@ class _VideoPlayerGestureHandlerState extends State<VideoPlayerGestureHandler>
     });
     widget.onDoubleTap();
     _animationController.forward(from: 0.0);
+    widget.onGestureTriggered?.call();
 
     _resetTimer = Timer(const Duration(milliseconds: 800), () {
       if (mounted) {
@@ -124,6 +146,7 @@ class _VideoPlayerGestureHandlerState extends State<VideoPlayerGestureHandler>
       _initialValue = _currentValue;
       _showVerticalOverlay = true;
     });
+    widget.onGestureTriggered?.call();
   }
 
   Future<void> _onVerticalDragUpdate(DragUpdateDetails details) async {
@@ -168,6 +191,7 @@ class _VideoPlayerGestureHandlerState extends State<VideoPlayerGestureHandler>
     _animationController.dispose();
     _resetTimer?.cancel();
     _overlayFadeTimer?.cancel();
+    _singleTapTimer?.cancel();
     if (!widget.isLeft) {
       FlutterVolumeController.removeListener();
       FlutterVolumeController.updateShowSystemUI(true);
@@ -180,8 +204,7 @@ class _VideoPlayerGestureHandlerState extends State<VideoPlayerGestureHandler>
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: widget.onTap,
-      onDoubleTap: _onDoubleTap,
+      onTap: _handleTap,
       onVerticalDragStart: _onVerticalDragStart,
       onVerticalDragUpdate: _onVerticalDragUpdate,
       onVerticalDragEnd: _onVerticalDragEnd,
