@@ -7,6 +7,7 @@ import 'package:zenbu/pages/video_player_page.dart';
 import 'package:zenbu/pages/extensions_page.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:zenbu/services/progress_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AnimeWatchPane extends StatefulWidget {
   final int mediaId;
@@ -35,6 +36,7 @@ class AnimeWatchPane extends StatefulWidget {
 class _AnimeWatchPaneState extends State<AnimeWatchPane> {
   List<ExtSource> _installedExtensions = [];
   Map<String, double> _episodesProgress = {};
+  String? _customLinkActive;
 
   Future<void> _loadLocalProgress() async {
     final Map<String, double> progressMap = {};
@@ -165,6 +167,10 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
   Future<void> _loadEpisodes() async {
     if (_selectedExtension == null || !mounted) return;
 
+    final prefs = await SharedPreferences.getInstance();
+    final key = 'custom_title_link_${widget.mediaId}_${_selectedExtension!.id}';
+    final customLink = prefs.getString(key);
+
     setState(() {
       _isLoadingEpisodes = true;
       _errorMessage = null;
@@ -173,6 +179,7 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
       _rawEpisodes = [];
       _currentPage = 0;
       _isLoadingPage = false;
+      _customLinkActive = customLink;
     });
 
     try {
@@ -180,24 +187,30 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
         _selectedExtension!,
       );
 
-      final searchResults = await _cachedEngine!.search(widget.animeTitle, 1);
-      final is403 =
-          _cachedEngine?.lastStatusCode == 403 ||
-          _cachedEngine?.lastStatusCode == 503;
-      if (is403) {
-        throw Exception('Cloudflare challenge detected.');
+      String matchedLink = '';
+      if (customLink != null && customLink.isNotEmpty) {
+        matchedLink = customLink;
+      } else {
+        final searchResults = await _cachedEngine!.search(widget.animeTitle, 1);
+        final is403 =
+            _cachedEngine?.lastStatusCode == 403 ||
+            _cachedEngine?.lastStatusCode == 503;
+        if (is403) {
+          throw Exception('Cloudflare challenge detected.');
+        }
+
+        if (searchResults.isEmpty) {
+          if (!mounted) return;
+          setState(() {
+            _allRawEpisodes = [];
+            _rawEpisodes = [];
+          });
+          return;
+        }
+
+        matchedLink = searchResults.first['link'] ?? '';
       }
 
-      if (searchResults.isEmpty) {
-        if (!mounted) return;
-        setState(() {
-          _allRawEpisodes = [];
-          _rawEpisodes = [];
-        });
-        return;
-      }
-
-      final matchedLink = searchResults.first['link'] ?? '';
       if (matchedLink.isEmpty) {
         if (!mounted) return;
         setState(() {
@@ -298,7 +311,7 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
           Row(
             children: [
               const Text(
-                'Source Extension: ',
+                'Source: ',
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
               ),
               const SizedBox(width: 8),
@@ -324,6 +337,20 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
                   },
                 ),
               ),
+              if (_selectedExtension != null) ...[
+                IconButton(
+                  icon: Icon(
+                    _customLinkActive != null ? Icons.link : Icons.link_off,
+                    color: _customLinkActive != null
+                        ? Theme.of(context).colorScheme.primary
+                        : null,
+                  ),
+                  tooltip: _customLinkActive != null
+                      ? 'Custom Link Active (Tap to edit/reset)'
+                      : 'Wrong Title',
+                  onPressed: _showWrongTitleBottomSheet,
+                ),
+              ],
               IconButton(
                 icon: const Icon(Icons.settings),
                 onPressed: () async {
@@ -760,10 +787,326 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
           _loadLocalProgress();
         });
   }
+
+  Future<void> _showWrongTitleBottomSheet() async {
+    if (_selectedExtension == null) return;
+
+    if (_cachedEngine == null) {
+      setState(() {
+        _isLoadingEpisodes = true;
+      });
+      try {
+        _cachedEngine = await RepoService.loadExtensionEngine(
+          _selectedExtension!,
+        );
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to load extension engine: $e')),
+          );
+        }
+        return;
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isLoadingEpisodes = false;
+          });
+        }
+      }
+    }
+
+    if (!mounted || _cachedEngine == null) return;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.75,
+          minChildSize: 0.5,
+          maxChildSize: 0.95,
+          builder: (context, scrollController) {
+            return Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surface,
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(20),
+                ),
+              ),
+              child: _WrongTitleBottomSheet(
+                animeTitle: widget.animeTitle,
+                currentCustomLink: _customLinkActive,
+                jsEngine: _cachedEngine!,
+                scrollController: scrollController,
+                onSelect: (link, name) async {
+                  final prefs = await SharedPreferences.getInstance();
+                  final key =
+                      'custom_title_link_${widget.mediaId}_${_selectedExtension!.id}';
+                  await prefs.setString(key, link);
+                  if (mounted) {
+                    _loadEpisodes();
+                  }
+                },
+                onClear: () async {
+                  final prefs = await SharedPreferences.getInstance();
+                  final key =
+                      'custom_title_link_${widget.mediaId}_${_selectedExtension!.id}';
+                  await prefs.remove(key);
+                  if (mounted) {
+                    _loadEpisodes();
+                  }
+                },
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
 }
 
 class ResumeTarget {
   final ExtEpisode episode;
   final bool isResume;
   ResumeTarget({required this.episode, required this.isResume});
+}
+
+class _WrongTitleBottomSheet extends StatefulWidget {
+  final String animeTitle;
+  final String? currentCustomLink;
+  final JsEngine jsEngine;
+  final ScrollController scrollController;
+  final Function(String link, String name) onSelect;
+  final VoidCallback onClear;
+
+  const _WrongTitleBottomSheet({
+    required this.animeTitle,
+    this.currentCustomLink,
+    required this.jsEngine,
+    required this.scrollController,
+    required this.onSelect,
+    required this.onClear,
+  });
+
+  @override
+  State<_WrongTitleBottomSheet> createState() => _WrongTitleBottomSheetState();
+}
+
+class _WrongTitleBottomSheetState extends State<_WrongTitleBottomSheet> {
+  late final TextEditingController _controller;
+  List<Map<String, dynamic>> _results = [];
+  bool _isLoading = false;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.animeTitle);
+    _performSearch(widget.animeTitle);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<void> _performSearch(String query) async {
+    if (query.trim().isEmpty) return;
+    setState(() {
+      _isLoading = true;
+      _error = null;
+      _results = [];
+    });
+
+    try {
+      final results = await widget.jsEngine.search(query, 1);
+      if (mounted) {
+        setState(() {
+          _results = results;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _error = e.toString();
+        });
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 12),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.outlineVariant,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Search Alternative Title',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                if (widget.currentCustomLink != null)
+                  TextButton.icon(
+                    onPressed: () {
+                      widget.onClear();
+                      Navigator.of(context).pop();
+                    },
+                    icon: const Icon(Icons.clear, size: 16),
+                    label: const Text('Reset'),
+                    style: TextButton.styleFrom(
+                      foregroundColor: Theme.of(context).colorScheme.error,
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _controller,
+              decoration: InputDecoration(
+                hintText: 'Search title...',
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (_controller.text.isNotEmpty)
+                      IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: () {
+                          _controller.clear();
+                          setState(() {});
+                        },
+                      ),
+                    IconButton(
+                      icon: const Icon(Icons.arrow_forward),
+                      onPressed: () => _performSearch(_controller.text),
+                    ),
+                  ],
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+              ),
+              onSubmitted: _performSearch,
+            ),
+            const SizedBox(height: 16),
+            Expanded(
+              child: _isLoading
+                  ? const Center(child: CircularProgressIndicator.adaptive())
+                  : _error != null
+                  ? Center(
+                      child: Text(
+                        'Error: $_error',
+                        style: const TextStyle(color: Colors.red),
+                        textAlign: TextAlign.center,
+                      ),
+                    )
+                  : _results.isEmpty
+                  ? const Center(child: Text('No results found.'))
+                  : ListView.builder(
+                      controller: widget.scrollController,
+                      itemCount: _results.length,
+                      itemBuilder: (context, index) {
+                        final result = _results[index];
+                        final name =
+                            result['name'] ?? result['title'] ?? 'Unknown';
+                        final link = result['link'] ?? '';
+                        final cover =
+                            result['cover'] ?? result['thumbnail'] ?? '';
+                        final isSelected = widget.currentCustomLink == link;
+
+                        return Card(
+                          margin: const EdgeInsets.symmetric(vertical: 4),
+                          color: isSelected
+                              ? Theme.of(context).colorScheme.primaryContainer
+                              : Theme.of(context).colorScheme.surfaceContainer,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            side: BorderSide(
+                              color: isSelected
+                                  ? Theme.of(context).colorScheme.primary
+                                  : Theme.of(context).colorScheme.outlineVariant
+                                        .withValues(alpha: 0.3),
+                            ),
+                          ),
+                          child: ListTile(
+                            leading: cover.isNotEmpty
+                                ? SizedBox(
+                                    width: 40,
+                                    height: 60,
+                                    child: CustomImage(
+                                      imageUrl: cover,
+                                      fit: BoxFit.cover,
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                  )
+                                : const Icon(Icons.movie),
+                            title: Text(
+                              name,
+                              style: TextStyle(
+                                fontWeight: isSelected ? FontWeight.bold : null,
+                              ),
+                            ),
+                            subtitle: Text(
+                              link,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Theme.of(
+                                  context,
+                                ).textTheme.bodySmall?.color,
+                              ),
+                            ),
+                            trailing: isSelected
+                                ? Icon(
+                                    Icons.check_circle,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
+                                  )
+                                : null,
+                            onTap: () {
+                              widget.onSelect(link, name);
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                        );
+                      },
+                    ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }

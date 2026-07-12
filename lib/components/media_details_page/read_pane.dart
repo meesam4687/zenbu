@@ -301,7 +301,7 @@ class _MangaReadPaneState extends State<MangaReadPane> {
           Row(
             children: [
               const Text(
-                'Source Extension: ',
+                'Source: ',
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
               ),
               const SizedBox(width: 8),
