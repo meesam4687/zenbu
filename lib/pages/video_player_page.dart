@@ -503,6 +503,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
         if (!mounted) return;
       } else {
         _selectedSubtitle = null;
+        _activeSubtitleCtrl = null;
       }
 
       if (_currentPosition != Duration.zero) {
