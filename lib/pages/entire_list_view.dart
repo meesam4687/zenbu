@@ -201,7 +201,8 @@ class _EntireListViewState extends State<EntireListView> {
                             child: Padding(
                               padding: const EdgeInsets.only(right: 3.0),
                               child: ItemCard(
-                                title: medias[index]["title"]["romaji"] as String,
+                                title:
+                                    medias[index]["title"]["romaji"] as String,
                                 image:
                                     medias[index]["coverImage"]["large"]
                                         as String,

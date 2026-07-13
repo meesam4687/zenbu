@@ -108,6 +108,7 @@ class MainActivity : FlutterActivity() {
                     dismissDownloadingNotification()
                     result.success(null)
                 }
+
                 else -> {
                     result.notImplemented()
                 }
@@ -271,4 +272,5 @@ class MainActivity : FlutterActivity() {
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.cancel(NOTIFICATION_ID)
     }
+
 }

@@ -229,7 +229,11 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                                 alignment: Alignment.centerLeft,
                                 padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
-                                  border: Border.all(color: Theme.of(context).colorScheme.outline),
+                                  border: Border.all(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.outline,
+                                  ),
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                                 child: Text(
@@ -285,7 +289,11 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                                 alignment: Alignment.centerLeft,
                                 padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
-                                  border: Border.all(color: Theme.of(context).colorScheme.outline),
+                                  border: Border.all(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.outline,
+                                  ),
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                                 child: Text(

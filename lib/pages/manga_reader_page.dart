@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'package:archive/archive.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -193,26 +195,90 @@ class _MangaReaderPageState extends State<MangaReaderPage>
     });
 
     try {
-      _jsEngine?.dispose();
-      _jsEngine = await RepoService.loadExtensionEngine(widget.source);
       final currentChapter = widget.chapters[_currentChapterIndex];
-      final rawPages = await _jsEngine!.getPageList(currentChapter.url);
-
       final List<Map<String, dynamic>> standardizedPages = [];
-      if (rawPages.isNotEmpty) {
-        final firstUrl = rawPages.first is Map
-            ? (rawPages.first['url'] ?? '')
-            : rawPages.first.toString();
-        final headers = await _jsEngine!.getHeaders(firstUrl);
 
-        for (final page in rawPages) {
-          if (page is Map) {
-            standardizedPages.add({
-              'url': page['url'] as String? ?? '',
-              'headers': Map<String, String>.from(page['headers'] ?? headers),
-            });
+      if (widget.source.id == -1) {
+        final path = currentChapter.url;
+        final isZip =
+            path.toLowerCase().endsWith('.zip') ||
+            path.toLowerCase().endsWith('.cbz');
+
+        if (isZip) {
+          final file = File(path);
+          if (await file.exists()) {
+            final bytes = await file.readAsBytes();
+            final archive = ZipDecoder().decodeBytes(bytes);
+            final imageExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.gif'];
+
+            final List<ArchiveFile> imageFiles = [];
+            for (final archiveFile in archive) {
+              if (archiveFile.isFile) {
+                final nameLower = archiveFile.name.toLowerCase();
+                if (imageExtensions.any((ext) => nameLower.endsWith(ext))) {
+                  imageFiles.add(archiveFile);
+                }
+              }
+            }
+
+            imageFiles.sort((a, b) => a.name.compareTo(b.name));
+
+            for (final archiveFile in imageFiles) {
+              final content = archiveFile.content as List<int>;
+              standardizedPages.add({
+                'url': 'archive://${archiveFile.name}',
+                'bytes': Uint8List.fromList(content),
+                'headers': <String, String>{},
+              });
+            }
           } else {
-            standardizedPages.add({'url': page.toString(), 'headers': headers});
+            throw Exception('Manga archive file does not exist: $path');
+          }
+        } else {
+          final directory = Directory(path);
+          if (await directory.exists()) {
+            final List<FileSystemEntity> files = directory.listSync();
+            final imageExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.gif'];
+            final imageFiles = files.whereType<File>().where((file) {
+              final nameLower = file.path.toLowerCase();
+              return imageExtensions.any((ext) => nameLower.endsWith(ext));
+            }).toList();
+
+            imageFiles.sort((a, b) => a.path.compareTo(b.path));
+
+            for (final file in imageFiles) {
+              standardizedPages.add({
+                'url': file.path,
+                'headers': <String, String>{},
+              });
+            }
+          } else {
+            throw Exception('Manga directory does not exist: $path');
+          }
+        }
+      } else {
+        _jsEngine?.dispose();
+        _jsEngine = await RepoService.loadExtensionEngine(widget.source);
+        final rawPages = await _jsEngine!.getPageList(currentChapter.url);
+
+        if (rawPages.isNotEmpty) {
+          final firstUrl = rawPages.first is Map
+              ? (rawPages.first['url'] ?? '')
+              : rawPages.first.toString();
+          final headers = await _jsEngine!.getHeaders(firstUrl);
+
+          for (final page in rawPages) {
+            if (page is Map) {
+              standardizedPages.add({
+                'url': page['url'] as String? ?? '',
+                'headers': Map<String, String>.from(page['headers'] ?? headers),
+              });
+            } else {
+              standardizedPages.add({
+                'url': page.toString(),
+                'headers': headers,
+              });
+            }
           }
         }
       }
@@ -437,49 +503,76 @@ class _MangaReaderPageState extends State<MangaReaderPage>
               final page = _pages[index];
               final url = page['url'] as String;
               final headers = Map<String, String>.from(page['headers'] ?? {});
-              return CachedNetworkImage(
-                imageUrl: url,
-                httpHeaders: headers,
-                fit: BoxFit.fitWidth,
-                width: double.infinity,
-                placeholder: (context, url) => Container(
-                  height: 400,
-                  color: Colors.black,
-                  child: const Center(
-                    child: SizedBox(
-                      width: 32,
-                      height: 32,
-                      child: CircularProgressIndicator.adaptive(
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          Colors.white30,
-                        ),
-                        strokeWidth: 2,
+              final bytes = page['bytes'] as Uint8List?;
+              return bytes != null
+                  ? Image.memory(
+                      bytes,
+                      fit: BoxFit.fitWidth,
+                      width: double.infinity,
+                    )
+                  : (url.startsWith('file://') || File(url).existsSync())
+                  ? Image.file(
+                      File(
+                        url.startsWith('file://')
+                            ? Uri.parse(url).toFilePath()
+                            : url,
                       ),
-                    ),
-                  ),
-                ),
-                errorWidget: (context, url, error) => Container(
-                  height: 300,
-                  color: Colors.grey.shade900,
-                  child: const Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.error_outline,
-                          color: Colors.redAccent,
-                          size: 36,
+                      fit: BoxFit.fitWidth,
+                      width: double.infinity,
+                      errorBuilder: (context, error, stackTrace) => Container(
+                        height: 400,
+                        color: Colors.black,
+                        child: const Center(
+                          child: Text('Failed to load local image'),
                         ),
-                        SizedBox(height: 8),
-                        Text(
-                          'Failed to load image',
-                          style: TextStyle(color: Colors.white54, fontSize: 12),
+                      ),
+                    )
+                  : CachedNetworkImage(
+                      imageUrl: url,
+                      httpHeaders: headers,
+                      fit: BoxFit.fitWidth,
+                      width: double.infinity,
+                      placeholder: (context, url) => Container(
+                        height: 400,
+                        color: Colors.black,
+                        child: const Center(
+                          child: SizedBox(
+                            width: 32,
+                            height: 32,
+                            child: CircularProgressIndicator.adaptive(
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.white30,
+                              ),
+                              strokeWidth: 2,
+                            ),
+                          ),
                         ),
-                      ],
-                    ),
-                  ),
-                ),
-              );
+                      ),
+                      errorWidget: (context, url, error) => Container(
+                        height: 300,
+                        color: Colors.grey.shade900,
+                        child: const Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.error_outline,
+                                color: Colors.redAccent,
+                                size: 36,
+                              ),
+                              SizedBox(height: 8),
+                              Text(
+                                'Failed to load image',
+                                style: TextStyle(
+                                  color: Colors.white54,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
             },
           ),
         ),
@@ -522,42 +615,68 @@ class _MangaReaderPageState extends State<MangaReaderPage>
             minScale: 1.0,
             maxScale: 4.0,
             child: Center(
-              child: CachedNetworkImage(
-                imageUrl: url,
-                httpHeaders: headers,
-                fit: BoxFit.contain,
-                placeholder: (context, url) => const Center(
-                  child: SizedBox(
-                    width: 32,
-                    height: 32,
-                    child: CircularProgressIndicator.adaptive(
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white30),
-                      strokeWidth: 2,
-                    ),
-                  ),
-                ),
-                errorWidget: (context, url, error) => Container(
-                  height: 300,
-                  color: Colors.transparent,
-                  child: const Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.error_outline,
-                          color: Colors.redAccent,
-                          size: 36,
+              child: page['bytes'] != null
+                  ? Image.memory(
+                      page['bytes'] as Uint8List,
+                      fit: BoxFit.contain,
+                    )
+                  : (url.startsWith('file://') || File(url).existsSync())
+                  ? Image.file(
+                      File(
+                        url.startsWith('file://')
+                            ? Uri.parse(url).toFilePath()
+                            : url,
+                      ),
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) =>
+                          const SizedBox(
+                            height: 300,
+                            child: Center(
+                              child: Text('Failed to load local image'),
+                            ),
+                          ),
+                    )
+                  : CachedNetworkImage(
+                      imageUrl: url,
+                      httpHeaders: headers,
+                      fit: BoxFit.contain,
+                      placeholder: (context, url) => const Center(
+                        child: SizedBox(
+                          width: 32,
+                          height: 32,
+                          child: CircularProgressIndicator.adaptive(
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white30,
+                            ),
+                            strokeWidth: 2,
+                          ),
                         ),
-                        SizedBox(height: 8),
-                        Text(
-                          'Failed to load image',
-                          style: TextStyle(color: Colors.white54, fontSize: 12),
+                      ),
+                      errorWidget: (context, url, error) => Container(
+                        height: 300,
+                        color: Colors.transparent,
+                        child: const Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.error_outline,
+                                color: Colors.redAccent,
+                                size: 36,
+                              ),
+                              SizedBox(height: 8),
+                              Text(
+                                'Failed to load image',
+                                style: TextStyle(
+                                  color: Colors.white54,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ],
+                      ),
                     ),
-                  ),
-                ),
-              ),
             ),
           );
         },

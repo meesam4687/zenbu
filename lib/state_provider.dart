@@ -56,7 +56,9 @@ class StateProvider extends ChangeNotifier {
 
     try {
       try {
-        await const MethodChannel('zenbu/pip').invokeMethod('showDownloadingNotification', {'progress': 0});
+        await const MethodChannel(
+          'zenbu/pip',
+        ).invokeMethod('showDownloadingNotification', {'progress': 0});
       } catch (_) {}
 
       await UpdateService.downloadAndInstallApk(
@@ -65,7 +67,7 @@ class StateProvider extends ChangeNotifier {
           if (_isCancelledByUser) return;
           _updateDownloadProgress = progress;
           notifyListeners();
-          
+
           final progressPercent = (progress * 100).toInt();
           if (progressPercent != lastNotifiedProgress) {
             lastNotifiedProgress = progressPercent;
@@ -90,7 +92,9 @@ class StateProvider extends ChangeNotifier {
       _isDownloadingUpdate = false;
       notifyListeners();
       try {
-        await const MethodChannel('zenbu/pip').invokeMethod('dismissDownloadingNotification');
+        await const MethodChannel(
+          'zenbu/pip',
+        ).invokeMethod('dismissDownloadingNotification');
       } catch (_) {}
     }
   }
@@ -131,16 +135,20 @@ class StateProvider extends ChangeNotifier {
         : ThemeMode.system;
     final seedColorValue = prefs.getInt('setting_seed_color');
     _seedColor = seedColorValue != null ? Color(seedColorValue) : null;
-    _displayAdultContent = prefs.getBool('setting_display_adult_content') ?? false;
+    _displayAdultContent =
+        prefs.getBool('setting_display_adult_content') ?? false;
     _selectedCustomTheme = prefs.getString('setting_custom_theme');
     _showAnimeList = prefs.getBool('setting_show_anime_list') ?? true;
     _showMangaList = prefs.getBool('setting_show_manga_list') ?? true;
-    _showRecommendationsList = prefs.getBool('setting_show_recommendations_list') ?? true;
-    
+    _showRecommendationsList =
+        prefs.getBool('setting_show_recommendations_list') ?? true;
+
     final loadedOrder = prefs.getStringList('setting_home_list_order');
     if (loadedOrder != null && loadedOrder.isNotEmpty) {
       final validItems = ['anime', 'manga', 'recommendations'];
-      _homeListOrder = loadedOrder.where((item) => validItems.contains(item)).toList();
+      _homeListOrder = loadedOrder
+          .where((item) => validItems.contains(item))
+          .toList();
       for (var item in validItems) {
         if (!_homeListOrder.contains(item)) {
           _homeListOrder.add(item);

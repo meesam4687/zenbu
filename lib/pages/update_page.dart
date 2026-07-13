@@ -18,8 +18,10 @@ class _UpdatePageState extends State<UpdatePage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<StateProvider>(context, listen: false)
-          .checkDownloadedApk(widget.updateInfo.remoteVersion);
+      Provider.of<StateProvider>(
+        context,
+        listen: false,
+      ).checkDownloadedApk(widget.updateInfo.remoteVersion);
     });
   }
 
@@ -28,7 +30,8 @@ class _UpdatePageState extends State<UpdatePage> {
     final theme = Theme.of(context);
     final provider = Provider.of<StateProvider>(context);
 
-    final isDownloading = provider.isDownloadingUpdate &&
+    final isDownloading =
+        provider.isDownloadingUpdate &&
         provider.downloadingUpdateInfo?.remoteVersion ==
             widget.updateInfo.remoteVersion;
     final isApkDownloaded = provider.isUpdateApkDownloaded;

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -324,6 +325,68 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
       _errorMessage = null;
     });
 
+    if (widget.source.id == -1) {
+      final List<ExtSubtitle> localSubtitles = [];
+      try {
+        final videoFile = File(_currentEpisode.url);
+        final parentDir = videoFile.parent;
+        if (await parentDir.exists()) {
+          final videoNameWithoutExt = videoFile.path.substring(
+            0,
+            videoFile.path.lastIndexOf('.'),
+          );
+          final subsExtensions = ['.srt', '.vtt', '.ass', '.ssa'];
+          final parentEntities = parentDir.listSync();
+          for (final entity in parentEntities) {
+            if (entity is File) {
+              final pathLower = entity.path.toLowerCase();
+              if (subsExtensions.any((ext) => pathLower.endsWith(ext))) {
+                final subNameWithoutExt = entity.path.substring(
+                  0,
+                  entity.path.lastIndexOf('.'),
+                );
+                if (subNameWithoutExt.toLowerCase().startsWith(
+                  videoNameWithoutExt.toLowerCase(),
+                )) {
+                  String label = 'Local';
+                  final suffix = subNameWithoutExt.substring(
+                    videoNameWithoutExt.length,
+                  );
+                  if (suffix.startsWith('.')) {
+                    label = suffix.substring(1).toUpperCase();
+                  } else if (suffix.isNotEmpty) {
+                    label = suffix.trim();
+                  }
+                  localSubtitles.add(
+                    ExtSubtitle(file: entity.path, label: label),
+                  );
+                }
+              }
+            }
+          }
+        }
+      } catch (e) {
+        debugPrint('[LOCAL SUBTITLES SCAN ERROR] $e');
+      }
+
+      final localVideo = ExtVideo(
+        url: _currentEpisode.url,
+        originalUrl: _currentEpisode.url,
+        quality: 'Local',
+        headers: {},
+        subtitles: localSubtitles,
+      );
+
+      setState(() {
+        _videos = [localVideo];
+        _selectedVideo = localVideo;
+        _isLoading = false;
+      });
+
+      await _initializePlayer();
+      return;
+    }
+
     try {
       final engine = await RepoService.loadExtensionEngine(widget.source);
       final rawList = await engine.getVideoList(_currentEpisode.url);
@@ -460,11 +523,20 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
         formatHint = VideoFormat.dash;
       }
 
-      _videoPlayerController = VideoPlayerController.networkUrl(
-        Uri.parse(resolvedUrl),
-        httpHeaders: headers,
-        formatHint: formatHint,
-      );
+      final isLocal =
+          resolvedUrl.startsWith('file://') || File(resolvedUrl).existsSync();
+      if (isLocal) {
+        final filePath = resolvedUrl.startsWith('file://')
+            ? Uri.parse(resolvedUrl).toFilePath()
+            : resolvedUrl;
+        _videoPlayerController = VideoPlayerController.file(File(filePath));
+      } else {
+        _videoPlayerController = VideoPlayerController.networkUrl(
+          Uri.parse(resolvedUrl),
+          httpHeaders: headers,
+          formatHint: formatHint,
+        );
+      }
 
       await _videoPlayerController!.initialize();
       if (!mounted) return;

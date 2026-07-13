@@ -40,7 +40,8 @@ class MediaList extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    title ?? (isAnime ? "Currently Watching" : "Currently Reading"),
+                    title ??
+                        (isAnime ? "Currently Watching" : "Currently Reading"),
                     style: const TextStyle(fontSize: 20),
                   ),
                   if (title == null)
@@ -65,9 +66,12 @@ class MediaList extends StatelessWidget {
                       },
                       child: const Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [Text('View All  '), Icon(Icons.arrow_forward)],
+                        children: [
+                          Text('View All  '),
+                          Icon(Icons.arrow_forward),
+                        ],
+                      ),
                     ),
-                  ),
                 ],
               ),
             ),
@@ -146,28 +150,34 @@ class MediaList extends StatelessWidget {
                         return GridView.builder(
                           scrollDirection: Axis.horizontal,
                           itemCount: items.length,
-                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            mainAxisExtent: 113,
-                            mainAxisSpacing: 0,
-                            crossAxisSpacing: 0,
-                          ),
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 2,
+                                mainAxisExtent: 113,
+                                mainAxisSpacing: 0,
+                                crossAxisSpacing: 0,
+                              ),
                           itemBuilder: (context, index) {
                             final item = items[index];
                             final int id = item['media']['id'];
-                            final mediaListEntry = item["media"]["mediaListEntry"] as Map?;
+                            final mediaListEntry =
+                                item["media"]["mediaListEntry"] as Map?;
                             final progress = mediaListEntry?["progress"];
-                            final String mediaType = item["media"]["type"]?.toString().toLowerCase() ?? (isAnime ? "anime" : "manga");
+                            final String mediaType =
+                                item["media"]["type"]
+                                    ?.toString()
+                                    .toLowerCase() ??
+                                (isAnime ? "anime" : "manga");
                             final bool isItemAnime = mediaType == "anime";
-                            
+
                             final total = isItemAnime
                                 ? (item["media"]["episodes"] ?? '?')
                                 : (item["media"]["chapters"] ?? '?');
-                            final stateText = progress != null 
-                                ? "$progress/$total" 
+                            final stateText = progress != null
+                                ? "$progress/$total"
                                 : (item["media"]["meanScore"] != null
-                                    ? "${item["media"]["meanScore"]}%"
-                                    : "$total ${isItemAnime ? 'eps' : 'ch'}");
+                                      ? "${item["media"]["meanScore"]}%"
+                                      : "$total ${isItemAnime ? 'eps' : 'ch'}");
 
                             return Padding(
                               padding: const EdgeInsets.only(left: 3),
@@ -194,19 +204,24 @@ class MediaList extends StatelessWidget {
                           itemBuilder: (context, index) {
                             final item = items[index];
                             final int id = item['media']['id'];
-                            final mediaListEntry = item["media"]["mediaListEntry"] as Map?;
+                            final mediaListEntry =
+                                item["media"]["mediaListEntry"] as Map?;
                             final progress = mediaListEntry?["progress"];
-                            final String mediaType = item["media"]["type"]?.toString().toLowerCase() ?? (isAnime ? "anime" : "manga");
+                            final String mediaType =
+                                item["media"]["type"]
+                                    ?.toString()
+                                    .toLowerCase() ??
+                                (isAnime ? "anime" : "manga");
                             final bool isItemAnime = mediaType == "anime";
 
                             final total = isItemAnime
                                 ? (item["media"]["episodes"] ?? '?')
                                 : (item["media"]["chapters"] ?? '?');
-                            final stateText = progress != null 
-                                ? "$progress/$total" 
+                            final stateText = progress != null
+                                ? "$progress/$total"
                                 : (item["media"]["meanScore"] != null
-                                    ? "${item["media"]["meanScore"]}%"
-                                    : "$total ${isItemAnime ? 'eps' : 'ch'}");
+                                      ? "${item["media"]["meanScore"]}%"
+                                      : "$total ${isItemAnime ? 'eps' : 'ch'}");
 
                             return Padding(
                               padding: const EdgeInsets.only(left: 3),

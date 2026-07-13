@@ -109,12 +109,15 @@ class _MediaDetailsPageState extends State<MediaDetailsPage>
                               Tab(text: "Reviews"),
                             ]
                           : (showReadTab
-                              ? const [
-                                  Tab(text: "About"),
-                                  Tab(text: "Read"),
-                                  Tab(text: "Reviews"),
-                                ]
-                              : const [Tab(text: "About"), Tab(text: "Reviews")]),
+                                ? const [
+                                    Tab(text: "About"),
+                                    Tab(text: "Read"),
+                                    Tab(text: "Reviews"),
+                                  ]
+                                : const [
+                                    Tab(text: "About"),
+                                    Tab(text: "Reviews"),
+                                  ]),
                     ),
                   ),
                 ),
@@ -141,8 +144,10 @@ class _MediaDetailsPageState extends State<MediaDetailsPage>
                               coverImage: media["coverImage"]["extraLarge"],
                               streamingEpisodes:
                                   media["streamingEpisodes"] as List?,
-                              anilistProgress: int.tryParse(currentProgress.toString()) ?? 0,
-                              mediaState: media["mediaListEntry"]?["status"] ?? 'NONE',
+                              anilistProgress:
+                                  int.tryParse(currentProgress.toString()) ?? 0,
+                              mediaState:
+                                  media["mediaListEntry"]?["status"] ?? 'NONE',
                             ),
                           ),
                         ),
@@ -151,47 +156,54 @@ class _MediaDetailsPageState extends State<MediaDetailsPage>
                         ),
                       ]
                     : (showReadTab
-                        ? [
-                            _KeepAliveWrapper(
-                              child: SingleChildScrollView(
-                                key: const PageStorageKey('about'),
-                                physics: const ClampingScrollPhysics(),
-                                child: DetailsPane(
-                                  mediaId: widget.id as int,
-                                  isAnime: false,
+                          ? [
+                              _KeepAliveWrapper(
+                                child: SingleChildScrollView(
+                                  key: const PageStorageKey('about'),
+                                  physics: const ClampingScrollPhysics(),
+                                  child: DetailsPane(
+                                    mediaId: widget.id as int,
+                                    isAnime: false,
+                                  ),
                                 ),
                               ),
-                            ),
-                            _KeepAliveWrapper(
-                              child: SizedBox(
-                                child: MangaReadPane(
-                                  mediaId: widget.id as int,
-                                  mangaTitle: resolvedTitle,
-                                  coverImage: media["coverImage"]["extraLarge"],
-                                  anilistProgress: int.tryParse(currentProgress.toString()) ?? 0,
-                                  mediaState: media["mediaListEntry"]?["status"] ?? 'NONE',
+                              _KeepAliveWrapper(
+                                child: SizedBox(
+                                  child: MangaReadPane(
+                                    mediaId: widget.id as int,
+                                    mangaTitle: resolvedTitle,
+                                    coverImage:
+                                        media["coverImage"]["extraLarge"],
+                                    anilistProgress:
+                                        int.tryParse(
+                                          currentProgress.toString(),
+                                        ) ??
+                                        0,
+                                    mediaState:
+                                        media["mediaListEntry"]?["status"] ??
+                                        'NONE',
+                                  ),
                                 ),
                               ),
-                            ),
-                            _KeepAliveWrapper(
-                              child: ReviewsPane(mediaId: widget.id as int),
-                            ),
-                          ]
-                        : [
-                            _KeepAliveWrapper(
-                              child: SingleChildScrollView(
-                                key: const PageStorageKey('about'),
-                                physics: const ClampingScrollPhysics(),
-                                child: DetailsPane(
-                                  mediaId: widget.id as int,
-                                  isAnime: false,
+                              _KeepAliveWrapper(
+                                child: ReviewsPane(mediaId: widget.id as int),
+                              ),
+                            ]
+                          : [
+                              _KeepAliveWrapper(
+                                child: SingleChildScrollView(
+                                  key: const PageStorageKey('about'),
+                                  physics: const ClampingScrollPhysics(),
+                                  child: DetailsPane(
+                                    mediaId: widget.id as int,
+                                    isAnime: false,
+                                  ),
                                 ),
                               ),
-                            ),
-                            _KeepAliveWrapper(
-                              child: ReviewsPane(mediaId: widget.id as int),
-                            ),
-                          ]),
+                              _KeepAliveWrapper(
+                                child: ReviewsPane(mediaId: widget.id as int),
+                              ),
+                            ]),
               ),
             ),
           ),

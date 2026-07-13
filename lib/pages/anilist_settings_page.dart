@@ -142,15 +142,10 @@ class _AnilistSettingsPageState extends State<AnilistSettingsPage> {
                 borderRadius: BorderRadius.circular(14),
               ),
               child: ListTile(
-                leading: Icon(
-                  Icons.explicit_rounded,
-                  color: cs.primary,
-                ),
+                leading: Icon(Icons.explicit_rounded, color: cs.primary),
                 title: Text(
                   'Show NSFW Content',
-                  style: tt.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: tt.titleSmall?.copyWith(fontWeight: FontWeight.w600),
                 ),
                 subtitle: Text(
                   'Display adult (18+) anime and manga. Synced with your AniList account.',
@@ -160,9 +155,7 @@ class _AnilistSettingsPageState extends State<AnilistSettingsPage> {
                     ? const SizedBox(
                         width: 24,
                         height: 24,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                        ),
+                        child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : Switch(
                         value: provider.displayAdultContent,
@@ -193,10 +186,10 @@ class _SectionHeader extends StatelessWidget {
       child: Text(
         label.toUpperCase(),
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: Theme.of(context).colorScheme.primary,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 1.2,
-            ),
+          color: Theme.of(context).colorScheme.primary,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 1.2,
+        ),
       ),
     );
   }

@@ -12,9 +12,7 @@ class AppearanceSettingsPage extends StatelessWidget {
     final tt = Theme.of(context).textTheme;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Appearance'),
-      ),
+      appBar: AppBar(title: const Text('Appearance')),
       body: ListView(
         padding: const EdgeInsets.symmetric(vertical: 8),
         children: [
@@ -59,11 +57,13 @@ class AppearanceSettingsPage extends StatelessWidget {
                       onSelectionChanged: (Set<ThemeMode> selection) {
                         final newMode = selection.first;
                         provider.themeMode = newMode;
-                        
+
                         if (provider.selectedCustomTheme == 'Midnight') {
-                          final systemBrightness = MediaQuery.platformBrightnessOf(context);
+                          final systemBrightness =
+                              MediaQuery.platformBrightnessOf(context);
                           if (newMode == ThemeMode.light ||
-                              (newMode == ThemeMode.system && systemBrightness == Brightness.light)) {
+                              (newMode == ThemeMode.system &&
+                                  systemBrightness == Brightness.light)) {
                             provider.selectedCustomTheme = null;
                           }
                         }
@@ -104,7 +104,8 @@ class AppearanceSettingsPage extends StatelessWidget {
                       onSelected: (color, customThemeName) {
                         if (customThemeName != null) {
                           if (customThemeName == 'Midnight') {
-                            final systemBrightness = MediaQuery.platformBrightnessOf(context);
+                            final systemBrightness =
+                                MediaQuery.platformBrightnessOf(context);
                             if (provider.themeMode == ThemeMode.light ||
                                 (provider.themeMode == ThemeMode.system &&
                                     systemBrightness == Brightness.light)) {
@@ -148,16 +149,21 @@ class AppearanceSettingsPage extends StatelessWidget {
                   },
                   itemBuilder: (context, index) {
                     final key = provider.homeListOrder[index];
-                    
+
                     Widget tile;
                     if (key == 'anime') {
                       tile = ListTile(
                         leading: ReorderableDragStartListener(
                           index: index,
-                          child: Icon(Icons.drag_indicator_rounded, color: cs.outline),
+                          child: Icon(
+                            Icons.drag_indicator_rounded,
+                            color: cs.outline,
+                          ),
                         ),
                         title: const Text('Show Anime List'),
-                        subtitle: const Text('Display currently watching anime'),
+                        subtitle: const Text(
+                          'Display currently watching anime',
+                        ),
                         trailing: Switch.adaptive(
                           value: provider.showAnimeList,
                           onChanged: (bool value) {
@@ -169,7 +175,10 @@ class AppearanceSettingsPage extends StatelessWidget {
                       tile = ListTile(
                         leading: ReorderableDragStartListener(
                           index: index,
-                          child: Icon(Icons.drag_indicator_rounded, color: cs.outline),
+                          child: Icon(
+                            Icons.drag_indicator_rounded,
+                            color: cs.outline,
+                          ),
                         ),
                         title: const Text('Show Manga List'),
                         subtitle: const Text('Display currently reading manga'),
@@ -184,10 +193,15 @@ class AppearanceSettingsPage extends StatelessWidget {
                       tile = ListTile(
                         leading: ReorderableDragStartListener(
                           index: index,
-                          child: Icon(Icons.drag_indicator_rounded, color: cs.outline),
+                          child: Icon(
+                            Icons.drag_indicator_rounded,
+                            color: cs.outline,
+                          ),
                         ),
                         title: const Text('Show Recommendations'),
-                        subtitle: const Text('Display recommendations based on anime list'),
+                        subtitle: const Text(
+                          'Display recommendations based on anime list',
+                        ),
                         trailing: Switch.adaptive(
                           value: provider.showRecommendationsList,
                           onChanged: (bool value) {
@@ -196,7 +210,7 @@ class AppearanceSettingsPage extends StatelessWidget {
                         ),
                       );
                     }
-                    
+
                     return Column(
                       key: ValueKey(key),
                       children: [
@@ -227,10 +241,10 @@ class _SectionHeader extends StatelessWidget {
       child: Text(
         label.toUpperCase(),
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: Theme.of(context).colorScheme.primary,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 1.2,
-            ),
+          color: Theme.of(context).colorScheme.primary,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 1.2,
+        ),
       ),
     );
   }
@@ -249,7 +263,11 @@ class _ColorSwatchRow extends StatelessWidget {
 
   static const _swatches = [
     _Swatch(label: 'System', color: null),
-    _Swatch(label: 'Midnight', color: Colors.black, customThemeName: 'Midnight'),
+    _Swatch(
+      label: 'Midnight',
+      color: Colors.black,
+      customThemeName: 'Midnight',
+    ),
     _Swatch(label: 'Purple', color: Color(0xFF6750A4)),
     _Swatch(label: 'Blue', color: Color(0xFF1565C0)),
     _Swatch(label: 'Teal', color: Color(0xFF00695C)),
@@ -339,16 +357,16 @@ class _ColorSwatch extends StatelessWidget {
                     color: cs.onSurfaceVariant,
                   )
                 : isSelected
-                    ? const Icon(Icons.check_rounded, size: 20, color: Colors.white)
-                    : null,
+                ? const Icon(Icons.check_rounded, size: 20, color: Colors.white)
+                : null,
           ),
           const SizedBox(height: 4),
           Text(
             swatch.label,
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: isSelected ? cs.primary : cs.onSurfaceVariant,
-                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.normal,
-                ),
+              color: isSelected ? cs.primary : cs.onSurfaceVariant,
+              fontWeight: isSelected ? FontWeight.w700 : FontWeight.normal,
+            ),
           ),
         ],
       ),

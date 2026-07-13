@@ -167,10 +167,6 @@ class _OthersSearchPageState extends State<OthersSearchPage> {
           decoration: BoxDecoration(
             color: theme.colorScheme.onInverseSurface,
             borderRadius: BorderRadius.circular(28),
-            border: Border.all(
-              color: theme.colorScheme.outline.withAlpha(80),
-              width: 1,
-            ),
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(28),

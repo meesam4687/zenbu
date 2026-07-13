@@ -9,7 +9,12 @@ class Error extends StatelessWidget {
   Widget build(BuildContext context) {
     String displayMessage = "Your Internet might not be working";
     if (message != null && message!.trim().isNotEmpty) {
-      displayMessage = message!.replaceFirst(RegExp(r'^(Exception|HttpException|SocketException|ClientException):\s*'), '');
+      displayMessage = message!.replaceFirst(
+        RegExp(
+          r'^(Exception|HttpException|SocketException|ClientException):\s*',
+        ),
+        '',
+      );
     }
     return Center(
       child: Column(
@@ -17,7 +22,10 @@ class Error extends StatelessWidget {
         children: [
           const Icon(Icons.error_outline, size: 60),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 24.0,
+              vertical: 16.0,
+            ),
             child: Text(
               "Failed to Load\n\n$displayMessage",
               textAlign: TextAlign.center,

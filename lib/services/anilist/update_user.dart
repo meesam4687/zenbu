@@ -15,7 +15,9 @@ Future<Map<String, dynamic>> updateUserTitleLanguage(String language) async {
   return executeQuery(mutation, variables: {'titleLanguage': language});
 }
 
-Future<Map<String, dynamic>> updateUserDisplayAdultContent(bool displayAdultContent) async {
+Future<Map<String, dynamic>> updateUserDisplayAdultContent(
+  bool displayAdultContent,
+) async {
   const String mutation = '''
     mutation (\$displayAdultContent: Boolean) {
       UpdateUser(displayAdultContent: \$displayAdultContent) {
@@ -27,6 +29,8 @@ Future<Map<String, dynamic>> updateUserDisplayAdultContent(bool displayAdultCont
     }
   ''';
 
-  return executeQuery(mutation, variables: {'displayAdultContent': displayAdultContent});
+  return executeQuery(
+    mutation,
+    variables: {'displayAdultContent': displayAdultContent},
+  );
 }
-

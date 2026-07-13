@@ -23,9 +23,6 @@ Future<Map<String, dynamic>> toggleFavourite({
 
   return executeQuery(
     query,
-    variables: {
-      if (animeId != null) "animeId": animeId,
-      if (mangaId != null) "mangaId": mangaId,
-    },
+    variables: {"animeId": ?animeId, "mangaId": ?mangaId},
   );
 }

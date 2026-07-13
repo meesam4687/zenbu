@@ -54,9 +54,7 @@ class CustomImage extends StatelessWidget {
         color: Colors.grey.withAlpha(50),
         borderRadius: borderRadius ?? BorderRadius.circular(10),
       ),
-      child: const Center(
-        child: Icon(Icons.broken_image, size: 24),
-      ),
+      child: const Center(child: Icon(Icons.broken_image, size: 24)),
     );
   }
 }

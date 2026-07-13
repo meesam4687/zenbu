@@ -14,7 +14,7 @@ class ConstantSliverGridDelegate extends SliverGridDelegate {
     final double usableWidth = constraints.crossAxisExtent;
     final int crossAxisCount = (usableWidth / itemWidth).floor().clamp(1, 999);
     final double cellWidth = usableWidth / crossAxisCount;
-    
+
     return SliverGridRegularTileLayout(
       crossAxisCount: crossAxisCount,
       mainAxisStride: itemHeight,

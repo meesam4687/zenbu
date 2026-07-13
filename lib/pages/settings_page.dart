@@ -77,8 +77,6 @@ class _SettingsPageState extends State<SettingsPage> {
     }
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<StateProvider>(context);
@@ -104,16 +102,11 @@ class _SettingsPageState extends State<SettingsPage> {
                   'assets/alLogo.svg',
                   width: 24,
                   height: 24,
-                  colorFilter: ColorFilter.mode(
-                    cs.primary,
-                    BlendMode.srcIn,
-                  ),
+                  colorFilter: ColorFilter.mode(cs.primary, BlendMode.srcIn),
                 ),
                 title: Text(
                   'AniList Settings',
-                  style: tt.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: tt.titleSmall?.copyWith(fontWeight: FontWeight.w600),
                 ),
                 subtitle: Text(
                   'Configure metadata language and content preferences.',
@@ -147,9 +140,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 leading: Icon(Icons.palette_rounded, color: cs.primary),
                 title: Text(
                   'Theme & Colours',
-                  style: tt.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: tt.titleSmall?.copyWith(fontWeight: FontWeight.w600),
                 ),
                 subtitle: Text(
                   _themeModeLabel(provider.themeMode),
@@ -245,7 +236,9 @@ class _SettingsPageState extends State<SettingsPage> {
                               },
                             ),
                             onTap: () async {
-                              await DiscordService.setPresenceEnabled(!isEnabled);
+                              await DiscordService.setPresenceEnabled(
+                                !isEnabled,
+                              );
                             },
                             shape: const RoundedRectangleBorder(
                               borderRadius: BorderRadius.only(
@@ -399,8 +392,6 @@ class _SectionHeader extends StatelessWidget {
     );
   }
 }
-
-
 
 class _AppFooter extends StatefulWidget {
   const _AppFooter();

@@ -57,9 +57,7 @@ class VideoPlayerControlsOverlay extends StatelessWidget {
     return Stack(
       children: [
         Positioned.fill(
-          child: IgnorePointer(
-            child: Container(color: Colors.black45),
-          ),
+          child: IgnorePointer(child: Container(color: Colors.black45)),
         ),
 
         Positioned(
