@@ -22,7 +22,7 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
     _hideOverlay();
     if (!mounted) return;
 
-    final double expandedWidth = MediaQuery.of(context).size.width - 80;
+    final double expandedWidth = MediaQuery.of(context).size.width - 128;
 
     _overlayEntry = OverlayEntry(
       builder: (context) {
@@ -189,7 +189,7 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
 
   @override
   Widget build(BuildContext context) {
-    final double expandedWidth = MediaQuery.of(context).size.width - 80;
+    final double expandedWidth = MediaQuery.of(context).size.width - 128;
 
     return CompositedTransformTarget(
       link: _layerLink,
