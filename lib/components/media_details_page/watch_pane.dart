@@ -1035,8 +1035,9 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
   ) async {
     final downloadService = DownloadService();
     try {
-      final videoUrl = selectedStream['url'] as String? ?? '';
-      final headers = Map<String, String>.from(selectedStream['headers'] ?? {});
+      final extVideo = ExtVideo.fromJson(selectedStream);
+      final videoUrl = extVideo.url;
+      final headers = extVideo.headers;
 
       if (videoUrl.isEmpty) {
         throw Exception('Stream URL is empty.');
@@ -1051,6 +1052,7 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
         videoStreamUrl: videoUrl,
         headers: headers,
         rootPath: rootPath,
+        subtitles: extVideo.subtitles,
       );
     } catch (e) {
       final wasCancelled = downloadService.wasManuallyCancelled(ep.url);

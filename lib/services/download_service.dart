@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:zenbu/models/extensions_models.dart';
 
 class DownloadItem {
   final String url;
@@ -99,9 +100,7 @@ class DownloadService extends ChangeNotifier {
   void _dismissNotification(String url) {
     try {
       final id = url.hashCode;
-      _channel.invokeMethod('dismissDownloadingNotification', {
-        'id': id,
-      });
+      _channel.invokeMethod('dismissDownloadingNotification', {'id': id});
     } catch (_) {}
   }
 
@@ -430,6 +429,7 @@ class DownloadService extends ChangeNotifier {
     required String videoStreamUrl,
     required Map<String, String> headers,
     required String rootPath,
+    List<ExtSubtitle>? subtitles,
   }) async {
     _activeDownloads[episodeUrl] = 0.0;
     _activeTypes[episodeUrl] = false;
@@ -459,6 +459,48 @@ class DownloadService extends ChangeNotifier {
 
       fileDest =
           '$showPath${Platform.isWindows ? '\\' : '/'}$sanitizedEpName$ext';
+
+      if (subtitles != null && subtitles.isNotEmpty) {
+        final videoNameWithoutExt = fileDest.substring(
+          0,
+          fileDest.lastIndexOf('.'),
+        );
+        for (final subtitle in subtitles) {
+          if (!_activeDownloads.containsKey(episodeUrl)) {
+            break;
+          }
+          if (subtitle.file.isEmpty) continue;
+          try {
+            final sanitizedLabel = sanitizeFilename(subtitle.label);
+            String subExt = '.vtt';
+            final fileUri = Uri.tryParse(subtitle.file);
+            if (fileUri != null) {
+              final path = fileUri.path.toLowerCase();
+              if (path.contains('.srt')) {
+                subExt = '.srt';
+              } else if (path.contains('.ass')) {
+                subExt = '.ass';
+              } else if (path.contains('.ssa')) {
+                subExt = '.ssa';
+              }
+            }
+            final subFileDest = '$videoNameWithoutExt.$sanitizedLabel$subExt';
+            final subResponse = await sendWithRedirects(
+              subtitle.file,
+              headers,
+              client: client,
+            );
+            if (subResponse.statusCode == 200) {
+              final subFile = File(subFileDest);
+              await subFile.writeAsBytes(subResponse.bodyBytes);
+            }
+          } catch (e) {
+            debugPrint(
+              '[DOWNLOAD SUBS ERROR] Failed to download subtitle (${subtitle.label}): $e',
+            );
+          }
+        }
+      }
 
       final response = await streamWithRedirects(
         videoStreamUrl,
@@ -598,7 +640,11 @@ class DownloadService extends ChangeNotifier {
 
               final progress = (i + 1) / totalSegments;
               _activeDownloads[episodeUrl] = progress;
-              _updateNotificationProgress(episodeUrl, '$mediaTitle - $episodeName', progress);
+              _updateNotificationProgress(
+                episodeUrl,
+                '$mediaTitle - $episodeName',
+                progress,
+              );
               notifyListeners();
             }
 
@@ -655,7 +701,11 @@ class DownloadService extends ChangeNotifier {
             if (contentLength > 0) {
               final progress = downloadedBytes / contentLength;
               _activeDownloads[episodeUrl] = progress;
-              _updateNotificationProgress(episodeUrl, '$mediaTitle - $episodeName', progress);
+              _updateNotificationProgress(
+                episodeUrl,
+                '$mediaTitle - $episodeName',
+                progress,
+              );
               notifyListeners();
             }
           },
@@ -712,6 +762,31 @@ class DownloadService extends ChangeNotifier {
           final file = File(fileDest);
           if (await file.exists()) {
             await file.delete();
+          }
+          final videoNameWithoutExt = fileDest.substring(
+            0,
+            fileDest.lastIndexOf('.'),
+          );
+          final parentDir = file.parent;
+          final subsExtensions = ['.srt', '.vtt', '.ass', '.ssa'];
+          if (await parentDir.exists()) {
+            final parentEntities = parentDir.listSync();
+            for (final entity in parentEntities) {
+              if (entity is File) {
+                final pathLower = entity.path.toLowerCase();
+                if (subsExtensions.any((ext) => pathLower.endsWith(ext))) {
+                  final subNameWithoutExt = entity.path.substring(
+                    0,
+                    entity.path.lastIndexOf('.'),
+                  );
+                  if (subNameWithoutExt.toLowerCase().startsWith(
+                    videoNameWithoutExt.toLowerCase(),
+                  )) {
+                    await entity.delete();
+                  }
+                }
+              }
+            }
           }
         } catch (_) {}
       }
@@ -807,7 +882,11 @@ class DownloadService extends ChangeNotifier {
           }
           final progress = completedPages / totalPages;
           _activeDownloads[chapterUrl] = progress;
-          _updateNotificationProgress(chapterUrl, '$mediaTitle - $chapterName', progress);
+          _updateNotificationProgress(
+            chapterUrl,
+            '$mediaTitle - $chapterName',
+            progress,
+          );
           notifyListeners();
         }
 
@@ -890,6 +969,35 @@ class DownloadService extends ChangeNotifier {
       try {
         final fileOrDir = File(targetItem.localPath);
         if (await fileOrDir.exists()) {
+          if (!isManga) {
+            try {
+              final parentDir = fileOrDir.parent;
+              final videoNameWithoutExt = targetItem.localPath.substring(
+                0,
+                targetItem.localPath.lastIndexOf('.'),
+              );
+              final subsExtensions = ['.srt', '.vtt', '.ass', '.ssa'];
+              if (await parentDir.exists()) {
+                final parentEntities = parentDir.listSync();
+                for (final entity in parentEntities) {
+                  if (entity is File) {
+                    final pathLower = entity.path.toLowerCase();
+                    if (subsExtensions.any((ext) => pathLower.endsWith(ext))) {
+                      final subNameWithoutExt = entity.path.substring(
+                        0,
+                        entity.path.lastIndexOf('.'),
+                      );
+                      if (subNameWithoutExt.toLowerCase().startsWith(
+                        videoNameWithoutExt.toLowerCase(),
+                      )) {
+                        await entity.delete();
+                      }
+                    }
+                  }
+                }
+              }
+            } catch (_) {}
+          }
           await fileOrDir.delete();
         } else {
           final dir = Directory(targetItem.localPath);

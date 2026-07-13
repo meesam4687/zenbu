@@ -694,13 +694,23 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
 
   Future<void> _loadSubtitle(ExtSubtitle sub) async {
     try {
-      final resolvedResult = await _resolveRedirects(
-        sub.file,
-        Map<String, String>.from(_selectedVideo?.headers ?? {}),
-      );
-      final resolvedUrl = resolvedResult.url;
+      String? body;
+      if (!sub.file.startsWith('http://') && !sub.file.startsWith('https://')) {
+        final file = File(sub.file);
+        if (await file.exists()) {
+          final bytes = await file.readAsBytes();
+          body = utf8.decode(bytes, allowMalformed: true);
+        }
+      } else {
+        final resolvedResult = await _resolveRedirects(
+          sub.file,
+          Map<String, String>.from(_selectedVideo?.headers ?? {}),
+        );
+        final resolvedUrl = resolvedResult.url;
 
-      final body = await _fetchSubtitleBody(resolvedUrl);
+        body = await _fetchSubtitleBody(resolvedUrl);
+      }
+
       if (body == null) return;
 
       final format = body.trimLeft().startsWith('WEBVTT')
