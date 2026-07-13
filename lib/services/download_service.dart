@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:async';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -79,6 +80,29 @@ class DownloadService extends ChangeNotifier {
   factory DownloadService() => _instance;
   DownloadService._internal() {
     _loadRegistries();
+  }
+
+  static const MethodChannel _channel = MethodChannel('zenbu/pip');
+
+  void _updateNotificationProgress(String url, String title, double progress) {
+    try {
+      final id = url.hashCode;
+      final percent = (progress * 100).toInt();
+      _channel.invokeMethod('showDownloadingNotification', {
+        'id': id,
+        'title': title,
+        'progress': percent,
+      });
+    } catch (_) {}
+  }
+
+  void _dismissNotification(String url) {
+    try {
+      final id = url.hashCode;
+      _channel.invokeMethod('dismissDownloadingNotification', {
+        'id': id,
+      });
+    } catch (_) {}
   }
 
   static const Duration _downloadTimeout = Duration(seconds: 90);
@@ -177,6 +201,7 @@ class DownloadService extends ChangeNotifier {
     _speedHistories[url] = [_ByteRecord(DateTime.now(), 0)];
     _downloadSpeeds[url] = '0 KB/s';
     _startSpeedTimer();
+    _updateNotificationProgress(url, '$mediaTitle - $name', 0.0);
     notifyListeners();
   }
 
@@ -187,6 +212,7 @@ class DownloadService extends ChangeNotifier {
     _activeTypes.remove(url);
     _activeNames.remove(url);
     _activeMediaTitles.remove(url);
+    _dismissNotification(url);
 
     final client = _activeClients.remove(url);
     if (client != null) {
@@ -572,6 +598,7 @@ class DownloadService extends ChangeNotifier {
 
               final progress = (i + 1) / totalSegments;
               _activeDownloads[episodeUrl] = progress;
+              _updateNotificationProgress(episodeUrl, '$mediaTitle - $episodeName', progress);
               notifyListeners();
             }
 
@@ -628,6 +655,7 @@ class DownloadService extends ChangeNotifier {
             if (contentLength > 0) {
               final progress = downloadedBytes / contentLength;
               _activeDownloads[episodeUrl] = progress;
+              _updateNotificationProgress(episodeUrl, '$mediaTitle - $episodeName', progress);
               notifyListeners();
             }
           },
@@ -694,6 +722,7 @@ class DownloadService extends ChangeNotifier {
       _activeNames.remove(episodeUrl);
       _activeMediaTitles.remove(episodeUrl);
       _activeClients.remove(episodeUrl);
+      _dismissNotification(episodeUrl);
       notifyListeners();
       client.close();
     }
@@ -776,7 +805,9 @@ class DownloadService extends ChangeNotifier {
           if (!_activeDownloads.containsKey(chapterUrl)) {
             throw Exception('Cancelled by user.');
           }
-          _activeDownloads[chapterUrl] = completedPages / totalPages;
+          final progress = completedPages / totalPages;
+          _activeDownloads[chapterUrl] = progress;
+          _updateNotificationProgress(chapterUrl, '$mediaTitle - $chapterName', progress);
           notifyListeners();
         }
 
@@ -835,6 +866,7 @@ class DownloadService extends ChangeNotifier {
       _activeNames.remove(chapterUrl);
       _activeMediaTitles.remove(chapterUrl);
       _activeClients.remove(chapterUrl);
+      _dismissNotification(chapterUrl);
       notifyListeners();
     }
   }

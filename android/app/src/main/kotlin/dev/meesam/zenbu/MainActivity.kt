@@ -100,12 +100,15 @@ class MainActivity : FlutterActivity() {
                     }
                 }
                 "showDownloadingNotification" -> {
+                    val id = call.argument<Int>("id") ?: 1001
+                    val title = call.argument<String>("title") ?: "Downloading Zenbu Update"
                     val progress = call.argument<Int>("progress") ?: 0
-                    showDownloadingNotification(progress)
+                    showDownloadingNotification(id, title, progress)
                     result.success(null)
                 }
                 "dismissDownloadingNotification" -> {
-                    dismissDownloadingNotification()
+                    val id = call.argument<Int>("id") ?: 1001
+                    dismissDownloadingNotification(id)
                     result.success(null)
                 }
 
@@ -209,24 +212,11 @@ class MainActivity : FlutterActivity() {
         channel?.invokeMethod("onPipModeChanged", isInPictureInPictureMode)
     }
 
-    private val NOTIFICATION_ID = 1001
-    private val CHANNEL_ID = "zenbu_update_channel"
+    private val activeNotificationIds = mutableSetOf<Int>()
+    private var isServiceRunning = false
 
-    private fun createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val name = "App Updates"
-            val descriptionText = "Notifications for app updates and downloads"
-            val importance = NotificationManager.IMPORTANCE_LOW
-            val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
-                description = descriptionText
-            }
-            val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.createNotificationChannel(channel)
-        }
-    }
-
-    private fun showDownloadingNotification(progress: Int) {
-        createNotificationChannel()
+    private fun showDownloadingNotification(id: Int, title: String, progress: Int) {
+        DownloadForegroundService.createNotificationChannel(this)
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -237,7 +227,7 @@ class MainActivity : FlutterActivity() {
         }
 
         val builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            Notification.Builder(this, CHANNEL_ID)
+            Notification.Builder(this, DownloadForegroundService.CHANNEL_ID)
         } else {
             Notification.Builder(this)
         }
@@ -253,11 +243,11 @@ class MainActivity : FlutterActivity() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        builder.setContentTitle("Downloading Zenbu Update")
+        builder.setContentTitle(title)
             .setContentText("Downloading... $progress%")
             .setSmallIcon(android.R.drawable.stat_sys_download)
             .setOngoing(true)
-            .setProgress(100, progress, false)
+            .setProgress(100, progress, progress == 0)
             .setOnlyAlertOnce(true)
             .setContentIntent(pendingIntent)
 
@@ -265,12 +255,39 @@ class MainActivity : FlutterActivity() {
             builder.setForegroundServiceBehavior(Notification.FOREGROUND_SERVICE_IMMEDIATE)
         }
 
-        notificationManager.notify(NOTIFICATION_ID, builder.build())
+        val notification = builder.build()
+
+        if (!isServiceRunning) {
+            val serviceIntent = Intent(this, DownloadForegroundService::class.java).apply {
+                putExtra("id", id)
+                putExtra("title", title)
+                putExtra("progress", progress)
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(serviceIntent)
+            } else {
+                startService(serviceIntent)
+            }
+            isServiceRunning = true
+        } else {
+            notificationManager.notify(id, notification)
+        }
+
+        activeNotificationIds.add(id)
     }
 
-    private fun dismissDownloadingNotification() {
+    private fun dismissDownloadingNotification(id: Int) {
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.cancel(NOTIFICATION_ID)
+        notificationManager.cancel(id)
+        activeNotificationIds.remove(id)
+
+        if (activeNotificationIds.isEmpty() && isServiceRunning) {
+            val serviceIntent = Intent(this, DownloadForegroundService::class.java).apply {
+                putExtra("isDone", true)
+            }
+            startService(serviceIntent)
+            isServiceRunning = false
+        }
     }
 
 }
