@@ -52,6 +52,142 @@ class _DownloadsPageState extends State<DownloadsPage> {
     );
   }
 
+  Widget _buildActiveDownloadCard(BuildContext context, String url, bool isManga, bool isTablet) {
+    final name = _downloadService.activeNames[url] ?? 'Downloading...';
+    final mediaTitle = _downloadService.activeMediaTitles[url] ?? '';
+    final progress = _downloadService.activeDownloads[url] ?? 0.0;
+    return Card(
+      margin: isTablet ? EdgeInsets.zero : const EdgeInsets.symmetric(vertical: 4),
+      color: Theme.of(context).colorScheme.onInverseSurface,
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: ListTile(
+        title: Text(
+          '$mediaTitle - $name',
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0, bottom: 4.0),
+              child: LinearProgressIndicator(
+                value: (progress == 0.0) ? null : progress,
+              ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  progress == 0.0
+                      ? 'Resolving...'
+                      : '${(progress * 100).toInt()}%',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                Text(
+                  _downloadService.getDownloadSpeed(url),
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+        trailing: IconButton(
+          icon: const Icon(Icons.close, size: 20),
+          onPressed: () => _downloadService.cancelDownload(isManga, url),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDownloadedMediaCard(BuildContext context, DownloadedMedia media, bool isManga, bool isTablet) {
+    return Card(
+      margin: isTablet ? EdgeInsets.zero : const EdgeInsets.symmetric(vertical: 6),
+      color: Theme.of(context).colorScheme.onInverseSurface,
+      elevation: 0,
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: InkWell(
+        onTap: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => DownloadedItemsListPage(media: media),
+            ),
+          );
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Row(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: SizedBox(
+                  width: 50,
+                  height: 75,
+                  child: media.coverImage.isNotEmpty
+                      ? CustomImage(
+                          imageUrl: media.coverImage,
+                          fit: BoxFit.cover,
+                        )
+                      : Container(
+                          color: Theme.of(context).colorScheme.surfaceContainer,
+                          child: const Icon(Icons.broken_image, size: 20),
+                        ),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      media.mediaTitle,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      '${media.items.length} downloaded ${isManga ? "chapter" : "episode"}${media.items.length == 1 ? "" : "s"}',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.chevron_right,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildMediaList(bool isManga) {
     final list = isManga
         ? _downloadService.mangaRegistry
@@ -82,175 +218,97 @@ class _DownloadsPageState extends State<DownloadsPage> {
       );
     }
 
-    return ListView(
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-      children: [
+    final double width = MediaQuery.of(context).size.width;
+    final bool isTablet = width >= 600;
+
+    return CustomScrollView(
+      slivers: [
         if (activeKeys.isNotEmpty) ...[
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-            child: Row(
-              children: [
-                const SizedBox(
-                  width: 14,
-                  height: 14,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'Downloading (${activeKeys.length})',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+            sliver: SliverToBoxAdapter(
+              child: Row(
+                children: [
+                  const SizedBox(
+                    width: 14,
+                    height: 14,
+                    child: CircularProgressIndicator(strokeWidth: 2),
                   ),
-                ),
-              ],
+                  const SizedBox(width: 8),
+                  Text(
+                    'Downloading (${activeKeys.length})',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-          ...activeKeys.map((url) {
-            final name = _downloadService.activeNames[url] ?? 'Downloading...';
-            final mediaTitle = _downloadService.activeMediaTitles[url] ?? '';
-            final progress = _downloadService.activeDownloads[url] ?? 0.0;
-            return Card(
-              margin: const EdgeInsets.symmetric(vertical: 4),
-              color: Theme.of(context).colorScheme.onInverseSurface,
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: ListTile(
-                title: Text(
-                  '$mediaTitle - $name',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            sliver: isTablet
+                ? SliverGrid(
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      mainAxisSpacing: 8,
+                      crossAxisSpacing: 12,
+                      mainAxisExtent: 96,
+                    ),
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        final url = activeKeys[index];
+                        return _buildActiveDownloadCard(context, url, isManga, true);
+                      },
+                      childCount: activeKeys.length,
+                    ),
+                  )
+                : SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        final url = activeKeys[index];
+                        return _buildActiveDownloadCard(context, url, isManga, false);
+                      },
+                      childCount: activeKeys.length,
+                    ),
                   ),
-                ),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8.0, bottom: 4.0),
-                      child: LinearProgressIndicator(
-                        value: (progress == 0.0) ? null : progress,
-                      ),
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          progress == 0.0
-                              ? 'Resolving...'
-                              : '${(progress * 100).toInt()}%',
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                        Text(
-                          _downloadService.getDownloadSpeed(url),
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                trailing: IconButton(
-                  icon: const Icon(Icons.close, size: 20),
-                  onPressed: () =>
-                      _downloadService.cancelDownload(isManga, url),
-                ),
-              ),
-            );
-          }),
-          const SizedBox(height: 8),
-          const Divider(),
-          const SizedBox(height: 8),
+          ),
+          const SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+              child: Divider(),
+            ),
+          ),
         ],
-        ...list.map((media) {
-          return Card(
-            margin: const EdgeInsets.symmetric(vertical: 6),
-            color: Theme.of(context).colorScheme.onInverseSurface,
-            elevation: 0,
-            clipBehavior: Clip.antiAlias,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: InkWell(
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => DownloadedItemsListPage(media: media),
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+          sliver: isTablet
+              ? SliverGrid(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 8,
+                    crossAxisSpacing: 12,
+                    mainAxisExtent: 104,
                   ),
-                );
-              },
-              child: Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Row(
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: SizedBox(
-                        width: 50,
-                        height: 75,
-                        child: media.coverImage.isNotEmpty
-                            ? CustomImage(
-                                imageUrl: media.coverImage,
-                                fit: BoxFit.cover,
-                              )
-                            : Container(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.surfaceContainer,
-                                child: const Icon(Icons.broken_image, size: 20),
-                              ),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            media.mediaTitle,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            '${media.items.length} downloaded ${isManga ? "chapter" : "episode"}${media.items.length == 1 ? "" : "s"}',
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Icon(
-                      Icons.chevron_right,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ],
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      final media = list[index];
+                      return _buildDownloadedMediaCard(context, media, isManga, true);
+                    },
+                    childCount: list.length,
+                  ),
+                )
+              : SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      final media = list[index];
+                      return _buildDownloadedMediaCard(context, media, isManga, false);
+                    },
+                    childCount: list.length,
+                  ),
                 ),
-              ),
-            ),
-          );
-        }),
+        ),
       ],
     );
   }
@@ -285,6 +343,118 @@ class _DownloadedItemsListPageState extends State<DownloadedItemsListPage> {
     if (mounted) setState(() {});
   }
 
+  Widget _buildEpisodeItemCard(
+      BuildContext context, DownloadedMedia media, DownloadItem item, int index, bool isTablet) {
+    return Card(
+      margin: isTablet ? EdgeInsets.zero : const EdgeInsets.symmetric(vertical: 4),
+      color: Theme.of(context).colorScheme.onInverseSurface,
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 4,
+        ),
+        title: Text(
+          item.name,
+          style: const TextStyle(fontWeight: FontWeight.w600),
+        ),
+        trailing: IconButton(
+          icon: Icon(
+            Icons.delete,
+            color: Theme.of(context).colorScheme.error,
+          ),
+          onPressed: () async {
+            final confirm = await showDialog<bool>(
+              context: context,
+              builder: (context) => AlertDialog(
+                title: const Text('Delete Download'),
+                content: Text(
+                  'Are you sure you want to delete ${item.name}?',
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(false),
+                    child: const Text('Cancel'),
+                  ),
+                  FilledButton(
+                    onPressed: () => Navigator.of(context).pop(true),
+                    child: const Text('Delete'),
+                  ),
+                ],
+              ),
+            );
+
+            if (confirm == true) {
+              await _downloadService.deleteDownloadedItem(
+                media.isManga,
+                item.url,
+              );
+            }
+          },
+        ),
+        onTap: () {
+          if (media.isManga) {
+            final localSource = ExtSource(
+              id: -1,
+              name: 'Local Source',
+              baseUrl: '',
+              lang: 'all',
+              version: '1.0.0',
+              sourceCodeUrl: '',
+              iconUrl: '',
+              isNsfw: false,
+              isManga: true,
+            );
+
+            final chapters = media.items
+                .map((e) => ExtEpisode(name: e.name, url: e.localPath))
+                .toList();
+
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => MangaReaderPage(
+                  chapters: chapters,
+                  currentIndex: index,
+                  source: localSource,
+                  mangaTitle: media.mediaTitle,
+                  mediaId: media.mediaId,
+                  coverImage: media.coverImage,
+                ),
+              ),
+            );
+          } else {
+            final localSource = ExtSource(
+              id: -1,
+              name: 'Local Source',
+              baseUrl: '',
+              lang: 'all',
+              version: '1.0.0',
+              sourceCodeUrl: '',
+              iconUrl: '',
+              isNsfw: false,
+              isManga: false,
+            );
+
+            final ep = ExtEpisode(name: item.name, url: item.localPath);
+
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => VideoPlayerPage(
+                  episode: ep,
+                  source: localSource,
+                  animeTitle: media.mediaTitle,
+                ),
+              ),
+            );
+          }
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final registry = widget.media.isManga
@@ -302,125 +472,34 @@ class _DownloadedItemsListPageState extends State<DownloadedItemsListPage> {
     }
 
     final media = registry[mediaIdx];
+    final double width = MediaQuery.of(context).size.width;
+    final bool isTablet = width >= 600;
 
     return Scaffold(
       appBar: AppBar(title: Text(media.mediaTitle)),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(12),
-        itemCount: media.items.length,
-        itemBuilder: (context, index) {
-          final item = media.items[index];
-
-          return Card(
-            margin: const EdgeInsets.symmetric(vertical: 4),
-            color: Theme.of(context).colorScheme.onInverseSurface,
-            elevation: 0,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: ListTile(
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 4,
+      body: isTablet
+          ? GridView.builder(
+              padding: const EdgeInsets.all(12),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                mainAxisSpacing: 8,
+                crossAxisSpacing: 12,
+                mainAxisExtent: 72,
               ),
-              title: Text(
-                item.name,
-                style: const TextStyle(fontWeight: FontWeight.w600),
-              ),
-              trailing: IconButton(
-                icon: Icon(
-                  Icons.delete,
-                  color: Theme.of(context).colorScheme.error,
-                ),
-                onPressed: () async {
-                  final confirm = await showDialog<bool>(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      title: const Text('Delete Download'),
-                      content: Text(
-                        'Are you sure you want to delete ${item.name}?',
-                      ),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.of(context).pop(false),
-                          child: const Text('Cancel'),
-                        ),
-                        FilledButton(
-                          onPressed: () => Navigator.of(context).pop(true),
-                          child: const Text('Delete'),
-                        ),
-                      ],
-                    ),
-                  );
-
-                  if (confirm == true) {
-                    await _downloadService.deleteDownloadedItem(
-                      media.isManga,
-                      item.url,
-                    );
-                  }
-                },
-              ),
-              onTap: () {
-                if (media.isManga) {
-                  final localSource = ExtSource(
-                    id: -1,
-                    name: 'Local Source',
-                    baseUrl: '',
-                    lang: 'all',
-                    version: '1.0.0',
-                    sourceCodeUrl: '',
-                    iconUrl: '',
-                    isNsfw: false,
-                    isManga: true,
-                  );
-
-                  final chapters = media.items
-                      .map((e) => ExtEpisode(name: e.name, url: e.localPath))
-                      .toList();
-
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => MangaReaderPage(
-                        chapters: chapters,
-                        currentIndex: index,
-                        source: localSource,
-                        mangaTitle: media.mediaTitle,
-                        mediaId: media.mediaId,
-                        coverImage: media.coverImage,
-                      ),
-                    ),
-                  );
-                } else {
-                  final localSource = ExtSource(
-                    id: -1,
-                    name: 'Local Source',
-                    baseUrl: '',
-                    lang: 'all',
-                    version: '1.0.0',
-                    sourceCodeUrl: '',
-                    iconUrl: '',
-                    isNsfw: false,
-                    isManga: false,
-                  );
-
-                  final ep = ExtEpisode(name: item.name, url: item.localPath);
-
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => VideoPlayerPage(
-                        episode: ep,
-                        source: localSource,
-                        animeTitle: media.mediaTitle,
-                      ),
-                    ),
-                  );
-                }
+              itemCount: media.items.length,
+              itemBuilder: (context, index) {
+                final item = media.items[index];
+                return _buildEpisodeItemCard(context, media, item, index, true);
+              },
+            )
+          : ListView.builder(
+              padding: const EdgeInsets.all(12),
+              itemCount: media.items.length,
+              itemBuilder: (context, index) {
+                final item = media.items[index];
+                return _buildEpisodeItemCard(context, media, item, index, false);
               },
             ),
-          );
-        },
-      ),
     );
   }
 }

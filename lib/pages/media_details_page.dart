@@ -69,8 +69,113 @@ class _MediaDetailsPageState extends State<MediaDetailsPage>
         final format = media["format"]?.toString() ?? "";
         final showReadTab = !widget.isAnime && format != 'NOVEL';
 
+        final double width = MediaQuery.of(context).size.width;
+        final bool isTablet = width >= 600;
+
+        final Widget aboutPane = _KeepAliveWrapper(
+          child: SingleChildScrollView(
+            key: const PageStorageKey('about'),
+            physics: const ClampingScrollPhysics(),
+            child: DetailsPane(
+              mediaId: widget.id as int,
+              isAnime: widget.isAnime,
+            ),
+          ),
+        );
+
+        final Widget watchOrReadPane = _KeepAliveWrapper(
+          child: SizedBox(
+            child: widget.isAnime
+                ? AnimeWatchPane(
+                    mediaId: widget.id as int,
+                    malId: media["idMal"] as int?,
+                    animeTitle: resolvedTitle,
+                    coverImage: media["coverImage"]["extraLarge"],
+                    streamingEpisodes: media["streamingEpisodes"] as List?,
+                    anilistProgress: int.tryParse(currentProgress.toString()) ?? 0,
+                    mediaState: media["mediaListEntry"]?["status"] ?? 'NONE',
+                  )
+                : MangaReadPane(
+                    mediaId: widget.id as int,
+                    mangaTitle: resolvedTitle,
+                    coverImage: media["coverImage"]["extraLarge"],
+                    anilistProgress: int.tryParse(currentProgress.toString()) ?? 0,
+                    mediaState: media["mediaListEntry"]?["status"] ?? 'NONE',
+                  ),
+          ),
+        );
+
+        final Widget reviewsPane = _KeepAliveWrapper(
+          child: ReviewsPane(mediaId: widget.id as int),
+        );
+
+        final List<Widget> tabsList = widget.isAnime
+            ? const [
+                Tab(text: "About"),
+                Tab(text: "Watch"),
+                Tab(text: "Reviews"),
+              ]
+            : (showReadTab
+                ? const [
+                    Tab(text: "About"),
+                    Tab(text: "Read"),
+                    Tab(text: "Reviews"),
+                  ]
+                : const [
+                    Tab(text: "About"),
+                    Tab(text: "Reviews"),
+                  ]);
+
+        final List<Widget> tabViewsList = widget.isAnime
+            ? [aboutPane, watchOrReadPane, reviewsPane]
+            : (showReadTab
+                ? [aboutPane, watchOrReadPane, reviewsPane]
+                : [aboutPane, reviewsPane]);
+
+        if (isTablet) {
+          return DefaultTabController(
+            length: tabViewsList.length,
+            child: Scaffold(
+              body: Row(
+                children: [
+                  SizedBox(
+                    width: 400,
+                    child: TitlePane(
+                      id: widget.id as int,
+                      totalEpisodes: progressLimit,
+                      title: resolvedTitle,
+                      progress: "Progress: $currentProgress/$progressLimit",
+                      cover: media["coverImage"]["extraLarge"],
+                      banner: media["bannerImage"],
+                      mediaState: media["mediaListEntry"]?["status"] ?? 'NONE',
+                      mediaListEntry: media["mediaListEntry"],
+                      fullTitle: resolvedTitle,
+                      isAnime: widget.isAnime,
+                      isFavourite: media["isFavourite"] ?? false,
+                      isTablet: true,
+                    ),
+                  ),
+                  Expanded(
+                    child: Scaffold(
+                      appBar: AppBar(
+                        title: Text(resolvedTitle),
+                        bottom: TabBar(
+                          tabs: tabsList,
+                        ),
+                      ),
+                      body: TabBarView(
+                        children: tabViewsList,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
         return DefaultTabController(
-          length: widget.isAnime ? 3 : (showReadTab ? 3 : 2),
+          length: tabViewsList.length,
           child: Scaffold(
             body: NestedScrollView(
               floatHeaderSlivers: true,
@@ -95,6 +200,7 @@ class _MediaDetailsPageState extends State<MediaDetailsPage>
                       fullTitle: resolvedTitle,
                       isAnime: widget.isAnime,
                       isFavourite: media["isFavourite"] ?? false,
+                      isTablet: false,
                     ),
                   ),
                 ),
@@ -102,108 +208,13 @@ class _MediaDetailsPageState extends State<MediaDetailsPage>
                   pinned: true,
                   delegate: _TabBarDelegate(
                     TabBar(
-                      tabs: widget.isAnime
-                          ? const [
-                              Tab(text: "About"),
-                              Tab(text: "Watch"),
-                              Tab(text: "Reviews"),
-                            ]
-                          : (showReadTab
-                                ? const [
-                                    Tab(text: "About"),
-                                    Tab(text: "Read"),
-                                    Tab(text: "Reviews"),
-                                  ]
-                                : const [
-                                    Tab(text: "About"),
-                                    Tab(text: "Reviews"),
-                                  ]),
+                      tabs: tabsList,
                     ),
                   ),
                 ),
               ],
               body: TabBarView(
-                children: widget.isAnime
-                    ? [
-                        _KeepAliveWrapper(
-                          child: SingleChildScrollView(
-                            key: const PageStorageKey('about'),
-                            physics: const ClampingScrollPhysics(),
-                            child: DetailsPane(
-                              mediaId: widget.id as int,
-                              isAnime: true,
-                            ),
-                          ),
-                        ),
-                        _KeepAliveWrapper(
-                          child: SizedBox(
-                            child: AnimeWatchPane(
-                              mediaId: widget.id as int,
-                              malId: media["idMal"] as int?,
-                              animeTitle: resolvedTitle,
-                              coverImage: media["coverImage"]["extraLarge"],
-                              streamingEpisodes:
-                                  media["streamingEpisodes"] as List?,
-                              anilistProgress:
-                                  int.tryParse(currentProgress.toString()) ?? 0,
-                              mediaState:
-                                  media["mediaListEntry"]?["status"] ?? 'NONE',
-                            ),
-                          ),
-                        ),
-                        _KeepAliveWrapper(
-                          child: ReviewsPane(mediaId: widget.id as int),
-                        ),
-                      ]
-                    : (showReadTab
-                          ? [
-                              _KeepAliveWrapper(
-                                child: SingleChildScrollView(
-                                  key: const PageStorageKey('about'),
-                                  physics: const ClampingScrollPhysics(),
-                                  child: DetailsPane(
-                                    mediaId: widget.id as int,
-                                    isAnime: false,
-                                  ),
-                                ),
-                              ),
-                              _KeepAliveWrapper(
-                                child: SizedBox(
-                                  child: MangaReadPane(
-                                    mediaId: widget.id as int,
-                                    mangaTitle: resolvedTitle,
-                                    coverImage:
-                                        media["coverImage"]["extraLarge"],
-                                    anilistProgress:
-                                        int.tryParse(
-                                          currentProgress.toString(),
-                                        ) ??
-                                        0,
-                                    mediaState:
-                                        media["mediaListEntry"]?["status"] ??
-                                        'NONE',
-                                  ),
-                                ),
-                              ),
-                              _KeepAliveWrapper(
-                                child: ReviewsPane(mediaId: widget.id as int),
-                              ),
-                            ]
-                          : [
-                              _KeepAliveWrapper(
-                                child: SingleChildScrollView(
-                                  key: const PageStorageKey('about'),
-                                  physics: const ClampingScrollPhysics(),
-                                  child: DetailsPane(
-                                    mediaId: widget.id as int,
-                                    isAnime: false,
-                                  ),
-                                ),
-                              ),
-                              _KeepAliveWrapper(
-                                child: ReviewsPane(mediaId: widget.id as int),
-                              ),
-                            ]),
+                children: tabViewsList,
               ),
             ),
           ),

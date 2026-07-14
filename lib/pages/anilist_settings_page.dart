@@ -59,117 +59,123 @@ class _AnilistSettingsPageState extends State<AnilistSettingsPage> {
 
     return Scaffold(
       appBar: AppBar(title: const Text('AniList Settings')),
-      body: ListView(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        children: [
-          _SectionHeader(label: 'Metadata'),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
-            child: Card(
-              elevation: 0,
-              color: cs.surfaceContainerLow,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
+      body: Align(
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 700),
+          child: ListView(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            children: [
+              _SectionHeader(label: 'Metadata'),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+                child: Card(
+                  elevation: 0,
+                  color: cs.surfaceContainerLow,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Icon(
-                          Icons.translate_rounded,
-                          size: 20,
-                          color: cs.primary,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Title Language',
-                          style: tt.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        if (_isSavingLang) ...[
-                          const SizedBox(width: 10),
-                          SizedBox(
-                            width: 14,
-                            height: 14,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 1.5,
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.translate_rounded,
+                              size: 20,
                               color: cs.primary,
                             ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Title Language',
+                              style: tt.titleSmall?.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            if (_isSavingLang) ...[
+                              const SizedBox(width: 10),
+                              SizedBox(
+                                width: 14,
+                                height: 14,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 1.5,
+                                  color: cs.primary,
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'How titles are shown throughout the app. Synced with your AniList account.',
+                          style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+                        ),
+                        const SizedBox(height: 14),
+                        SegmentedButton<String>(
+                          segments: const [
+                            ButtonSegment(value: 'ROMAJI', label: Text('Romaji')),
+                            ButtonSegment(value: 'ENGLISH', label: Text('English')),
+                            ButtonSegment(value: 'NATIVE', label: Text('Native')),
+                          ],
+                          selected: {provider.titleLanguage},
+                          onSelectionChanged: _isSavingLang
+                              ? null
+                              : (Set<String> selection) {
+                                  _setTitleLanguage(selection.first, provider);
+                                },
+                          style: SegmentedButton.styleFrom(
+                            selectedBackgroundColor: cs.primaryContainer,
+                            selectedForegroundColor: cs.onPrimaryContainer,
+                            textStyle: const TextStyle(fontSize: 12),
                           ),
-                        ],
+                        ),
                       ],
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'How titles are shown throughout the app. Synced with your AniList account.',
+                  ),
+                ),
+              ),
+              _SectionHeader(label: 'Content Preferences'),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+                child: Card(
+                  elevation: 0,
+                  color: cs.surfaceContainerLow,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: ListTile(
+                    leading: Icon(Icons.explicit_rounded, color: cs.primary),
+                    title: Text(
+                      'Show NSFW Content',
+                      style: tt.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+                    ),
+                    subtitle: Text(
+                      'Display adult (18+) anime and manga. Synced with your AniList account.',
                       style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
                     ),
-                    const SizedBox(height: 14),
-                    SegmentedButton<String>(
-                      segments: const [
-                        ButtonSegment(value: 'ROMAJI', label: Text('Romaji')),
-                        ButtonSegment(value: 'ENGLISH', label: Text('English')),
-                        ButtonSegment(value: 'NATIVE', label: Text('Native')),
-                      ],
-                      selected: {provider.titleLanguage},
-                      onSelectionChanged: _isSavingLang
-                          ? null
-                          : (Set<String> selection) {
-                              _setTitleLanguage(selection.first, provider);
+                    trailing: _isSavingNsfw
+                        ? const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : Switch(
+                            value: provider.displayAdultContent,
+                            onChanged: (val) {
+                              _setDisplayAdultContent(val, provider);
                             },
-                      style: SegmentedButton.styleFrom(
-                        selectedBackgroundColor: cs.primaryContainer,
-                        selectedForegroundColor: cs.onPrimaryContainer,
-                        textStyle: const TextStyle(fontSize: 12),
-                      ),
+                          ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
                     ),
-                  ],
+                  ),
                 ),
               ),
-            ),
+            ],
           ),
-          _SectionHeader(label: 'Content Preferences'),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
-            child: Card(
-              elevation: 0,
-              color: cs.surfaceContainerLow,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: ListTile(
-                leading: Icon(Icons.explicit_rounded, color: cs.primary),
-                title: Text(
-                  'Show NSFW Content',
-                  style: tt.titleSmall?.copyWith(fontWeight: FontWeight.w600),
-                ),
-                subtitle: Text(
-                  'Display adult (18+) anime and manga. Synced with your AniList account.',
-                  style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
-                ),
-                trailing: _isSavingNsfw
-                    ? const SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : Switch(
-                        value: provider.displayAdultContent,
-                        onChanged: (val) {
-                          _setDisplayAdultContent(val, provider);
-                        },
-                      ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

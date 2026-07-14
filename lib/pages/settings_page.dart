@@ -85,278 +85,284 @@ class _SettingsPageState extends State<SettingsPage> {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Settings')),
-      body: ListView(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        children: [
-          _SectionHeader(label: 'AniList'),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
-            child: Card(
-              elevation: 0,
-              color: cs.surfaceContainerLow,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: ListTile(
-                leading: SvgPicture.asset(
-                  'assets/alLogo.svg',
-                  width: 24,
-                  height: 24,
-                  colorFilter: ColorFilter.mode(cs.primary, BlendMode.srcIn),
-                ),
-                title: Text(
-                  'AniList Settings',
-                  style: tt.titleSmall?.copyWith(fontWeight: FontWeight.w600),
-                ),
-                subtitle: Text(
-                  'Configure metadata language and content preferences.',
-                  style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
-                ),
-                trailing: const Icon(Icons.chevron_right_rounded),
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => const AnilistSettingsPage(),
+      body: Align(
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 700),
+          child: ListView(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            children: [
+              _SectionHeader(label: 'AniList'),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+                child: Card(
+                  elevation: 0,
+                  color: cs.surfaceContainerLow,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: ListTile(
+                    leading: SvgPicture.asset(
+                      'assets/alLogo.svg',
+                      width: 24,
+                      height: 24,
+                      colorFilter: ColorFilter.mode(cs.primary, BlendMode.srcIn),
                     ),
-                  );
-                },
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-              ),
-            ),
-          ),
-
-          _SectionHeader(label: 'Appearance'),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
-            child: Card(
-              elevation: 0,
-              color: cs.surfaceContainerLow,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: ListTile(
-                leading: Icon(Icons.palette_rounded, color: cs.primary),
-                title: Text(
-                  'Theme & Colours',
-                  style: tt.titleSmall?.copyWith(fontWeight: FontWeight.w600),
-                ),
-                subtitle: Text(
-                  _themeModeLabel(provider.themeMode),
-                  style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
-                ),
-                trailing: const Icon(Icons.chevron_right_rounded),
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => const AppearanceSettingsPage(),
+                    title: Text(
+                      'AniList Settings',
+                      style: tt.titleSmall?.copyWith(fontWeight: FontWeight.w600),
                     ),
-                  );
-                },
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-              ),
-            ),
-          ),
-
-          _SectionHeader(label: 'Integrations'),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
-            child: Card(
-              elevation: 0,
-              color: cs.surfaceContainerLow,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: ValueListenableBuilder<bool>(
-                valueListenable: DiscordService.discordLinked,
-                builder: (context, isLinked, _) {
-                  if (!isLinked) {
-                    return ListTile(
-                      leading: SvgPicture.asset(
-                        'assets/discord.svg',
-                        width: 24,
-                        height: 24,
-                        colorFilter: ColorFilter.mode(
-                          cs.primary,
-                          BlendMode.srcIn,
+                    subtitle: Text(
+                      'Configure metadata language and content preferences.',
+                      style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+                    ),
+                    trailing: const Icon(Icons.chevron_right_rounded),
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const AnilistSettingsPage(),
                         ),
-                      ),
-                      title: const Text('Discord'),
-                      subtitle: const Text('Not linked  •  Tap to connect'),
-                      trailing: TextButton(
-                        onPressed: () async {
-                          await DiscordService.startAuthorizationFlow();
-                        },
-                        child: Text(
-                          'Link',
-                          style: TextStyle(
-                            color: cs.primary,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                      onTap: () async {
-                        await DiscordService.startAuthorizationFlow();
-                      },
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                    );
-                  }
-
-                  return ValueListenableBuilder<bool>(
-                    valueListenable: DiscordService.presenceEnabled,
-                    builder: (context, isEnabled, _) {
-                      return Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          ListTile(
-                            leading: SvgPicture.asset(
-                              'assets/discord.svg',
-                              width: 24,
-                              height: 24,
-                              colorFilter: ColorFilter.mode(
-                                cs.primary,
-                                BlendMode.srcIn,
-                              ),
-                            ),
-                            title: const Text('Discord'),
-                            subtitle: Text(
-                              isEnabled
-                                  ? 'Linked  •  Presence active'
-                                  : 'Linked  •  Presence paused',
-                            ),
-                            trailing: Switch(
-                              value: isEnabled,
-                              onChanged: (val) async {
-                                await DiscordService.setPresenceEnabled(val);
-                              },
-                            ),
-                            onTap: () async {
-                              await DiscordService.setPresenceEnabled(
-                                !isEnabled,
-                              );
-                            },
-                            shape: const RoundedRectangleBorder(
-                              borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(14),
-                                topRight: Radius.circular(14),
-                              ),
-                            ),
-                          ),
-                          const Divider(height: 1, indent: 16, endIndent: 16),
-                          ListTile(
-                            leading: Icon(
-                              Icons.link_off_rounded,
-                              color: cs.error,
-                            ),
-                            title: Text(
-                              'Unlink Account',
-                              style: TextStyle(
-                                color: cs.error,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            onTap: () async {
-                              await DiscordService.unlink();
-                              Fluttertoast.showToast(
-                                msg: 'Discord account unlinked',
-                              );
-                            },
-                            shape: const RoundedRectangleBorder(
-                              borderRadius: BorderRadius.only(
-                                bottomLeft: Radius.circular(14),
-                                bottomRight: Radius.circular(14),
-                              ),
-                            ),
-                          ),
-                        ],
                       );
                     },
-                  );
-                },
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                ),
               ),
-            ),
-          ),
 
-          _SectionHeader(label: 'About'),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
-            child: Card(
-              elevation: 0,
-              color: cs.surfaceContainerLow,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
+              _SectionHeader(label: 'Appearance'),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+                child: Card(
+                  elevation: 0,
+                  color: cs.surfaceContainerLow,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: ListTile(
+                    leading: Icon(Icons.palette_rounded, color: cs.primary),
+                    title: Text(
+                      'Theme & Colours',
+                      style: tt.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+                    ),
+                    subtitle: Text(
+                      _themeModeLabel(provider.themeMode),
+                      style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+                    ),
+                    trailing: const Icon(Icons.chevron_right_rounded),
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const AppearanceSettingsPage(),
+                        ),
+                      );
+                    },
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                ),
               ),
-              child: Column(
-                children: [
-                  if (!_hasUpdate)
-                    ListTile(
-                      leading: Icon(
-                        Icons.system_update_rounded,
-                        color: cs.primary,
-                      ),
-                      title: const Text('Check for Updates'),
-                      subtitle: const Text(
-                        'Check for a newer version of Zenbu',
-                      ),
-                      trailing: _isCheckingUpdate
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Icon(Icons.chevron_right_rounded),
-                      onTap: _isCheckingUpdate ? null : _checkUpdate,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                    )
-                  else
-                    ListTile(
-                      leading: Icon(
-                        Icons.system_update_alt_rounded,
-                        color: cs.primary,
-                      ),
-                      title: Text(
-                        'Update Available  •  ${_updateInfo?.remoteVersion}',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: cs.primary,
-                        ),
-                      ),
-                      subtitle: const Text('Tap to view and install'),
-                      trailing: FilledButton.tonal(
-                        style: FilledButton.styleFrom(
-                          visualDensity: VisualDensity.compact,
-                        ),
-                        onPressed: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) =>
-                                  UpdatePage(updateInfo: _updateInfo!),
+
+              _SectionHeader(label: 'Integrations'),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+                child: Card(
+                  elevation: 0,
+                  color: cs.surfaceContainerLow,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: ValueListenableBuilder<bool>(
+                    valueListenable: DiscordService.discordLinked,
+                    builder: (context, isLinked, _) {
+                      if (!isLinked) {
+                        return ListTile(
+                          leading: SvgPicture.asset(
+                            'assets/discord.svg',
+                            width: 24,
+                            height: 24,
+                            colorFilter: ColorFilter.mode(
+                              cs.primary,
+                              BlendMode.srcIn,
                             ),
+                          ),
+                          title: const Text('Discord'),
+                          subtitle: const Text('Not linked  •  Tap to connect'),
+                          trailing: TextButton(
+                            onPressed: () async {
+                              await DiscordService.startAuthorizationFlow();
+                            },
+                            child: Text(
+                              'Link',
+                              style: TextStyle(
+                                color: cs.primary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                          onTap: () async {
+                            await DiscordService.startAuthorizationFlow();
+                          },
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        );
+                      }
+
+                      return ValueListenableBuilder<bool>(
+                        valueListenable: DiscordService.presenceEnabled,
+                        builder: (context, isEnabled, _) {
+                          return Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              ListTile(
+                                leading: SvgPicture.asset(
+                                  'assets/discord.svg',
+                                  width: 24,
+                                  height: 24,
+                                  colorFilter: ColorFilter.mode(
+                                    cs.primary,
+                                    BlendMode.srcIn,
+                                  ),
+                                ),
+                                title: const Text('Discord'),
+                                subtitle: Text(
+                                  isEnabled
+                                      ? 'Linked  •  Presence active'
+                                      : 'Linked  •  Presence paused',
+                                ),
+                                trailing: Switch(
+                                  value: isEnabled,
+                                  onChanged: (val) async {
+                                    await DiscordService.setPresenceEnabled(val);
+                                  },
+                                ),
+                                onTap: () async {
+                                  await DiscordService.setPresenceEnabled(
+                                    !isEnabled,
+                                  );
+                                },
+                                shape: const RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(14),
+                                    topRight: Radius.circular(14),
+                                  ),
+                                ),
+                              ),
+                              const Divider(height: 1, indent: 16, endIndent: 16),
+                              ListTile(
+                                leading: Icon(
+                                  Icons.link_off_rounded,
+                                  color: cs.error,
+                                ),
+                                title: Text(
+                                  'Unlink Account',
+                                  style: TextStyle(
+                                    color: cs.error,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                onTap: () async {
+                                  await DiscordService.unlink();
+                                  Fluttertoast.showToast(
+                                    msg: 'Discord account unlinked',
+                                  );
+                                },
+                                shape: const RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.only(
+                                    bottomLeft: Radius.circular(14),
+                                    bottomRight: Radius.circular(14),
+                                  ),
+                                ),
+                              ),
+                            ],
                           );
                         },
-                        child: const Text('View'),
-                      ),
-                      onTap: _isCheckingUpdate ? null : _checkUpdate,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                    ),
-                ],
+                      );
+                    },
+                  ),
+                ),
               ),
-            ),
+
+              _SectionHeader(label: 'About'),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+                child: Card(
+                  elevation: 0,
+                  color: cs.surfaceContainerLow,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Column(
+                    children: [
+                      if (!_hasUpdate)
+                        ListTile(
+                          leading: Icon(
+                            Icons.system_update_rounded,
+                            color: cs.primary,
+                          ),
+                          title: const Text('Check for Updates'),
+                          subtitle: const Text(
+                            'Check for a newer version of Zenbu',
+                          ),
+                          trailing: _isCheckingUpdate
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                )
+                              : const Icon(Icons.chevron_right_rounded),
+                          onTap: _isCheckingUpdate ? null : _checkUpdate,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        )
+                      else
+                        ListTile(
+                          leading: Icon(
+                            Icons.system_update_alt_rounded,
+                            color: cs.primary,
+                          ),
+                          title: Text(
+                            'Update Available  •  ${_updateInfo?.remoteVersion}',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: cs.primary,
+                            ),
+                          ),
+                          subtitle: const Text('Tap to view and install'),
+                          trailing: FilledButton.tonal(
+                            style: FilledButton.styleFrom(
+                              visualDensity: VisualDensity.compact,
+                            ),
+                            onPressed: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                      UpdatePage(updateInfo: _updateInfo!),
+                                ),
+                              );
+                            },
+                            child: const Text('View'),
+                          ),
+                          onTap: _isCheckingUpdate ? null : _checkUpdate,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+
+              const _AppFooter(),
+
+              const SizedBox(height: 32),
+            ],
           ),
-
-          const _AppFooter(),
-
-          const SizedBox(height: 32),
-        ],
+        ),
       ),
     );
   }

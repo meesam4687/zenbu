@@ -65,6 +65,76 @@ class MainPageViewState extends State<MainPageView> {
 
   @override
   Widget build(BuildContext context) {
+    final double width = MediaQuery.of(context).size.width;
+    final bool isTablet = width >= 600;
+
+    final Widget bodyContent = PageTransitionSwitcher(
+      duration: const Duration(milliseconds: 400),
+      transitionBuilder: (child, animation, secondaryAnimation) =>
+          FadeThroughTransition(
+            animation: animation,
+            secondaryAnimation: secondaryAnimation,
+            child: child,
+          ),
+      child: pages[selectedIdx],
+    );
+
+    if (isTablet) {
+      return Scaffold(
+        body: Row(
+          children: [
+            Theme(
+              data: Theme.of(context).copyWith(
+                navigationRailTheme: Theme.of(context).navigationRailTheme.copyWith(
+                  useIndicator: true,
+                  indicatorColor: Theme.of(context).colorScheme.secondaryContainer,
+                  indicatorShape: const StadiumBorder(),
+                ),
+              ),
+              child: NavigationRail(
+                backgroundColor: ElevationOverlay.applySurfaceTint(
+                  Theme.of(context).colorScheme.surface,
+                  Theme.of(context).colorScheme.surfaceTint,
+                  3.0,
+                ),
+                groupAlignment: 0.0,
+                selectedIndex: selectedIdx,
+                onDestinationSelected: (value) {
+                  setState(() {
+                    selectedIdx = value;
+                  });
+                },
+                labelType: NavigationRailLabelType.all,
+                destinations: const [
+                  NavigationRailDestination(
+                    padding: EdgeInsets.symmetric(vertical: 16.0),
+                    icon: Icon(Icons.video_collection),
+                    selectedIcon: Icon(Icons.video_collection),
+                    label: Text("Anime"),
+                  ),
+                  NavigationRailDestination(
+                    padding: EdgeInsets.symmetric(vertical: 16.0),
+                    icon: Icon(Icons.home),
+                    selectedIcon: Icon(Icons.home),
+                    label: Text("Home"),
+                  ),
+                  NavigationRailDestination(
+                    padding: EdgeInsets.symmetric(vertical: 16.0),
+                    icon: Icon(Icons.book_rounded),
+                    selectedIcon: Icon(Icons.book_rounded),
+                    label: Text("Manga"),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: bodyContent,
+            ),
+          ],
+        ),
+      );
+    }
+
     return Scaffold(
       bottomNavigationBar: NavigationBar(
         surfaceTintColor: Theme.of(context).colorScheme.surfaceTint,
@@ -74,7 +144,7 @@ class MainPageViewState extends State<MainPageView> {
             selectedIdx = value;
           });
         },
-        destinations: [
+        destinations: const [
           NavigationDestination(
             icon: Icon(Icons.video_collection),
             label: "Anime",
@@ -83,16 +153,7 @@ class MainPageViewState extends State<MainPageView> {
           NavigationDestination(icon: Icon(Icons.book_rounded), label: "Manga"),
         ],
       ),
-      body: PageTransitionSwitcher(
-        duration: Duration(milliseconds: 400),
-        transitionBuilder: (child, animation, secondaryAnimation) =>
-            FadeThroughTransition(
-              animation: animation,
-              secondaryAnimation: secondaryAnimation,
-              child: child,
-            ),
-        child: pages[selectedIdx],
-      ),
+      body: bodyContent,
     );
   }
 }
