@@ -11,7 +11,6 @@ class DoodExtractor {
         headers: browserHeaders(url),
       );
       final body = res.body;
-      // follow redirects via window.location.href
       final redirectMatch = RegExp(
         r'''window\.location\.href\s*=\s*['"]([^'"]+)['"]''',
       ).firstMatch(body);

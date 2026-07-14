@@ -50,7 +50,6 @@ class WordSet {
 }
 
 class MBridge {
-  /// Unpack a JS code
   static String? unpackJs(String code) {
     try {
       final jsPacker = JSPacker(code);
@@ -60,7 +59,6 @@ class MBridge {
     }
   }
 
-  /// Unpack a JS code and combine
   static String? unpackJsAndCombine(String code) {
     try {
       return JsUnpacker.unpackAndCombine(code) ?? "";
@@ -69,7 +67,6 @@ class MBridge {
     }
   }
 
-  /// GetMapValue
   static String getMapValue(String source, String attr, bool encode) {
     try {
       var map = json.decode(source) as Map<String, dynamic>;
@@ -82,7 +79,6 @@ class MBridge {
     }
   }
 
-  // Parse a list of dates to millisecondsSinceEpoch
   static List parseDates(
     List value,
     String dateFormat,
@@ -123,7 +119,6 @@ class MBridge {
     return list;
   }
 
-  // Utility to use RegExp
   static String regExp(
     String expression,
     String source,
@@ -151,19 +146,16 @@ class MBridge {
 
   static final Set<String> _initializedLocales = {};
 
-  // Utility to use substring
   static String substringAfter(String text, String pattern) {
     final index = text.indexOf(pattern);
     return index == -1 ? text : text.substring(index + pattern.length);
   }
 
-  // Utility to use substring
   static String substringBefore(String text, String pattern) {
     final index = text.indexOf(pattern);
     return index == -1 ? text : text.substring(0, index);
   }
 
-  // Utility to use substring
   static String substringBeforeLast(String text, String pattern) {
     final index = text.lastIndexOf(pattern);
     return index == -1 ? text : text.substring(0, index);
@@ -173,7 +165,6 @@ class MBridge {
     return text.split(pattern).last;
   }
 
-  // Parse a chapter date to millisecondsSinceEpoch
   static String parseChapterDate(
     String date,
     String dateFormat,
@@ -623,11 +614,11 @@ class Deobfuscator {
       if (inputString[idx] == openingBracket) counter++;
       if (inputString[idx] == closingBracket) counter--;
 
-      if (counter == 0) return idx; // found matching bracket
-      if (counter < 0) return -1; // unbalanced brackets
+      if (counter == 0) return idx;
+      if (counter < 0) return -1;
     }
 
-    return -1; // matching bracket not found
+    return -1;
   }
 
   static String calculateDigit(String inputSubString) {
@@ -641,7 +632,7 @@ class Deobfuscator {
       return digit.toString();
     }
 
-    return '-'; // Illegal digit
+    return '-';
   }
 }
 

@@ -13,7 +13,6 @@ class VoeExtractor {
         headers: browserHeaders(pageUrl),
       );
       var body = res.body;
-      // follow window.location.href redirect
       final redirMatch = RegExp(
         r'''window\.location\.href\s*=\s*['"]([^'"]+)['"]''',
       ).firstMatch(body);
@@ -31,7 +30,6 @@ class VoeExtractor {
           .map((e) => e.text)
           .toList();
       String? masterUrl;
-      // path A: sources block
       for (final script in scripts) {
         if (script.contains('const sources')) {
           final hlsMatch = RegExp(
@@ -47,7 +45,6 @@ class VoeExtractor {
           }
         }
       }
-      // path B: wc0/alternativeScript base64
       if (masterUrl == null) {
         for (final script in scripts) {
           if (script.contains('wc0') || script.contains('alternativeScript')) {

@@ -14,7 +14,6 @@ class OkruExtractor {
       final div = document.querySelector('div[data-options]');
       if (div == null) return [];
       final dataOpts = div.attributes['data-options'] ?? '';
-      // unescape \u0026 -> &
       final unescaped = dataOpts.replaceAll(r'\u0026', '&');
       final hlsMatch = RegExp(
         r'''ondemandHls["']?:["']([^"'&]+)''',

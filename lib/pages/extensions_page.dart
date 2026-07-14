@@ -270,8 +270,28 @@ class _ExtensionsPageState extends State<ExtensionsPage>
           (ext.isManga ? 'manga' : 'anime').contains(query);
     }).toList();
 
-    final Map<String, List<ExtSource>> grouped = {};
+    final installed = <ExtSource>[];
+    final available = <ExtSource>[];
+
     for (final ext in filteredExtensions) {
+      final isInst = _installedExtensions.any((e) => e.id == ext.id);
+      if (isInst) {
+        installed.add(ext);
+      } else {
+        available.add(ext);
+      }
+    }
+
+    final List<_ExtListItem> items = [];
+    if (installed.isNotEmpty) {
+      items.add(_ExtListItem.header('installed'));
+      for (final ext in installed) {
+        items.add(_ExtListItem.extension(ext));
+      }
+    }
+
+    final Map<String, List<ExtSource>> grouped = {};
+    for (final ext in available) {
       final lang = ext.lang.isEmpty ? 'unknown' : ext.lang.toLowerCase();
       grouped.putIfAbsent(lang, () => []).add(ext);
     }
@@ -286,7 +306,6 @@ class _ExtensionsPageState extends State<ExtensionsPage>
         return a.compareTo(b);
       });
 
-    final List<_ExtListItem> items = [];
     for (final lang in sortedLangs) {
       items.add(_ExtListItem.header(lang));
       for (final ext in grouped[lang]!) {
@@ -331,6 +350,7 @@ class _ExtensionsPageState extends State<ExtensionsPage>
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 10, 16, 4),
           child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               _TypeChip(
                 label: 'Anime',
@@ -338,7 +358,7 @@ class _ExtensionsPageState extends State<ExtensionsPage>
                 selected: _selectedType == 'anime',
                 onTap: () => setState(() => _selectedType = 'anime'),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 24),
               _TypeChip(
                 label: 'Manga',
                 icon: Icons.menu_book_rounded,
@@ -446,6 +466,7 @@ class _ExtensionsPageState extends State<ExtensionsPage>
 
   String _langDisplayName(String lang) {
     const names = {
+      'installed': 'Installed',
       'all': 'All',
       'multi': 'Multi-language',
       'en': 'English',
@@ -1303,44 +1324,50 @@ class _TypeChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        curve: Curves.easeInOut,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: selected
-              ? colorScheme.primary
-              : colorScheme.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: selected ? colorScheme.primary : colorScheme.outlineVariant,
-            width: 1.2,
-          ),
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 180),
+      curve: Curves.easeInOut,
+      decoration: BoxDecoration(
+        color: selected
+            ? colorScheme.primary
+            : colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: selected ? colorScheme.primary : colorScheme.outlineVariant,
+          width: 1.2,
         ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: 16,
-              color: selected
-                  ? colorScheme.onPrimary
-                  : colorScheme.onSurfaceVariant,
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(20),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  icon,
+                  size: 16,
+                  color: selected
+                      ? colorScheme.onPrimary
+                      : colorScheme.onSurfaceVariant,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: selected
+                        ? colorScheme.onPrimary
+                        : colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: selected
-                    ? colorScheme.onPrimary
-                    : colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

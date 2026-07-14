@@ -89,7 +89,6 @@ class JsExtensionService implements ExtensionService {
     ''');
 
     String sourceCode = source.sourceCode ?? '';
-    // Zenbu Custom Patch: Safe replacement for .map(rel => rel.attributes.name)
     if (sourceCode.contains('.map(rel => rel.attributes.name)')) {
       sourceCode = sourceCode.replaceAll(
         '.map(rel => rel.attributes.name)',
@@ -99,7 +98,6 @@ class JsExtensionService implements ExtensionService {
 
     runtime.evaluate(sourceCode);
 
-    // Zenbu Custom JS prototype overrides
     runtime.evaluate(r'''
       if (typeof DefaultExtension !== 'undefined') {
         DefaultExtension.prototype.originalB64dec = DefaultExtension.prototype.b64dec;

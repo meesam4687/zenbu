@@ -45,7 +45,7 @@ void _initPseudoSelector() {
     final parent = element.parent;
     if (parent == null) return false;
     final siblings = parent.children;
-    final index = siblings.indexOf(element) + 1; // 1-based
+    final index = siblings.indexOf(element) + 1;
     final (a, b) = parseNth(args);
     return matchesNth(index, a, b);
   }
@@ -55,8 +55,7 @@ void _initPseudoSelector() {
     final parent = element.parent;
     if (parent == null) return false;
     final siblings = parent.children;
-    final index =
-        siblings.length - siblings.indexOf(element); // 1-based from end
+    final index = siblings.length - siblings.indexOf(element);
     final (a, b) = parseNth(args);
     return matchesNth(index, a, b);
   }
@@ -68,7 +67,7 @@ void _initPseudoSelector() {
     final siblings = parent.children
         .where((e) => e.localName == element.localName)
         .toList();
-    final index = siblings.indexOf(element) + 1; // 1-based
+    final index = siblings.indexOf(element) + 1;
     final (a, b) = parseNth(args);
     return matchesNth(index, a, b);
   }
@@ -80,8 +79,7 @@ void _initPseudoSelector() {
     final siblings = parent.children
         .where((e) => e.localName == element.localName)
         .toList();
-    final index =
-        siblings.length - siblings.indexOf(element); // 1-based from end
+    final index = siblings.length - siblings.indexOf(element);
     final (a, b) = parseNth(args);
     return matchesNth(index, a, b);
   }
@@ -127,7 +125,6 @@ void _initPseudoSelector() {
 
   bool containsData(Element element, String? args) {
     final data = args ?? '';
-    // For script and style elements
     if (element.localName == 'script' || element.localName == 'style') {
       return element.text.toLowerCase().contains(data.toLowerCase());
     }

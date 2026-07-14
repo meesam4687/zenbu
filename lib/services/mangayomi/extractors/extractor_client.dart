@@ -22,7 +22,6 @@ Map<String, String> browserHeaders(String url, {Map<String, String>? extra}) {
   return headers;
 }
 
-/// Parse #EXT-X-STREAM-INF m3u8 and return list of {resolution, url}
 List<Map<String, String>> parseM3u8Streams(String content, String masterUrl) {
   final results = <Map<String, String>>[];
   final lines = content.split('\n');

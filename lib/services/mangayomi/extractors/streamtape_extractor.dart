@@ -5,7 +5,6 @@ class StreamTapeExtractor {
   Future<List<Video>> videosFromUrl(String url, {String? quality}) async {
     final client = buildExtractorClient();
     try {
-      // normalize to embed URL
       final id = RegExp(
         r'streamtape\.(?:com|to)/(?:e|v)/([^/?]+)',
       ).firstMatch(url)?.group(1);
@@ -16,7 +15,6 @@ class StreamTapeExtractor {
         headers: browserHeaders(embedUrl),
       );
       final body = res.body;
-      // find robotlink script block
       final robotMatch = RegExp(
         r'''robotlink.*?innerHTML\s*=\s*(['"])(.*?)\1\s*\+\s*(['"])(.*?)\3''',
         dotAll: true,

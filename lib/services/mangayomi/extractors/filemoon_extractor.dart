@@ -28,7 +28,6 @@ class FilemoonExtractor {
       ).firstMatch(unpacked);
       if (fileMatch == null) return [];
       final masterUrl = fileMatch.group(1)!;
-      // subtitles from sub.info param
       List<Track> subtitles = [];
       final subInfoMatch = RegExp(
         r'''sub\.info["']?:\s*["']([^"']+)["']''',

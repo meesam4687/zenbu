@@ -64,7 +64,6 @@ class JsUtils {
       );
     });
 
-    // Native speedups from Zenbu
     runtime.onMessage('native_b64dec', (dynamic args) {
       try {
         final String str = args[0] as String;
@@ -91,7 +90,6 @@ class JsUtils {
       }
     });
 
-    // Stubs for Epub and Webview evaluation
     runtime.onMessage('evaluateJavascriptViaWebview', (dynamic args) async {
       try {
         await ensureWebViewServerStarted();

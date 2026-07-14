@@ -19,7 +19,6 @@ class Mp4uploadExtractor {
       };
       final res = await client.get(Uri.parse(url), headers: reqHeaders);
       final xp = HtmlXPath.html(res.body);
-      // try packed js
       final evalScripts = xp
           .query(
             "//script[contains(text(), 'eval') and contains(text(), 'p,a,c,k,e,d')]/text()",
@@ -37,7 +36,6 @@ class Mp4uploadExtractor {
         final hMatch = RegExp(r'HEIGHT=(\d+)').firstMatch(unpacked);
         if (hMatch != null) resolution = hMatch.group(1);
       }
-      // fallback: player.src script
       if (fileUrl == null) {
         final playerScripts = xp
             .query("//script[contains(text(), 'player.src')]/text()")

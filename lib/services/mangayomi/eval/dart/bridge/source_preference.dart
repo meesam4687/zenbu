@@ -1,7 +1,6 @@
 import 'package:d4rt/d4rt.dart';
 import 'package:zenbu/services/mangayomi/eval/model/source_preference.dart';
 
-// EditTextPreference
 class SourcePreferenceBridge {
   final checkBoxPreferenceBridgedClass = BridgedClass(
     nativeType: CheckBoxPreference,

@@ -7,7 +7,6 @@ import 'package:zenbu/services/mangayomi/eval/model/m_video.dart';
 
 enum CloudDriveType { quark, uc }
 
-// In-memory cookie store (replaces Mangayomi's Isar persistence)
 final _cookieStore = <String, String>{};
 
 class QuarkUcExtractor {
@@ -84,7 +83,6 @@ class QuarkUcExtractor {
       } else {
         resp = await client.get(Uri.parse(apiUrl + url), headers: getHeaders());
       }
-      // update cookie from set-cookie header
       final setCookie = resp.headers['set-cookie'];
       if (setCookie != null) {
         for (final cookie in setCookie.split(';;;')) {
@@ -367,7 +365,6 @@ class QuarkUcExtractor {
           (q) => Video(q['url']!, q['quality']!, originalUrl, headers: headers),
         )
         .toList();
-    // subtitles
     final subs = <Track>[];
     for (final subInfo in subtitleParts) {
       if (subInfo.isEmpty) continue;

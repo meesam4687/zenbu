@@ -4,14 +4,11 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
-// Global port (0 = not started yet)
 int cfPort = 0;
 HttpServer? _server;
 
-/// Start the local WebView HTTP server lazily (only when first needed).
 Future<void> ensureWebViewServerStarted() async {
   if (cfPort != 0) return;
-  // HeadlessInAppWebView only works on mobile/desktop; skip on unsupported platforms
   if (kIsWeb) return;
   _server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
   cfPort = _server!.port;
