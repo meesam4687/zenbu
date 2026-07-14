@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:zenbu/models/extensions_models.dart';
+import 'package:zenbu/services/mangayomi/models/extensions_models.dart';
 import 'package:zenbu/services/repo_service.dart';
 import 'package:zenbu/components/global/custom_image.dart';
-import 'package:zenbu/services/js_engine.dart';
+import 'package:zenbu/services/mangayomi/eval/interface.dart';
 import 'package:zenbu/pages/video_player_page.dart';
 import 'package:zenbu/pages/extensions_page.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -86,7 +86,7 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
   String? _failedUrl;
 
   int _currentPage = 0;
-  JsEngine? _cachedEngine;
+  ExtensionService? _cachedEngine;
 
   @override
   void initState() {
@@ -234,10 +234,12 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
         if (customLink != null && customLink.isNotEmpty) {
           matchedLink = customLink;
         } else {
-          final searchResults = await _cachedEngine!.search(
+          final searchPages = await _cachedEngine!.search(
             widget.animeTitle,
             1,
+            [],
           );
+          final searchResults = searchPages.list.map((e) => e.toJson()).toList();
           final is403 =
               _cachedEngine?.lastStatusCode == 403 ||
               _cachedEngine?.lastStatusCode == 503;
@@ -267,7 +269,7 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
         }
 
         final detail = await _cachedEngine!.getDetail(matchedLink);
-        final rawEpisodes = detail['chapters'] as List? ?? [];
+        final rawEpisodes = detail.chapters?.map((e) => e.toJson()).toList() ?? [];
 
         if (!mounted) return;
         setState(() {
@@ -1175,7 +1177,7 @@ class ResumeTarget {
 class _WrongTitleBottomSheet extends StatefulWidget {
   final String animeTitle;
   final String? currentCustomLink;
-  final JsEngine? jsEngine;
+  final ExtensionService? jsEngine;
   final ScrollController scrollController;
   final Function(String link, String name) onSelect;
   final VoidCallback onClear;
@@ -1247,7 +1249,8 @@ class _WrongTitleBottomSheetState extends State<_WrongTitleBottomSheet> {
           });
           return;
         }
-        final results = await widget.jsEngine!.search(query, 1);
+        final searchPages = await widget.jsEngine!.search(query, 1, []);
+        final results = searchPages.list.map((e) => e.toJson()).toList();
         if (mounted) {
           setState(() {
             _results = results;
@@ -1484,7 +1487,7 @@ class _DownloadResolverDialogState extends State<_DownloadResolverDialog> {
 
       if (mounted) {
         setState(() {
-          _streams = rawList.map((e) => Map<String, dynamic>.from(e)).toList();
+          _streams = rawList.map((e) => e.toJson()).toList();
           _isLoading = false;
         });
       }
@@ -1604,11 +1607,11 @@ class _StreamSelectionDialogState extends State<_StreamSelectionDialog> {
           });
         } else {
           setState(() {
-            _streams = rawList;
+            _streams = rawList.map((e) => e.toJson()).toList();
             _isLoading = false;
           });
           if (rawList.length == 1) {
-            Navigator.of(context).pop(Map<String, dynamic>.from(rawList.first));
+            Navigator.of(context).pop(rawList.first.toJson());
           }
         }
       }

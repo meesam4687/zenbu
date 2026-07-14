@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:zenbu/models/extensions_models.dart';
+import 'package:zenbu/services/mangayomi/models/extensions_models.dart';
 import 'package:zenbu/services/repo_service.dart';
 import 'package:zenbu/components/global/custom_image.dart';
 

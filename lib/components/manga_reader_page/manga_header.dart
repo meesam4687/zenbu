@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:zenbu/models/extensions_models.dart';
+import 'package:zenbu/services/mangayomi/models/extensions_models.dart';
 
 class MangaHeader extends StatelessWidget implements PreferredSizeWidget {
   final String mangaTitle;

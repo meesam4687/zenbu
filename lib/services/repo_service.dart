@@ -1,8 +1,11 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:zenbu/models/extensions_models.dart';
-import 'package:zenbu/services/js_engine.dart';
+import 'package:zenbu/services/mangayomi/models/extensions_models.dart';
+import 'package:zenbu/services/mangayomi/eval/model/m_source.dart';
+import 'package:zenbu/services/mangayomi/eval/interface.dart';
+import 'package:zenbu/services/mangayomi/eval/dart/service.dart';
+import 'package:zenbu/services/mangayomi/eval/javascript/service.dart';
 
 class RepoService {
   static const String _reposKey = 'ext_repos';
@@ -155,7 +158,7 @@ class RepoService {
     await prefs.setStringList(_installedKey, rawList);
   }
 
-  static Future<JsEngine> loadExtensionEngine(ExtSource source) async {
+  static Future<ExtensionService> loadExtensionEngine(ExtSource source) async {
     final prefs = await SharedPreferences.getInstance();
     final sourceCode = prefs.getString('$_sourceCodePrefix${source.id}');
     if (sourceCode == null || sourceCode.isEmpty) {
@@ -179,17 +182,45 @@ class RepoService {
       }
     }
 
-    final engine = JsEngine(source.id);
-    await engine.loadExtension(sourceCode, source, userPrefs);
-    return engine;
+    final mSource = Source(
+      id: source.id,
+      name: source.name,
+      baseUrl: source.baseUrl,
+      lang: source.lang,
+      isNsfw: source.isNsfw,
+      sourceCode: sourceCode,
+      sourceCodeUrl: source.sourceCodeUrl,
+      iconUrl: source.iconUrl,
+      isManga: source.isManga,
+      apiUrl: source.apiUrl,
+      dateFormat: source.dateFormat,
+      dateFormatLocale: source.dateFormatLocale,
+      version: source.version,
+      sourceCodeLanguage:
+          (source.sourceCodeLanguage == 0 ||
+              source.sourceCodeUrl
+                  .toLowerCase()
+                  .split('?')
+                  .first
+                  .endsWith('.dart'))
+          ? SourceCodeLanguage.dart
+          : SourceCodeLanguage.javascript,
+    );
+
+    if (mSource.sourceCodeLanguage == SourceCodeLanguage.dart) {
+      return DartExtensionService(mSource);
+    } else {
+      return JsExtensionService(mSource, userPrefs: userPrefs);
+    }
   }
 
   static Future<List<dynamic>> getExtensionPreferences(ExtSource source) async {
-    final engine = await loadExtensionEngine(source);
+    final service = await loadExtensionEngine(source);
     try {
-      return await engine.getSourcePreferences();
+      final prefs = service.getSourcePreferences();
+      return prefs.map((e) => e.toJson()).toList();
     } finally {
-      engine.dispose();
+      service.dispose();
     }
   }
 }

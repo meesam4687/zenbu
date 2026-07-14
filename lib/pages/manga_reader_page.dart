@@ -3,8 +3,8 @@ import 'package:archive/archive.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:zenbu/models/extensions_models.dart';
-import 'package:zenbu/services/js_engine.dart';
+import 'package:zenbu/services/mangayomi/models/extensions_models.dart';
+import 'package:zenbu/services/mangayomi/eval/interface.dart';
 import 'package:zenbu/services/repo_service.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:flutter/services.dart';
@@ -41,7 +41,7 @@ class _MangaReaderPageState extends State<MangaReaderPage>
   List<dynamic> _pages = [];
   bool _isLoading = true;
   String? _errorMessage;
-  JsEngine? _jsEngine;
+  ExtensionService? _jsEngine;
 
   bool _isWebtoonMode = true;
   bool _showControls = true;
@@ -262,23 +262,13 @@ class _MangaReaderPageState extends State<MangaReaderPage>
         final rawPages = await _jsEngine!.getPageList(currentChapter.url);
 
         if (rawPages.isNotEmpty) {
-          final firstUrl = rawPages.first is Map
-              ? (rawPages.first['url'] ?? '')
-              : rawPages.first.toString();
-          final headers = await _jsEngine!.getHeaders(firstUrl);
+          final headers = _jsEngine!.getHeaders();
 
           for (final page in rawPages) {
-            if (page is Map) {
-              standardizedPages.add({
-                'url': page['url'] as String? ?? '',
-                'headers': Map<String, String>.from(page['headers'] ?? headers),
-              });
-            } else {
-              standardizedPages.add({
-                'url': page.toString(),
-                'headers': headers,
-              });
-            }
+            standardizedPages.add({
+              'url': page.url,
+              'headers': page.headers ?? headers,
+            });
           }
         }
       }

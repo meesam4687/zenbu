@@ -7,8 +7,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_subtitle/flutter_subtitle.dart' hide Subtitle;
 import 'package:http/http.dart' as http;
 import 'package:video_player/video_player.dart';
-import 'package:zenbu/models/extensions_models.dart';
-import 'package:zenbu/services/js_engine.dart';
+import 'package:zenbu/services/mangayomi/models/extensions_models.dart';
+import 'package:zenbu/services/mangayomi/eval/javascript/service.dart';
+import 'package:zenbu/services/mangayomi/eval/interface.dart';
 import 'package:zenbu/services/repo_service.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:zenbu/services/progress_service.dart';
@@ -64,7 +65,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
   VideoPlayerController? _videoPlayerController;
   ChewieController? _chewieController;
 
-  JsEngine? _jsEngine;
+  ExtensionService? _jsEngine;
 
   bool _isLoading = true;
   String _loadingText = 'Resolving stream links...';
@@ -397,7 +398,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
       if (!mounted) return;
 
       final List<ExtVideo> list = rawList
-          .map((e) => ExtVideo.fromJson(Map<String, dynamic>.from(e)))
+          .map((e) => ExtVideo.fromJson(e.toJson()))
           .toList();
 
       if (list.isEmpty) {
@@ -655,7 +656,12 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
     }
 
     final attempts = [
-      () => _jsEngine?.fetchUrl(url, base),
+      () async {
+        if (_jsEngine is JsExtensionService) {
+          return await (_jsEngine as JsExtensionService).fetchUrl(url, base);
+        }
+        return null;
+      },
       () async {
         final r = await http.get(Uri.parse(url), headers: base);
         return r.statusCode == 200

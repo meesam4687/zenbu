@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:zenbu/models/extensions_models.dart';
+import 'package:zenbu/services/mangayomi/models/extensions_models.dart';
 import 'package:zenbu/services/repo_service.dart';
-import 'package:zenbu/services/js_engine.dart';
+import 'package:zenbu/services/mangayomi/eval/interface.dart';
 import 'package:zenbu/components/global/custom_image.dart';
 import 'package:zenbu/pages/manga_reader_page.dart';
 import 'package:zenbu/pages/extensions_page.dart';
@@ -95,7 +95,7 @@ class _MangaReadPaneState extends State<MangaReadPane> {
   String? _failedUrl;
 
   int _currentPage = 0;
-  JsEngine? _cachedEngine;
+  ExtensionService? _cachedEngine;
 
   @override
   void initState() {
@@ -238,10 +238,12 @@ class _MangaReadPaneState extends State<MangaReadPane> {
         if (customLink != null && customLink.isNotEmpty) {
           matchedLink = customLink;
         } else {
-          final searchResults = await _cachedEngine!.search(
+          final searchPages = await _cachedEngine!.search(
             widget.mangaTitle,
             1,
+            [],
           );
+          final searchResults = searchPages.list.map((e) => e.toJson()).toList();
           final is403 =
               _cachedEngine?.lastStatusCode == 403 ||
               _cachedEngine?.lastStatusCode == 503;
@@ -271,7 +273,7 @@ class _MangaReadPaneState extends State<MangaReadPane> {
         }
 
         final detail = await _cachedEngine!.getDetail(matchedLink);
-        final rawChapters = detail['chapters'] as List? ?? [];
+        final rawChapters = detail.chapters?.map((e) => e.toJson()).toList() ?? [];
 
         if (!mounted) return;
         setState(() {
@@ -1025,23 +1027,13 @@ class _MangaReadPaneState extends State<MangaReadPane> {
 
       final List<Map<String, dynamic>> pagesToDownload = [];
       if (rawPages.isNotEmpty) {
-        final firstUrl = rawPages.first is Map
-            ? (rawPages.first['url'] ?? '')
-            : rawPages.first.toString();
-        final headers = await engine.getHeaders(firstUrl);
+        final headers = engine.getHeaders();
 
         for (final page in rawPages) {
-          if (page is Map) {
-            pagesToDownload.add({
-              'url': page['url'] as String? ?? '',
-              'headers': Map<String, String>.from(page['headers'] ?? headers),
-            });
-          } else {
-            pagesToDownload.add({
-              'url': page.toString(),
-              'headers': Map<String, String>.from(headers),
-            });
-          }
+          pagesToDownload.add({
+            'url': page.url,
+            'headers': page.headers ?? headers,
+          });
         }
       }
       engine.dispose();
@@ -1180,7 +1172,7 @@ class ResumeTarget {
 class _WrongTitleBottomSheet extends StatefulWidget {
   final String animeTitle;
   final String? currentCustomLink;
-  final JsEngine? jsEngine;
+  final ExtensionService? jsEngine;
   final ScrollController scrollController;
   final Function(String link, String name) onSelect;
   final VoidCallback onClear;
@@ -1252,7 +1244,8 @@ class _WrongTitleBottomSheetState extends State<_WrongTitleBottomSheet> {
           });
           return;
         }
-        final results = await widget.jsEngine!.search(query, 1);
+        final searchPages = await widget.jsEngine!.search(query, 1, []);
+        final results = searchPages.list.map((e) => e.toJson()).toList();
         if (mounted) {
           setState(() {
             _results = results;

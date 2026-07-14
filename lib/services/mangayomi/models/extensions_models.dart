@@ -42,6 +42,7 @@ class ExtSource {
   final String apiUrl;
   final String dateFormat;
   final String dateFormatLocale;
+  final int sourceCodeLanguage;
 
   ExtSource({
     required this.name,
@@ -57,6 +58,7 @@ class ExtSource {
     this.apiUrl = '',
     this.dateFormat = '',
     this.dateFormatLocale = '',
+    this.sourceCodeLanguage = 1,
   });
 
   factory ExtSource.fromJson(Map<String, dynamic> json) {
@@ -74,6 +76,11 @@ class ExtSource {
       apiUrl: json['apiUrl'] ?? '',
       dateFormat: json['dateFormat'] ?? '',
       dateFormatLocale: json['dateFormatLocale'] ?? '',
+      sourceCodeLanguage: json['sourceCodeLanguage'] is int
+          ? json['sourceCodeLanguage']
+          : json['sourceCodeLanguage'] == null
+          ? 1
+          : int.tryParse(json['sourceCodeLanguage'].toString()) ?? 1,
     );
   }
 
@@ -91,6 +98,7 @@ class ExtSource {
     'apiUrl': apiUrl,
     'dateFormat': dateFormat,
     'dateFormatLocale': dateFormatLocale,
+    'sourceCodeLanguage': sourceCodeLanguage,
   };
 
   @override

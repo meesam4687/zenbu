@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:zenbu/models/extensions_models.dart';
+import 'package:zenbu/services/mangayomi/models/extensions_models.dart';
 import 'package:zenbu/services/download_service.dart';
 import 'package:zenbu/pages/video_player_page.dart';
 import 'package:zenbu/pages/manga_reader_page.dart';
