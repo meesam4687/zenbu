@@ -243,7 +243,9 @@ class _MangaReadPaneState extends State<MangaReadPane> {
             1,
             [],
           );
-          final searchResults = searchPages.list.map((e) => e.toJson()).toList();
+          final searchResults = searchPages.list
+              .map((e) => e.toJson())
+              .toList();
           final is403 =
               _cachedEngine?.lastStatusCode == 403 ||
               _cachedEngine?.lastStatusCode == 503;
@@ -273,7 +275,8 @@ class _MangaReadPaneState extends State<MangaReadPane> {
         }
 
         final detail = await _cachedEngine!.getDetail(matchedLink);
-        final rawChapters = detail.chapters?.map((e) => e.toJson()).toList() ?? [];
+        final rawChapters =
+            detail.chapters?.map((e) => e.toJson()).toList() ?? [];
 
         if (!mounted) return;
         setState(() {
@@ -1076,46 +1079,55 @@ class _MangaReadPaneState extends State<MangaReadPane> {
         final progress = downloadService.getDownloadProgress(chap.url);
 
         if (isDownloading) {
-          return SizedBox(
-            width: 48,
-            height: 48,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: Stack(
-                    children: [
-                      CircularProgressIndicator(
-                        value: 1.0,
-                        strokeWidth: 2,
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.onSurface.withValues(alpha: 0.12),
-                      ),
-                      CircularProgressIndicator(
-                        value: (progress == null || progress == 0.0)
-                            ? null
-                            : progress,
-                        strokeWidth: 2,
-                      ),
-                    ],
-                  ),
-                ),
-                Material(
-                  type: MaterialType.transparency,
-                  child: InkWell(
-                    onTap: () => downloadService.cancelDownload(true, chap.url),
-                    borderRadius: BorderRadius.circular(24),
-                    child: const SizedBox(
-                      width: 48,
-                      height: 48,
-                      child: Icon(Icons.close, size: 14),
+          final isPaused = downloadService.isPaused(chap.url);
+          return PopupMenuButton<String>(
+            tooltip: 'Download Options',
+            onSelected: (value) {
+              if (value == 'pause') {
+                if (isPaused) {
+                  downloadService.resumeDownload(chap.url);
+                } else {
+                  downloadService.pauseDownload(chap.url);
+                }
+              } else if (value == 'cancel') {
+                downloadService.cancelDownload(true, chap.url);
+              }
+            },
+            itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+              PopupMenuItem<String>(
+                value: 'pause',
+                child: Row(
+                  children: [
+                    Icon(
+                      isPaused ? Icons.play_arrow_rounded : Icons.pause_rounded,
+                      size: 20,
                     ),
-                  ),
+                    const SizedBox(width: 8),
+                    Text(isPaused ? 'Resume' : 'Pause'),
+                  ],
                 ),
-              ],
+              ),
+              PopupMenuItem<String>(
+                value: 'cancel',
+                child: Row(
+                  children: [
+                    Icon(Icons.close_rounded, size: 20),
+                    const SizedBox(width: 8),
+                    Text('Cancel'),
+                  ],
+                ),
+              ),
+            ],
+            child: SizedBox(
+              width: 48,
+              height: 48,
+              child: Center(
+                child: PieProgressIndicator(
+                  progress: progress ?? 0.0,
+                  isPaused: isPaused,
+                  size: 20,
+                ),
+              ),
             ),
           );
         }
@@ -1445,5 +1457,74 @@ class _WrongTitleBottomSheetState extends State<_WrongTitleBottomSheet> {
         ),
       ),
     );
+  }
+}
+
+class PieProgressIndicator extends StatelessWidget {
+  final double progress;
+  final double size;
+  final bool isPaused;
+
+  const PieProgressIndicator({
+    super.key,
+    required this.progress,
+    required this.isPaused,
+    this.size = 20,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        CustomPaint(
+          size: Size(size, size),
+          painter: PieProgressPainter(
+            progress: progress,
+            color: isPaused ? colorScheme.outline : colorScheme.primary,
+            backgroundColor: colorScheme.onSurface.withValues(alpha: 0.12),
+          ),
+        ),
+        if (isPaused)
+          Icon(
+            Icons.pause_rounded,
+            size: size * 0.6,
+            color: colorScheme.outline,
+          ),
+      ],
+    );
+  }
+}
+
+class PieProgressPainter extends CustomPainter {
+  final double progress;
+  final Color color;
+  final Color backgroundColor;
+
+  PieProgressPainter({
+    required this.progress,
+    required this.color,
+    required this.backgroundColor,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..style = PaintingStyle.fill;
+
+    paint.color = backgroundColor;
+    canvas.drawCircle(size.center(Offset.zero), size.width / 2, paint);
+
+    paint.color = color;
+    final rect = Rect.fromLTWH(0, 0, size.width, size.height);
+    final sweepAngle = (progress.clamp(0.0, 1.0)) * 2 * 3.141592653589793;
+    canvas.drawArc(rect, -3.141592653589793 / 2, sweepAngle, true, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant PieProgressPainter oldDelegate) {
+    return oldDelegate.progress != progress ||
+        oldDelegate.color != color ||
+        oldDelegate.backgroundColor != backgroundColor;
   }
 }

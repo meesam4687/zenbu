@@ -106,9 +106,29 @@ class _DownloadsPageState extends State<DownloadsPage> {
             ),
           ],
         ),
-        trailing: IconButton(
-          icon: const Icon(Icons.close, size: 20),
-          onPressed: () => _downloadService.cancelDownload(isManga, url),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              icon: Icon(
+                _downloadService.isPaused(url)
+                    ? Icons.play_arrow_rounded
+                    : Icons.pause_rounded,
+                size: 20,
+              ),
+              onPressed: () {
+                if (_downloadService.isPaused(url)) {
+                  _downloadService.resumeDownload(url);
+                } else {
+                  _downloadService.pauseDownload(url);
+                }
+              },
+            ),
+            IconButton(
+              icon: const Icon(Icons.close_rounded, size: 20),
+              onPressed: () => _downloadService.cancelDownload(isManga, url),
+            ),
+          ],
         ),
       ),
     );

@@ -121,6 +121,17 @@ class DownloadService extends ChangeNotifier {
   final Map<String, String> _activeMediaTitles = {};
 
   final Set<String> _manuallyCancelled = {};
+  final Set<String> _pausedDownloads = {};
+
+  final Map<String, int> _activeMediaIds = {};
+  final Map<String, String> _activeCoverImages = {};
+  final Map<String, String> _activeRootPaths = {};
+  final Map<String, String> _activeVideoStreamUrls = {};
+  final Map<String, Map<String, String>> _activeHeaders = {};
+  final Map<String, List<dynamic>> _activeSubtitles = {};
+  final Map<String, List<dynamic>> _activePages = {};
+
+  bool isPaused(String url) => _pausedDownloads.contains(url);
 
   List<DownloadedMedia> _animeRegistry = [];
   List<DownloadedMedia> _mangaRegistry = [];
@@ -151,6 +162,10 @@ class DownloadService extends ChangeNotifier {
         return;
       }
       for (final url in _activeDownloads.keys) {
+        if (_pausedDownloads.contains(url)) {
+          _downloadSpeeds[url] = 'Paused';
+          continue;
+        }
         final currentBytes = _downloadedBytes[url] ?? 0;
         final now = DateTime.now();
 
@@ -204,6 +219,127 @@ class DownloadService extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> _saveRegistryState() async {
+    final prefs = await SharedPreferences.getInstance();
+    final Map<String, dynamic> stateMap = {};
+    for (final url in _activeDownloads.keys) {
+      final isManga = _activeTypes[url] ?? false;
+      stateMap[url] = {
+        'url': url,
+        'isManga': isManga,
+        'progress': _activeDownloads[url],
+        'isPaused': _pausedDownloads.contains(url),
+        'name': _activeNames[url],
+        'mediaTitle': _activeMediaTitles[url],
+        'mediaId': _activeMediaIds[url],
+        'coverImage': _activeCoverImages[url],
+        'rootPath': _activeRootPaths[url],
+        'videoStreamUrl': _activeVideoStreamUrls[url],
+        'headers': _activeHeaders[url],
+        'subtitles': _activeSubtitles[url],
+        'pages': _activePages[url],
+      };
+    }
+    await prefs.setString('active_downloads_state_v1', json.encode(stateMap));
+  }
+
+  void saveDownloadMetadata({
+    required String url,
+    required bool isManga,
+    required String name,
+    required String mediaTitle,
+    required int mediaId,
+    required String coverImage,
+    required String rootPath,
+    String? videoStreamUrl,
+    Map<String, String>? headers,
+    List<dynamic>? subtitles,
+    List<dynamic>? pages,
+  }) {
+    _activeDownloads[url] = 0.0;
+    _activeTypes[url] = isManga;
+    _activeNames[url] = name;
+    _activeMediaTitles[url] = mediaTitle;
+    _activeMediaIds[url] = mediaId;
+    _activeCoverImages[url] = coverImage;
+    _activeRootPaths[url] = rootPath;
+    if (videoStreamUrl != null) _activeVideoStreamUrls[url] = videoStreamUrl;
+    if (headers != null) _activeHeaders[url] = headers;
+    if (subtitles != null) {
+      _activeSubtitles[url] = subtitles.map((e) => {'file': e.file, 'label': e.label}).toList();
+    }
+    if (pages != null) _activePages[url] = pages;
+    _saveRegistryState();
+    notifyListeners();
+  }
+
+  void pauseDownload(String url) {
+    if (!_activeDownloads.containsKey(url)) return;
+    _pausedDownloads.add(url);
+    _downloadSpeeds[url] = 'Paused';
+
+    final isManga = _activeTypes[url] ?? false;
+    if (!isManga) {
+      final sub = _activeSubscriptions[url];
+      if (sub != null) {
+        sub.pause();
+      }
+    }
+    _saveRegistryState();
+    notifyListeners();
+  }
+
+  void resumeDownload(String url) {
+    if (!_activeDownloads.containsKey(url)) return;
+    _pausedDownloads.remove(url);
+
+    final isManga = _activeTypes[url] ?? false;
+    final isAlreadyRunning = isManga 
+        ? _activeClients.containsKey(url)
+        : (_activeClients.containsKey(url) || _activeSubscriptions.containsKey(url));
+
+    if (!isAlreadyRunning) {
+      if (isManga) {
+        final pagesList = _activePages[url]
+            ?.map((e) => Map<String, dynamic>.from(e))
+            .toList() ?? [];
+        startMangaDownload(
+          mediaId: _activeMediaIds[url] ?? 0,
+          mediaTitle: _activeMediaTitles[url] ?? '',
+          coverImage: _activeCoverImages[url] ?? '',
+          chapterUrl: url,
+          chapterName: _activeNames[url] ?? '',
+          pages: pagesList,
+          rootPath: _activeRootPaths[url] ?? '',
+        );
+      } else {
+        final subsList = _activeSubtitles[url]
+            ?.map((e) => ExtSubtitle(file: e['file'] ?? '', label: e['label'] ?? ''))
+            .toList();
+        startAnimeDownload(
+          mediaId: _activeMediaIds[url] ?? 0,
+          mediaTitle: _activeMediaTitles[url] ?? '',
+          coverImage: _activeCoverImages[url] ?? '',
+          episodeUrl: url,
+          episodeName: _activeNames[url] ?? '',
+          videoStreamUrl: _activeVideoStreamUrls[url] ?? '',
+          headers: _activeHeaders[url] ?? {},
+          rootPath: _activeRootPaths[url] ?? '',
+          subtitles: subsList,
+        );
+      }
+    } else {
+      if (!isManga) {
+        final sub = _activeSubscriptions[url];
+        if (sub != null) {
+          sub.resume();
+        }
+      }
+    }
+    _saveRegistryState();
+    notifyListeners();
+  }
+
   void cancelDownload(bool isManga, String url) {
     _manuallyCancelled.add(url);
 
@@ -211,6 +347,14 @@ class DownloadService extends ChangeNotifier {
     _activeTypes.remove(url);
     _activeNames.remove(url);
     _activeMediaTitles.remove(url);
+    _activeMediaIds.remove(url);
+    _activeCoverImages.remove(url);
+    _activeRootPaths.remove(url);
+    _activeVideoStreamUrls.remove(url);
+    _activeHeaders.remove(url);
+    _activeSubtitles.remove(url);
+    _activePages.remove(url);
+    _pausedDownloads.remove(url);
     _dismissNotification(url);
 
     final client = _activeClients.remove(url);
@@ -231,6 +375,7 @@ class DownloadService extends ChangeNotifier {
         _activeCompleters.remove(url);
       }
     }
+    _saveRegistryState();
     notifyListeners();
   }
 
@@ -268,6 +413,31 @@ class DownloadService extends ChangeNotifier {
         _mangaRegistry = parsed
             .map((e) => DownloadedMedia.fromJson(Map<String, dynamic>.from(e)))
             .toList();
+      } catch (_) {}
+    }
+
+    final stateRaw = prefs.getString('active_downloads_state_v1');
+    if (stateRaw != null) {
+      try {
+        final Map<String, dynamic> stateMap = json.decode(stateRaw);
+        stateMap.forEach((url, data) {
+          _activeDownloads[url] = data['progress'] ?? 0.0;
+          _activeTypes[url] = data['isManga'] ?? false;
+          _activeNames[url] = data['name'] ?? '';
+          _activeMediaTitles[url] = data['mediaTitle'] ?? '';
+          _activeMediaIds[url] = data['mediaId'] ?? 0;
+          _activeCoverImages[url] = data['coverImage'] ?? '';
+          _activeRootPaths[url] = data['rootPath'] ?? '';
+          if (data['videoStreamUrl'] != null) _activeVideoStreamUrls[url] = data['videoStreamUrl'];
+          if (data['headers'] != null) {
+            _activeHeaders[url] = Map<String, String>.from(data['headers']);
+          }
+          if (data['subtitles'] != null) _activeSubtitles[url] = data['subtitles'];
+          if (data['pages'] != null) _activePages[url] = data['pages'];
+          
+          _pausedDownloads.add(url);
+          _downloadSpeeds[url] = 'Paused';
+        });
       } catch (_) {}
     }
     notifyListeners();
@@ -431,11 +601,18 @@ class DownloadService extends ChangeNotifier {
     required String rootPath,
     List<ExtSubtitle>? subtitles,
   }) async {
-    _activeDownloads[episodeUrl] = 0.0;
-    _activeTypes[episodeUrl] = false;
-    _activeNames[episodeUrl] = episodeName;
-    _activeMediaTitles[episodeUrl] = mediaTitle;
-    notifyListeners();
+    saveDownloadMetadata(
+      url: episodeUrl,
+      isManga: false,
+      name: episodeName,
+      mediaTitle: mediaTitle,
+      mediaId: mediaId,
+      coverImage: coverImage,
+      rootPath: rootPath,
+      videoStreamUrl: videoStreamUrl,
+      headers: headers,
+      subtitles: subtitles,
+    );
 
     String fileDest = '';
     final client = http.Client();
@@ -604,6 +781,12 @@ class DownloadService extends ChangeNotifier {
 
           try {
             for (int i = 0; i < totalSegments; i++) {
+              while (_pausedDownloads.contains(episodeUrl)) {
+                await Future.delayed(const Duration(milliseconds: 500));
+                if (!_activeDownloads.containsKey(episodeUrl)) {
+                  throw Exception('Cancelled by user.');
+                }
+              }
               if (!_activeDownloads.containsKey(episodeUrl)) {
                 throw Exception('Cancelled by user.');
               }
@@ -681,16 +864,43 @@ class DownloadService extends ChangeNotifier {
           client.close();
         }
       } else {
-        final contentLength = response.contentLength ?? 0;
-        var downloadedBytes = 0;
-
         final file = File(fileDest);
-        final sink = file.openWrite();
+        var downloadedBytes = 0;
+        var mode = FileMode.write;
+        final requestHeaders = Map<String, String>.from(headers);
+
+        if (await file.exists()) {
+          downloadedBytes = await file.length();
+          if (downloadedBytes > 0) {
+            requestHeaders['Range'] = 'bytes=$downloadedBytes-';
+            mode = FileMode.append;
+          }
+        }
+
+        final mp4Response = downloadedBytes > 0
+            ? await streamWithRedirects(
+                videoStreamUrl,
+                requestHeaders,
+                client: client,
+              )
+            : response;
+
+        if (downloadedBytes > 0) {
+          if (mp4Response.statusCode == 200) {
+            downloadedBytes = 0;
+            mode = FileMode.write;
+          } else if (mp4Response.statusCode != 206) {
+            throw Exception('Server returned status code ${mp4Response.statusCode}');
+          }
+        }
+
+        final contentLength = (mp4Response.contentLength ?? 0) + downloadedBytes;
+        final sink = file.openWrite(mode: mode);
 
         final Completer<void> completer = Completer<void>();
         late StreamSubscription subscription;
 
-        subscription = response.stream.listen(
+        subscription = mp4Response.stream.listen(
           (chunk) {
             if (!_activeDownloads.containsKey(episodeUrl)) {
               return;
@@ -719,6 +929,11 @@ class DownloadService extends ChangeNotifier {
         );
 
         _activeSubscriptions[episodeUrl] = subscription;
+
+        if (_pausedDownloads.contains(episodeUrl)) {
+          subscription.pause();
+        }
+
         try {
           await completer.future;
         } finally {
@@ -797,7 +1012,15 @@ class DownloadService extends ChangeNotifier {
       _activeNames.remove(episodeUrl);
       _activeMediaTitles.remove(episodeUrl);
       _activeClients.remove(episodeUrl);
+      _activeMediaIds.remove(episodeUrl);
+      _activeCoverImages.remove(episodeUrl);
+      _activeRootPaths.remove(episodeUrl);
+      _activeVideoStreamUrls.remove(episodeUrl);
+      _activeHeaders.remove(episodeUrl);
+      _activeSubtitles.remove(episodeUrl);
+      _pausedDownloads.remove(episodeUrl);
       _dismissNotification(episodeUrl);
+      _saveRegistryState();
       notifyListeners();
       client.close();
     }
@@ -812,11 +1035,16 @@ class DownloadService extends ChangeNotifier {
     required List<Map<String, dynamic>> pages,
     required String rootPath,
   }) async {
-    _activeDownloads[chapterUrl] = 0.0;
-    _activeTypes[chapterUrl] = true;
-    _activeNames[chapterUrl] = chapterName;
-    _activeMediaTitles[chapterUrl] = mediaTitle;
-    notifyListeners();
+    saveDownloadMetadata(
+      url: chapterUrl,
+      isManga: true,
+      name: chapterName,
+      mediaTitle: mediaTitle,
+      mediaId: mediaId,
+      coverImage: coverImage,
+      rootPath: rootPath,
+      pages: pages,
+    );
 
     final client = http.Client();
     _activeClients[chapterUrl] = client;
@@ -840,6 +1068,12 @@ class DownloadService extends ChangeNotifier {
         final totalPages = pages.length;
 
         for (int i = 0; i < totalPages; i++) {
+          while (_pausedDownloads.contains(chapterUrl)) {
+            await Future.delayed(const Duration(milliseconds: 500));
+            if (!_activeDownloads.containsKey(chapterUrl)) {
+              throw Exception('Cancelled by user.');
+            }
+          }
           if (!_activeDownloads.containsKey(chapterUrl)) {
             throw Exception('Cancelled by user.');
           }
@@ -860,6 +1094,22 @@ class DownloadService extends ChangeNotifier {
 
           final pageFileDest =
               '$chapterPath${Platform.isWindows ? '\\' : '/'}$pageNumStr$ext';
+
+          if (await File(pageFileDest).exists()) {
+            completedPages++;
+            if (!_activeDownloads.containsKey(chapterUrl)) {
+              throw Exception('Cancelled by user.');
+            }
+            final progress = completedPages / totalPages;
+            _activeDownloads[chapterUrl] = progress;
+            _updateNotificationProgress(
+              chapterUrl,
+              '$mediaTitle - $chapterName',
+              progress,
+            );
+            notifyListeners();
+            continue;
+          }
 
           final response = await sendWithRedirects(
             pageUrl,
@@ -945,7 +1195,13 @@ class DownloadService extends ChangeNotifier {
       _activeNames.remove(chapterUrl);
       _activeMediaTitles.remove(chapterUrl);
       _activeClients.remove(chapterUrl);
+      _activeMediaIds.remove(chapterUrl);
+      _activeCoverImages.remove(chapterUrl);
+      _activeRootPaths.remove(chapterUrl);
+      _activePages.remove(chapterUrl);
+      _pausedDownloads.remove(chapterUrl);
       _dismissNotification(chapterUrl);
+      _saveRegistryState();
       notifyListeners();
     }
   }
