@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 class VideoPlayerHeader extends StatelessWidget implements PreferredSizeWidget {
   final String animeTitle;
   final String episodeName;
-  final bool isFullScreen;
   final bool hasNextEpisode;
   final bool hasSubtitles;
   final bool hasMultipleVideos;
@@ -18,7 +17,6 @@ class VideoPlayerHeader extends StatelessWidget implements PreferredSizeWidget {
     super.key,
     required this.animeTitle,
     required this.episodeName,
-    required this.isFullScreen,
     required this.hasNextEpisode,
     required this.hasSubtitles,
     required this.hasMultipleVideos,

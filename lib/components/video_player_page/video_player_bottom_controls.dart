@@ -3,19 +3,17 @@ import 'package:flutter/material.dart';
 class VideoPlayerBottomControls extends StatelessWidget {
   final String currentPositionText;
   final String totalDurationText;
-  final bool isFullScreen;
   final Widget seekBar;
   final VoidCallback onSkip85Pressed;
-  final VoidCallback onFullscreenPressed;
+  final VoidCallback onRotatePressed;
 
   const VideoPlayerBottomControls({
     super.key,
     required this.currentPositionText,
     required this.totalDurationText,
-    required this.isFullScreen,
     required this.seekBar,
     required this.onSkip85Pressed,
-    required this.onFullscreenPressed,
+    required this.onRotatePressed,
   });
 
   @override
@@ -64,12 +62,12 @@ class VideoPlayerBottomControls extends StatelessWidget {
               ),
             ),
             IconButton(
-              icon: Icon(
-                isFullScreen ? Icons.fullscreen_exit : Icons.fullscreen,
+              icon: const Icon(
+                Icons.screen_rotation_rounded,
                 color: Colors.white,
               ),
-              tooltip: 'Fullscreen',
-              onPressed: onFullscreenPressed,
+              tooltip: 'Rotate',
+              onPressed: onRotatePressed,
             ),
           ],
         ),

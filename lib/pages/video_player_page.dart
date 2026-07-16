@@ -142,7 +142,6 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
   ExtSubtitle? _selectedSubtitle;
   SubtitleController? _activeSubtitleCtrl;
 
-  bool _isFullScreen = false;
   bool _showControls = true;
   Timer? _controlsTimer;
   bool _isDraggingSlider = false;
@@ -173,6 +172,41 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
     _currentEpisode = widget.episode;
     _updateNextEpisode();
     _fetchVideoList();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final route = ModalRoute.of(context);
+      if (route != null && route.animation != null) {
+        if (route.animation!.isCompleted) {
+          SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+          SystemChrome.setPreferredOrientations([
+            DeviceOrientation.portraitUp,
+            DeviceOrientation.landscapeLeft,
+            DeviceOrientation.landscapeRight,
+          ]);
+        } else {
+          void listener(AnimationStatus status) {
+            if (status == AnimationStatus.completed) {
+              SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+              SystemChrome.setPreferredOrientations([
+                DeviceOrientation.portraitUp,
+                DeviceOrientation.landscapeLeft,
+                DeviceOrientation.landscapeRight,
+              ]);
+              route.animation?.removeStatusListener(listener);
+            }
+          }
+          route.animation!.addStatusListener(listener);
+        }
+      } else {
+        SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+        SystemChrome.setPreferredOrientations([
+          DeviceOrientation.portraitUp,
+          DeviceOrientation.landscapeLeft,
+          DeviceOrientation.landscapeRight,
+        ]);
+      }
+    });
 
     _pipChannel.setMethodCallHandler((call) async {
       switch (call.method) {
@@ -305,17 +339,15 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
     }
   }
 
-  void _toggleFullScreen() {
-    setState(() => _isFullScreen = !_isFullScreen);
-    if (_isFullScreen) {
-      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+  void _toggleOrientation() {
+    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+    if (isLandscape) {
+      SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+    } else {
       SystemChrome.setPreferredOrientations([
         DeviceOrientation.landscapeLeft,
         DeviceOrientation.landscapeRight,
       ]);
-    } else {
-      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-      SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     }
   }
 
@@ -1108,7 +1140,6 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
           VideoPlayerControlsOverlay(
             animeTitle: widget.animeTitle,
             episodeName: _currentEpisode.name,
-            isFullScreen: _isFullScreen,
             hasNextEpisode: _nextEpisode != null,
             hasSubtitles: _allSubtitles.isNotEmpty,
             hasMultipleVideos: _videos.length > 1,
@@ -1121,12 +1152,11 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
               totalDuration,
               primaryColor,
             ),
-            onBackPressed: () {
-              if (_isFullScreen) {
-                _toggleFullScreen();
-              } else {
-                Navigator.of(context).pop();
-              }
+            onBackPressed: () async {
+              final navigator = Navigator.of(context);
+              await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+              await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+              navigator.pop();
             },
             onNextEpisodePressed: () {
               _startControlsTimer();
@@ -1179,12 +1209,12 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
                 newPos > totalDuration ? totalDuration : newPos,
               );
             },
-            onFullscreenPressed: _toggleFullScreen,
+            onRotatePressed: _toggleOrientation,
           ),
 
         if (_activeSubtitleCtrl != null && _videoPlayerController != null)
           Positioned(
-            bottom: _isFullScreen ? (_showControls ? 76.0 : 20.0) : 80.0,
+            bottom: _showControls ? 76.0 : 20.0,
             left: 16.0,
             right: 16.0,
             child: IgnorePointer(
@@ -1201,7 +1231,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
                     text: text,
                     backgroundColor: Colors.transparent,
                     subtitleStyle: SubtitleStyle(
-                      fontSize: _isFullScreen ? 20.0 : 16.0,
+                      fontSize: 20.0,
                       textColor: Colors.white,
                       bordered: true,
                       borderStyle: const SubtitleBorderStyle(
@@ -1216,7 +1246,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
           ),
 
         Positioned(
-          bottom: _isFullScreen ? 90.0 : 100.0,
+          bottom: 90.0,
           right: 24.0,
           child: ValueListenableBuilder<SkipTime?>(
             valueListenable: _activeSkipTimeNotifier,
@@ -1277,10 +1307,13 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
     }
 
     return PopScope(
-      canPop: !_isFullScreen,
-      onPopInvokedWithResult: (didPop, result) {
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
         if (didPop) return;
-        if (_isFullScreen) _toggleFullScreen();
+        final navigator = Navigator.of(context);
+        await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+        await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+        navigator.pop(result);
       },
       child: Scaffold(
         backgroundColor: Colors.black,

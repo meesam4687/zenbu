@@ -6,7 +6,6 @@ import 'video_player_bottom_controls.dart';
 class VideoPlayerControlsOverlay extends StatelessWidget {
   final String animeTitle;
   final String episodeName;
-  final bool isFullScreen;
   final bool hasNextEpisode;
   final bool hasSubtitles;
   final bool hasMultipleVideos;
@@ -25,13 +24,12 @@ class VideoPlayerControlsOverlay extends StatelessWidget {
   final VoidCallback onReplayPressed;
   final VoidCallback onForwardPressed;
   final VoidCallback onSkip85Pressed;
-  final VoidCallback onFullscreenPressed;
+  final VoidCallback onRotatePressed;
 
   const VideoPlayerControlsOverlay({
     super.key,
     required this.animeTitle,
     required this.episodeName,
-    required this.isFullScreen,
     required this.hasNextEpisode,
     required this.hasSubtitles,
     required this.hasMultipleVideos,
@@ -49,7 +47,7 @@ class VideoPlayerControlsOverlay extends StatelessWidget {
     required this.onReplayPressed,
     required this.onForwardPressed,
     required this.onSkip85Pressed,
-    required this.onFullscreenPressed,
+    required this.onRotatePressed,
   });
 
   @override
@@ -61,13 +59,12 @@ class VideoPlayerControlsOverlay extends StatelessWidget {
         ),
 
         Positioned(
-          top: isFullScreen ? 24.0 : 0.0,
+          top: 24.0,
           left: 8.0,
           right: 8.0,
           child: VideoPlayerHeader(
             animeTitle: animeTitle,
             episodeName: episodeName,
-            isFullScreen: isFullScreen,
             hasNextEpisode: hasNextEpisode,
             hasSubtitles: hasSubtitles,
             hasMultipleVideos: hasMultipleVideos,
@@ -88,16 +85,15 @@ class VideoPlayerControlsOverlay extends StatelessWidget {
         ),
 
         Positioned(
-          bottom: isFullScreen ? 16.0 : 8.0,
+          bottom: 16.0,
           left: 16.0,
           right: 16.0,
           child: VideoPlayerBottomControls(
             currentPositionText: currentPositionText,
             totalDurationText: totalDurationText,
-            isFullScreen: isFullScreen,
             seekBar: seekBar,
             onSkip85Pressed: onSkip85Pressed,
-            onFullscreenPressed: onFullscreenPressed,
+            onRotatePressed: onRotatePressed,
           ),
         ),
       ],
