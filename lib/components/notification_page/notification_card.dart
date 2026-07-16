@@ -2,6 +2,8 @@ import 'package:zenbu/pages/media_details_page.dart';
 import 'package:flutter/material.dart';
 import 'package:animations/animations.dart';
 import 'package:zenbu/components/global/custom_image.dart';
+import 'package:provider/provider.dart';
+import 'package:zenbu/state_provider.dart';
 
 class NotificationCard extends StatelessWidget {
   const NotificationCard({
@@ -14,19 +16,22 @@ class NotificationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final provider = Provider.of<StateProvider>(context);
+    final mediaTitle = provider.resolveTitle(
+        notificationData["media"]?["title"] as Map?);
     String notificationText = "";
     if (notificationData["type"] == "AIRING") {
       notificationText =
-          "Episode ${notificationData["episode"].toString()} of ${notificationData["media"]["title"]["romaji"]} aired";
+          "Episode ${notificationData["episode"].toString()} of $mediaTitle aired";
     } else if (notificationData["type"] == "RELATED_MEDIA_ADDITION") {
       notificationText =
-          "${notificationData["media"]["title"]["romaji"]} was recently added to the site.";
+          "$mediaTitle was recently added to the site.";
     } else if (notificationData["type"] == "MEDIA_DATA_CHANGE") {
       notificationText =
-          "${notificationData["media"]["title"]["romaji"]} received site data changes";
+          "$mediaTitle received site data changes";
     } else if (notificationData["type"] == "MEDIA_MERGE") {
       notificationText =
-          "${notificationData["deletedMediaTitles"][0]} was merged with ${notificationData["media"]["title"]["romaji"]}";
+          "${notificationData["deletedMediaTitles"][0]} was merged with $mediaTitle";
     }
     return OpenContainer(
       openElevation: 0,

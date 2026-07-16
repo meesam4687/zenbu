@@ -29,8 +29,9 @@ class SendvidExtractor {
         headers: m3u8Headers,
       );
       final streams = parseM3u8Streams(m3u8Res.body, masterUrl);
-      if (streams.isEmpty)
+      if (streams.isEmpty) {
         return [Video(masterUrl, '${prefix}Sendvid', masterUrl)];
+      }
       return streams
           .map(
             (s) => Video(

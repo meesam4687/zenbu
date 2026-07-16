@@ -1,5 +1,7 @@
 import 'package:zenbu/components/global/item_card.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:zenbu/state_provider.dart';
 
 class CharacterRelations extends StatelessWidget {
   const CharacterRelations({super.key, required this.relations});
@@ -8,6 +10,7 @@ class CharacterRelations extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final provider = Provider.of<StateProvider>(context);
     return Container(
       margin: EdgeInsets.all(12),
       width: double.infinity,
@@ -29,15 +32,12 @@ class CharacterRelations extends StatelessWidget {
                 scrollDirection: Axis.horizontal,
                 itemCount: relations.length,
                 itemBuilder: (context, index) {
-                  final title =
-                      (relations[index]["node"]["title"]["romaji"] != null)
-                      ? ((relations[index]["node"]["title"]["romaji"] as String)
-                                    .length >
-                                16)
-                            ? '${(relations[index]["node"]["title"]["romaji"] as String).substring(0, 16)}...'
-                            : (relations[index]["node"]["title"]["romaji"]
-                                  as String)
-                      : "N/A";
+                  final resolvedTitle = provider.resolveTitle(
+                      relations[index]["node"]["title"] as Map?,
+                      fallback: "N/A");
+                  final title = resolvedTitle.length > 16
+                      ? '${resolvedTitle.substring(0, 16)}...'
+                      : resolvedTitle;
                   return ItemCard(
                     title: title,
                     image: relations[index]["node"]["coverImage"]["extraLarge"],

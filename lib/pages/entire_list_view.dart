@@ -3,6 +3,8 @@ import 'package:zenbu/components/global/item_card.dart';
 import 'package:zenbu/components/global/constant_sliver_grid_delegate.dart';
 import 'package:zenbu/pages/error_page.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:zenbu/state_provider.dart';
 
 enum PageType {
   trendingAnime,
@@ -151,6 +153,7 @@ class _EntireListViewState extends State<EntireListView> {
 
   @override
   Widget build(BuildContext context) {
+    final provider = Provider.of<StateProvider>(context);
     return Scaffold(
       appBar: AppBar(title: Text(widget.heading)),
       body: RefreshIndicator(
@@ -201,8 +204,8 @@ class _EntireListViewState extends State<EntireListView> {
                             child: Padding(
                               padding: const EdgeInsets.only(right: 3.0),
                               child: ItemCard(
-                                title:
-                                    medias[index]["title"]["romaji"] as String,
+                                title: provider.resolveTitle(
+                                    medias[index]["title"] as Map?),
                                 image:
                                     medias[index]["coverImage"]["large"]
                                         as String,

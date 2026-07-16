@@ -202,14 +202,13 @@ class _SearchPageState extends State<SearchPage> {
 
   @override
   Widget build(BuildContext context) {
+    final provider = Provider.of<StateProvider>(context);
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) {
         if (didPop) {
           return;
         }
-
-        final provider = Provider.of<StateProvider>(context, listen: false);
         if (widget.isAnime) {
           provider.clearAnimeFilters();
         } else {
@@ -264,9 +263,8 @@ class _SearchPageState extends State<SearchPage> {
                               child: Padding(
                                 padding: const EdgeInsets.only(left: 3.0),
                                 child: ItemCard(
-                                  title:
-                                      medias[index]["title"]["romaji"]
-                                          as String,
+                                  title: provider.resolveTitle(
+                                      medias[index]["title"] as Map?),
                                   image:
                                       medias[index]["coverImage"]["large"]
                                           as String,

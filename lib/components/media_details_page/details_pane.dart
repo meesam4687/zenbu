@@ -3,6 +3,8 @@ import 'package:zenbu/services/anilist/anilist.dart';
 import 'package:zenbu/components/media_details_page/details.dart';
 import 'package:zenbu/pages/error_page.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:zenbu/state_provider.dart';
 import 'package:zenbu/components/global/item_card.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -97,6 +99,7 @@ class _DetailsPaneState extends State<DetailsPane>
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    final provider = Provider.of<StateProvider>(context);
     Map<int, String> months = {
       1: "January",
       2: "February",
@@ -382,9 +385,9 @@ class _DetailsPaneState extends State<DetailsPane>
                                         media["relations"]["edges"][index]["node"]["type"]
                                             .toString()
                                             .toLowerCase(),
-                                    title:
-                                        (media["relations"]["edges"][index]["node"]["title"]["romaji"]
-                                            as String),
+                                    title: provider.resolveTitle(
+                                         media["relations"]["edges"][index]
+                                             ["node"]["title"] as Map?),
                                     image:
                                         media["relations"]["edges"][index]["node"]["coverImage"]["extraLarge"],
                                     state:
@@ -484,9 +487,8 @@ class _DetailsPaneState extends State<DetailsPane>
                                     id: nodeMedia["id"],
                                     type: (nodeMedia["type"] as String)
                                         .toLowerCase(),
-                                    title:
-                                        (nodeMedia["title"]["romaji"]
-                                            as String),
+                                    title: provider.resolveTitle(
+                                         nodeMedia["title"] as Map?),
                                     image:
                                         nodeMedia["coverImage"]["extraLarge"],
                                     mediaListEntry:

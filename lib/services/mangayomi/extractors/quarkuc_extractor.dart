@@ -124,8 +124,9 @@ class QuarkUcExtractor {
         'pwd_id': shareId,
         'passcode': shareData['sharePwd'] ?? '',
       }, 'post');
-      if (token['data']?['stoken'] != null)
+      if (token['data']?['stoken'] != null) {
         shareTokenCache[shareId] = token['data'];
+      }
     }
   }
 

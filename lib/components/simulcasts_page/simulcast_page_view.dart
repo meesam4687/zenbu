@@ -75,7 +75,7 @@ class _SimulcastPageViewState extends State<SimulcastPageView>
                 child: Padding(
                   padding: const EdgeInsets.only(left: 3.0),
                   child: ItemCard(
-                    title: media["title"]?["romaji"] ?? "",
+                    title: provider.resolveTitle(media["title"] as Map?),
                     image: media["coverImage"]?["large"] ?? "",
                     id: media["id"],
                     type: "anime",
