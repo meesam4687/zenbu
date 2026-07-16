@@ -9,6 +9,7 @@ import 'package:zenbu/services/update_service.dart';
 import 'package:zenbu/pages/update_page.dart';
 import 'package:zenbu/pages/anilist_settings_page.dart';
 import 'package:zenbu/pages/appearance_settings_page.dart';
+import 'package:zenbu/pages/extensions_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:zenbu/services/discord_service.dart';
 
@@ -106,11 +107,16 @@ class _SettingsPageState extends State<SettingsPage> {
                       'assets/alLogo.svg',
                       width: 24,
                       height: 24,
-                      colorFilter: ColorFilter.mode(cs.primary, BlendMode.srcIn),
+                      colorFilter: ColorFilter.mode(
+                        cs.primary,
+                        BlendMode.srcIn,
+                      ),
                     ),
                     title: Text(
                       'AniList Settings',
-                      style: tt.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+                      style: tt.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                     subtitle: Text(
                       'Configure metadata language and content preferences.',
@@ -121,6 +127,42 @@ class _SettingsPageState extends State<SettingsPage> {
                       Navigator.of(context).push(
                         MaterialPageRoute(
                           builder: (context) => const AnilistSettingsPage(),
+                        ),
+                      );
+                    },
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                ),
+              ),
+
+              _SectionHeader(label: 'Mangayomi'),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+                child: Card(
+                  elevation: 0,
+                  color: cs.surfaceContainerLow,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: ListTile(
+                    leading: Icon(Icons.extension_rounded, color: cs.primary),
+                    title: Text(
+                      'Extensions',
+                      style: tt.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    subtitle: Text(
+                      'Manage sources and repositories for anime & manga.',
+                      style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+                    ),
+                    trailing: const Icon(Icons.chevron_right_rounded),
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const ExtensionsPage(),
                         ),
                       );
                     },
@@ -144,7 +186,9 @@ class _SettingsPageState extends State<SettingsPage> {
                     leading: Icon(Icons.palette_rounded, color: cs.primary),
                     title: Text(
                       'Theme & Colours',
-                      style: tt.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+                      style: tt.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                     subtitle: Text(
                       _themeModeLabel(provider.themeMode),
@@ -236,7 +280,9 @@ class _SettingsPageState extends State<SettingsPage> {
                                 trailing: Switch(
                                   value: isEnabled,
                                   onChanged: (val) async {
-                                    await DiscordService.setPresenceEnabled(val);
+                                    await DiscordService.setPresenceEnabled(
+                                      val,
+                                    );
                                   },
                                 ),
                                 onTap: () async {
@@ -251,7 +297,11 @@ class _SettingsPageState extends State<SettingsPage> {
                                   ),
                                 ),
                               ),
-                              const Divider(height: 1, indent: 16, endIndent: 16),
+                              const Divider(
+                                height: 1,
+                                indent: 16,
+                                endIndent: 16,
+                              ),
                               ListTile(
                                 leading: Icon(
                                   Icons.link_off_rounded,
@@ -311,7 +361,9 @@ class _SettingsPageState extends State<SettingsPage> {
                               ? const SizedBox(
                                   width: 20,
                                   height: 20,
-                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
                                 )
                               : const Icon(Icons.chevron_right_rounded),
                           onTap: _isCheckingUpdate ? null : _checkUpdate,

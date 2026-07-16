@@ -250,7 +250,8 @@ class _ExtensionsPageState extends State<ExtensionsPage>
             ),
             const SizedBox(height: 8),
             const Text(
-              'Add a repository URL in the next tab first!',
+              'Add a repository URL in the next tab first!\nMangayomi extensions / repositories can be used.',
+              textAlign: TextAlign.center,
               style: TextStyle(fontSize: 14, color: Colors.grey),
             ),
           ],
@@ -687,7 +688,8 @@ class _ExtensionsPageState extends State<ExtensionsPage>
                   ),
                   const SizedBox(height: 8),
                   const Text(
-                    'Click the + button to add a source repo!',
+                    'Click the + button to add a source repo!\nMangayomi extensions / repositories can be used.',
+                    textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 14, color: Colors.grey),
                   ),
                 ],

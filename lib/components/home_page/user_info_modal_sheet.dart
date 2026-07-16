@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:zenbu/authentication_token_controller.dart';
 import 'package:provider/provider.dart';
 import 'package:zenbu/components/global/custom_image.dart';
-import 'package:zenbu/pages/extensions_page.dart';
 import 'package:zenbu/pages/settings_page.dart';
 import 'package:zenbu/pages/user_profile_page.dart';
 
@@ -98,29 +97,7 @@ class UserInfoModalSheet extends StatelessWidget {
                 ),
               ),
             ),
-            InkWell(
-              onTap: () {
-                Navigator.of(context).pop();
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const ExtensionsPage(),
-                  ),
-                );
-              },
-              child: Container(
-                height: 60,
-                margin: const EdgeInsets.only(left: 45),
-                width: double.infinity,
-                child: const Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Icon(Icons.extension),
-                    Padding(padding: EdgeInsets.only(left: 20)),
-                    Text("Extensions", style: TextStyle(fontSize: 18)),
-                  ],
-                ),
-              ),
-            ),
+
             InkWell(
               onTap: () {
                 Navigator.of(context).pop();
