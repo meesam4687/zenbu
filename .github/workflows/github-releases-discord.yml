@@ -1,0 +1,7 @@
+- name: Github Releases To Discord
+  uses: SethCohen/github-releases-to-discord@v1.13.1
+  with:
+    webhook_url: ${{ secrets.DISCORD_WEBHOOK }}
+    color: 10820832 # #10a2e0 in decimal
+    username: "Zenbu Released"
+    avatar_url: "https://raw.githubusercontent.com/meesam4687/zenbu/4dbdc076fbaaa8fd7880899e3c994d82515f668c/assets/zenbu_512.png"
