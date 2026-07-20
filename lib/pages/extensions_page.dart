@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:zenbu/services/mangayomi/models/extensions_models.dart';
 import 'package:zenbu/services/repo_service.dart';
 import 'package:zenbu/components/global/custom_image.dart';
@@ -253,6 +254,16 @@ class _ExtensionsPageState extends State<ExtensionsPage>
               'Add a repository URL in the next tab first!\nMangayomi extensions / repositories can be used.',
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 14, color: Colors.grey),
+            ),
+            const SizedBox(height: 16),
+            TextButton(
+              onPressed: () {
+                launchUrl(
+                  Uri.parse('https://zenbu.meesam.dev/guide/'),
+                  mode: LaunchMode.externalApplication,
+                );
+              },
+              child: const Text('Need Help?'),
             ),
           ],
         ),
@@ -691,6 +702,16 @@ class _ExtensionsPageState extends State<ExtensionsPage>
                     'Click the + button to add a source repo!\nMangayomi extensions / repositories can be used.',
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 14, color: Colors.grey),
+                  ),
+                  const SizedBox(height: 16),
+                  TextButton(
+                    onPressed: () {
+                      launchUrl(
+                        Uri.parse('https://zenbu.meesam.dev/guide/'),
+                        mode: LaunchMode.externalApplication,
+                      );
+                    },
+                    child: const Text('Need Help?'),
                   ),
                 ],
               ),
