@@ -86,78 +86,90 @@ class _HomePageState extends State<HomePage> {
           const SizedBox(width: 8),
           const HomeDownloadButton(),
           const SizedBox(width: 8),
-          GestureDetector(
-            onTap: () {
-              if (providerData.isNotEmpty) {
-                showModalBottomSheet(
-                  context: context,
-                  builder: (context) {
-                    return UserInfoModalSheet(
-                      profileImage:
-                          providerData['data']['Viewer']['avatar']['large'],
-                      username: providerData['data']['Viewer']['name'],
-                      userId: providerData['data']['Viewer']['id'],
-                    );
-                  },
-                );
-              }
-            },
-            child: Badge(
-              isLabelVisible: (providerData.isNotEmpty)
-                  ? (providerData["data"]["Viewer"]["unreadNotificationCount"] >
-                        0)
-                  : false,
-              smallSize: 12,
-              child: Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: Theme.of(context).colorScheme.onSecondary,
-                  ),
-                  borderRadius: const BorderRadius.all(Radius.circular(360)),
+          Badge(
+            isLabelVisible: (providerData.isNotEmpty)
+                ? (providerData["data"]["Viewer"]["unreadNotificationCount"] >
+                      0)
+                : false,
+            smallSize: 12,
+            child: Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.onSecondary,
                 ),
-                child: ClipOval(
-                  child: (providerData.isEmpty)
-                      ? FutureBuilder(
-                          future: _alData,
-                          builder: (context, snapshot) {
-                            if (snapshot.connectionState ==
-                                ConnectionState.waiting) {
-                              return const SizedBox(
+                borderRadius: const BorderRadius.all(Radius.circular(360)),
+              ),
+              child: ClipOval(
+                child: Stack(
+                  children: [
+                    (providerData.isEmpty)
+                        ? FutureBuilder(
+                            future: _alData,
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return const SizedBox(
+                                  height: 40,
+                                  width: 40,
+                                  child: Icon(Icons.face),
+                                );
+                              }
+                              if (snapshot.hasError) {
+                                return const SizedBox(
+                                  height: 40,
+                                  width: 40,
+                                  child: Icon(Icons.face),
+                                );
+                              }
+                              final data = snapshot.data!;
+                              return CustomImage(
                                 height: 40,
                                 width: 40,
-                                child: Icon(Icons.face),
+                                fit: BoxFit.fill,
+                                imageUrl:
+                                    data['data']['Viewer']['avatar']['large']
+                                        as String,
+                                borderRadius: BorderRadius.circular(360),
                               );
-                            }
-                            if (snapshot.hasError) {
-                              return const SizedBox(
-                                height: 40,
-                                width: 40,
-                                child: Icon(Icons.face),
-                              );
-                            }
-                            final data = snapshot.data!;
-                            return CustomImage(
-                              height: 40,
-                              width: 40,
-                              fit: BoxFit.fill,
-                              imageUrl:
-                                  data['data']['Viewer']['avatar']['large']
-                                      as String,
-                              borderRadius: BorderRadius.circular(360),
-                            );
-                          },
-                        )
-                      : CustomImage(
-                          height: 40,
-                          width: 40,
-                          fit: BoxFit.fill,
-                          imageUrl:
-                              providerData['data']['Viewer']['avatar']['large']
-                                  as String,
+                            },
+                          )
+                        : CustomImage(
+                            height: 40,
+                            width: 40,
+                            fit: BoxFit.fill,
+                            imageUrl:
+                                providerData['data']['Viewer']['avatar']['large']
+                                    as String,
+                            borderRadius: BorderRadius.circular(360),
+                          ),
+                    Positioned.fill(
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
                           borderRadius: BorderRadius.circular(360),
+                          onTap: () {
+                            if (providerData.isNotEmpty) {
+                              showModalBottomSheet(
+                                context: context,
+                                builder: (context) {
+                                  return UserInfoModalSheet(
+                                    profileImage: providerData['data']
+                                            ['Viewer']['avatar']['large'],
+                                    username: providerData['data']['Viewer']
+                                        ['name'],
+                                    userId: providerData['data']['Viewer']
+                                        ['id'],
+                                  );
+                                },
+                              );
+                            }
+                          },
                         ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
