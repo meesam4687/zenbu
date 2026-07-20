@@ -1,0 +1,19 @@
+name: Release
+
+on:
+  workflow_dispatch:
+  release:
+    types: [published]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Github Releases To Discord
+        uses: SethCohen/github-releases-to-discord@v1.13.1
+        with:
+          webhook_url: ${{ secrets.DISCORD_WEBHOOK }}
+          color: 1090272
+          username: Zenbu Releases
+          content: "<@&1527669924179480767>"
+          avatar_url: https://raw.githubusercontent.com/meesam4687/zenbu/4dbdc076fbaaa8fd7880899e3c994d82515f668c/assets/zenbu_512.png
