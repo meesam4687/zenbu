@@ -75,7 +75,7 @@ class _MediaDetailsPageState extends State<MediaDetailsPage>
         final Widget aboutPane = _KeepAliveWrapper(
           child: SingleChildScrollView(
             key: const PageStorageKey('about'),
-            physics: const ClampingScrollPhysics(),
+            physics: const AlwaysScrollableScrollPhysics(),
             child: DetailsPane(
               mediaId: widget.id as int,
               isAnime: widget.isAnime,

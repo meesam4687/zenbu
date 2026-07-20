@@ -194,7 +194,7 @@ class _UserProfilePageState extends State<UserProfilePage>
                 _KeepAliveWrapper(
                   child: SingleChildScrollView(
                     key: const PageStorageKey('user_anime_stats'),
-                    physics: const ClampingScrollPhysics(),
+                    physics: const AlwaysScrollableScrollPhysics(),
                     child: ProfileStatsTab(
                       statistics: animeStats,
                       isAnime: true,
@@ -204,7 +204,7 @@ class _UserProfilePageState extends State<UserProfilePage>
                 _KeepAliveWrapper(
                   child: SingleChildScrollView(
                     key: const PageStorageKey('user_manga_stats'),
-                    physics: const ClampingScrollPhysics(),
+                    physics: const AlwaysScrollableScrollPhysics(),
                     child: ProfileStatsTab(
                       statistics: mangaStats,
                       isAnime: false,

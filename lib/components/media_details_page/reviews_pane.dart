@@ -20,28 +20,11 @@ class _ReviewsPaneState extends State<ReviewsPane> {
   bool _isLoading = false;
   bool _hasError = false;
   bool _hasMore = true;
-  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
     _loadMore();
-    _scrollController.addListener(_onScroll);
-  }
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  void _onScroll() {
-    if (_scrollController.position.pixels >=
-            _scrollController.position.maxScrollExtent - 100 &&
-        !_isLoading &&
-        _hasMore) {
-      _loadMore();
-    }
   }
 
   Future<void> _loadMore() async {
@@ -157,12 +140,21 @@ class _ReviewsPaneState extends State<ReviewsPane> {
       );
     }
 
-    return RefreshIndicator(
-      onRefresh: _handleRefresh,
-      child: ListView.builder(
-        physics: const AlwaysScrollableScrollPhysics(),
-        controller: _scrollController,
-        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+    return NotificationListener<ScrollNotification>(
+      onNotification: (ScrollNotification scrollInfo) {
+        if (scrollInfo.metrics.pixels >=
+                scrollInfo.metrics.maxScrollExtent - 100 &&
+            !_isLoading &&
+            _hasMore) {
+          _loadMore();
+        }
+        return false;
+      },
+      child: RefreshIndicator(
+        onRefresh: _handleRefresh,
+        child: ListView.builder(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
         itemCount: _isLoading && _hasMore
             ? _reviews.length + 1
             : _reviews.length,
@@ -261,6 +253,7 @@ class _ReviewsPaneState extends State<ReviewsPane> {
           );
         },
       ),
-    );
-  }
+    ),
+  );
+}
 }
