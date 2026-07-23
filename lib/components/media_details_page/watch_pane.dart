@@ -1050,6 +1050,7 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
 
       await downloadService.startAnimeDownload(
         mediaId: widget.mediaId,
+        malId: widget.malId,
         mediaTitle: widget.animeTitle,
         coverImage: widget.coverImage ?? '',
         episodeUrl: ep.url,

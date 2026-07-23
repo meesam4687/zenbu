@@ -466,6 +466,8 @@ class _DownloadedItemsListPageState extends State<DownloadedItemsListPage> {
                   episode: ep,
                   source: localSource,
                   animeTitle: media.mediaTitle,
+                  malId: media.malId,
+                  mediaId: media.mediaId,
                 ),
               ),
             );

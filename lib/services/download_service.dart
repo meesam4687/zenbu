@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:zenbu/services/mangayomi/models/extensions_models.dart';
+import 'package:zenbu/services/progress_service.dart';
 
 class DownloadItem {
   final String url;
@@ -35,6 +36,7 @@ class DownloadItem {
 
 class DownloadedMedia {
   final int mediaId;
+  final int? malId;
   final String mediaTitle;
   final String coverImage;
   final bool isManga;
@@ -42,6 +44,7 @@ class DownloadedMedia {
 
   DownloadedMedia({
     required this.mediaId,
+    this.malId,
     required this.mediaTitle,
     required this.coverImage,
     required this.isManga,
@@ -50,6 +53,7 @@ class DownloadedMedia {
 
   Map<String, dynamic> toJson() => {
     'mediaId': mediaId,
+    'malId': malId,
     'mediaTitle': mediaTitle,
     'coverImage': coverImage,
     'isManga': isManga,
@@ -60,6 +64,7 @@ class DownloadedMedia {
     final rawItems = json['items'] as List? ?? [];
     return DownloadedMedia(
       mediaId: json['mediaId'] ?? 0,
+      malId: json['malId'] as int?,
       mediaTitle: json['mediaTitle'] ?? '',
       coverImage: json['coverImage'] ?? '',
       isManga: json['isManga'] ?? false,
@@ -124,6 +129,7 @@ class DownloadService extends ChangeNotifier {
   final Set<String> _pausedDownloads = {};
 
   final Map<String, int> _activeMediaIds = {};
+  final Map<String, int?> _activeMalIds = {};
   final Map<String, String> _activeCoverImages = {};
   final Map<String, String> _activeRootPaths = {};
   final Map<String, String> _activeVideoStreamUrls = {};
@@ -232,6 +238,7 @@ class DownloadService extends ChangeNotifier {
         'name': _activeNames[url],
         'mediaTitle': _activeMediaTitles[url],
         'mediaId': _activeMediaIds[url],
+        'malId': _activeMalIds[url],
         'coverImage': _activeCoverImages[url],
         'rootPath': _activeRootPaths[url],
         'videoStreamUrl': _activeVideoStreamUrls[url],
@@ -249,6 +256,7 @@ class DownloadService extends ChangeNotifier {
     required String name,
     required String mediaTitle,
     required int mediaId,
+    int? malId,
     required String coverImage,
     required String rootPath,
     String? videoStreamUrl,
@@ -261,6 +269,7 @@ class DownloadService extends ChangeNotifier {
     _activeNames[url] = name;
     _activeMediaTitles[url] = mediaTitle;
     _activeMediaIds[url] = mediaId;
+    _activeMalIds[url] = malId;
     _activeCoverImages[url] = coverImage;
     _activeRootPaths[url] = rootPath;
     if (videoStreamUrl != null) _activeVideoStreamUrls[url] = videoStreamUrl;
@@ -318,6 +327,7 @@ class DownloadService extends ChangeNotifier {
             .toList();
         startAnimeDownload(
           mediaId: _activeMediaIds[url] ?? 0,
+          malId: _activeMalIds[url],
           mediaTitle: _activeMediaTitles[url] ?? '',
           coverImage: _activeCoverImages[url] ?? '',
           episodeUrl: url,
@@ -426,6 +436,7 @@ class DownloadService extends ChangeNotifier {
           _activeNames[url] = data['name'] ?? '';
           _activeMediaTitles[url] = data['mediaTitle'] ?? '';
           _activeMediaIds[url] = data['mediaId'] ?? 0;
+          _activeMalIds[url] = data['malId'];
           _activeCoverImages[url] = data['coverImage'] ?? '';
           _activeRootPaths[url] = data['rootPath'] ?? '';
           if (data['videoStreamUrl'] != null) _activeVideoStreamUrls[url] = data['videoStreamUrl'];
@@ -592,6 +603,7 @@ class DownloadService extends ChangeNotifier {
 
   Future<void> startAnimeDownload({
     required int mediaId,
+    int? malId,
     required String mediaTitle,
     required String coverImage,
     required String episodeUrl,
@@ -607,6 +619,7 @@ class DownloadService extends ChangeNotifier {
       name: episodeName,
       mediaTitle: mediaTitle,
       mediaId: mediaId,
+      malId: malId,
       coverImage: coverImage,
       rootPath: rootPath,
       videoStreamUrl: videoStreamUrl,
@@ -637,11 +650,52 @@ class DownloadService extends ChangeNotifier {
       fileDest =
           '$showPath${Platform.isWindows ? '\\' : '/'}$sanitizedEpName$ext';
 
+      final videoNameWithoutExt = fileDest.substring(
+        0,
+        fileDest.lastIndexOf('.'),
+      );
+
+      if (malId != null) {
+        try {
+          final epNum = ProgressService.parseEpisodeNumber(episodeUrl, episodeName);
+          if (epNum != null) {
+            final skipApiUrl =
+                'https://api.aniskip.com/v2/skip-times/$malId/$epNum?types[]=op&types[]=ed&types[]=mixed-op&types[]=mixed-ed&types[]=recap&episodeLength=0';
+            final skipRes = await http.get(Uri.parse(skipApiUrl));
+            if (skipRes.statusCode == 200) {
+              final skipData = jsonDecode(skipRes.body);
+              if (skipData is Map &&
+                  skipData['found'] == true &&
+                  skipData['results'] is List) {
+                final List<Map<String, dynamic>> parsedSkips = [];
+                for (final item in skipData['results']) {
+                  final interval = item['interval'];
+                  if (interval is Map) {
+                    final startTime =
+                        double.tryParse(interval['startTime'].toString()) ?? 0.0;
+                    final endTime =
+                        double.tryParse(interval['endTime'].toString()) ?? 0.0;
+                    final skipType = item['skipType']?.toString() ?? 'op';
+                    parsedSkips.add({
+                      'startTime': startTime,
+                      'endTime': endTime,
+                      'skipType': skipType,
+                    });
+                  }
+                }
+                if (parsedSkips.isNotEmpty) {
+                  final jsonDest = '$videoNameWithoutExt.json';
+                  await File(jsonDest).writeAsString(jsonEncode(parsedSkips));
+                }
+              }
+            }
+          }
+        } catch (e) {
+          debugPrint('[DOWNLOAD SKIP STAMPS ERROR] Failed to fetch skip times: $e');
+        }
+      }
+
       if (subtitles != null && subtitles.isNotEmpty) {
-        final videoNameWithoutExt = fileDest.substring(
-          0,
-          fileDest.lastIndexOf('.'),
-        );
         for (final subtitle in subtitles) {
           if (!_activeDownloads.containsKey(episodeUrl)) {
             break;
@@ -959,6 +1013,7 @@ class DownloadService extends ChangeNotifier {
         _animeRegistry.add(
           DownloadedMedia(
             mediaId: mediaId,
+            malId: malId,
             mediaTitle: mediaTitle,
             coverImage: coverImage,
             isManga: false,
@@ -982,6 +1037,10 @@ class DownloadService extends ChangeNotifier {
             0,
             fileDest.lastIndexOf('.'),
           );
+          final jsonFile = File('$videoNameWithoutExt.json');
+          if (await jsonFile.exists()) {
+            await jsonFile.delete();
+          }
           final parentDir = file.parent;
           final subsExtensions = ['.srt', '.vtt', '.ass', '.ssa'];
           if (await parentDir.exists()) {
@@ -1013,6 +1072,7 @@ class DownloadService extends ChangeNotifier {
       _activeMediaTitles.remove(episodeUrl);
       _activeClients.remove(episodeUrl);
       _activeMediaIds.remove(episodeUrl);
+      _activeMalIds.remove(episodeUrl);
       _activeCoverImages.remove(episodeUrl);
       _activeRootPaths.remove(episodeUrl);
       _activeVideoStreamUrls.remove(episodeUrl);
@@ -1251,6 +1311,10 @@ class DownloadService extends ChangeNotifier {
                     }
                   }
                 }
+              }
+              final jsonFile = File('$videoNameWithoutExt.json');
+              if (await jsonFile.exists()) {
+                await jsonFile.delete();
               }
             } catch (_) {}
           }

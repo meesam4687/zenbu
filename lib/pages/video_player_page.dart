@@ -616,7 +616,18 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
         if (!mounted) return;
       }
 
-      if (widget.malId != null) {
+      bool loadedLocalSkip = false;
+      if (isLocal) {
+        final filePath = resolvedUrl.startsWith('file://')
+            ? Uri.parse(resolvedUrl).toFilePath()
+            : (_currentEpisode.url.startsWith('file://')
+                ? Uri.parse(_currentEpisode.url).toFilePath()
+                : _currentEpisode.url);
+        loadedLocalSkip = await _loadLocalSkipTimes(filePath);
+        if (!mounted) return;
+      }
+
+      if (!loadedLocalSkip && widget.malId != null) {
         final double? epNum = parseEpisodeNumber(_currentEpisode);
         if (epNum != null) {
           final durationSec = _videoPlayerController!.value.duration.inSeconds;
@@ -906,6 +917,66 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
         );
       },
     );
+  }
+
+  Future<bool> _loadLocalSkipTimes(String videoFilePath) async {
+    try {
+      final dotIdx = videoFilePath.lastIndexOf('.');
+      final jsonPath = dotIdx != -1
+          ? '${videoFilePath.substring(0, dotIdx)}.json'
+          : '$videoFilePath.json';
+      final jsonFile = File(jsonPath);
+      if (await jsonFile.exists()) {
+        final content = await jsonFile.readAsString();
+        final data = jsonDecode(content);
+        final List<SkipTime> parsedSkips = [];
+        if (data is List) {
+          for (final item in data) {
+            if (item is Map) {
+              final startTime =
+                  double.tryParse(item['startTime'].toString()) ?? 0.0;
+              final endTime =
+                  double.tryParse(item['endTime'].toString()) ?? 0.0;
+              final skipType = item['skipType']?.toString() ?? 'op';
+              parsedSkips.add(
+                SkipTime(
+                  startTime: startTime,
+                  endTime: endTime,
+                  skipType: skipType,
+                ),
+              );
+            }
+          }
+        } else if (data is Map && data['results'] is List) {
+          for (final item in data['results']) {
+            final interval = item['interval'];
+            if (interval is Map) {
+              final startTime =
+                  double.tryParse(interval['startTime'].toString()) ?? 0.0;
+              final endTime =
+                  double.tryParse(interval['endTime'].toString()) ?? 0.0;
+              final skipType = item['skipType']?.toString() ?? 'op';
+              parsedSkips.add(
+                SkipTime(
+                  startTime: startTime,
+                  endTime: endTime,
+                  skipType: skipType,
+                ),
+              );
+            }
+          }
+        }
+        if (parsedSkips.isNotEmpty) {
+          if (mounted) {
+            setState(() => _skipTimes = parsedSkips);
+          }
+          return true;
+        }
+      }
+    } catch (e) {
+      debugPrint('[LOAD LOCAL SKIP TIMES ERROR] $e');
+    }
+    return false;
   }
 
   Future<void> _fetchSkipTimes(
