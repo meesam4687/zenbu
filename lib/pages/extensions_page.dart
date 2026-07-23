@@ -58,8 +58,8 @@ class _ExtensionsPageState extends State<ExtensionsPage>
   Future<void> _loadExtensions() async {
     setState(() => _isLoadingExtensions = true);
     try {
-      final installed = await RepoService.getInstalledExtensions();
       final all = await RepoService.fetchAllExtensions();
+      final installed = await RepoService.cleanOrphanedExtensions(all);
       setState(() {
         _installedExtensions = installed;
         _allExtensions = all;

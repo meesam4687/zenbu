@@ -158,6 +158,21 @@ class RepoService {
     await prefs.setStringList(_installedKey, rawList);
   }
 
+  static Future<List<ExtSource>> cleanOrphanedExtensions(
+    List<ExtSource> allExtensions,
+  ) async {
+    final installed = await getInstalledExtensions();
+    final validInstalled = <ExtSource>[];
+    for (final ext in installed) {
+      if (allExtensions.any((e) => e.id == ext.id)) {
+        validInstalled.add(ext);
+      } else {
+        await uninstallExtension(ext);
+      }
+    }
+    return validInstalled;
+  }
+
   static Future<ExtensionService> loadExtensionEngine(ExtSource source) async {
     final prefs = await SharedPreferences.getInstance();
     final sourceCode = prefs.getString('$_sourceCodePrefix${source.id}');
