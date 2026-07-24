@@ -14,6 +14,7 @@ import 'package:zenbu/services/repo_service.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:zenbu/services/progress_service.dart';
 import 'package:zenbu/services/discord_service.dart';
+import 'package:zenbu/services/download_service.dart';
 import 'package:zenbu/components/video_player_page/video_player_gesture_handler.dart';
 import 'package:zenbu/components/video_player_page/buffered_seek_bar_painter.dart';
 import 'package:zenbu/components/video_player_page/video_player_controls_overlay.dart';
@@ -497,6 +498,37 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
     return _ResolvedStream(currentUrl, contentType);
   }
 
+  Future<bool> _isLocalVideoFileValid(String filePath) async {
+    try {
+      final file = File(filePath);
+      if (!await file.exists()) return false;
+      final length = await file.length();
+      if (length < 50 * 1024) return false;
+
+      final handle = await file.open(mode: FileMode.read);
+      final bytes = await handle.read(512);
+      await handle.close();
+
+      if (bytes.isEmpty) return false;
+
+      final snippet = utf8
+          .decode(bytes, allowMalformed: true)
+          .trimLeft()
+          .toLowerCase();
+      if (snippet.startsWith('<html>') ||
+          snippet.startsWith('<!doctype html') ||
+          snippet.startsWith('<head') ||
+          snippet.startsWith('<script') ||
+          snippet.startsWith('{"error"') ||
+          snippet.startsWith('{"message"')) {
+        return false;
+      }
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
   Future<void> _initializePlayer() async {
     if (_selectedVideo == null) return;
 
@@ -562,6 +594,18 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
         final filePath = resolvedUrl.startsWith('file://')
             ? Uri.parse(resolvedUrl).toFilePath()
             : resolvedUrl;
+
+        final isValid = await _isLocalVideoFileValid(filePath);
+        if (!isValid) {
+          if (!mounted) return;
+          setState(() {
+            _errorMessage =
+                'The downloaded video file is corrupt or invalid.\n(An HTML error page or incomplete stream was saved instead of video data).\n\nPlease delete this download and try again.';
+            _isLoading = false;
+          });
+          return;
+        }
+
         _videoPlayerController = VideoPlayerController.file(File(filePath));
       } else {
         _videoPlayerController = VideoPlayerController.networkUrl(
@@ -571,7 +615,19 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
         );
       }
 
-      await _videoPlayerController!.initialize();
+      try {
+        await _videoPlayerController!.initialize();
+      } catch (e, stack) {
+        debugPrint('[VIDEO PLAYER INIT EXCEPTION] $e\n$stack');
+        _disposePlayer();
+        if (!mounted) return;
+        setState(() {
+          _errorMessage =
+              'Failed to initialize video player: ${e.toString().split('\n').first}';
+          _isLoading = false;
+        });
+        return;
+      }
       if (!mounted) return;
 
       _videoPlayerController!.addListener(_onPlaybackStateChanged);
@@ -1427,9 +1483,48 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
                         ),
                       ),
                       const SizedBox(height: 24),
-                      FilledButton(
-                        onPressed: _fetchVideoList,
-                        child: const Text('Retry'),
+                      Wrap(
+                        alignment: WrapAlignment.center,
+                        spacing: 12,
+                        runSpacing: 12,
+                        children: [
+                          if (widget.source.id == -1) ...[
+                            FilledButton.icon(
+                              style: FilledButton.styleFrom(
+                                backgroundColor: Theme.of(context).colorScheme.error,
+                              ),
+                              onPressed: () async {
+                                await DownloadService().deleteDownloadedItem(
+                                  false,
+                                  widget.episode.url,
+                                );
+                                if (context.mounted) {
+                                  Navigator.of(context).pop();
+                                }
+                              },
+                              icon: const Icon(Icons.delete_outline),
+                              label: const Text('Delete Download'),
+                            ),
+                          ] else ...[
+                            FilledButton(
+                              onPressed: _fetchVideoList,
+                              child: const Text('Retry'),
+                            ),
+                          ],
+                          OutlinedButton(
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: Colors.white,
+                              side: const BorderSide(color: Colors.white30),
+                            ),
+                            onPressed: () async {
+                              final navigator = Navigator.of(context);
+                              await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+                              await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+                              navigator.pop();
+                            },
+                            child: const Text('Go Back'),
+                          ),
+                        ],
                       ),
                     ],
                   ),

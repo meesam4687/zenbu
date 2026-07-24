@@ -111,6 +111,79 @@ class DownloadService extends ChangeNotifier {
 
   static const Duration _downloadTimeout = Duration(seconds: 90);
 
+  static bool _isHtmlOrJsonPayload(List<int> bytes, [Map<String, String>? headers]) {
+    if (headers != null) {
+      final contentType = headers.entries
+          .firstWhere(
+            (e) => e.key.toLowerCase() == 'content-type',
+            orElse: () => const MapEntry('', ''),
+          )
+          .value
+          .toLowerCase();
+      if (contentType.contains('text/html') ||
+          contentType.contains('application/json')) {
+        return true;
+      }
+    }
+
+    if (bytes.isEmpty) return false;
+
+    final checkLength = bytes.length < 512 ? bytes.length : 512;
+    final snippet = utf8
+        .decode(bytes.sublist(0, checkLength), allowMalformed: true)
+        .trimLeft()
+        .toLowerCase();
+
+    if (snippet.startsWith('<html>') ||
+        snippet.startsWith('<!doctype html') ||
+        snippet.startsWith('<head') ||
+        snippet.startsWith('<script') ||
+        snippet.startsWith('{"error"') ||
+        snippet.startsWith('{"message"') ||
+        snippet.startsWith('{"success":false')) {
+      return true;
+    }
+    return false;
+  }
+
+  static Future<bool> _validateVideoFile(File file) async {
+    if (!await file.exists()) return false;
+    final length = await file.length();
+    if (length < 50 * 1024) return false;
+
+    try {
+      final handle = await file.open(mode: FileMode.read);
+      final headerBytes = await handle.read(512);
+      await handle.close();
+
+      if (headerBytes.isEmpty) return false;
+      if (_isHtmlOrJsonPayload(headerBytes)) return false;
+
+      final snippetStr = utf8.decode(headerBytes, allowMalformed: true);
+      final isMp4 = snippetStr.contains('ftyp') ||
+          snippetStr.contains('moov') ||
+          snippetStr.contains('mdat') ||
+          snippetStr.contains('wide') ||
+          snippetStr.contains('free') ||
+          snippetStr.contains('skip');
+
+      final isMkvOrWebm = headerBytes.length >= 4 &&
+          headerBytes[0] == 0x1A &&
+          headerBytes[1] == 0x45 &&
+          headerBytes[2] == 0xDF &&
+          headerBytes[3] == 0xA3;
+
+      final isTs = headerBytes.isNotEmpty && headerBytes[0] == 0x47;
+
+      if (isMp4 || isMkvOrWebm || isTs) {
+        return true;
+      }
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
   final Map<String, double> _activeDownloads = {};
   final Map<String, StreamSubscription> _activeSubscriptions = {};
   final Map<String, Completer<void>> _activeCompleters = {};
@@ -754,6 +827,11 @@ class DownloadService extends ChangeNotifier {
           final playlistBytes = await response.stream.toBytes().timeout(
             _downloadTimeout,
           );
+          if (_isHtmlOrJsonPayload(playlistBytes, response.headers)) {
+            throw Exception(
+              'Failed to download video stream: Server returned HTML error page instead of HLS playlist.',
+            );
+          }
           var playlistContent = utf8.decode(playlistBytes);
           var mediaPlaylistUrl = videoStreamUrl;
 
@@ -804,6 +882,11 @@ class DownloadService extends ChangeNotifier {
               if (subResponse.statusCode != 200) {
                 throw Exception(
                   'Failed to fetch HLS sub-playlist: HTTP ${subResponse.statusCode}',
+                );
+              }
+              if (_isHtmlOrJsonPayload(subResponse.bodyBytes, subResponse.headers)) {
+                throw Exception(
+                  'Failed to fetch HLS sub-playlist: Server returned HTML error page.',
                 );
               }
               playlistContent = subResponse.body;
@@ -860,6 +943,11 @@ class DownloadService extends ChangeNotifier {
                   client: client,
                 );
                 if (segResponse.statusCode == 200) {
+                  if (_isHtmlOrJsonPayload(segResponse.bodyBytes, segResponse.headers)) {
+                    throw Exception(
+                      'Failed to download segment $i: Server returned HTML error page instead of video segment.',
+                    );
+                  }
                   await segmentFile.writeAsBytes(segResponse.bodyBytes);
                   _downloadedBytes[episodeUrl] =
                       (_downloadedBytes[episodeUrl] ?? 0) +
@@ -995,6 +1083,17 @@ class DownloadService extends ChangeNotifier {
           _activeCompleters.remove(episodeUrl);
           await sink.close();
         }
+      }
+
+      final isVideoValid = await _validateVideoFile(File(fileDest));
+      if (!isVideoValid) {
+        try {
+          final f = File(fileDest);
+          if (await f.exists()) await f.delete();
+        } catch (_) {}
+        throw Exception(
+          'Downloaded video file is corrupt or invalid (received HTML error page instead of video).',
+        );
       }
 
       final item = DownloadItem(
@@ -1177,6 +1276,11 @@ class DownloadService extends ChangeNotifier {
             client: client,
           );
           if (response.statusCode == 200) {
+            if (_isHtmlOrJsonPayload(response.bodyBytes, response.headers)) {
+              throw Exception(
+                'Failed to download page ${i + 1}: Server returned HTML/error payload.',
+              );
+            }
             await File(pageFileDest).writeAsBytes(response.bodyBytes);
             _downloadedBytes[chapterUrl] =
                 (_downloadedBytes[chapterUrl] ?? 0) + response.bodyBytes.length;
