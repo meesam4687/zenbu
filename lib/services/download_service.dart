@@ -5,6 +5,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:convert/convert.dart';
+import 'package:encrypt/encrypt.dart' as encrypt;
 import 'package:zenbu/services/mangayomi/models/extensions_models.dart';
 import 'package:zenbu/services/progress_service.dart';
 
@@ -111,7 +114,10 @@ class DownloadService extends ChangeNotifier {
 
   static const Duration _downloadTimeout = Duration(seconds: 90);
 
-  static bool _isHtmlOrJsonPayload(List<int> bytes, [Map<String, String>? headers]) {
+  static bool _isHtmlOrJsonPayload(
+    List<int> bytes, [
+    Map<String, String>? headers,
+  ]) {
     if (headers != null) {
       final contentType = headers.entries
           .firstWhere(
@@ -146,6 +152,32 @@ class DownloadService extends ChangeNotifier {
     return false;
   }
 
+  static Uint8List stripFakeHeaders(Uint8List data) {
+    if (data.length < 188) return data;
+    if (data[0] == 0x47) return data;
+
+    if (data.length >= 8) {
+      if (data[0] == 0x1A &&
+          data[1] == 0x45 &&
+          data[2] == 0xDF &&
+          data[3] == 0xA3) {
+        return data;
+      }
+      final brand = utf8.decode(data.sublist(4, 8), allowMalformed: true);
+      if (brand == 'ftyp' || brand == 'moov' || brand == 'styp') {
+        return data;
+      }
+    }
+
+    for (int i = 0; i <= data.length - 376; i++) {
+      if (data[i] == 0x47 && data[i + 188] == 0x47) {
+        return data.sublist(i);
+      }
+    }
+
+    return data;
+  }
+
   static Future<bool> _validateVideoFile(File file) async {
     if (!await file.exists()) return false;
     final length = await file.length();
@@ -160,14 +192,16 @@ class DownloadService extends ChangeNotifier {
       if (_isHtmlOrJsonPayload(headerBytes)) return false;
 
       final snippetStr = utf8.decode(headerBytes, allowMalformed: true);
-      final isMp4 = snippetStr.contains('ftyp') ||
+      final isMp4 =
+          snippetStr.contains('ftyp') ||
           snippetStr.contains('moov') ||
           snippetStr.contains('mdat') ||
           snippetStr.contains('wide') ||
           snippetStr.contains('free') ||
           snippetStr.contains('skip');
 
-      final isMkvOrWebm = headerBytes.length >= 4 &&
+      final isMkvOrWebm =
+          headerBytes.length >= 4 &&
           headerBytes[0] == 0x1A &&
           headerBytes[1] == 0x45 &&
           headerBytes[2] == 0xDF &&
@@ -348,7 +382,9 @@ class DownloadService extends ChangeNotifier {
     if (videoStreamUrl != null) _activeVideoStreamUrls[url] = videoStreamUrl;
     if (headers != null) _activeHeaders[url] = headers;
     if (subtitles != null) {
-      _activeSubtitles[url] = subtitles.map((e) => {'file': e.file, 'label': e.label}).toList();
+      _activeSubtitles[url] = subtitles
+          .map((e) => {'file': e.file, 'label': e.label})
+          .toList();
     }
     if (pages != null) _activePages[url] = pages;
     _saveRegistryState();
@@ -376,15 +412,18 @@ class DownloadService extends ChangeNotifier {
     _pausedDownloads.remove(url);
 
     final isManga = _activeTypes[url] ?? false;
-    final isAlreadyRunning = isManga 
+    final isAlreadyRunning = isManga
         ? _activeClients.containsKey(url)
-        : (_activeClients.containsKey(url) || _activeSubscriptions.containsKey(url));
+        : (_activeClients.containsKey(url) ||
+              _activeSubscriptions.containsKey(url));
 
     if (!isAlreadyRunning) {
       if (isManga) {
-        final pagesList = _activePages[url]
-            ?.map((e) => Map<String, dynamic>.from(e))
-            .toList() ?? [];
+        final pagesList =
+            _activePages[url]
+                ?.map((e) => Map<String, dynamic>.from(e))
+                .toList() ??
+            [];
         startMangaDownload(
           mediaId: _activeMediaIds[url] ?? 0,
           mediaTitle: _activeMediaTitles[url] ?? '',
@@ -396,7 +435,10 @@ class DownloadService extends ChangeNotifier {
         );
       } else {
         final subsList = _activeSubtitles[url]
-            ?.map((e) => ExtSubtitle(file: e['file'] ?? '', label: e['label'] ?? ''))
+            ?.map(
+              (e) =>
+                  ExtSubtitle(file: e['file'] ?? '', label: e['label'] ?? ''),
+            )
             .toList();
         startAnimeDownload(
           mediaId: _activeMediaIds[url] ?? 0,
@@ -512,13 +554,17 @@ class DownloadService extends ChangeNotifier {
           _activeMalIds[url] = data['malId'];
           _activeCoverImages[url] = data['coverImage'] ?? '';
           _activeRootPaths[url] = data['rootPath'] ?? '';
-          if (data['videoStreamUrl'] != null) _activeVideoStreamUrls[url] = data['videoStreamUrl'];
+          if (data['videoStreamUrl'] != null) {
+            _activeVideoStreamUrls[url] = data['videoStreamUrl'];
+          }
           if (data['headers'] != null) {
             _activeHeaders[url] = Map<String, String>.from(data['headers']);
           }
-          if (data['subtitles'] != null) _activeSubtitles[url] = data['subtitles'];
+          if (data['subtitles'] != null) {
+            _activeSubtitles[url] = data['subtitles'];
+          }
           if (data['pages'] != null) _activePages[url] = data['pages'];
-          
+
           _pausedDownloads.add(url);
           _downloadSpeeds[url] = 'Paused';
         });
@@ -547,6 +593,26 @@ class DownloadService extends ChangeNotifier {
       return path;
     }
     return null;
+  }
+
+  Future<String> getDownloadsDirectory() async {
+    final prefs = await SharedPreferences.getInstance();
+    final customPath = prefs.getString('downloads_directory_path');
+    if (customPath != null && customPath.isNotEmpty) {
+      final dir = Directory(customPath);
+      if (!await dir.exists()) {
+        await dir.create(recursive: true);
+      }
+      return customPath;
+    }
+    final appDocDir = await getApplicationDocumentsDirectory();
+    final defaultPath =
+        '${appDocDir.path}${Platform.isWindows ? '\\' : '/'}Zenbu${Platform.isWindows ? '\\' : '/'}downloads';
+    final dir = Directory(defaultPath);
+    if (!await dir.exists()) {
+      await dir.create(recursive: true);
+    }
+    return defaultPath;
   }
 
   Future<http.StreamedResponse> streamWithRedirects(
@@ -683,9 +749,13 @@ class DownloadService extends ChangeNotifier {
     required String episodeName,
     required String videoStreamUrl,
     required Map<String, String> headers,
-    required String rootPath,
+    String? rootPath,
     List<ExtSubtitle>? subtitles,
   }) async {
+    final effectiveRootPath = (rootPath != null && rootPath.isNotEmpty)
+        ? rootPath
+        : await getDownloadsDirectory();
+
     saveDownloadMetadata(
       url: episodeUrl,
       isManga: false,
@@ -694,7 +764,7 @@ class DownloadService extends ChangeNotifier {
       mediaId: mediaId,
       malId: malId,
       coverImage: coverImage,
-      rootPath: rootPath,
+      rootPath: effectiveRootPath,
       videoStreamUrl: videoStreamUrl,
       headers: headers,
       subtitles: subtitles,
@@ -708,7 +778,8 @@ class DownloadService extends ChangeNotifier {
       final sanitizedTitle = sanitizeFilename(mediaTitle);
       final sanitizedEpName = sanitizeFilename(episodeName);
 
-      final animeRootPath = '$rootPath${Platform.isWindows ? '\\' : '/'}anime';
+      final animeRootPath =
+          '$effectiveRootPath${Platform.isWindows ? '\\' : '/'}anime';
       final showPath =
           '$animeRootPath${Platform.isWindows ? '\\' : '/'}$sanitizedTitle';
       final showDir = Directory(showPath);
@@ -730,7 +801,10 @@ class DownloadService extends ChangeNotifier {
 
       if (malId != null) {
         try {
-          final epNum = ProgressService.parseEpisodeNumber(episodeUrl, episodeName);
+          final epNum = ProgressService.parseEpisodeNumber(
+            episodeUrl,
+            episodeName,
+          );
           if (epNum != null) {
             final skipApiUrl =
                 'https://api.aniskip.com/v2/skip-times/$malId/$epNum?types[]=op&types[]=ed&types[]=mixed-op&types[]=mixed-ed&types[]=recap&episodeLength=0';
@@ -745,7 +819,8 @@ class DownloadService extends ChangeNotifier {
                   final interval = item['interval'];
                   if (interval is Map) {
                     final startTime =
-                        double.tryParse(interval['startTime'].toString()) ?? 0.0;
+                        double.tryParse(interval['startTime'].toString()) ??
+                        0.0;
                     final endTime =
                         double.tryParse(interval['endTime'].toString()) ?? 0.0;
                     final skipType = item['skipType']?.toString() ?? 'op';
@@ -764,7 +839,9 @@ class DownloadService extends ChangeNotifier {
             }
           }
         } catch (e) {
-          debugPrint('[DOWNLOAD SKIP STAMPS ERROR] Failed to fetch skip times: $e');
+          debugPrint(
+            '[DOWNLOAD SKIP STAMPS ERROR] Failed to fetch skip times: $e',
+          );
         }
       }
 
@@ -816,23 +893,30 @@ class DownloadService extends ChangeNotifier {
         throw Exception('Server returned status code ${response.statusCode}');
       }
 
+      final playlistBytes = await response.stream.toBytes().timeout(
+        _downloadTimeout,
+      );
+      if (_isHtmlOrJsonPayload(playlistBytes, response.headers)) {
+        throw Exception(
+          'Failed to download video stream: Server returned HTML error page instead of video payload.',
+        );
+      }
+
+      final playlistText = utf8.decode(playlistBytes, allowMalformed: true);
       final contentType = response.headers['content-type']?.toLowerCase() ?? '';
       final isHls =
           videoStreamUrl.contains('.m3u8') ||
           contentType.contains('mpegurl') ||
-          contentType.contains('application/x-mpegurl');
+          contentType.contains('application/x-mpegurl') ||
+          playlistText.contains('#EXTM3U');
 
       if (isHls) {
+        if (fileDest.endsWith('.mp4')) {
+          fileDest = '$videoNameWithoutExt.ts';
+        }
+
         try {
-          final playlistBytes = await response.stream.toBytes().timeout(
-            _downloadTimeout,
-          );
-          if (_isHtmlOrJsonPayload(playlistBytes, response.headers)) {
-            throw Exception(
-              'Failed to download video stream: Server returned HTML error page instead of HLS playlist.',
-            );
-          }
-          var playlistContent = utf8.decode(playlistBytes);
+          var playlistContent = playlistText;
           var mediaPlaylistUrl = videoStreamUrl;
 
           var lines = playlistContent.split('\n');
@@ -884,13 +968,91 @@ class DownloadService extends ChangeNotifier {
                   'Failed to fetch HLS sub-playlist: HTTP ${subResponse.statusCode}',
                 );
               }
-              if (_isHtmlOrJsonPayload(subResponse.bodyBytes, subResponse.headers)) {
+              if (_isHtmlOrJsonPayload(
+                subResponse.bodyBytes,
+                subResponse.headers,
+              )) {
                 throw Exception(
                   'Failed to fetch HLS sub-playlist: Server returned HTML error page.',
                 );
               }
               playlistContent = subResponse.body;
               lines = playlistContent.split('\n');
+            }
+          }
+
+          int mediaSequence = 1;
+          for (final line in lines) {
+            final trimmed = line.trim();
+            if (trimmed.startsWith('#EXT-X-MEDIA-SEQUENCE:')) {
+              final seqMatch = RegExp(
+                r'#EXT-X-MEDIA-SEQUENCE:\s*(\d+)',
+              ).firstMatch(trimmed);
+              if (seqMatch != null) {
+                mediaSequence = int.tryParse(seqMatch.group(1) ?? '1') ?? 1;
+              }
+            }
+          }
+
+          Uint8List? aesKeyBytes;
+          Uint8List? aesIvBytes;
+
+          for (final line in lines) {
+            final trimmed = line.trim();
+            if (trimmed.startsWith('#EXT-X-KEY')) {
+              final body = trimmed.substring(trimmed.indexOf(':') + 1);
+              final keyAttrs = <String, String>{};
+              final attrRegExp = RegExp(
+                r'([A-Z0-9\-]+)=(?:"([^"]*)"|([^,]+))',
+                caseSensitive: false,
+              );
+              for (final match in attrRegExp.allMatches(body)) {
+                final k = match.group(1)!.toUpperCase();
+                final v = match.group(2) ?? match.group(3) ?? '';
+                keyAttrs[k] = v;
+              }
+
+              final method = keyAttrs['METHOD']?.toUpperCase();
+              if (method == 'AES-128') {
+                final keyUriStr = keyAttrs['URI'];
+                final ivStr = keyAttrs['IV'];
+
+                if (keyUriStr != null && keyUriStr.isNotEmpty) {
+                  final resolvedKeyUrl = Uri.parse(
+                    mediaPlaylistUrl,
+                  ).resolve(keyUriStr).toString();
+                  try {
+                    final keyHeaders = Map<String, String>.from(headers);
+                    final keyResponse = await sendWithRedirects(
+                      resolvedKeyUrl,
+                      keyHeaders,
+                      client: client,
+                    );
+                    if (keyResponse.statusCode == 200) {
+                      aesKeyBytes = keyResponse.bodyBytes;
+                    } else {
+                      debugPrint(
+                        '[DOWNLOAD HLS KEY ERROR] Status ${keyResponse.statusCode}',
+                      );
+                    }
+                  } catch (e) {
+                    debugPrint(
+                      '[DOWNLOAD HLS KEY ERROR] Failed to fetch key: $e',
+                    );
+                  }
+                }
+
+                if (ivStr != null && ivStr.isNotEmpty) {
+                  try {
+                    final cleanHex = ivStr
+                        .replaceAll('0x', '')
+                        .replaceAll('0X', '');
+                    aesIvBytes = Uint8List.fromList(hex.decode(cleanHex));
+                  } catch (e) {
+                    debugPrint('[DOWNLOAD HLS IV PARSE ERROR] $e');
+                  }
+                }
+              }
             }
           }
 
@@ -937,26 +1099,83 @@ class DownloadService extends ChangeNotifier {
                   segmentHeaders['Referer'] = mediaPlaylistUrl;
                 }
 
-                final segResponse = await sendWithRedirects(
-                  segmentUrl,
-                  segmentHeaders,
-                  client: client,
-                );
-                if (segResponse.statusCode == 200) {
-                  if (_isHtmlOrJsonPayload(segResponse.bodyBytes, segResponse.headers)) {
-                    throw Exception(
-                      'Failed to download segment $i: Server returned HTML error page instead of video segment.',
+                http.Response? segResponse;
+                int segAttempts = 0;
+                dynamic lastSegErr;
+
+                while (segAttempts < 3) {
+                  try {
+                    segAttempts++;
+                    segResponse = await sendWithRedirects(
+                      segmentUrl,
+                      segmentHeaders,
+                      client: client,
                     );
+                    if (segResponse.statusCode >= 200 &&
+                        segResponse.statusCode < 300) {
+                      break;
+                    }
+                    lastSegErr = 'HTTP ${segResponse.statusCode}';
+                  } catch (e) {
+                    lastSegErr = e;
+                    if (segAttempts >= 3) rethrow;
                   }
-                  await segmentFile.writeAsBytes(segResponse.bodyBytes);
-                  _downloadedBytes[episodeUrl] =
-                      (_downloadedBytes[episodeUrl] ?? 0) +
-                      segResponse.bodyBytes.length;
-                } else {
+                }
+
+                if (segResponse == null ||
+                    segResponse.statusCode < 200 ||
+                    segResponse.statusCode >= 300) {
                   throw Exception(
-                    'Failed to download segment $i: HTTP ${segResponse.statusCode}',
+                    'Failed to download segment $i after 3 attempts: $lastSegErr',
                   );
                 }
+
+                if (_isHtmlOrJsonPayload(
+                  segResponse.bodyBytes,
+                  segResponse.headers,
+                )) {
+                  throw Exception(
+                    'Failed to download segment $i: Server returned HTML error page instead of video segment.',
+                  );
+                }
+
+                Uint8List finalSegmentData = segResponse.bodyBytes;
+
+                if (aesKeyBytes != null) {
+                  try {
+                    Uint8List iv = Uint8List(16);
+                    if (aesIvBytes != null && aesIvBytes.length == 16) {
+                      iv = Uint8List.fromList(aesIvBytes);
+                    } else {
+                      final seqNum = mediaSequence + i;
+                      ByteData.view(
+                        iv.buffer,
+                      ).setUint32(12, seqNum, Endian.big);
+                    }
+                    final encrypter = encrypt.Encrypter(
+                      encrypt.AES(
+                        encrypt.Key(aesKeyBytes),
+                        mode: encrypt.AESMode.cbc,
+                        padding: null,
+                      ),
+                    );
+                    finalSegmentData = Uint8List.fromList(
+                      encrypter.decryptBytes(
+                        encrypt.Encrypted(segResponse.bodyBytes),
+                        iv: encrypt.IV(iv),
+                      ),
+                    );
+                  } catch (e) {
+                    throw Exception('Failed to decrypt segment $i: $e');
+                  }
+                }
+
+                finalSegmentData = stripFakeHeaders(finalSegmentData);
+
+                await segmentFile.writeAsBytes(finalSegmentData);
+                _downloadedBytes[episodeUrl] =
+                    (_downloadedBytes[episodeUrl] ?? 0) +
+                    finalSegmentData.length;
               }
 
               if (!_activeDownloads.containsKey(episodeUrl)) {
@@ -1032,12 +1251,20 @@ class DownloadService extends ChangeNotifier {
             downloadedBytes = 0;
             mode = FileMode.write;
           } else if (mp4Response.statusCode != 206) {
-            throw Exception('Server returned status code ${mp4Response.statusCode}');
+            throw Exception(
+              'Server returned status code ${mp4Response.statusCode}',
+            );
           }
         }
 
-        final contentLength = (mp4Response.contentLength ?? 0) + downloadedBytes;
+        final contentLength =
+            (mp4Response.contentLength ?? 0) + downloadedBytes;
         final sink = file.openWrite(mode: mode);
+
+        if (downloadedBytes == 0 && playlistBytes.isNotEmpty) {
+          sink.add(playlistBytes);
+          downloadedBytes += playlistBytes.length;
+        }
 
         final Completer<void> completer = Completer<void>();
         late StreamSubscription subscription;
@@ -1192,8 +1419,12 @@ class DownloadService extends ChangeNotifier {
     required String chapterUrl,
     required String chapterName,
     required List<Map<String, dynamic>> pages,
-    required String rootPath,
+    String? rootPath,
   }) async {
+    final effectiveRootPath = (rootPath != null && rootPath.isNotEmpty)
+        ? rootPath
+        : await getDownloadsDirectory();
+
     saveDownloadMetadata(
       url: chapterUrl,
       isManga: true,
@@ -1201,7 +1432,7 @@ class DownloadService extends ChangeNotifier {
       mediaTitle: mediaTitle,
       mediaId: mediaId,
       coverImage: coverImage,
-      rootPath: rootPath,
+      rootPath: effectiveRootPath,
       pages: pages,
     );
 
@@ -1213,7 +1444,7 @@ class DownloadService extends ChangeNotifier {
         final sanitizedChapName = sanitizeFilename(chapterName);
 
         final mangaRootPath =
-            '$rootPath${Platform.isWindows ? '\\' : '/'}manga';
+            '$effectiveRootPath${Platform.isWindows ? '\\' : '/'}manga';
         final showPath =
             '$mangaRootPath${Platform.isWindows ? '\\' : '/'}$sanitizedTitle';
         final chapterPath =

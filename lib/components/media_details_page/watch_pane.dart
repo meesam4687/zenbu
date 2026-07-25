@@ -987,14 +987,6 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
   }
 
   Future<void> _downloadEpisode(ExtEpisode ep) async {
-    final prefs = await SharedPreferences.getInstance();
-    var rootPath = prefs.getString('local_directory_path');
-    if (rootPath == null || rootPath.isEmpty) {
-      await _pickAnimeDirectory();
-      rootPath = prefs.getString('local_directory_path');
-      if (rootPath == null || rootPath.isEmpty) return;
-    }
-
     if (!mounted) return;
     if (!await LocalSourceService.checkAndRequestStoragePermission(context)) {
       return;
@@ -1030,13 +1022,12 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
       widget.animeTitle,
     );
 
-    _startAnimeDownloadWithStream(ep, selectedStream, rootPath);
+    _startAnimeDownloadWithStream(ep, selectedStream);
   }
 
   Future<void> _startAnimeDownloadWithStream(
     ExtEpisode ep,
     Map<String, dynamic> selectedStream,
-    String rootPath,
   ) async {
     final downloadService = DownloadService();
     try {
@@ -1057,7 +1048,6 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
         episodeName: ep.name,
         videoStreamUrl: videoUrl,
         headers: headers,
-        rootPath: rootPath,
         subtitles: extVideo.subtitles,
       );
     } catch (e) {

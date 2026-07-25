@@ -53,6 +53,7 @@ dependencies:
   flutter_subtitle: ^0.0.6
   encrypt: ^5.0.3
   crypto: ^3.0.7
+  convert: ^3.1.2
   d4rt: ^0.2.2
   pseudom: ^1.0.1
   xpath_selector_html_parser: ^3.0.1

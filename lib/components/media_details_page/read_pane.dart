@@ -988,14 +988,6 @@ class _MangaReadPaneState extends State<MangaReadPane> {
   }
 
   Future<void> _downloadChapter(ExtEpisode chap) async {
-    final prefs = await SharedPreferences.getInstance();
-    var rootPath = prefs.getString('local_directory_path');
-    if (rootPath == null || rootPath.isEmpty) {
-      await _pickMangaDirectory();
-      rootPath = prefs.getString('local_directory_path');
-      if (rootPath == null || rootPath.isEmpty) return;
-    }
-
     if (!mounted) return;
     if (!await LocalSourceService.checkAndRequestStoragePermission(context)) {
       return;
@@ -1016,13 +1008,10 @@ class _MangaReadPaneState extends State<MangaReadPane> {
       widget.mangaTitle,
     );
 
-    _resolveAndStartMangaDownload(chap, rootPath);
+    _resolveAndStartMangaDownload(chap);
   }
 
-  Future<void> _resolveAndStartMangaDownload(
-    ExtEpisode chap,
-    String rootPath,
-  ) async {
+  Future<void> _resolveAndStartMangaDownload(ExtEpisode chap) async {
     final downloadService = DownloadService();
     try {
       final engine = await RepoService.loadExtensionEngine(_selectedExtension!);
@@ -1052,7 +1041,6 @@ class _MangaReadPaneState extends State<MangaReadPane> {
         chapterUrl: chap.url,
         chapterName: chap.name,
         pages: pagesToDownload,
-        rootPath: rootPath,
       );
     } catch (e) {
       final wasCancelled = downloadService.wasManuallyCancelled(chap.url);
