@@ -461,6 +461,18 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
     String url,
     Map<String, String> headers,
   ) async {
+    if (url.startsWith('data:')) {
+      String? mime;
+      final commaIndex = url.indexOf(',');
+      if (commaIndex != -1) {
+        final header = url.substring(5, commaIndex);
+        final parts = header.split(';');
+        if (parts.isNotEmpty && parts[0].isNotEmpty) {
+          mime = parts[0];
+        }
+      }
+      return _ResolvedStream(url, mime);
+    }
     String currentUrl = url;
     String? contentType;
     final client = http.Client();
@@ -569,9 +581,15 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
       final lowerUrl = resolvedUrl.toLowerCase();
       final lowerOrigUrl = _selectedVideo!.url.toLowerCase();
       final lowerContentType = contentType?.toLowerCase() ?? '';
-      if (lowerUrl.contains('.m3u8') ||
+      if (lowerUrl.startsWith('data:application/x-mpegurl') ||
+          lowerUrl.startsWith('data:application/vnd.apple.mpegurl') ||
+          lowerUrl.contains('mpegurl') ||
+          lowerUrl.contains('.m3u8') ||
           lowerUrl.contains('/hls/') ||
           lowerUrl.contains('type=m3u8') ||
+          lowerOrigUrl.startsWith('data:application/x-mpegurl') ||
+          lowerOrigUrl.startsWith('data:application/vnd.apple.mpegurl') ||
+          lowerOrigUrl.contains('mpegurl') ||
           lowerOrigUrl.contains('.m3u8') ||
           lowerOrigUrl.contains('/hls/') ||
           lowerOrigUrl.contains('type=m3u8') ||
