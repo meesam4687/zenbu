@@ -271,15 +271,19 @@ class _ExtensionsPageState extends State<ExtensionsPage>
     }
 
     final filteredExtensions = _allExtensions.where((ext) {
-      final isAnime = !ext.isManga;
+      final isAnime = ext.isAnime;
       final isManga = ext.isManga;
+      final isNovel = ext.isNovel;
       if (_selectedType == 'anime' && !isAnime) return false;
       if (_selectedType == 'manga' && !isManga) return false;
+      if (_selectedType == 'novel' && !isNovel) return false;
       final query = _searchQuery.toLowerCase();
       if (query.isEmpty) return true;
       return ext.name.toLowerCase().contains(query) ||
           ext.lang.toLowerCase().contains(query) ||
-          (ext.isManga ? 'manga' : 'anime').contains(query);
+          (ext.isNovel ? 'novel' : (ext.isManga ? 'manga' : 'anime')).contains(
+            query,
+          );
     }).toList();
 
     final installed = <ExtSource>[];
@@ -302,21 +306,13 @@ class _ExtensionsPageState extends State<ExtensionsPage>
       }
     }
 
-    final Map<String, List<ExtSource>> grouped = {};
+    final grouped = <String, List<ExtSource>>{};
     for (final ext in available) {
-      final lang = ext.lang.isEmpty ? 'unknown' : ext.lang.toLowerCase();
+      final lang = ext.lang.toUpperCase();
       grouped.putIfAbsent(lang, () => []).add(ext);
     }
-    final sortedLangs = grouped.keys.toList()
-      ..sort((a, b) {
-        const priority = ['all', 'multi'];
-        final ai = priority.indexOf(a);
-        final bi = priority.indexOf(b);
-        if (ai != -1 && bi != -1) return ai.compareTo(bi);
-        if (ai != -1) return -1;
-        if (bi != -1) return 1;
-        return a.compareTo(b);
-      });
+
+    final sortedLangs = grouped.keys.toList()..sort();
 
     for (final lang in sortedLangs) {
       items.add(_ExtListItem.header(lang));
@@ -370,12 +366,19 @@ class _ExtensionsPageState extends State<ExtensionsPage>
                 selected: _selectedType == 'anime',
                 onTap: () => setState(() => _selectedType = 'anime'),
               ),
-              const SizedBox(width: 24),
+              const SizedBox(width: 16),
               _TypeChip(
                 label: 'Manga',
                 icon: Icons.menu_book_rounded,
                 selected: _selectedType == 'manga',
                 onTap: () => setState(() => _selectedType = 'manga'),
+              ),
+              const SizedBox(width: 16),
+              _TypeChip(
+                label: 'Novel',
+                icon: Icons.auto_stories_rounded,
+                selected: _selectedType == 'novel',
+                onTap: () => setState(() => _selectedType = 'novel'),
               ),
             ],
           ),
@@ -397,7 +400,7 @@ class _ExtensionsPageState extends State<ExtensionsPage>
                       Text(
                         _searchQuery.isNotEmpty
                             ? 'No results for "$_searchQuery"'
-                            : 'No ${_selectedType == 'manga' ? 'manga' : 'anime'} extensions',
+                            : 'No $_selectedType extensions',
                         style: const TextStyle(
                           fontSize: 18,
                           color: Colors.grey,

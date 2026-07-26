@@ -37,6 +37,7 @@ class ExtSource {
   final String sourceCodeUrl;
   String? sourceCode;
   final String iconUrl;
+  final int itemType; // 0: manga, 1: anime, 2: novel
   final bool isManga;
   final bool isNsfw;
   final String apiUrl;
@@ -53,15 +54,29 @@ class ExtSource {
     required this.sourceCodeUrl,
     this.sourceCode,
     this.iconUrl = '',
-    this.isManga = true,
+    this.itemType = 0,
+    bool? isManga,
     this.isNsfw = false,
     this.apiUrl = '',
     this.dateFormat = '',
     this.dateFormatLocale = '',
     this.sourceCodeLanguage = 1,
-  });
+  }) : isManga = isManga ?? (itemType == 0);
+
+  bool get isNovel => itemType == 2;
+  bool get isAnime => itemType == 1;
 
   factory ExtSource.fromJson(Map<String, dynamic> json) {
+    final parsedItemType = json['itemType'] is int
+        ? json['itemType'] as int
+        : (json['itemType'] != null
+              ? int.tryParse(json['itemType'].toString()) ??
+                    (json['isManga'] == false ? 1 : 0)
+              : (json['isManga'] == false ? 1 : 0));
+    final parsedIsManga = json['isManga'] is bool
+        ? json['isManga'] as bool
+        : (parsedItemType == 0);
+
     return ExtSource(
       name: json['name'] ?? '',
       id: json['id'] is int ? json['id'] : int.parse(json['id'].toString()),
@@ -71,7 +86,8 @@ class ExtSource {
       sourceCodeUrl: json['sourceCodeUrl'] ?? '',
       sourceCode: json['sourceCode'],
       iconUrl: json['iconUrl'] ?? json['icon'] ?? '',
-      isManga: json['isManga'] ?? true,
+      itemType: parsedItemType,
+      isManga: parsedIsManga,
       isNsfw: json['isNsfw'] ?? false,
       apiUrl: json['apiUrl'] ?? '',
       dateFormat: json['dateFormat'] ?? '',
@@ -93,6 +109,7 @@ class ExtSource {
     'sourceCodeUrl': sourceCodeUrl,
     'sourceCode': sourceCode,
     'iconUrl': iconUrl,
+    'itemType': itemType,
     'isManga': isManga,
     'isNsfw': isNsfw,
     'apiUrl': apiUrl,

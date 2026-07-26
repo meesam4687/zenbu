@@ -6,6 +6,7 @@ import 'package:zenbu/services/mangayomi/eval/model/m_source.dart';
 import 'package:zenbu/services/mangayomi/eval/interface.dart';
 import 'package:zenbu/services/mangayomi/eval/dart/service.dart';
 import 'package:zenbu/services/mangayomi/eval/javascript/service.dart';
+import 'package:zenbu/services/mangayomi/eval/lnreader/service.dart';
 
 class RepoService {
   static const String _reposKey = 'ext_repos';
@@ -219,11 +220,15 @@ class RepoService {
                   .first
                   .endsWith('.dart'))
           ? SourceCodeLanguage.dart
-          : SourceCodeLanguage.javascript,
+          : (source.sourceCodeLanguage == 3
+                ? SourceCodeLanguage.lnreader
+                : SourceCodeLanguage.javascript),
     );
 
     if (mSource.sourceCodeLanguage == SourceCodeLanguage.dart) {
       return DartExtensionService(mSource);
+    } else if (mSource.sourceCodeLanguage == SourceCodeLanguage.lnreader) {
+      return LNReaderExtensionService(mSource);
     } else {
       return JsExtensionService(mSource, userPrefs: userPrefs);
     }

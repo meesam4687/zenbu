@@ -66,8 +66,7 @@ class _MediaDetailsPageState extends State<MediaDetailsPage>
 
         final currentProgress = media["mediaListEntry"]?["progress"] ?? "0";
 
-        final format = media["format"]?.toString() ?? "";
-        final showReadTab = !widget.isAnime && format != 'NOVEL';
+        final showReadTab = !widget.isAnime;
 
         final double width = MediaQuery.of(context).size.width;
         final bool isTablet = width >= 600;
@@ -92,14 +91,16 @@ class _MediaDetailsPageState extends State<MediaDetailsPage>
                     animeTitle: resolvedTitle,
                     coverImage: media["coverImage"]["extraLarge"],
                     streamingEpisodes: media["streamingEpisodes"] as List?,
-                    anilistProgress: int.tryParse(currentProgress.toString()) ?? 0,
+                    anilistProgress:
+                        int.tryParse(currentProgress.toString()) ?? 0,
                     mediaState: media["mediaListEntry"]?["status"] ?? 'NONE',
                   )
                 : MangaReadPane(
                     mediaId: widget.id as int,
                     mangaTitle: resolvedTitle,
                     coverImage: media["coverImage"]["extraLarge"],
-                    anilistProgress: int.tryParse(currentProgress.toString()) ?? 0,
+                    anilistProgress:
+                        int.tryParse(currentProgress.toString()) ?? 0,
                     mediaState: media["mediaListEntry"]?["status"] ?? 'NONE',
                   ),
           ),
@@ -116,21 +117,18 @@ class _MediaDetailsPageState extends State<MediaDetailsPage>
                 Tab(text: "Reviews"),
               ]
             : (showReadTab
-                ? const [
-                    Tab(text: "About"),
-                    Tab(text: "Read"),
-                    Tab(text: "Reviews"),
-                  ]
-                : const [
-                    Tab(text: "About"),
-                    Tab(text: "Reviews"),
-                  ]);
+                  ? const [
+                      Tab(text: "About"),
+                      Tab(text: "Read"),
+                      Tab(text: "Reviews"),
+                    ]
+                  : const [Tab(text: "About"), Tab(text: "Reviews")]);
 
         final List<Widget> tabViewsList = widget.isAnime
             ? [aboutPane, watchOrReadPane, reviewsPane]
             : (showReadTab
-                ? [aboutPane, watchOrReadPane, reviewsPane]
-                : [aboutPane, reviewsPane]);
+                  ? [aboutPane, watchOrReadPane, reviewsPane]
+                  : [aboutPane, reviewsPane]);
 
         if (isTablet) {
           return DefaultTabController(
@@ -159,13 +157,9 @@ class _MediaDetailsPageState extends State<MediaDetailsPage>
                     child: Scaffold(
                       appBar: AppBar(
                         title: Text(resolvedTitle),
-                        bottom: TabBar(
-                          tabs: tabsList,
-                        ),
+                        bottom: TabBar(tabs: tabsList),
                       ),
-                      body: TabBarView(
-                        children: tabViewsList,
-                      ),
+                      body: TabBarView(children: tabViewsList),
                     ),
                   ),
                 ],
@@ -206,16 +200,10 @@ class _MediaDetailsPageState extends State<MediaDetailsPage>
                 ),
                 SliverPersistentHeader(
                   pinned: true,
-                  delegate: _TabBarDelegate(
-                    TabBar(
-                      tabs: tabsList,
-                    ),
-                  ),
+                  delegate: _TabBarDelegate(TabBar(tabs: tabsList)),
                 ),
               ],
-              body: TabBarView(
-                children: tabViewsList,
-              ),
+              body: TabBarView(children: tabViewsList),
             ),
           ),
         );

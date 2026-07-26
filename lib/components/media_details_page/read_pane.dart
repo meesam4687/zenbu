@@ -4,6 +4,7 @@ import 'package:zenbu/services/repo_service.dart';
 import 'package:zenbu/services/mangayomi/eval/interface.dart';
 import 'package:zenbu/components/global/custom_image.dart';
 import 'package:zenbu/pages/manga_reader_page.dart';
+import 'package:zenbu/pages/novel_reader_page.dart';
 import 'package:zenbu/pages/extensions_page.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:zenbu/services/progress_service.dart';
@@ -118,7 +119,9 @@ class _MangaReadPaneState extends State<MangaReadPane> {
 
     try {
       final list = await RepoService.getInstalledExtensions();
-      final mangaExtensions = list.where((ext) => ext.isManga).toList();
+      final mangaExtensions = list
+          .where((ext) => ext.isManga || ext.isNovel)
+          .toList();
       if (!mounted) return;
       setState(() {
         _installedExtensions = [...mangaExtensions, localSource];
@@ -675,26 +678,53 @@ class _MangaReadPaneState extends State<MangaReadPane> {
                                     final curIdx = chronologicalChapters
                                         .indexWhere((c) => c.url == chap.url);
 
-                                    Navigator.of(context)
-                                        .push(
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                MangaReaderPage(
-                                                  chapters:
-                                                      chronologicalChapters,
-                                                  currentIndex: curIdx >= 0
-                                                      ? curIdx
-                                                      : 0,
-                                                  source: _selectedExtension!,
-                                                  mangaTitle: widget.mangaTitle,
-                                                  mediaId: widget.mediaId,
-                                                  coverImage: widget.coverImage,
-                                                ),
-                                          ),
-                                        )
-                                        .then((_) {
-                                          _loadLocalProgress();
-                                        });
+                                    if (_selectedExtension?.isNovel == true) {
+                                      Navigator.of(context)
+                                          .push(
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  NovelReaderPage(
+                                                    chapters:
+                                                        chronologicalChapters,
+                                                    currentIndex: curIdx >= 0
+                                                        ? curIdx
+                                                        : 0,
+                                                    source: _selectedExtension!,
+                                                    novelTitle:
+                                                        widget.mangaTitle,
+                                                    mediaId: widget.mediaId,
+                                                    coverImage:
+                                                        widget.coverImage,
+                                                  ),
+                                            ),
+                                          )
+                                          .then((_) {
+                                            _loadLocalProgress();
+                                          });
+                                    } else {
+                                      Navigator.of(context)
+                                          .push(
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  MangaReaderPage(
+                                                    chapters:
+                                                        chronologicalChapters,
+                                                    currentIndex: curIdx >= 0
+                                                        ? curIdx
+                                                        : 0,
+                                                    source: _selectedExtension!,
+                                                    mangaTitle:
+                                                        widget.mangaTitle,
+                                                    mediaId: widget.mediaId,
+                                                    coverImage:
+                                                        widget.coverImage,
+                                                  ),
+                                            ),
+                                          )
+                                          .then((_) {
+                                            _loadLocalProgress();
+                                          });
+                                    }
                                   },
                                   child: Padding(
                                     padding: const EdgeInsets.symmetric(
@@ -881,22 +911,41 @@ class _MangaReadPaneState extends State<MangaReadPane> {
 
     final curIdx = chronologicalChapters.indexWhere((c) => c.url == chap.url);
 
-    Navigator.of(context)
-        .push(
-          MaterialPageRoute(
-            builder: (context) => MangaReaderPage(
-              chapters: chronologicalChapters,
-              currentIndex: curIdx >= 0 ? curIdx : 0,
-              source: _selectedExtension!,
-              mangaTitle: widget.mangaTitle,
-              mediaId: widget.mediaId,
-              coverImage: widget.coverImage,
+    if (_selectedExtension?.isNovel == true) {
+      Navigator.of(context)
+          .push(
+            MaterialPageRoute(
+              builder: (context) => NovelReaderPage(
+                chapters: chronologicalChapters,
+                currentIndex: curIdx >= 0 ? curIdx : 0,
+                source: _selectedExtension!,
+                novelTitle: widget.mangaTitle,
+                mediaId: widget.mediaId,
+                coverImage: widget.coverImage,
+              ),
             ),
-          ),
-        )
-        .then((_) {
-          _loadLocalProgress();
-        });
+          )
+          .then((_) {
+            _loadLocalProgress();
+          });
+    } else {
+      Navigator.of(context)
+          .push(
+            MaterialPageRoute(
+              builder: (context) => MangaReaderPage(
+                chapters: chronologicalChapters,
+                currentIndex: curIdx >= 0 ? curIdx : 0,
+                source: _selectedExtension!,
+                mangaTitle: widget.mangaTitle,
+                mediaId: widget.mediaId,
+                coverImage: widget.coverImage,
+              ),
+            ),
+          )
+          .then((_) {
+            _loadLocalProgress();
+          });
+    }
   }
 
   Future<void> _showWrongTitleBottomSheet() async {
