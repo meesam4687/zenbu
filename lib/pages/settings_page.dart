@@ -481,6 +481,13 @@ class _AppFooterState extends State<_AppFooter> {
     }
   }
 
+  Future<void> _openDiscord() async {
+    final uri = Uri.parse('https://discord.gg/tJRA5NPQXY');
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      Fluttertoast.showToast(msg: 'Could not open Discord');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
@@ -513,7 +520,22 @@ class _AppFooterState extends State<_AppFooter> {
 
           const SizedBox(height: 16),
 
-          _GitHubButton(onTap: _openGitHub, color: cs.onSurfaceVariant),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _SocialButton(
+                iconPath: 'assets/github.svg',
+                onTap: _openGitHub,
+                color: cs.onSurfaceVariant,
+              ),
+              const SizedBox(width: 12),
+              _SocialButton(
+                iconPath: 'assets/discord.svg',
+                onTap: _openDiscord,
+                color: cs.onSurfaceVariant,
+              ),
+            ],
+          ),
 
           const SizedBox(height: 8),
         ],
@@ -522,11 +544,16 @@ class _AppFooterState extends State<_AppFooter> {
   }
 }
 
-class _GitHubButton extends StatelessWidget {
+class _SocialButton extends StatelessWidget {
+  final String iconPath;
   final VoidCallback onTap;
   final Color color;
 
-  const _GitHubButton({required this.onTap, required this.color});
+  const _SocialButton({
+    required this.iconPath,
+    required this.onTap,
+    required this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -536,7 +563,7 @@ class _GitHubButton extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(6.0),
         child: SvgPicture.asset(
-          'assets/github.svg',
+          iconPath,
           width: 26,
           height: 26,
           colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
