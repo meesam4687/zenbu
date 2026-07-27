@@ -66,7 +66,27 @@ class _MediaDetailsPageState extends State<MediaDetailsPage>
 
         final currentProgress = media["mediaListEntry"]?["progress"] ?? "0";
 
-        final showReadTab = !widget.isAnime;
+        final String rawFormat = (media["format"]?.toString() ?? "")
+            .toUpperCase();
+
+        const animeFormats = {
+          'TV',
+          'TV_SHORT',
+          'MOVIE',
+          'SPECIAL',
+          'OVA',
+          'ONA',
+          'MUSIC',
+        };
+
+        const mangaFormats = {'MANGA', 'ONE_SHOT'};
+
+        const novelFormats = {'NOVEL'};
+
+        final bool showWatchTab = animeFormats.contains(rawFormat);
+        final bool showReadTab =
+            mangaFormats.contains(rawFormat) ||
+            novelFormats.contains(rawFormat);
 
         final double width = MediaQuery.of(context).size.width;
         final bool isTablet = width >= 600;
@@ -82,27 +102,26 @@ class _MediaDetailsPageState extends State<MediaDetailsPage>
           ),
         );
 
-        final Widget watchOrReadPane = _KeepAliveWrapper(
-          child: SizedBox(
-            child: widget.isAnime
-                ? AnimeWatchPane(
-                    mediaId: widget.id as int,
-                    malId: media["idMal"] as int?,
-                    animeTitle: resolvedTitle,
-                    coverImage: media["coverImage"]["extraLarge"],
-                    streamingEpisodes: media["streamingEpisodes"] as List?,
-                    anilistProgress:
-                        int.tryParse(currentProgress.toString()) ?? 0,
-                    mediaState: media["mediaListEntry"]?["status"] ?? 'NONE',
-                  )
-                : MangaReadPane(
-                    mediaId: widget.id as int,
-                    mangaTitle: resolvedTitle,
-                    coverImage: media["coverImage"]["extraLarge"],
-                    anilistProgress:
-                        int.tryParse(currentProgress.toString()) ?? 0,
-                    mediaState: media["mediaListEntry"]?["status"] ?? 'NONE',
-                  ),
+        final Widget watchPane = _KeepAliveWrapper(
+          child: AnimeWatchPane(
+            mediaId: widget.id as int,
+            malId: media["idMal"] as int?,
+            animeTitle: resolvedTitle,
+            coverImage: media["coverImage"]["extraLarge"],
+            streamingEpisodes: media["streamingEpisodes"] as List?,
+            anilistProgress: int.tryParse(currentProgress.toString()) ?? 0,
+            mediaState: media["mediaListEntry"]?["status"] ?? 'NONE',
+          ),
+        );
+
+        final Widget readPane = _KeepAliveWrapper(
+          child: MangaReadPane(
+            mediaId: widget.id as int,
+            mangaTitle: resolvedTitle,
+            coverImage: media["coverImage"]["extraLarge"],
+            anilistProgress: int.tryParse(currentProgress.toString()) ?? 0,
+            mediaState: media["mediaListEntry"]?["status"] ?? 'NONE',
+            format: rawFormat,
           ),
         );
 
@@ -110,25 +129,19 @@ class _MediaDetailsPageState extends State<MediaDetailsPage>
           child: ReviewsPane(mediaId: widget.id as int),
         );
 
-        final List<Widget> tabsList = widget.isAnime
-            ? const [
-                Tab(text: "About"),
-                Tab(text: "Watch"),
-                Tab(text: "Reviews"),
-              ]
-            : (showReadTab
-                  ? const [
-                      Tab(text: "About"),
-                      Tab(text: "Read"),
-                      Tab(text: "Reviews"),
-                    ]
-                  : const [Tab(text: "About"), Tab(text: "Reviews")]);
+        final List<Widget> tabsList = [
+          const Tab(text: "About"),
+          if (showWatchTab) const Tab(text: "Watch"),
+          if (showReadTab) const Tab(text: "Read"),
+          const Tab(text: "Reviews"),
+        ];
 
-        final List<Widget> tabViewsList = widget.isAnime
-            ? [aboutPane, watchOrReadPane, reviewsPane]
-            : (showReadTab
-                  ? [aboutPane, watchOrReadPane, reviewsPane]
-                  : [aboutPane, reviewsPane]);
+        final List<Widget> tabViewsList = [
+          aboutPane,
+          if (showWatchTab) watchPane,
+          if (showReadTab) readPane,
+          reviewsPane,
+        ];
 
         if (isTablet) {
           return DefaultTabController(

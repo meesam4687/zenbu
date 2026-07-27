@@ -20,6 +20,7 @@ class MangaReadPane extends StatefulWidget {
   final String? coverImage;
   final int anilistProgress;
   final String mediaState;
+  final String? format;
 
   const MangaReadPane({
     super.key,
@@ -28,6 +29,7 @@ class MangaReadPane extends StatefulWidget {
     this.coverImage,
     required this.anilistProgress,
     required this.mediaState,
+    this.format,
   });
 
   @override
@@ -119,9 +121,18 @@ class _MangaReadPaneState extends State<MangaReadPane> {
 
     try {
       final list = await RepoService.getInstalledExtensions();
-      final mangaExtensions = list
-          .where((ext) => ext.isManga || ext.isNovel)
-          .toList();
+      final String fmt = (widget.format ?? '').toUpperCase();
+
+      List<ExtSource> mangaExtensions;
+      if (fmt == 'NOVEL') {
+        mangaExtensions = list.where((ext) => ext.isNovel).toList();
+      } else if (fmt == 'MANGA' || fmt == 'ONE_SHOT') {
+        mangaExtensions = list.where((ext) => ext.isManga).toList();
+      } else {
+        mangaExtensions = list
+            .where((ext) => ext.isManga || ext.isNovel)
+            .toList();
+      }
       if (!mounted) return;
       setState(() {
         _installedExtensions = [...mangaExtensions, localSource];
