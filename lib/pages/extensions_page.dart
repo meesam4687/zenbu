@@ -59,7 +59,7 @@ class _ExtensionsPageState extends State<ExtensionsPage>
     setState(() => _isLoadingExtensions = true);
     try {
       final all = await RepoService.fetchAllExtensions();
-      final installed = await RepoService.cleanOrphanedExtensions(all);
+      final installed = await RepoService.getInstalledExtensions();
       setState(() {
         _installedExtensions = installed;
         _allExtensions = all;
@@ -230,7 +230,7 @@ class _ExtensionsPageState extends State<ExtensionsPage>
       );
     }
 
-    if (_allExtensions.isEmpty) {
+    if (_allExtensions.isEmpty && _installedExtensions.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -270,7 +270,7 @@ class _ExtensionsPageState extends State<ExtensionsPage>
       );
     }
 
-    final filteredExtensions = _allExtensions.where((ext) {
+    bool filterMatch(ExtSource ext) {
       final isAnime = ext.isAnime;
       final isManga = ext.isManga;
       final isNovel = ext.isNovel;
@@ -284,19 +284,13 @@ class _ExtensionsPageState extends State<ExtensionsPage>
           (ext.isNovel ? 'novel' : (ext.isManga ? 'manga' : 'anime')).contains(
             query,
           );
-    }).toList();
-
-    final installed = <ExtSource>[];
-    final available = <ExtSource>[];
-
-    for (final ext in filteredExtensions) {
-      final isInst = _installedExtensions.any((e) => e.id == ext.id);
-      if (isInst) {
-        installed.add(ext);
-      } else {
-        available.add(ext);
-      }
     }
+
+    final installed = _installedExtensions.where(filterMatch).toList();
+    final available = _allExtensions
+        .where((ext) => !_installedExtensions.any((e) => e.id == ext.id))
+        .where(filterMatch)
+        .toList();
 
     final List<_ExtListItem> items = [];
     if (installed.isNotEmpty) {
@@ -399,21 +393,10 @@ class _ExtensionsPageState extends State<ExtensionsPage>
                       const SizedBox(height: 16),
                       Text(
                         _searchQuery.isNotEmpty
-                            ? 'No results for "$_searchQuery"'
-                            : 'No $_selectedType extensions',
+                            ? 'No extensions found.'
+                            : 'No ${_selectedType.toUpperCase()} extensions available.',
                         style: const TextStyle(
-                          fontSize: 18,
-                          color: Colors.grey,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        _searchQuery.isNotEmpty
-                            ? 'Try checking your spelling or search terms.'
-                            : 'Add a repository with $_selectedType sources to get started.',
-                        style: const TextStyle(
-                          fontSize: 14,
+                          fontSize: 16,
                           color: Colors.grey,
                         ),
                       ),
@@ -434,16 +417,15 @@ class _ExtensionsPageState extends State<ExtensionsPage>
                       final isInst = _installedExtensions.any(
                         (e) => e.id == ext.id,
                       );
-                      final localExt = isInst
-                          ? _installedExtensions.firstWhere(
-                              (e) => e.id == ext.id,
-                            )
-                          : null;
+                      final repoExt = _allExtensions
+                          .where((e) => e.id == ext.id)
+                          .firstOrNull;
                       final needsUpdate =
                           isInst &&
-                          localExt != null &&
-                          localExt.version != ext.version;
-                      return _buildExtensionCard(ext, isInst, needsUpdate);
+                          repoExt != null &&
+                          repoExt.version != ext.version;
+                      final displayExt = needsUpdate ? repoExt : ext;
+                      return _buildExtensionCard(displayExt, isInst, needsUpdate);
                     },
                   ),
                 ),
