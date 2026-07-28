@@ -223,9 +223,9 @@ class LocalSourceService {
     return rawChapters.reversed.toList();
   }
 
-  static Future<List<Map<String, dynamic>>> searchLocalFolders({
-    required String query,
-    required bool isManga,
+  static Future<List<Map<String, dynamic>>> scanNovel({
+    required String novelTitle,
+    required String? customLink,
   }) async {
     final prefs = await SharedPreferences.getInstance();
     final directoryPath = prefs.getString(_localDirectoryKey);
@@ -233,7 +233,125 @@ class LocalSourceService {
       throw Exception('Local directory is not configured.');
     }
 
-    final subfolderName = isManga ? 'manga' : 'anime';
+    final novelRootPath =
+        '$directoryPath${Platform.isWindows ? '\\' : '/'}novel';
+    final novelRootDir = Directory(novelRootPath);
+    if (!await novelRootDir.exists()) {
+      await novelRootDir.create(recursive: true);
+    }
+
+    String? matchedFolderPath;
+    if (customLink != null && customLink.isNotEmpty) {
+      matchedFolderPath = customLink;
+    } else {
+      final List<FileSystemEntity> entities = novelRootDir.listSync();
+      final titleLower = novelTitle.toLowerCase();
+      final sanitizedTitleLower = sanitizeFilename(novelTitle).toLowerCase();
+      for (final entity in entities) {
+        if (entity is Directory) {
+          final folderName = entity.path
+              .split(Platform.isWindows ? '\\' : '/')
+              .last
+              .toLowerCase();
+          if (folderName == titleLower ||
+              folderName == sanitizedTitleLower ||
+              titleLower.contains(folderName) ||
+              sanitizedTitleLower.contains(folderName)) {
+            matchedFolderPath = entity.path;
+            break;
+          }
+        }
+      }
+    }
+
+    if (matchedFolderPath == null || matchedFolderPath.isEmpty) {
+      throw Exception('No matching novel folder found.');
+    }
+
+    final novelDir = Directory(matchedFolderPath);
+    if (!await novelDir.exists()) {
+      throw Exception('Novel folder does not exist.');
+    }
+
+    final List<FileSystemEntity> chapEntities = novelDir.listSync();
+
+    final List<Map<String, dynamic>> rawChapters = [];
+
+    final subfolders = chapEntities.whereType<Directory>().toList();
+    final textFiles = chapEntities.whereType<File>().where((file) {
+      final nameLower = file.path.toLowerCase();
+      return nameLower.endsWith('.txt') ||
+          nameLower.endsWith('.html') ||
+          nameLower.endsWith('.xhtml') ||
+          nameLower.endsWith('.md') ||
+          nameLower.endsWith('.epub') ||
+          nameLower.endsWith('.cbz') ||
+          nameLower.endsWith('.zip');
+    }).toList();
+
+    subfolders.sort((a, b) => a.path.compareTo(b.path));
+    textFiles.sort((a, b) => a.path.compareTo(b.path));
+
+    for (final dir in subfolders) {
+      final folderName = dir.path.split(Platform.isWindows ? '\\' : '/').last;
+      rawChapters.add({'name': folderName, 'url': dir.path});
+    }
+
+    for (final file in textFiles) {
+      final fileName = file.path.split(Platform.isWindows ? '\\' : '/').last;
+      rawChapters.add({'name': fileName, 'url': file.path});
+    }
+
+    return rawChapters.reversed.toList();
+  }
+
+  static Future<String> readLocalNovelContent(String path) async {
+    final file = File(path);
+    if (await file.exists()) {
+      final pathLower = path.toLowerCase();
+      if (pathLower.endsWith('.txt') ||
+          pathLower.endsWith('.md') ||
+          pathLower.endsWith('.html') ||
+          pathLower.endsWith('.xhtml')) {
+        return await file.readAsString();
+      }
+    }
+
+    final dir = Directory(path);
+    if (await dir.exists()) {
+      final files = dir.listSync().whereType<File>().toList();
+      files.sort((a, b) => a.path.compareTo(b.path));
+      final buffer = StringBuffer();
+      for (final f in files) {
+        final fLower = f.path.toLowerCase();
+        if (fLower.endsWith('.txt') ||
+            fLower.endsWith('.md') ||
+            fLower.endsWith('.html') ||
+            fLower.endsWith('.xhtml')) {
+          final text = await f.readAsString();
+          buffer.writeln(text);
+        }
+      }
+      return buffer.toString();
+    }
+
+    return '';
+  }
+
+  static Future<List<Map<String, dynamic>>> searchLocalFolders({
+    required String query,
+    required bool isManga,
+    int? itemType,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    final directoryPath = prefs.getString(_localDirectoryKey);
+    if (directoryPath == null || directoryPath.isEmpty) {
+      throw Exception('Local directory is not configured.');
+    }
+
+    final String subfolderName = (itemType == 2)
+        ? 'novel'
+        : (isManga || itemType == 0 ? 'manga' : 'anime');
     final subfolderPath =
         '$directoryPath${Platform.isWindows ? '\\' : '/'}$subfolderName';
     final subfolderDir = Directory(subfolderPath);

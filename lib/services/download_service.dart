@@ -9,6 +9,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:convert/convert.dart';
 import 'package:encrypt/encrypt.dart' as encrypt;
 import 'package:zenbu/services/mangayomi/models/extensions_models.dart';
+import 'package:zenbu/services/mangayomi/eval/interface.dart';
 import 'package:zenbu/services/progress_service.dart';
 
 class DownloadItem {
@@ -42,35 +43,46 @@ class DownloadedMedia {
   final int? malId;
   final String mediaTitle;
   final String coverImage;
+  final int itemType;
   final bool isManga;
   final List<DownloadItem> items;
+
+  bool get isNovel => itemType == 2;
+  bool get isAnime => itemType == 1;
 
   DownloadedMedia({
     required this.mediaId,
     this.malId,
     required this.mediaTitle,
     required this.coverImage,
-    required this.isManga,
+    int? itemType,
+    bool? isManga,
     required this.items,
-  });
+  }) : itemType = itemType ?? (isManga == true ? 0 : 1),
+       isManga = isManga ?? ((itemType ?? (isManga == true ? 0 : 1)) == 0);
 
   Map<String, dynamic> toJson() => {
     'mediaId': mediaId,
     'malId': malId,
     'mediaTitle': mediaTitle,
     'coverImage': coverImage,
+    'itemType': itemType,
     'isManga': isManga,
     'items': items.map((e) => e.toJson()).toList(),
   };
 
   factory DownloadedMedia.fromJson(Map<String, dynamic> json) {
     final rawItems = json['items'] as List? ?? [];
+    final parsedItemType = json['itemType'] is int
+        ? json['itemType'] as int
+        : (json['isManga'] == true ? 0 : (json['isManga'] == false ? 1 : 0));
     return DownloadedMedia(
       mediaId: json['mediaId'] ?? 0,
       malId: json['malId'] as int?,
       mediaTitle: json['mediaTitle'] ?? '',
       coverImage: json['coverImage'] ?? '',
-      isManga: json['isManga'] ?? false,
+      itemType: parsedItemType,
+      isManga: parsedItemType == 0,
       items: rawItems
           .map((e) => DownloadItem.fromJson(Map<String, dynamic>.from(e)))
           .toList(),
@@ -248,6 +260,7 @@ class DownloadService extends ChangeNotifier {
 
   List<DownloadedMedia> _animeRegistry = [];
   List<DownloadedMedia> _mangaRegistry = [];
+  List<DownloadedMedia> _novelRegistry = [];
 
   Map<String, double> get activeDownloads => _activeDownloads;
   Map<String, bool> get activeTypes => _activeTypes;
@@ -255,6 +268,7 @@ class DownloadService extends ChangeNotifier {
   Map<String, String> get activeMediaTitles => _activeMediaTitles;
   List<DownloadedMedia> get animeRegistry => _animeRegistry;
   List<DownloadedMedia> get mangaRegistry => _mangaRegistry;
+  List<DownloadedMedia> get novelRegistry => _novelRegistry;
 
   double? getDownloadProgress(String url) => _activeDownloads[url];
   bool isDownloading(String url) => _activeDownloads.containsKey(url);
@@ -465,7 +479,8 @@ class DownloadService extends ChangeNotifier {
     notifyListeners();
   }
 
-  void cancelDownload(bool isManga, String url) {
+  void cancelDownload(dynamic typeOrIsManga, String url) {
+    final bool isManga = typeOrIsManga == true || typeOrIsManga == 0;
     _manuallyCancelled.add(url);
 
     _activeDownloads.remove(url);
@@ -504,8 +519,16 @@ class DownloadService extends ChangeNotifier {
     notifyListeners();
   }
 
-  bool isDownloaded(bool isManga, String url) {
-    final registry = isManga ? _mangaRegistry : _animeRegistry;
+  bool isDownloaded(dynamic typeOrIsManga, String url) {
+    List<DownloadedMedia> registry;
+    if (typeOrIsManga is int) {
+      registry = typeOrIsManga == 2
+          ? _novelRegistry
+          : (typeOrIsManga == 0 ? _mangaRegistry : _animeRegistry);
+    } else {
+      final bool isManga = typeOrIsManga == true;
+      registry = isManga ? _mangaRegistry : _animeRegistry;
+    }
     for (final media in registry) {
       if (media.items.any((item) => item.url == url)) {
         return true;
@@ -541,6 +564,16 @@ class DownloadService extends ChangeNotifier {
       } catch (_) {}
     }
 
+    final novelRaw = prefs.getString('download_novel_registry_v1');
+    if (novelRaw != null) {
+      try {
+        final List parsed = json.decode(novelRaw);
+        _novelRegistry = parsed
+            .map((e) => DownloadedMedia.fromJson(Map<String, dynamic>.from(e)))
+            .toList();
+      } catch (_) {}
+    }
+
     final stateRaw = prefs.getString('active_downloads_state_v1');
     if (stateRaw != null) {
       try {
@@ -563,14 +596,12 @@ class DownloadService extends ChangeNotifier {
           if (data['subtitles'] != null) {
             _activeSubtitles[url] = data['subtitles'];
           }
-          if (data['pages'] != null) _activePages[url] = data['pages'];
-
-          _pausedDownloads.add(url);
-          _downloadSpeeds[url] = 'Paused';
+          if (data['pages'] != null) {
+            _activePages[url] = data['pages'];
+          }
         });
       } catch (_) {}
     }
-    notifyListeners();
   }
 
   Future<void> _saveRegistries() async {
@@ -582,6 +613,10 @@ class DownloadService extends ChangeNotifier {
     await prefs.setString(
       'download_manga_registry_v2',
       json.encode(_mangaRegistry.map((e) => e.toJson()).toList()),
+    );
+    await prefs.setString(
+      'download_novel_registry_v1',
+      json.encode(_novelRegistry.map((e) => e.toJson()).toList()),
     );
     notifyListeners();
   }
@@ -1601,8 +1636,16 @@ class DownloadService extends ChangeNotifier {
     }
   }
 
-  Future<void> deleteDownloadedItem(bool isManga, String url) async {
-    final registry = isManga ? _mangaRegistry : _animeRegistry;
+  Future<void> deleteDownloadedItem(dynamic typeOrIsManga, String url) async {
+    List<DownloadedMedia> registry;
+    final bool isManga = typeOrIsManga == true || typeOrIsManga == 0;
+    if (typeOrIsManga is int) {
+      registry = typeOrIsManga == 2
+          ? _novelRegistry
+          : (typeOrIsManga == 0 ? _mangaRegistry : _animeRegistry);
+    } else {
+      registry = isManga ? _mangaRegistry : _animeRegistry;
+    }
     DownloadItem? targetItem;
     DownloadedMedia? targetMedia;
 
@@ -1666,6 +1709,84 @@ class DownloadService extends ChangeNotifier {
         registry.removeWhere((e) => e.mediaId == targetMedia!.mediaId);
       }
       await _saveRegistries();
+    }
+  }
+
+  Future<void> downloadNovelChapter({
+    required int mediaId,
+    int? malId,
+    required String mediaTitle,
+    required String coverImage,
+    required ExtEpisode chapter,
+    required ExtensionService engine,
+  }) async {
+    final keyUrl = chapter.url;
+    if (_activeDownloads.containsKey(keyUrl)) return;
+
+    setDownloadingInitialState(keyUrl, false, chapter.name, mediaTitle);
+
+    try {
+      _updateNotificationProgress(keyUrl, '$mediaTitle - ${chapter.name}', 0.1);
+
+      String content = await engine.getHtmlContent(chapter.name, chapter.url);
+      if (content.isEmpty) {
+        content = await engine.cleanHtmlContent(content);
+      }
+
+      final downloadsDir = await getDownloadsDirectory();
+      final novelDir = Directory(
+        '$downloadsDir${Platform.isWindows ? '\\' : '/'}novels${Platform.isWindows ? '\\' : '/'}$mediaId',
+      );
+      if (!await novelDir.exists()) {
+        await novelDir.create(recursive: true);
+      }
+
+      final safeFileName = chapter.name.replaceAll(
+        RegExp(r'[\\/:*?"<>|]'),
+        '_',
+      );
+      final localFile = File(
+        '${novelDir.path}${Platform.isWindows ? '\\' : '/'}${safeFileName}_${chapter.url.hashCode}.html',
+      );
+      await localFile.writeAsString(content);
+
+      final item = DownloadItem(
+        url: chapter.url,
+        name: chapter.name,
+        localPath: localFile.path,
+      );
+
+      var media = _novelRegistry.firstWhere(
+        (m) => m.mediaId == mediaId,
+        orElse: () {
+          final newMedia = DownloadedMedia(
+            mediaId: mediaId,
+            malId: malId,
+            mediaTitle: mediaTitle,
+            coverImage: coverImage,
+            itemType: 2,
+            items: [],
+          );
+          _novelRegistry.add(newMedia);
+          return newMedia;
+        },
+      );
+
+      media.items.removeWhere((i) => i.url == chapter.url);
+      media.items.add(item);
+
+      await _saveRegistries();
+
+      _activeDownloads[keyUrl] = 1.0;
+      _updateNotificationProgress(keyUrl, '$mediaTitle - ${chapter.name}', 1.0);
+    } catch (e) {
+      debugPrint('[NOVEL DOWNLOAD ERROR] $e');
+    } finally {
+      _activeDownloads.remove(keyUrl);
+      _activeNames.remove(keyUrl);
+      _activeMediaTitles.remove(keyUrl);
+      _dismissNotification(keyUrl);
+      notifyListeners();
     }
   }
 }

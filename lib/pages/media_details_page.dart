@@ -83,10 +83,14 @@ class _MediaDetailsPageState extends State<MediaDetailsPage>
 
         const novelFormats = {'NOVEL'};
 
-        final bool showWatchTab = animeFormats.contains(rawFormat);
-        final bool showReadTab =
-            mangaFormats.contains(rawFormat) ||
-            novelFormats.contains(rawFormat);
+        final bool showWatchTab = rawFormat.isNotEmpty
+            ? animeFormats.contains(rawFormat)
+            : widget.isAnime;
+
+        final bool showReadTab = rawFormat.isNotEmpty
+            ? (mangaFormats.contains(rawFormat) ||
+                  novelFormats.contains(rawFormat))
+            : !widget.isAnime;
 
         final double width = MediaQuery.of(context).size.width;
         final bool isTablet = width >= 600;

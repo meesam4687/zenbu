@@ -37,8 +37,7 @@ class ExtSource {
   final String sourceCodeUrl;
   String? sourceCode;
   final String iconUrl;
-  final int itemType; // 0: manga, 1: anime, 2: novel
-  final bool isManga;
+  final int itemType;
   final bool isNsfw;
   final String apiUrl;
   final String dateFormat;
@@ -54,32 +53,51 @@ class ExtSource {
     required this.sourceCodeUrl,
     this.sourceCode,
     this.iconUrl = '',
-    this.itemType = 0,
+    int? itemType,
     bool? isManga,
     this.isNsfw = false,
     this.apiUrl = '',
     this.dateFormat = '',
     this.dateFormatLocale = '',
     this.sourceCodeLanguage = 1,
-  }) : isManga = isManga ?? (itemType == 0);
+  }) : itemType = itemType ?? (isManga == false ? 1 : 0);
 
-  bool get isNovel => itemType == 2;
+  bool get isNovel => itemType == 2 || sourceCodeLanguage == 3;
   bool get isAnime => itemType == 1;
+  bool get isManga => itemType == 0;
 
   factory ExtSource.fromJson(Map<String, dynamic> json) {
-    final parsedItemType = json['itemType'] is int
-        ? json['itemType'] as int
-        : (json['itemType'] != null
-              ? int.tryParse(json['itemType'].toString()) ??
-                    (json['isManga'] == false ? 1 : 0)
-              : (json['isManga'] == false ? 1 : 0));
-    final parsedIsManga = json['isManga'] is bool
-        ? json['isManga'] as bool
-        : (parsedItemType == 0);
+    final int sourceLang = json['sourceCodeLanguage'] is int
+        ? json['sourceCodeLanguage'] as int
+        : (json['sourceCodeLanguage'] != null
+              ? int.tryParse(json['sourceCodeLanguage'].toString()) ?? 1
+              : 1);
+
+    int parsedItemType;
+    if (json['itemType'] is int) {
+      parsedItemType = json['itemType'] as int;
+    } else if (json['itemType'] != null &&
+        int.tryParse(json['itemType'].toString()) != null) {
+      parsedItemType = int.parse(json['itemType'].toString());
+    } else if (sourceLang == 3) {
+      parsedItemType = 2;
+    } else if (json['isNovel'] == true) {
+      parsedItemType = 2;
+    } else if (json['isAnime'] == true) {
+      parsedItemType = 1;
+    } else if (json['isManga'] == true) {
+      parsedItemType = 0;
+    } else if (json['isManga'] == false) {
+      parsedItemType = 1;
+    } else {
+      parsedItemType = 0;
+    }
 
     return ExtSource(
       name: json['name'] ?? '',
-      id: json['id'] is int ? json['id'] : int.parse(json['id'].toString()),
+      id: json['id'] is int
+          ? json['id'] as int
+          : int.parse(json['id'].toString()),
       baseUrl: json['baseUrl'] ?? '',
       lang: json['lang'] ?? '',
       version: json['version'] ?? '',
@@ -87,16 +105,12 @@ class ExtSource {
       sourceCode: json['sourceCode'],
       iconUrl: json['iconUrl'] ?? json['icon'] ?? '',
       itemType: parsedItemType,
-      isManga: parsedIsManga,
+      isManga: parsedItemType == 0,
       isNsfw: json['isNsfw'] ?? false,
       apiUrl: json['apiUrl'] ?? '',
       dateFormat: json['dateFormat'] ?? '',
       dateFormatLocale: json['dateFormatLocale'] ?? '',
-      sourceCodeLanguage: json['sourceCodeLanguage'] is int
-          ? json['sourceCodeLanguage']
-          : json['sourceCodeLanguage'] == null
-          ? 1
-          : int.tryParse(json['sourceCodeLanguage'].toString()) ?? 1,
+      sourceCodeLanguage: sourceLang,
     );
   }
 

@@ -8,6 +8,13 @@ import 'package:zenbu/services/mangayomi/eval/dart/service.dart';
 import 'package:zenbu/services/mangayomi/eval/javascript/service.dart';
 import 'package:zenbu/services/mangayomi/eval/lnreader/service.dart';
 
+import 'package:zenbu/services/local_source_service.dart';
+import 'package:zenbu/services/mangayomi/eval/model/filter.dart';
+import 'package:zenbu/services/mangayomi/eval/model/m_manga.dart';
+import 'package:zenbu/services/mangayomi/eval/model/m_pages.dart';
+import 'package:zenbu/services/mangayomi/eval/model/m_video.dart';
+import 'package:zenbu/services/mangayomi/eval/model/source_preference.dart';
+
 class RepoService {
   static const String _reposKey = 'ext_repos';
   static const String _installedKey = 'ext_installed';
@@ -175,6 +182,10 @@ class RepoService {
   }
 
   static Future<ExtensionService> loadExtensionEngine(ExtSource source) async {
+    if (source.id == -1) {
+      return LocalExtensionService();
+    }
+
     final prefs = await SharedPreferences.getInstance();
     final sourceCode = prefs.getString('$_sourceCodePrefix${source.id}');
     if (sourceCode == null || sourceCode.isEmpty) {
@@ -243,4 +254,60 @@ class RepoService {
       service.dispose();
     }
   }
+}
+
+class LocalExtensionService implements ExtensionService {
+  @override
+  late Source source;
+
+  @override
+  int? get lastStatusCode => 200;
+
+  @override
+  String? get lastRequestUrl => null;
+
+  @override
+  String get sourceBaseUrl => '';
+
+  @override
+  bool get supportsLatest => false;
+
+  @override
+  Map<String, String> getHeaders() => {};
+
+  @override
+  Future<MPages> getPopular(int page) async => MPages(list: []);
+
+  @override
+  Future<MPages> getLatestUpdates(int page) async => MPages(list: []);
+
+  @override
+  Future<MPages> search(String query, int page, List<dynamic> filters) async =>
+      MPages(list: []);
+
+  @override
+  Future<MManga> getDetail(String url) async => MManga();
+
+  @override
+  Future<List<PageUrl>> getPageList(String url) async => [];
+
+  @override
+  Future<List<Video>> getVideoList(String url) async => [];
+
+  @override
+  Future<String> getHtmlContent(String name, String url) async {
+    return await LocalSourceService.readLocalNovelContent(url);
+  }
+
+  @override
+  Future<String> cleanHtmlContent(String html) async => html;
+
+  @override
+  FilterList getFilterList() => FilterList([]);
+
+  @override
+  List<SourcePreference> getSourcePreferences() => [];
+
+  @override
+  void dispose() {}
 }

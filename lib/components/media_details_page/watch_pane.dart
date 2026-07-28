@@ -11,6 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
 import 'package:zenbu/services/download_service.dart';
 import 'package:zenbu/services/local_source_service.dart';
+import 'package:zenbu/components/global/download_action_button.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class AnimeWatchPane extends StatefulWidget {
@@ -114,7 +115,7 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
 
     try {
       final list = await RepoService.getInstalledExtensions();
-      final animeExtensions = list.where((ext) => !ext.isManga).toList();
+      final animeExtensions = list.where((ext) => ext.isAnime).toList();
       if (!mounted) return;
       setState(() {
         _installedExtensions = [...animeExtensions, localSource];
@@ -1071,100 +1072,51 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
       animation: downloadService,
       builder: (context, _) {
         final isDownloading = downloadService.isDownloading(ep.url);
-        final isDownloaded = downloadService.isDownloaded(false, ep.url);
-        final progress = downloadService.getDownloadProgress(ep.url);
+        final isDownloaded = downloadService.isDownloaded(1, ep.url);
+        final progress = downloadService.getDownloadProgress(ep.url) ?? 0.0;
+        final isPaused = downloadService.isPaused(ep.url);
 
-        if (isDownloading) {
-          final isPaused = downloadService.isPaused(ep.url);
-          return PopupMenuButton<String>(
-            tooltip: 'Download Options',
-            onSelected: (value) {
-              if (value == 'pause') {
-                if (isPaused) {
-                  downloadService.resumeDownload(ep.url);
-                } else {
-                  downloadService.pauseDownload(ep.url);
-                }
-              } else if (value == 'cancel') {
-                downloadService.cancelDownload(false, ep.url);
-              }
-            },
-            itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-              PopupMenuItem<String>(
-                value: 'pause',
-                child: Row(
-                  children: [
-                    Icon(
-                      isPaused ? Icons.play_arrow_rounded : Icons.pause_rounded,
-                      size: 20,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(isPaused ? 'Resume' : 'Pause'),
-                  ],
+        return DownloadActionButton(
+          isDownloading: isDownloading,
+          isDownloaded: isDownloaded,
+          isPaused: isPaused,
+          progress: progress,
+          onDownload: () => _downloadEpisode(ep),
+          onDelete: () async {
+            final confirm = await showDialog<bool>(
+              context: context,
+              builder: (context) => AlertDialog(
+                title: const Text('Delete Download'),
+                content: Text(
+                  'Are you sure you want to delete the offline file for ${ep.name}?',
                 ),
-              ),
-              PopupMenuItem<String>(
-                value: 'cancel',
-                child: Row(
-                  children: [
-                    Icon(Icons.close_rounded, size: 20),
-                    const SizedBox(width: 8),
-                    Text('Cancel'),
-                  ],
-                ),
-              ),
-            ],
-            child: SizedBox(
-              width: 48,
-              height: 48,
-              child: Center(
-                child: PieProgressIndicator(
-                  progress: progress ?? 0.0,
-                  isPaused: isPaused,
-                  size: 20,
-                ),
-              ),
-            ),
-          );
-        }
-
-        if (isDownloaded) {
-          return IconButton(
-            icon: Icon(
-              Icons.check_circle,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-            onPressed: () async {
-              final confirm = await showDialog<bool>(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: const Text('Delete Download'),
-                  content: Text(
-                    'Are you sure you want to delete the offline file for ${ep.name}?',
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(false),
+                    child: const Text('Cancel'),
                   ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.of(context).pop(false),
-                      child: const Text('Cancel'),
-                    ),
-                    FilledButton(
-                      onPressed: () => Navigator.of(context).pop(true),
-                      child: const Text('Delete'),
-                    ),
-                  ],
-                ),
-              );
+                  FilledButton(
+                    onPressed: () => Navigator.of(context).pop(true),
+                    child: const Text('Delete'),
+                  ),
+                ],
+              ),
+            );
 
-              if (confirm == true) {
-                await downloadService.deleteDownloadedItem(false, ep.url);
-              }
-            },
-          );
-        }
-
-        return IconButton(
-          icon: const Icon(Icons.download_for_offline_outlined),
-          onPressed: () => _downloadEpisode(ep),
+            if (confirm == true) {
+              await downloadService.deleteDownloadedItem(1, ep.url);
+            }
+          },
+          onPauseResume: () {
+            if (isPaused) {
+              downloadService.resumeDownload(ep.url);
+            } else {
+              downloadService.pauseDownload(ep.url);
+            }
+          },
+          onCancel: () {
+            downloadService.cancelDownload(1, ep.url);
+          },
         );
       },
     );
@@ -1673,74 +1625,5 @@ class _StreamSelectionDialogState extends State<_StreamSelectionDialog> {
         );
       },
     );
-  }
-}
-
-class PieProgressIndicator extends StatelessWidget {
-  final double progress;
-  final double size;
-  final bool isPaused;
-
-  const PieProgressIndicator({
-    super.key,
-    required this.progress,
-    required this.isPaused,
-    this.size = 20,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return Stack(
-      alignment: Alignment.center,
-      children: [
-        CustomPaint(
-          size: Size(size, size),
-          painter: PieProgressPainter(
-            progress: progress,
-            color: isPaused ? colorScheme.outline : colorScheme.primary,
-            backgroundColor: colorScheme.onSurface.withValues(alpha: 0.12),
-          ),
-        ),
-        if (isPaused)
-          Icon(
-            Icons.pause_rounded,
-            size: size * 0.6,
-            color: colorScheme.outline,
-          ),
-      ],
-    );
-  }
-}
-
-class PieProgressPainter extends CustomPainter {
-  final double progress;
-  final Color color;
-  final Color backgroundColor;
-
-  PieProgressPainter({
-    required this.progress,
-    required this.color,
-    required this.backgroundColor,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()..style = PaintingStyle.fill;
-
-    paint.color = backgroundColor;
-    canvas.drawCircle(size.center(Offset.zero), size.width / 2, paint);
-
-    paint.color = color;
-    final rect = Rect.fromLTWH(0, 0, size.width, size.height);
-    final sweepAngle = (progress.clamp(0.0, 1.0)) * 2 * 3.141592653589793;
-    canvas.drawArc(rect, -3.141592653589793 / 2, sweepAngle, true, paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant PieProgressPainter oldDelegate) {
-    return oldDelegate.progress != progress ||
-        oldDelegate.color != color ||
-        oldDelegate.backgroundColor != backgroundColor;
   }
 }

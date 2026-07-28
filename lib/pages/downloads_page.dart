@@ -3,6 +3,7 @@ import 'package:zenbu/services/mangayomi/models/extensions_models.dart';
 import 'package:zenbu/services/download_service.dart';
 import 'package:zenbu/pages/video_player_page.dart';
 import 'package:zenbu/pages/manga_reader_page.dart';
+import 'package:zenbu/pages/novel_reader_page.dart';
 import 'package:zenbu/components/global/custom_image.dart';
 
 class DownloadsPage extends StatefulWidget {
@@ -34,7 +35,7 @@ class _DownloadsPageState extends State<DownloadsPage> {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 2,
+      length: 3,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Downloads'),
@@ -42,36 +43,43 @@ class _DownloadsPageState extends State<DownloadsPage> {
             tabs: [
               Tab(text: 'Anime'),
               Tab(text: 'Manga'),
+              Tab(text: 'Novel'),
             ],
           ),
         ),
         body: TabBarView(
-          children: [_buildMediaList(false), _buildMediaList(true)],
+          children: [
+            _buildMediaList(1), // Anime
+            _buildMediaList(0), // Manga
+            _buildMediaList(2), // Novel
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildActiveDownloadCard(BuildContext context, String url, bool isManga, bool isTablet) {
+  Widget _buildActiveDownloadCard(
+    BuildContext context,
+    String url,
+    bool isManga,
+    bool isTablet,
+  ) {
     final name = _downloadService.activeNames[url] ?? 'Downloading...';
     final mediaTitle = _downloadService.activeMediaTitles[url] ?? '';
     final progress = _downloadService.activeDownloads[url] ?? 0.0;
     return Card(
-      margin: isTablet ? EdgeInsets.zero : const EdgeInsets.symmetric(vertical: 4),
+      margin: isTablet
+          ? EdgeInsets.zero
+          : const EdgeInsets.symmetric(vertical: 4),
       color: Theme.of(context).colorScheme.onInverseSurface,
       elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: ListTile(
         title: Text(
           '$mediaTitle - $name',
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-          ),
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
         ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -134,15 +142,20 @@ class _DownloadsPageState extends State<DownloadsPage> {
     );
   }
 
-  Widget _buildDownloadedMediaCard(BuildContext context, DownloadedMedia media, bool isManga, bool isTablet) {
+  Widget _buildDownloadedMediaCard(
+    BuildContext context,
+    DownloadedMedia media,
+    bool isManga,
+    bool isTablet,
+  ) {
     return Card(
-      margin: isTablet ? EdgeInsets.zero : const EdgeInsets.symmetric(vertical: 6),
+      margin: isTablet
+          ? EdgeInsets.zero
+          : const EdgeInsets.symmetric(vertical: 6),
       color: Theme.of(context).colorScheme.onInverseSurface,
       elevation: 0,
       clipBehavior: Clip.antiAlias,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
         onTap: () {
           Navigator.of(context).push(
@@ -208,13 +221,26 @@ class _DownloadsPageState extends State<DownloadsPage> {
     );
   }
 
-  Widget _buildMediaList(bool isManga) {
-    final list = isManga
-        ? _downloadService.mangaRegistry
-        : _downloadService.animeRegistry;
-    final activeKeys = _downloadService.activeDownloads.keys
-        .where((url) => _downloadService.activeTypes[url] == isManga)
-        .toList();
+  Widget _buildMediaList(int tabType) {
+    final list = tabType == 2
+        ? _downloadService.novelRegistry
+        : (tabType == 0
+              ? _downloadService.mangaRegistry
+              : _downloadService.animeRegistry);
+
+    final activeKeys = _downloadService.activeDownloads.keys.where((url) {
+      final activeType = _downloadService.activeTypes[url];
+      if (tabType == 2) return activeType == false && url.contains('/novels/');
+      if (tabType == 0) return activeType == true;
+      return activeType == false && !url.contains('/novels/');
+    }).toList();
+
+    final String tabName = tabType == 2
+        ? 'novels'
+        : (tabType == 0 ? 'manga' : 'anime');
+    final IconData iconData = tabType == 2
+        ? Icons.auto_stories_outlined
+        : (tabType == 0 ? Icons.book_outlined : Icons.movie_outlined);
 
     if (list.isEmpty && activeKeys.isEmpty) {
       return Center(
@@ -222,13 +248,13 @@ class _DownloadsPageState extends State<DownloadsPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              isManga ? Icons.book_outlined : Icons.movie_outlined,
+              iconData,
               size: 64,
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
             const SizedBox(height: 12),
             Text(
-              'No downloaded ${isManga ? "manga" : "anime"} found.',
+              'No downloaded $tabName found.',
               style: TextStyle(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
@@ -270,28 +296,33 @@ class _DownloadsPageState extends State<DownloadsPage> {
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             sliver: isTablet
                 ? SliverGrid(
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      mainAxisSpacing: 8,
-                      crossAxisSpacing: 12,
-                      mainAxisExtent: 96,
-                    ),
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        final url = activeKeys[index];
-                        return _buildActiveDownloadCard(context, url, isManga, true);
-                      },
-                      childCount: activeKeys.length,
-                    ),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          mainAxisSpacing: 8,
+                          crossAxisSpacing: 12,
+                          mainAxisExtent: 96,
+                        ),
+                    delegate: SliverChildBuilderDelegate((context, index) {
+                      final url = activeKeys[index];
+                      return _buildActiveDownloadCard(
+                        context,
+                        url,
+                        tabType == 0,
+                        true,
+                      );
+                    }, childCount: activeKeys.length),
                   )
                 : SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        final url = activeKeys[index];
-                        return _buildActiveDownloadCard(context, url, isManga, false);
-                      },
-                      childCount: activeKeys.length,
-                    ),
+                    delegate: SliverChildBuilderDelegate((context, index) {
+                      final url = activeKeys[index];
+                      return _buildActiveDownloadCard(
+                        context,
+                        url,
+                        tabType == 0,
+                        false,
+                      );
+                    }, childCount: activeKeys.length),
                   ),
           ),
           const SliverToBoxAdapter(
@@ -311,22 +342,26 @@ class _DownloadsPageState extends State<DownloadsPage> {
                     crossAxisSpacing: 12,
                     mainAxisExtent: 104,
                   ),
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      final media = list[index];
-                      return _buildDownloadedMediaCard(context, media, isManga, true);
-                    },
-                    childCount: list.length,
-                  ),
+                  delegate: SliverChildBuilderDelegate((context, index) {
+                    final media = list[index];
+                    return _buildDownloadedMediaCard(
+                      context,
+                      media,
+                      tabType == 0,
+                      true,
+                    );
+                  }, childCount: list.length),
                 )
               : SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      final media = list[index];
-                      return _buildDownloadedMediaCard(context, media, isManga, false);
-                    },
-                    childCount: list.length,
-                  ),
+                  delegate: SliverChildBuilderDelegate((context, index) {
+                    final media = list[index];
+                    return _buildDownloadedMediaCard(
+                      context,
+                      media,
+                      tabType == 0,
+                      false,
+                    );
+                  }, childCount: list.length),
                 ),
         ),
       ],
@@ -364,36 +399,33 @@ class _DownloadedItemsListPageState extends State<DownloadedItemsListPage> {
   }
 
   Widget _buildEpisodeItemCard(
-      BuildContext context, DownloadedMedia media, DownloadItem item, int index, bool isTablet) {
+    BuildContext context,
+    DownloadedMedia media,
+    DownloadItem item,
+    int index,
+    bool isTablet,
+  ) {
     return Card(
-      margin: isTablet ? EdgeInsets.zero : const EdgeInsets.symmetric(vertical: 4),
+      margin: isTablet
+          ? EdgeInsets.zero
+          : const EdgeInsets.symmetric(vertical: 4),
       color: Theme.of(context).colorScheme.onInverseSurface,
       elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 4,
-        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         title: Text(
           item.name,
           style: const TextStyle(fontWeight: FontWeight.w600),
         ),
         trailing: IconButton(
-          icon: Icon(
-            Icons.delete,
-            color: Theme.of(context).colorScheme.error,
-          ),
+          icon: Icon(Icons.delete, color: Theme.of(context).colorScheme.error),
           onPressed: () async {
             final confirm = await showDialog<bool>(
               context: context,
               builder: (context) => AlertDialog(
                 title: const Text('Delete Download'),
-                content: Text(
-                  'Are you sure you want to delete ${item.name}?',
-                ),
+                content: Text('Are you sure you want to delete ${item.name}?'),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(false),
@@ -409,14 +441,14 @@ class _DownloadedItemsListPageState extends State<DownloadedItemsListPage> {
 
             if (confirm == true) {
               await _downloadService.deleteDownloadedItem(
-                media.isManga,
+                media.itemType,
                 item.url,
               );
             }
           },
         ),
         onTap: () {
-          if (media.isManga) {
+          if (media.isNovel) {
             final localSource = ExtSource(
               id: -1,
               name: 'Local Source',
@@ -426,7 +458,36 @@ class _DownloadedItemsListPageState extends State<DownloadedItemsListPage> {
               sourceCodeUrl: '',
               iconUrl: '',
               isNsfw: false,
-              isManga: true,
+              itemType: 2,
+            );
+
+            final chapters = media.items
+                .map((e) => ExtEpisode(name: e.name, url: e.localPath))
+                .toList();
+
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => NovelReaderPage(
+                  chapters: chapters,
+                  currentIndex: index,
+                  source: localSource,
+                  novelTitle: media.mediaTitle,
+                  mediaId: media.mediaId,
+                  coverImage: media.coverImage,
+                ),
+              ),
+            );
+          } else if (media.isManga) {
+            final localSource = ExtSource(
+              id: -1,
+              name: 'Local Source',
+              baseUrl: '',
+              lang: 'all',
+              version: '1.0.0',
+              sourceCodeUrl: '',
+              iconUrl: '',
+              isNsfw: false,
+              itemType: 0,
             );
 
             final chapters = media.items
@@ -455,7 +516,7 @@ class _DownloadedItemsListPageState extends State<DownloadedItemsListPage> {
               sourceCodeUrl: '',
               iconUrl: '',
               isNsfw: false,
-              isManga: false,
+              itemType: 1,
             );
 
             final ep = ExtEpisode(name: item.name, url: item.localPath);
@@ -479,9 +540,11 @@ class _DownloadedItemsListPageState extends State<DownloadedItemsListPage> {
 
   @override
   Widget build(BuildContext context) {
-    final registry = widget.media.isManga
-        ? _downloadService.mangaRegistry
-        : _downloadService.animeRegistry;
+    final registry = widget.media.isNovel
+        ? _downloadService.novelRegistry
+        : (widget.media.isManga
+              ? _downloadService.mangaRegistry
+              : _downloadService.animeRegistry);
     final mediaIdx = registry.indexWhere(
       (e) => e.mediaId == widget.media.mediaId,
     );
@@ -519,7 +582,13 @@ class _DownloadedItemsListPageState extends State<DownloadedItemsListPage> {
               itemCount: media.items.length,
               itemBuilder: (context, index) {
                 final item = media.items[index];
-                return _buildEpisodeItemCard(context, media, item, index, false);
+                return _buildEpisodeItemCard(
+                  context,
+                  media,
+                  item,
+                  index,
+                  false,
+                );
               },
             ),
     );
