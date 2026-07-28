@@ -45,21 +45,40 @@ class DeepLinkController {
     final pathSegments = uri.pathSegments;
 
     if (uri.scheme == 'mangayomi' && uri.host == 'add-repo') {
-      final params = uri.queryParameters;
+      Map<String, String> params = Map.from(uri.queryParameters);
+      final rawQuery = uri.query;
+      if (rawQuery.contains('%26')) {
+        final decodedQuery = Uri.decodeComponent(rawQuery);
+        final splitPairs = decodedQuery.split('&');
+        for (final pair in splitPairs) {
+          final parts = pair.split('=');
+          if (parts.length >= 2) {
+            final k = parts[0].trim();
+            final v = parts.sublist(1).join('=').trim();
+            params[k] = v;
+          }
+        }
+      }
+
       final repoName = params['repo_name'] ?? 'Community Repo';
       final repoUrl = params['repo_url'];
       final animeUrl = params['anime_url'];
       final mangaUrl = params['manga_url'];
+      final novelUrl = params['novel_url'];
 
-      if (animeUrl == null && mangaUrl == null) {
+      if (animeUrl == null && mangaUrl == null && novelUrl == null) {
         Fluttertoast.showToast(msg: 'No valid extension URL found in link.');
         return;
       }
 
       try {
         int addedCount = 0;
+        final int totalUrls = (animeUrl != null ? 1 : 0) +
+            (mangaUrl != null ? 1 : 0) +
+            (novelUrl != null ? 1 : 0);
+
         if (animeUrl != null) {
-          final suffix = (mangaUrl != null) ? ' (Anime)' : '';
+          final suffix = (totalUrls > 1) ? ' (Anime)' : '';
           await RepoService.addRepo(
             animeUrl,
             customName: '$repoName$suffix',
@@ -68,9 +87,18 @@ class DeepLinkController {
           addedCount++;
         }
         if (mangaUrl != null) {
-          final suffix = (animeUrl != null) ? ' (Manga)' : '';
+          final suffix = (totalUrls > 1) ? ' (Manga)' : '';
           await RepoService.addRepo(
             mangaUrl,
+            customName: '$repoName$suffix',
+            customWebsite: repoUrl,
+          );
+          addedCount++;
+        }
+        if (novelUrl != null) {
+          final suffix = (totalUrls > 1) ? ' (Novel)' : '';
+          await RepoService.addRepo(
+            novelUrl,
             customName: '$repoName$suffix',
             customWebsite: repoUrl,
           );
