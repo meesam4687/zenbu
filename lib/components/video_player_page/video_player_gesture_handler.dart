@@ -8,6 +8,8 @@ class VideoPlayerGestureHandler extends StatefulWidget {
   final VoidCallback onTap;
   final VoidCallback onDoubleTap;
   final VoidCallback? onGestureTriggered;
+  final VoidCallback? onLongPressStart;
+  final VoidCallback? onLongPressEnd;
 
   const VideoPlayerGestureHandler({
     super.key,
@@ -15,6 +17,8 @@ class VideoPlayerGestureHandler extends StatefulWidget {
     required this.onTap,
     required this.onDoubleTap,
     this.onGestureTriggered,
+    this.onLongPressStart,
+    this.onLongPressEnd,
   });
 
   @override
@@ -205,6 +209,15 @@ class _VideoPlayerGestureHandlerState extends State<VideoPlayerGestureHandler>
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: _handleTap,
+      onLongPressStart: (_) {
+        widget.onLongPressStart?.call();
+      },
+      onLongPressEnd: (_) {
+        widget.onLongPressEnd?.call();
+      },
+      onLongPressCancel: () {
+        widget.onLongPressEnd?.call();
+      },
       onVerticalDragStart: _onVerticalDragStart,
       onVerticalDragUpdate: _onVerticalDragUpdate,
       onVerticalDragEnd: _onVerticalDragEnd,
