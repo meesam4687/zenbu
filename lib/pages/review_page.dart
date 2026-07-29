@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart' show parseFragment;
+import 'package:url_launcher/url_launcher.dart';
 import 'package:video_player/video_player.dart';
 import 'package:zenbu/components/global/spoiler.dart';
 import 'package:zenbu/components/global/custom_image.dart';
+import 'package:zenbu/pages/character_details_page.dart';
+import 'package:zenbu/pages/media_details_page.dart';
+import 'package:zenbu/pages/staff_details_page.dart';
 import 'package:zenbu/pages/user_profile_page.dart';
 
 class ReviewSegment {
@@ -65,21 +70,99 @@ String _convertHtmlToMarkdown(String html) {
   out = out.replaceAll(RegExp(r'</?b>', caseSensitive: false), '**');
   out = out.replaceAll(RegExp(r'</?strong>', caseSensitive: false), '**');
 
-  out = out.replaceAllMapped(
-    RegExp(
-      r'<a\s+(?:[^>]*?\s+)?href="([^"]*)"[^>]*>(.*?)</a>',
-      caseSensitive: false,
-      dotAll: true,
-    ),
-    (match) {
-      final url = match.group(1) ?? '';
-      final text = match.group(2) ?? '';
-      return '[$text]($url)';
-    },
-  );
-
   final fragment = parseFragment(out);
+
+  for (final element in fragment.querySelectorAll('a')) {
+    final url = element.attributes['href'] ?? '';
+    final text = element.text;
+    if (url.isNotEmpty) {
+      element.replaceWith(dom.Text('[${text.isEmpty ? url : text}]($url)'));
+    }
+  }
+
   return fragment.text ?? out;
+}
+
+void _handleLinkTap(BuildContext context, String href) async {
+  final cleanHref = href.trim();
+  if (cleanHref.isEmpty) return;
+
+  final uri = Uri.tryParse(cleanHref);
+  if (uri == null) return;
+
+  String host = uri.host;
+  List<String> pathSegments = uri.pathSegments;
+
+  if (host.isEmpty) {
+    final fullUri = Uri.tryParse(
+      cleanHref.startsWith('/')
+          ? 'https://anilist.co$cleanHref'
+          : 'https://anilist.co/$cleanHref',
+    );
+    if (fullUri != null) {
+      host = fullUri.host;
+      pathSegments = fullUri.pathSegments;
+    }
+  }
+
+  if ((host == 'anilist.co' || host == 'www.anilist.co') &&
+      pathSegments.isNotEmpty) {
+    final type = pathSegments[0].toLowerCase();
+
+    if (pathSegments.length >= 2) {
+      if (type == 'user') {
+        final username = pathSegments[1];
+        if (username.isNotEmpty) {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => UserProfilePage(username: username),
+            ),
+          );
+          return;
+        }
+      } else {
+        final id = int.tryParse(pathSegments[1]);
+        if (id != null) {
+          Widget? page;
+          switch (type) {
+            case 'anime':
+              page = MediaDetailsPage(id: id, isAnime: true);
+              break;
+            case 'manga':
+              page = MediaDetailsPage(id: id, isAnime: false);
+              break;
+            case 'character':
+              page = CharacterDetailsPage(id: id);
+              break;
+            case 'staff':
+              page = StaffDetailsPage(id: id);
+              break;
+          }
+
+          if (page != null) {
+            final targetPage = page;
+            Navigator.of(
+              context,
+            ).push(MaterialPageRoute(builder: (context) => targetPage));
+            return;
+          }
+        }
+      }
+    }
+  }
+
+  final launchUri = uri.hasScheme ? uri : Uri.tryParse('https://$cleanHref');
+  if (launchUri != null) {
+    try {
+      if (await canLaunchUrl(launchUri)) {
+        await launchUrl(launchUri, mode: LaunchMode.externalApplication);
+      } else {
+        await launchUrl(launchUri);
+      }
+    } catch (e) {
+      debugPrint('Failed to launch URL $cleanHref: $e');
+    }
+  }
 }
 
 class LoopVideoPlayer extends StatefulWidget {
@@ -303,6 +386,11 @@ class ReviewPage extends StatelessWidget {
                             _convertHtmlToMarkdown(segment.content),
                           ),
                           selectable: true,
+                          onTapLink: (text, href, title) {
+                            if (href != null) {
+                              _handleLinkTap(context, href);
+                            }
+                          },
                           styleSheet:
                               MarkdownStyleSheet.fromTheme(
                                 Theme.of(context),
