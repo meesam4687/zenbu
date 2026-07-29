@@ -48,72 +48,93 @@ class _VideoPlayerGestureHandlerState extends State<VideoPlayerGestureHandler>
     super.initState();
     _animationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 530),
     );
 
-    _scaleAnimation = Tween<double>(begin: 0.6, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.easeOutBack,
+    _scaleAnimation = TweenSequence<double>([
+      TweenSequenceItem(
+        tween: Tween(
+          begin: 0.0,
+          end: 0.965,
+        ).chain(CurveTween(curve: Curves.easeOut)),
+        weight: 19,
       ),
-    );
-
-    _opacityAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: const Interval(0.6, 1.0, curve: Curves.easeOut),
+      TweenSequenceItem(tween: Tween(begin: 0.965, end: 1.0), weight: 57),
+      TweenSequenceItem(
+        tween: Tween(
+          begin: 1.0,
+          end: 0.0,
+        ).chain(CurveTween(curve: Curves.easeIn)),
+        weight: 24,
       ),
-    );
+    ]).animate(_animationController);
 
-    _initValue();
+    _opacityAnimation = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 0.0, end: 1.0), weight: 9),
+      TweenSequenceItem(tween: ConstantTween(1.0), weight: 72),
+      TweenSequenceItem(tween: Tween(begin: 1.0, end: 0.0), weight: 19),
+    ]).animate(_animationController);
+
+    _initCurrentValues();
+
+    if (!widget.isLeft) {
+      FlutterVolumeController.updateShowSystemUI(false);
+      FlutterVolumeController.addListener((volume) {
+        if (mounted && !_showVerticalOverlay) {
+          setState(() {
+            _currentValue = volume;
+          });
+        }
+      });
+    }
   }
 
-  Future<void> _initValue() async {
+  Future<void> _initCurrentValues() async {
     try {
+      double val;
       if (widget.isLeft) {
-        _currentValue = await ScreenBrightness.instance.application;
+        val = await ScreenBrightness.instance.application;
       } else {
-        _currentValue = (await FlutterVolumeController.getVolume()) ?? 0.5;
-        FlutterVolumeController.addListener((volume) {
-          if (mounted && !_showVerticalOverlay) {
-            setState(() {
-              _currentValue = volume;
-            });
-          }
-        });
-        FlutterVolumeController.updateShowSystemUI(false);
+        val =
+            await FlutterVolumeController.getVolume(
+              stream: AudioStream.music,
+            ) ??
+            0.5;
       }
-    } catch (_) {
-      _currentValue = 0.5;
-    }
+      if (mounted) {
+        setState(() {
+          _currentValue = val;
+        });
+      }
+    } catch (_) {}
   }
 
   void _handleTap() {
+    _singleTapTimer?.cancel();
     final now = DateTime.now().millisecondsSinceEpoch;
-    if (now - _lastTapTime < 300) {
-      _singleTapTimer?.cancel();
-      _handleDoubleTap();
+    if (now - _lastTapTime < 200) {
+      _onDoubleTap();
+      _lastTapTime = 0;
     } else {
-      _singleTapTimer?.cancel();
-      _singleTapTimer = Timer(const Duration(milliseconds: 300), () {
-        widget.onTap();
+      _lastTapTime = now;
+      _singleTapTimer = Timer(const Duration(milliseconds: 200), () {
+        if (mounted) {
+          widget.onTap();
+        }
       });
     }
-    _lastTapTime = now;
   }
 
-  void _handleDoubleTap() {
+  void _onDoubleTap() {
+    _resetTimer?.cancel();
     setState(() {
       _accumulatedSeconds += 10;
     });
-
     widget.onDoubleTap();
+    _animationController.forward(from: 0.0);
     widget.onGestureTriggered?.call();
 
-    _animationController.forward(from: 0.0);
-
-    _resetTimer?.cancel();
-    _resetTimer = Timer(const Duration(milliseconds: 600), () {
+    _resetTimer = Timer(const Duration(milliseconds: 800), () {
       if (mounted) {
         setState(() {
           _accumulatedSeconds = 0;
@@ -124,8 +145,8 @@ class _VideoPlayerGestureHandlerState extends State<VideoPlayerGestureHandler>
 
   void _onVerticalDragStart(DragStartDetails details) {
     _overlayFadeTimer?.cancel();
-    _dragStartPos = details.globalPosition.dy;
     setState(() {
+      _dragStartPos = details.globalPosition.dy;
       _initialValue = _currentValue;
       _showVerticalOverlay = true;
     });
@@ -212,25 +233,17 @@ class _VideoPlayerGestureHandlerState extends State<VideoPlayerGestureHandler>
                   return const SizedBox.shrink();
                 }
 
-                final primaryColor = Theme.of(context).colorScheme.primary;
-
                 return Opacity(
                   opacity: _opacityAnimation.value,
                   child: Transform.scale(
                     scale: _scaleAnimation.value,
                     child: Container(
-                      width: 135,
-                      height: 135,
+                      width: 110,
+                      height: 110,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: primaryColor.withValues(alpha: 0.85),
-                        boxShadow: [
-                          BoxShadow(
-                            color: primaryColor.withValues(alpha: 0.35),
-                            blurRadius: 16,
-                            spreadRadius: 2,
-                          ),
-                        ],
+                        color: Colors.black.withValues(alpha: 0.5),
+                        border: Border.all(color: Colors.white12),
                       ),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -239,8 +252,8 @@ class _VideoPlayerGestureHandlerState extends State<VideoPlayerGestureHandler>
                             widget.isLeft
                                 ? Icons.fast_rewind_rounded
                                 : Icons.fast_forward_rounded,
-                            color: Theme.of(context).colorScheme.onPrimary,
-                            size: 40,
+                            color: Colors.white,
+                            size: 32,
                           ),
                           const SizedBox(height: 6),
                           Text(
@@ -248,9 +261,9 @@ class _VideoPlayerGestureHandlerState extends State<VideoPlayerGestureHandler>
                                 ? '- $_accumulatedSeconds seconds'
                                 : '+ $_accumulatedSeconds seconds',
                             textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.onPrimary,
-                              fontSize: 13,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -262,88 +275,68 @@ class _VideoPlayerGestureHandlerState extends State<VideoPlayerGestureHandler>
               },
             ),
           ),
-
-          IgnorePointer(
-            ignoring: !_showVerticalOverlay,
-            child: AnimatedOpacity(
-              duration: const Duration(milliseconds: 200),
-              opacity: _showVerticalOverlay ? 1.0 : 0.0,
-              child: Align(
-                alignment: widget.isLeft
-                    ? Alignment.centerLeft
-                    : Alignment.centerRight,
-                child: Padding(
-                  padding: EdgeInsets.only(
-                    left: widget.isLeft ? 48.0 : 0.0,
-                    right: widget.isLeft ? 0.0 : 48.0,
+          if (_showVerticalOverlay)
+            Align(
+              alignment: widget.isLeft
+                  ? Alignment.centerLeft
+                  : Alignment.centerRight,
+              child: Padding(
+                padding: EdgeInsets.only(
+                  left: widget.isLeft ? 56.0 : 0.0,
+                  right: widget.isLeft ? 0.0 : 56.0,
+                ),
+                child: Container(
+                  width: 36,
+                  height: 160,
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.6),
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(color: Colors.white12),
                   ),
-                  child: Container(
-                    width: 46,
-                    height: 190,
-                    decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.75),
-                      borderRadius: BorderRadius.circular(24),
-                      border: Border.all(color: Colors.white24, width: 1),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.3),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    child: Column(
-                      children: [
-                        Icon(
-                          widget.isLeft
-                              ? Icons.brightness_5_rounded
-                              : (_currentValue == 0.0
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  child: Column(
+                    children: [
+                      Icon(
+                        widget.isLeft
+                            ? Icons.brightness_5_rounded
+                            : (_currentValue == 0.0
                                   ? Icons.volume_mute_rounded
                                   : _currentValue < 0.5
-                                      ? Icons.volume_down_rounded
-                                      : Icons.volume_up_rounded),
-                          color: Colors.white,
-                          size: 22,
-                        ),
-                        const SizedBox(height: 12),
-                        Expanded(
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(6),
-                            child: Container(
-                              width: 8,
-                              color: Colors.white24,
-                              alignment: Alignment.bottomCenter,
-                              child: FractionallySizedBox(
-                                heightFactor: _currentValue,
-                                widthFactor: 1.0,
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color:
-                                        Theme.of(context).colorScheme.primary,
-                                    borderRadius: BorderRadius.circular(6),
-                                  ),
-                                ),
-                              ),
+                                  ? Icons.volume_down_rounded
+                                  : Icons.volume_up_rounded),
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                      const SizedBox(height: 10),
+                      Expanded(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(3),
+                          child: Container(
+                            width: 6,
+                            color: Colors.white24,
+                            alignment: Alignment.bottomCenter,
+                            child: FractionallySizedBox(
+                              heightFactor: _currentValue,
+                              widthFactor: 1.0,
+                              child: Container(color: Colors.white),
                             ),
                           ),
                         ),
-                        const SizedBox(height: 12),
-                        Text(
-                          '${(_currentValue * 100).toInt()}%',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                          ),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        '${(_currentValue * 100).toInt()}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               ),
             ),
-          ),
         ],
       ),
     );
