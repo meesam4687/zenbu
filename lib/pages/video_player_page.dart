@@ -72,6 +72,30 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
   String _loadingText = 'Resolving stream links...';
   String? _errorMessage;
   Duration _currentPosition = Duration.zero;
+  bool _isHolding2x = false;
+
+  void _onLongPressStart() {
+    if (_videoPlayerController != null &&
+        _videoPlayerController!.value.isInitialized) {
+      _hideControls();
+      _videoPlayerController!.setPlaybackSpeed(2.0);
+      setState(() {
+        _isHolding2x = true;
+      });
+    }
+  }
+
+  void _onLongPressEnd() {
+    if (_videoPlayerController != null &&
+        _videoPlayerController!.value.isInitialized) {
+      _videoPlayerController!.setPlaybackSpeed(1.0);
+    }
+    if (_isHolding2x) {
+      setState(() {
+        _isHolding2x = false;
+      });
+    }
+  }
 
   late ExtEpisode _currentEpisode;
   ExtEpisode? _nextEpisode;
@@ -197,6 +221,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
               route.animation?.removeStatusListener(listener);
             }
           }
+
           route.animation!.addStatusListener(listener);
         }
       } else {
@@ -341,7 +366,8 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
   }
 
   void _toggleOrientation() {
-    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+    final isLandscape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
     if (isLandscape) {
       SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     } else {
@@ -695,8 +721,8 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
         final filePath = resolvedUrl.startsWith('file://')
             ? Uri.parse(resolvedUrl).toFilePath()
             : (_currentEpisode.url.startsWith('file://')
-                ? Uri.parse(_currentEpisode.url).toFilePath()
-                : _currentEpisode.url);
+                  ? Uri.parse(_currentEpisode.url).toFilePath()
+                  : _currentEpisode.url);
         loadedLocalSkip = await _loadLocalSkipTimes(filePath);
         if (!mounted) return;
       }
@@ -1248,6 +1274,8 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
                   onTap: _toggleControlsVisibility,
                   onDoubleTap: () => _skipSeconds(-10),
                   onGestureTriggered: _hideControls,
+                  onLongPressStart: _onLongPressStart,
+                  onLongPressEnd: _onLongPressEnd,
                 ),
               ),
               Expanded(
@@ -1256,9 +1284,65 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
                   onTap: _toggleControlsVisibility,
                   onDoubleTap: () => _skipSeconds(10),
                   onGestureTriggered: _hideControls,
+                  onLongPressStart: _onLongPressStart,
+                  onLongPressEnd: _onLongPressEnd,
                 ),
               ),
             ],
+          ),
+        ),
+
+        Positioned(
+          top: 28.0,
+          left: 0,
+          right: 0,
+          child: Center(
+            child: AnimatedScale(
+              scale: _isHolding2x ? 1.0 : 0.0,
+              duration: const Duration(milliseconds: 200),
+              curve: _isHolding2x ? Curves.easeOutBack : Curves.easeIn,
+              child: AnimatedOpacity(
+                duration: const Duration(milliseconds: 150),
+                opacity: _isHolding2x ? 1.0 : 0.0,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 7,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.75),
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.4),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        '2x',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                      SizedBox(width: 4),
+                      Icon(
+                        Icons.fast_forward_rounded,
+                        color: Colors.white,
+                        size: 18,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
           ),
         ),
 
@@ -1281,85 +1365,89 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
             ),
           ),
 
-        if (_showControls)
-          VideoPlayerControlsOverlay(
-            animeTitle: widget.animeTitle,
-            episodeName: _currentEpisode.name,
-            hasNextEpisode: _nextEpisode != null,
-            hasSubtitles: _allSubtitles.isNotEmpty,
-            hasMultipleVideos: _videos.length > 1,
-            isSubtitleActive: _selectedSubtitle != null,
-            isPlaying: _videoPlayerController!.value.isPlaying,
-            currentPositionText: _formatDuration(currentPosition),
-            totalDurationText: _formatDuration(totalDuration),
-            seekBar: _buildSeekBar(
-              currentPosition,
-              totalDuration,
-              primaryColor,
-            ),
-            onBackPressed: () async {
-              final navigator = Navigator.of(context);
-              await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-              await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-              navigator.pop();
-            },
-            onNextEpisodePressed: () {
-              _startControlsTimer();
-              _playNextEpisode();
-            },
-            onSubtitlePressed: () {
-              _startControlsTimer();
-              _showSubtitleSelector();
-            },
-            onQualityPressed: () {
-              _startControlsTimer();
-              _showQualitySelector();
-            },
-            onPipPressed: _enterPipMode,
-            onPlayPausePressed: () async {
-              _startControlsTimer();
-              if (_videoPlayerController!.value.isPlaying) {
-                await _videoPlayerController!.pause();
-                await WakelockPlus.disable();
-              } else {
-                await _videoPlayerController!.play();
-                await WakelockPlus.enable();
-              }
-              setState(() {});
-            },
-            onReplayPressed: () {
-              _startControlsTimer();
-              final newPos =
-                  _videoPlayerController!.value.position -
-                  const Duration(seconds: 10);
-              _videoPlayerController!.seekTo(
-                newPos < Duration.zero ? Duration.zero : newPos,
-              );
-            },
-            onForwardPressed: () {
-              _startControlsTimer();
-              final newPos =
-                  _videoPlayerController!.value.position +
-                  const Duration(seconds: 10);
-              _videoPlayerController!.seekTo(
-                newPos > totalDuration ? totalDuration : newPos,
-              );
-            },
-            onSkip85Pressed: () {
-              _startControlsTimer();
-              final newPos =
-                  _videoPlayerController!.value.position +
-                  const Duration(seconds: 85);
-              _videoPlayerController!.seekTo(
-                newPos > totalDuration ? totalDuration : newPos,
-              );
-            },
-            onRotatePressed: _toggleOrientation,
-          ),
+        VideoPlayerControlsOverlay(
+          visible: _showControls,
+          isHolding: _isHolding2x,
+          animeTitle: widget.animeTitle,
+          episodeName: _currentEpisode.name,
+          hasNextEpisode: _nextEpisode != null,
+          hasSubtitles: _allSubtitles.isNotEmpty,
+          hasMultipleVideos: _videos.length > 1,
+          isSubtitleActive: _selectedSubtitle != null,
+          isPlaying: _videoPlayerController!.value.isPlaying,
+          currentPositionText: _formatDuration(currentPosition),
+          totalDurationText: _formatDuration(totalDuration),
+          seekBar: _buildSeekBar(currentPosition, totalDuration, primaryColor),
+          onBackPressed: () async {
+            final navigator = Navigator.of(context);
+            await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+            await SystemChrome.setPreferredOrientations([
+              DeviceOrientation.portraitUp,
+            ]);
+            navigator.pop();
+          },
+          onNextEpisodePressed: () {
+            _startControlsTimer();
+            _playNextEpisode();
+          },
+          onSubtitlePressed: () {
+            _startControlsTimer();
+            _showSubtitleSelector();
+          },
+          onQualityPressed: () {
+            _startControlsTimer();
+            _showQualitySelector();
+          },
+          onPipPressed: _enterPipMode,
+          onPlayPausePressed: () async {
+            _startControlsTimer();
+            if (_videoPlayerController!.value.isPlaying) {
+              await _videoPlayerController!.pause();
+              await WakelockPlus.disable();
+            } else {
+              await _videoPlayerController!.play();
+              await WakelockPlus.enable();
+            }
+            setState(() {});
+          },
+          onReplayPressed: () {
+            _startControlsTimer();
+            final newPos =
+                _videoPlayerController!.value.position -
+                const Duration(seconds: 10);
+            _videoPlayerController!.seekTo(
+              newPos < Duration.zero ? Duration.zero : newPos,
+            );
+          },
+          onForwardPressed: () {
+            _startControlsTimer();
+            final newPos =
+                _videoPlayerController!.value.position +
+                const Duration(seconds: 10);
+            _videoPlayerController!.seekTo(
+              newPos > totalDuration ? totalDuration : newPos,
+            );
+          },
+          onSkip85Pressed: () {
+            _startControlsTimer();
+            final newPos =
+                _videoPlayerController!.value.position +
+                const Duration(seconds: 85);
+            _videoPlayerController!.seekTo(
+              newPos > totalDuration ? totalDuration : newPos,
+            );
+          },
+          onRotatePressed: _toggleOrientation,
+          onBackgroundTap: _toggleControlsVisibility,
+          onLongPressStart: _onLongPressStart,
+          onLongPressEnd: _onLongPressEnd,
+        ),
 
         if (_activeSubtitleCtrl != null && _videoPlayerController != null)
-          Positioned(
-            bottom: _showControls ? 76.0 : 20.0,
+          AnimatedPositioned(
+            duration: const Duration(milliseconds: 135),
+            curve: _showControls ? Curves.easeOutCubic : Curves.easeInCubic,
+            bottom: _showControls ? 86.0 : 20.0,
             left: 16.0,
             right: 16.0,
             child: IgnorePointer(
@@ -1390,8 +1478,10 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
             ),
           ),
 
-        Positioned(
-          bottom: 90.0,
+        AnimatedPositioned(
+          duration: const Duration(milliseconds: 135),
+          curve: _showControls ? Curves.easeOutCubic : Curves.easeInCubic,
+          bottom: _showControls ? 124.0 : 90.0,
           right: 24.0,
           child: ValueListenableBuilder<SkipTime?>(
             valueListenable: _activeSkipTimeNotifier,
@@ -1457,7 +1547,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
         if (didPop) return;
         final navigator = Navigator.of(context);
         await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-        await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+        await SystemChrome.setPreferredOrientations([
+          DeviceOrientation.portraitUp,
+        ]);
         navigator.pop(result);
       },
       child: Scaffold(
@@ -1509,7 +1601,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
                           if (widget.source.id == -1) ...[
                             FilledButton.icon(
                               style: FilledButton.styleFrom(
-                                backgroundColor: Theme.of(context).colorScheme.error,
+                                backgroundColor: Theme.of(
+                                  context,
+                                ).colorScheme.error,
                               ),
                               onPressed: () async {
                                 await DownloadService().deleteDownloadedItem(
@@ -1536,8 +1630,12 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
                             ),
                             onPressed: () async {
                               final navigator = Navigator.of(context);
-                              await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-                              await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+                              await SystemChrome.setEnabledSystemUIMode(
+                                SystemUiMode.edgeToEdge,
+                              );
+                              await SystemChrome.setPreferredOrientations([
+                                DeviceOrientation.portraitUp,
+                              ]);
                               navigator.pop();
                             },
                             child: const Text('Go Back'),
