@@ -219,9 +219,7 @@ class _TitlePaneState extends State<TitlePane> {
                     ),
                   ),
           ),
-          Container(
-            color: surfaceColor.withAlpha(160),
-          ),
+          Container(color: surfaceColor.withAlpha(160)),
           Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -259,16 +257,12 @@ class _TitlePaneState extends State<TitlePane> {
                   const SizedBox(height: 24),
                   GestureDetector(
                     onLongPress: () {
-                      Clipboard.setData(
-                        ClipboardData(text: widget.fullTitle),
-                      );
+                      Clipboard.setData(ClipboardData(text: widget.fullTitle));
                       HapticFeedback.mediumImpact();
                     },
                     child: Text(
                       widget.title,
-                      style: const TextStyle(
-                        fontSize: 22,
-                      ),
+                      style: const TextStyle(fontSize: 22),
                       textAlign: TextAlign.center,
                       maxLines: 4,
                       overflow: TextOverflow.ellipsis,
@@ -278,19 +272,20 @@ class _TitlePaneState extends State<TitlePane> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(
-                        progress,
-                        style: const TextStyle(fontSize: 14),
-                      ),
+                      Text(progress, style: const TextStyle(fontSize: 14)),
                       if (mediaState == 'CURRENT') ...[
                         const SizedBox(width: 8),
                         ClipOval(
                           child: Material(
                             color: _isIncrementing
                                 ? Colors.grey.shade600
-                                : Theme.of(context).colorScheme.primaryContainer,
+                                : Theme.of(
+                                    context,
+                                  ).colorScheme.primaryContainer,
                             child: InkWell(
-                              onTap: _isIncrementing ? null : _incrementProgress,
+                              onTap: _isIncrementing
+                                  ? null
+                                  : _incrementProgress,
                               child: SizedBox(
                                 width: 32,
                                 height: 32,
@@ -301,7 +296,10 @@ class _TitlePaneState extends State<TitlePane> {
                                           height: 16,
                                           child: CircularProgressIndicator(
                                             strokeWidth: 2,
-                                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                            valueColor:
+                                                AlwaysStoppedAnimation<Color>(
+                                                  Colors.white,
+                                                ),
                                           ),
                                         )
                                       : Text(
@@ -309,9 +307,9 @@ class _TitlePaneState extends State<TitlePane> {
                                           style: TextStyle(
                                             fontWeight: FontWeight.bold,
                                             fontSize: 14,
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .onPrimaryContainer,
+                                            color: Theme.of(
+                                              context,
+                                            ).colorScheme.onPrimaryContainer,
                                           ),
                                         ),
                                 ),
@@ -330,10 +328,14 @@ class _TitlePaneState extends State<TitlePane> {
                           color: _isTogglingFavourite
                               ? Colors.grey.shade600
                               : (isFavourite
-                                  ? Colors.red.shade600
-                                  : Theme.of(context).colorScheme.primaryContainer),
+                                    ? Colors.red.shade600
+                                    : Theme.of(
+                                        context,
+                                      ).colorScheme.primaryContainer),
                           child: InkWell(
-                            onTap: _isTogglingFavourite ? null : _toggleFavourite,
+                            onTap: _isTogglingFavourite
+                                ? null
+                                : _toggleFavourite,
                             child: SizedBox(
                               width: 40,
                               height: 40,
@@ -344,11 +346,16 @@ class _TitlePaneState extends State<TitlePane> {
                                         height: 20,
                                         child: CircularProgressIndicator(
                                           strokeWidth: 2,
-                                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                          valueColor:
+                                              AlwaysStoppedAnimation<Color>(
+                                                Colors.white,
+                                              ),
                                         ),
                                       )
                                     : Icon(
-                                        isFavourite ? Icons.favorite : Icons.favorite_border,
+                                        isFavourite
+                                            ? Icons.favorite
+                                            : Icons.favorite_border,
                                         color: Colors.white,
                                         size: 20,
                                       ),
@@ -367,20 +374,29 @@ class _TitlePaneState extends State<TitlePane> {
                               builder: (context) {
                                 return Padding(
                                   padding: EdgeInsets.only(
-                                    bottom: MediaQuery.of(context).viewInsets.bottom,
+                                    bottom: MediaQuery.of(
+                                      context,
+                                    ).viewInsets.bottom,
                                   ),
                                   child: ListEditorBottomSheet(
                                     isAnime: widget.isAnime,
                                     status: mediaListEntry?["status"] ?? "NONE",
                                     progress: mediaListEntry?["progress"] ?? 0,
-                                    startDate: (mediaListEntry?["startedAt"]?["day"] == null)
+                                    startDate:
+                                        (mediaListEntry?["startedAt"]?["day"] ==
+                                            null)
                                         ? {"day": -1}
-                                        : mediaListEntry?["startedAt"] ?? {"day": -1},
-                                    endDate: (mediaListEntry?["completedAt"]?["day"] == null)
+                                        : mediaListEntry?["startedAt"] ??
+                                              {"day": -1},
+                                    endDate:
+                                        (mediaListEntry?["completedAt"]?["day"] ==
+                                            null)
                                         ? {"day": -1}
-                                        : mediaListEntry?["completedAt"] ?? {"day": -1},
+                                        : mediaListEntry?["completedAt"] ??
+                                              {"day": -1},
                                     score: (mediaListEntry?["score"] is int)
-                                        ? (mediaListEntry?["score"] as int).toDouble()
+                                        ? (mediaListEntry?["score"] as int)
+                                              .toDouble()
                                         : mediaListEntry?["score"] ?? 0.0,
                                     repeatCount: mediaListEntry?["repeat"] ?? 0,
                                     mediaId: widget.id,
@@ -400,6 +416,15 @@ class _TitlePaneState extends State<TitlePane> {
                     ],
                   ),
                 ],
+              ),
+            ),
+          ),
+          Positioned(
+            top: 8,
+            left: 8,
+            child: SafeArea(
+              child: BackButton(
+                onPressed: () => Navigator.of(context).maybePop(),
               ),
             ),
           ),

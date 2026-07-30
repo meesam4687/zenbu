@@ -173,6 +173,7 @@ class _MediaDetailsPageState extends State<MediaDetailsPage>
                   Expanded(
                     child: Scaffold(
                       appBar: AppBar(
+                        automaticallyImplyLeading: false,
                         title: Text(resolvedTitle),
                         bottom: TabBar(tabs: tabsList),
                       ),
