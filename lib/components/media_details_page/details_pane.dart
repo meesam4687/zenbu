@@ -244,39 +244,90 @@ class _DetailsPaneState extends State<DetailsPane>
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    Container(
-                      margin: const EdgeInsets.only(top: 10),
-                      child: (media["description"] != null)
-                          ? MarkdownBody(
-                              data: _convertHtmlToMarkdown(
-                                media["description"].toString(),
+                    Builder(
+                      builder: (context) {
+                        final titleMap = media["title"] as Map? ?? {};
+                        final resolvedTitle = provider.resolveTitle(titleMap);
+
+                        final Set<String> altTitlesSet = {};
+                        if (titleMap["english"] != null &&
+                            (titleMap["english"] as String).trim().isNotEmpty) {
+                          altTitlesSet.add(
+                            (titleMap["english"] as String).trim(),
+                          );
+                        }
+                        if (titleMap["romaji"] != null &&
+                            (titleMap["romaji"] as String).trim().isNotEmpty) {
+                          altTitlesSet.add(
+                            (titleMap["romaji"] as String).trim(),
+                          );
+                        }
+                        if (titleMap["native"] != null &&
+                            (titleMap["native"] as String).trim().isNotEmpty) {
+                          altTitlesSet.add(
+                            (titleMap["native"] as String).trim(),
+                          );
+                        }
+                        if (media["synonyms"] is List) {
+                          for (var syn in (media["synonyms"] as List)) {
+                            if (syn != null &&
+                                syn.toString().trim().isNotEmpty) {
+                              altTitlesSet.add(syn.toString().trim());
+                            }
+                          }
+                        }
+                        altTitlesSet.remove(resolvedTitle);
+
+                        String rawDesc = media["description"]?.toString() ?? "";
+                        String fullDescMarkdown = _convertHtmlToMarkdown(
+                          rawDesc,
+                        );
+
+                        if (altTitlesSet.isNotEmpty) {
+                          final String altTitlesFormatted = altTitlesSet.join(
+                            ", ",
+                          );
+                          if (fullDescMarkdown.isNotEmpty) {
+                            fullDescMarkdown +=
+                                "\n\n**Alternative Titles:**\n$altTitlesFormatted";
+                          } else {
+                            fullDescMarkdown =
+                                "**Alternative Titles:**\n$altTitlesFormatted";
+                          }
+                        }
+
+                        if (fullDescMarkdown.isEmpty) {
+                          return const Text("N/A");
+                        }
+
+                        return MarkdownBody(
+                          data: fullDescMarkdown,
+                          selectable: true,
+                          styleSheet:
+                              MarkdownStyleSheet.fromTheme(
+                                Theme.of(context),
+                              ).copyWith(
+                                p: TextStyle(
+                                  fontSize:
+                                      Theme.of(
+                                        context,
+                                      ).textTheme.bodyMedium?.fontSize ??
+                                      14,
+                                ),
                               ),
-                              selectable: true,
-                              styleSheet:
-                                  MarkdownStyleSheet.fromTheme(
-                                    Theme.of(context),
-                                  ).copyWith(
-                                    p: TextStyle(
-                                      fontSize:
-                                          Theme.of(
-                                            context,
-                                          ).textTheme.bodyMedium?.fontSize ??
-                                          14,
-                                    ),
-                                  ),
-                              onTapLink: (text, href, title) async {
-                                if (href != null) {
-                                  final uri = Uri.parse(href);
-                                  try {
-                                    await launchUrl(
-                                      uri,
-                                      mode: LaunchMode.platformDefault,
-                                    );
-                                  } catch (_) {}
-                                }
-                              },
-                            )
-                          : const Text("N/A"),
+                          onTapLink: (text, href, title) async {
+                            if (href != null) {
+                              final uri = Uri.parse(href);
+                              try {
+                                await launchUrl(
+                                  uri,
+                                  mode: LaunchMode.platformDefault,
+                                );
+                              } catch (_) {}
+                            }
+                          },
+                        );
+                      },
                     ),
                   ],
                 ),

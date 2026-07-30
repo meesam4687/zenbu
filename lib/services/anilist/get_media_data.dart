@@ -10,7 +10,8 @@ Future<Map<String, dynamic>> getAnimeData(int id) async {
           english
           native
           romaji
-        } 
+        }
+        synonyms
         format
         coverImage {
           extraLarge
@@ -162,7 +163,8 @@ Future<Map<String, dynamic>> getMangaData(int id) async {
           english
           native
           romaji
-        } 
+        }
+        synonyms
         format
         coverImage {
           extraLarge
