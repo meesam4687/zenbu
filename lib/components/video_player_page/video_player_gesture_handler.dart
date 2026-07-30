@@ -275,68 +275,80 @@ class _VideoPlayerGestureHandlerState extends State<VideoPlayerGestureHandler>
               },
             ),
           ),
-          if (_showVerticalOverlay)
-            Align(
-              alignment: widget.isLeft
-                  ? Alignment.centerLeft
-                  : Alignment.centerRight,
-              child: Padding(
-                padding: EdgeInsets.only(
-                  left: widget.isLeft ? 56.0 : 0.0,
-                  right: widget.isLeft ? 0.0 : 56.0,
-                ),
-                child: Container(
-                  width: 36,
-                  height: 160,
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.6),
-                    borderRadius: BorderRadius.circular(18),
-                    border: Border.all(color: Colors.white12),
+          IgnorePointer(
+            ignoring: !_showVerticalOverlay,
+            child: AnimatedOpacity(
+              duration: const Duration(milliseconds: 200),
+              opacity: _showVerticalOverlay ? 1.0 : 0.0,
+              child: Align(
+                alignment: widget.isLeft
+                    ? Alignment.centerLeft
+                    : Alignment.centerRight,
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    left: widget.isLeft ? 56.0 : 0.0,
+                    right: widget.isLeft ? 0.0 : 56.0,
                   ),
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  child: Column(
-                    children: [
-                      Icon(
-                        widget.isLeft
-                            ? Icons.brightness_5_rounded
-                            : (_currentValue == 0.0
-                                  ? Icons.volume_mute_rounded
-                                  : _currentValue < 0.5
-                                  ? Icons.volume_down_rounded
-                                  : Icons.volume_up_rounded),
-                        color: Colors.white,
-                        size: 20,
-                      ),
-                      const SizedBox(height: 10),
-                      Expanded(
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(3),
-                          child: Container(
-                            width: 6,
-                            color: Colors.white24,
-                            alignment: Alignment.bottomCenter,
-                            child: FractionallySizedBox(
-                              heightFactor: _currentValue,
-                              widthFactor: 1.0,
-                              child: Container(color: Colors.white),
+                  child: Container(
+                    width: 36,
+                    height: 160,
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.6),
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(color: Colors.white12),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    child: Column(
+                      children: [
+                        Icon(
+                          widget.isLeft
+                              ? Icons.brightness_5_rounded
+                              : (_currentValue == 0.0
+                                    ? Icons.volume_mute_rounded
+                                    : _currentValue < 0.5
+                                    ? Icons.volume_down_rounded
+                                    : Icons.volume_up_rounded),
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                        const SizedBox(height: 10),
+                        Expanded(
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(6),
+                            child: Container(
+                              width: 8,
+                              color: Colors.white24,
+                              alignment: Alignment.bottomCenter,
+                              child: FractionallySizedBox(
+                                heightFactor: _currentValue,
+                                widthFactor: 1.0,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        '${(_currentValue * 100).toInt()}',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
+                        const SizedBox(height: 10),
+                        Text(
+                          '${(_currentValue * 100).toInt()}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
+          ),
         ],
       ),
     );
