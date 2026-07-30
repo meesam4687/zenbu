@@ -21,7 +21,7 @@ class Details extends StatelessWidget {
             const SizedBox(width: 12),
             Flexible(
               child: Container(
-                margin: EdgeInsets.only(left: 10),
+                margin: const EdgeInsets.only(left: 10),
                 child: Text(
                   item.value ?? "N/A",
                   style: TextStyle(

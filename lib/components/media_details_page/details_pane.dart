@@ -9,6 +9,7 @@ import 'package:zenbu/components/global/item_card.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:html/parser.dart' show parseFragment;
+import 'package:zenbu/pages/media_search_page.dart';
 
 String _convertHtmlToMarkdown(String html) {
   var out = html;
@@ -300,9 +301,58 @@ class _DetailsPaneState extends State<DetailsPane>
                         scrollDirection: Axis.horizontal,
                         itemCount: (genres + tags).length,
                         itemBuilder: (context, index) {
+                          final item = (genres + tags)[index].toString();
+                          final bool isNA = item == "N/A";
+                          final bool isGenre = genres.contains(item);
+
                           return Padding(
                             padding: const EdgeInsets.only(right: 8.0),
-                            child: Chip(label: Text((genres + tags)[index])),
+                            child: ActionChip(
+                              label: Text(item),
+                              onPressed: isNA
+                                  ? null
+                                  : () {
+                                      final provider =
+                                          Provider.of<StateProvider>(
+                                            context,
+                                            listen: false,
+                                          );
+                                      final Map filters = Map.of(
+                                        widget.isAnime
+                                            ? provider.currentAnimeFilters
+                                            : provider.currentMangaFilters,
+                                      );
+
+                                      if (isGenre) {
+                                        filters["selectedGenres"] = <String>{
+                                          item,
+                                        };
+                                        filters["selectedTags"] = <String>{};
+                                      } else {
+                                        filters["selectedGenres"] = <String>{};
+                                        filters["selectedTags"] = <String>{
+                                          item,
+                                        };
+                                      }
+
+                                      if (widget.isAnime) {
+                                        provider.currentAnimeFilters = filters;
+                                      } else {
+                                        provider.currentMangaFilters = filters;
+                                      }
+
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (context) => SearchPage(
+                                            isAnime: widget.isAnime,
+                                            query: null,
+                                            genres: isGenre ? [item] : null,
+                                            tags: !isGenre ? [item] : null,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                            ),
                           );
                         },
                       ),
@@ -386,8 +436,9 @@ class _DetailsPaneState extends State<DetailsPane>
                                             .toString()
                                             .toLowerCase(),
                                     title: provider.resolveTitle(
-                                         media["relations"]["edges"][index]
-                                             ["node"]["title"] as Map?),
+                                      media["relations"]["edges"][index]["node"]["title"]
+                                          as Map?,
+                                    ),
                                     image:
                                         media["relations"]["edges"][index]["node"]["coverImage"]["extraLarge"],
                                     state:
@@ -488,7 +539,8 @@ class _DetailsPaneState extends State<DetailsPane>
                                     type: (nodeMedia["type"] as String)
                                         .toLowerCase(),
                                     title: provider.resolveTitle(
-                                         nodeMedia["title"] as Map?),
+                                      nodeMedia["title"] as Map?,
+                                    ),
                                     image:
                                         nodeMedia["coverImage"]["extraLarge"],
                                     mediaListEntry:
