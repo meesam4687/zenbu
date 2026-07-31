@@ -207,7 +207,10 @@ class _DetailsPaneState extends State<DetailsPane>
         final statusVal = media["status"] != null
             ? "${(media["status"] as String).substring(0, 1).toUpperCase()}${(media["status"] as String).substring(1).toLowerCase()}"
             : "N/A";
-        detailsItems.add((label: "Status", value: statusVal));
+        detailsItems.add((
+          label: "Status",
+          value: statusVal.replaceAll("_", " "),
+        ));
 
         final startDateVal = (months[media["startDate"]["month"]] != null)
             ? "${months[media["startDate"]["month"]]} ${media["startDate"]["day"]}, ${media["startDate"]["year"]}"
