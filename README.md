@@ -19,14 +19,14 @@
 
 <p align="center">
   <img src="https://cdn.meesam.dev/zenbu/Screenshot_20260629_171223.jpg" width="220">
-  <img src="https://cdn.meesam.dev/zenbu/home.jpg" width="220">
-  <img src="https://cdn.meesam.dev/zenbu/anime.jpg" width="220">
+  <img src="https://cdn.meesam.dev/home.jpg" width="220">
+  <img src="https://cdn.meesam.dev/anime.jpg" width="220">
 </p>
 
 <p align="center">
-  <img src="https://cdn.meesam.dev/zenbu/manga.jpg" width="220">
-  <img src="https://cdn.meesam.dev/zenbu/animep.jpg" width="220">
-  <img src="https://cdn.meesam.dev/zenbu/mangap.jpg" width="220">
+  <img src="https://cdn.meesam.dev/manga.jpg" width="220">
+  <img src="https://cdn.meesam.dev/animep.jpg" width="220">
+  <img src="https://cdn.meesam.dev/mangap.jpg" width="220">
 </p>
 
 ---
