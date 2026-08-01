@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/services.dart';
 import 'package:zenbu/services/anilist/anilist.dart';
 import 'package:zenbu/components/media_details_page/details.dart';
 import 'package:zenbu/pages/error_page.dart';
@@ -361,51 +362,60 @@ class _DetailsPaneState extends State<DetailsPane>
 
                           return Padding(
                             padding: const EdgeInsets.only(right: 8.0),
-                            child: ActionChip(
-                              label: Text(item),
-                              onPressed: isNA
-                                  ? null
-                                  : () {
-                                      final provider =
-                                          Provider.of<StateProvider>(
-                                            context,
-                                            listen: false,
-                                          );
-                                      final Map filters = Map.of(
-                                        widget.isAnime
-                                            ? provider.currentAnimeFilters
-                                            : provider.currentMangaFilters,
-                                      );
+                            child: GestureDetector(
+                              onLongPress: () {
+                                Clipboard.setData(ClipboardData(text: item));
+                                HapticFeedback.mediumImpact();
+                              },
+                              child: ActionChip(
+                                label: Text(item),
+                                onPressed: isNA
+                                    ? null
+                                    : () {
+                                        final provider =
+                                            Provider.of<StateProvider>(
+                                              context,
+                                              listen: false,
+                                            );
+                                        final Map filters = Map.of(
+                                          widget.isAnime
+                                              ? provider.currentAnimeFilters
+                                              : provider.currentMangaFilters,
+                                        );
 
-                                      if (isGenre) {
-                                        filters["selectedGenres"] = <String>{
-                                          item,
-                                        };
-                                        filters["selectedTags"] = <String>{};
-                                      } else {
-                                        filters["selectedGenres"] = <String>{};
-                                        filters["selectedTags"] = <String>{
-                                          item,
-                                        };
-                                      }
+                                        if (isGenre) {
+                                          filters["selectedGenres"] = <String>{
+                                            item,
+                                          };
+                                          filters["selectedTags"] = <String>{};
+                                        } else {
+                                          filters["selectedGenres"] =
+                                              <String>{};
+                                          filters["selectedTags"] = <String>{
+                                            item,
+                                          };
+                                        }
 
-                                      if (widget.isAnime) {
-                                        provider.currentAnimeFilters = filters;
-                                      } else {
-                                        provider.currentMangaFilters = filters;
-                                      }
+                                        if (widget.isAnime) {
+                                          provider.currentAnimeFilters =
+                                              filters;
+                                        } else {
+                                          provider.currentMangaFilters =
+                                              filters;
+                                        }
 
-                                      Navigator.of(context).push(
-                                        MaterialPageRoute(
-                                          builder: (context) => SearchPage(
-                                            isAnime: widget.isAnime,
-                                            query: null,
-                                            genres: isGenre ? [item] : null,
-                                            tags: !isGenre ? [item] : null,
+                                        Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                            builder: (context) => SearchPage(
+                                              isAnime: widget.isAnime,
+                                              query: null,
+                                              genres: isGenre ? [item] : null,
+                                              tags: !isGenre ? [item] : null,
+                                            ),
                                           ),
-                                        ),
-                                      );
-                                    },
+                                        );
+                                      },
+                              ),
                             ),
                           );
                         },
