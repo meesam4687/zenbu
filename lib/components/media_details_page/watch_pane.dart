@@ -692,19 +692,40 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
                                           SizedBox(
                                             width: 140,
                                             height: 80,
-                                            child:
-                                                widget.coverImage != null &&
-                                                    widget
-                                                        .coverImage!
-                                                        .isNotEmpty
+                                            child: (ep.thumbnailUrl != null &&
+                                                    ep.thumbnailUrl!.isNotEmpty)
                                                 ? CustomImage(
-                                                    imageUrl:
-                                                        widget.coverImage!,
+                                                    imageUrl: ep.thumbnailUrl!,
                                                     fit: BoxFit.cover,
                                                     errorWidget:
-                                                        _buildPlaceholderThumbnail(),
+                                                        (widget.coverImage !=
+                                                                    null &&
+                                                                widget
+                                                                    .coverImage!
+                                                                    .isNotEmpty)
+                                                            ? CustomImage(
+                                                                imageUrl:
+                                                                    widget
+                                                                        .coverImage!,
+                                                                fit: BoxFit
+                                                                    .cover,
+                                                                errorWidget:
+                                                                    _buildPlaceholderThumbnail(),
+                                                              )
+                                                            : _buildPlaceholderThumbnail(),
                                                   )
-                                                : _buildPlaceholderThumbnail(),
+                                                : (widget.coverImage != null &&
+                                                        widget
+                                                            .coverImage!
+                                                            .isNotEmpty)
+                                                    ? CustomImage(
+                                                        imageUrl:
+                                                            widget.coverImage!,
+                                                        fit: BoxFit.cover,
+                                                        errorWidget:
+                                                            _buildPlaceholderThumbnail(),
+                                                      )
+                                                    : _buildPlaceholderThumbnail(),
                                           ),
                                           const SizedBox(width: 16),
                                           Expanded(
@@ -1325,7 +1346,12 @@ class _WrongTitleBottomSheetState extends State<_WrongTitleBottomSheet> {
                             result['name'] ?? result['title'] ?? 'Unknown';
                         final link = result['link'] ?? '';
                         final cover =
-                            result['cover'] ?? result['thumbnail'] ?? '';
+                            result['cover'] ??
+                            result['thumbnail'] ??
+                            result['imageUrl'] ??
+                            result['image'] ??
+                            result['coverImage'] ??
+                            '';
                         final isSelected = widget.currentCustomLink == link;
 
                         return Card(
