@@ -13,6 +13,8 @@ import 'package:zenbu/components/manga_reader_page/manga_bottom_controls.dart';
 import 'package:zenbu/services/progress_service.dart';
 import 'package:zenbu/services/discord_service.dart';
 
+enum MangaReadingMode { webtoon, leftToRight, rightToLeft }
+
 class MangaReaderPage extends StatefulWidget {
   final List<ExtEpisode> chapters;
   final int currentIndex;
@@ -43,7 +45,8 @@ class _MangaReaderPageState extends State<MangaReaderPage>
   String? _errorMessage;
   ExtensionService? _jsEngine;
 
-  bool _isWebtoonMode = true;
+  MangaReadingMode _readingMode = MangaReadingMode.webtoon;
+  bool get _isWebtoonMode => _readingMode == MangaReadingMode.webtoon;
   bool _showControls = true;
   int _currentPageIndex = 0;
 
@@ -141,30 +144,125 @@ class _MangaReaderPageState extends State<MangaReaderPage>
 
   Future<void> _loadReadingModePreference() async {
     final prefs = await SharedPreferences.getInstance();
-    final isWebtoon = prefs.getBool('manga_reader_webtoon') ?? true;
+    final modeStr = prefs.getString('manga_reading_mode');
+    MangaReadingMode mode;
+    if (modeStr != null) {
+      if (modeStr == 'left_to_right') {
+        mode = MangaReadingMode.leftToRight;
+      } else if (modeStr == 'right_to_left') {
+        mode = MangaReadingMode.rightToLeft;
+      } else {
+        mode = MangaReadingMode.webtoon;
+      }
+    } else {
+      final isWebtoon = prefs.getBool('manga_reader_webtoon') ?? true;
+      mode = isWebtoon
+          ? MangaReadingMode.webtoon
+          : MangaReadingMode.leftToRight;
+    }
+
     setState(() {
-      _isWebtoonMode = isWebtoon;
+      _readingMode = mode;
       if (!_isWebtoonMode) {
         _pageController = PageController(initialPage: _currentPageIndex);
       }
     });
   }
 
-  Future<void> _toggleReadingMode() async {
+  Future<void> _setReadingMode(MangaReadingMode newMode) async {
+    if (_readingMode == newMode) return;
     final prefs = await SharedPreferences.getInstance();
-    final newMode = !_isWebtoonMode;
-    await prefs.setBool('manga_reader_webtoon', newMode);
+    String modeStr = 'webtoon';
+    if (newMode == MangaReadingMode.leftToRight) {
+      modeStr = 'left_to_right';
+    } else if (newMode == MangaReadingMode.rightToLeft) {
+      modeStr = 'right_to_left';
+    }
+    await prefs.setString('manga_reading_mode', modeStr);
     _transformationController.value = Matrix4.identity();
     setState(() {
-      _isWebtoonMode = newMode;
+      _readingMode = newMode;
       _isZoomed = false;
       if (_isWebtoonMode) {
         _pageController?.dispose();
         _pageController = null;
       } else {
+        _pageController?.dispose();
         _pageController = PageController(initialPage: _currentPageIndex);
       }
     });
+  }
+
+  void _showSettingsModal() {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        final theme = Theme.of(context);
+        final primaryColor = theme.colorScheme.primary;
+
+        return Container(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                child: Text(
+                  'Reading Mode',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ),
+              ListTile(
+                leading: const Icon(Icons.view_day),
+                title: const Text('Webnovel'),
+                subtitle: const Text(
+                  'Vertical scrolling',
+                  style: TextStyle(fontSize: 12),
+                ),
+                trailing: _readingMode == MangaReadingMode.webtoon
+                    ? Icon(Icons.check, color: primaryColor)
+                    : null,
+                onTap: () {
+                  Navigator.of(context).pop();
+                  _setReadingMode(MangaReadingMode.webtoon);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.swipe_left),
+                title: const Text('Right to left swipe'),
+                subtitle: const Text(
+                  'Pages go from right to left',
+                  style: TextStyle(fontSize: 12),
+                ),
+                trailing: _readingMode == MangaReadingMode.leftToRight
+                    ? Icon(Icons.check, color: primaryColor)
+                    : null,
+                onTap: () {
+                  Navigator.of(context).pop();
+                  _setReadingMode(MangaReadingMode.leftToRight);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.swipe_right),
+                title: const Text('Left to right swipe'),
+                subtitle: const Text(
+                  'Pages go from left to right',
+                  style: TextStyle(fontSize: 12),
+                ),
+                trailing: _readingMode == MangaReadingMode.rightToLeft
+                    ? Icon(Icons.check, color: primaryColor)
+                    : null,
+                onTap: () {
+                  Navigator.of(context).pop();
+                  _setReadingMode(MangaReadingMode.rightToLeft);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   void _onScroll() {
@@ -424,8 +522,7 @@ class _MangaReaderPageState extends State<MangaReaderPage>
                 child: MangaHeader(
                   mangaTitle: widget.mangaTitle,
                   chapter: currentChapter,
-                  isWebtoonMode: _isWebtoonMode,
-                  onToggleReadingMode: _toggleReadingMode,
+                  onSettingsPressed: _showSettingsModal,
                   onBackPressed: () {
                     SystemChrome.setEnabledSystemUIMode(
                       SystemUiMode.edgeToEdge,
@@ -577,6 +674,7 @@ class _MangaReaderPageState extends State<MangaReaderPage>
       onPointerCancel: (_) => setState(() => _pointerCount--),
       child: PageView.builder(
         controller: _pageController,
+        reverse: _readingMode == MangaReadingMode.rightToLeft,
         physics: (_isZoomed || _pointerCount >= 2)
             ? const NeverScrollableScrollPhysics()
             : const ClampingScrollPhysics(),

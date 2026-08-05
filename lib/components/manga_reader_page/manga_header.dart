@@ -4,16 +4,14 @@ import 'package:zenbu/services/mangayomi/models/extensions_models.dart';
 class MangaHeader extends StatelessWidget implements PreferredSizeWidget {
   final String mangaTitle;
   final ExtEpisode chapter;
-  final bool isWebtoonMode;
-  final VoidCallback onToggleReadingMode;
+  final VoidCallback onSettingsPressed;
   final VoidCallback onBackPressed;
 
   const MangaHeader({
     super.key,
     required this.mangaTitle,
     required this.chapter,
-    required this.isWebtoonMode,
-    required this.onToggleReadingMode,
+    required this.onSettingsPressed,
     required this.onBackPressed,
   });
 
@@ -58,14 +56,9 @@ class MangaHeader extends StatelessWidget implements PreferredSizeWidget {
         ),
         actions: [
           IconButton(
-            icon: Icon(
-              isWebtoonMode ? Icons.view_day : Icons.swap_horizontal_circle,
-              color: Colors.white,
-            ),
-            tooltip: isWebtoonMode
-                ? 'Switch to Single Page'
-                : 'Switch to Webtoon Scroll',
-            onPressed: onToggleReadingMode,
+            icon: const Icon(Icons.settings, color: Colors.white),
+            tooltip: 'Settings',
+            onPressed: onSettingsPressed,
           ),
         ],
       ),
