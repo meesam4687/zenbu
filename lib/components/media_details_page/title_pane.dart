@@ -356,7 +356,9 @@ class _TitlePaneState extends State<TitlePane> {
                                         isFavourite
                                             ? Icons.favorite
                                             : Icons.favorite_border,
-                                        color: Colors.white,
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.onPrimaryContainer,
                                         size: 20,
                                       ),
                               ),
@@ -601,7 +603,9 @@ class _TitlePaneState extends State<TitlePane> {
                                         isFavourite
                                             ? Icons.favorite
                                             : Icons.favorite_border,
-                                        color: Colors.white,
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.onPrimaryContainer,
                                         size: 20,
                                       ),
                               ),
