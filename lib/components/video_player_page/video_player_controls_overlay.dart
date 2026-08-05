@@ -9,9 +9,6 @@ class VideoPlayerControlsOverlay extends StatefulWidget {
   final String animeTitle;
   final String episodeName;
   final bool hasNextEpisode;
-  final bool hasSubtitles;
-  final bool hasMultipleVideos;
-  final bool isSubtitleActive;
   final bool isPlaying;
   final String currentPositionText;
   final String totalDurationText;
@@ -19,8 +16,7 @@ class VideoPlayerControlsOverlay extends StatefulWidget {
 
   final VoidCallback onBackPressed;
   final VoidCallback onNextEpisodePressed;
-  final VoidCallback onSubtitlePressed;
-  final VoidCallback onQualityPressed;
+  final VoidCallback onSettingsPressed;
   final VoidCallback onPipPressed;
   final VoidCallback onPlayPausePressed;
   final VoidCallback onReplayPressed;
@@ -38,17 +34,13 @@ class VideoPlayerControlsOverlay extends StatefulWidget {
     required this.animeTitle,
     required this.episodeName,
     required this.hasNextEpisode,
-    required this.hasSubtitles,
-    required this.hasMultipleVideos,
-    required this.isSubtitleActive,
     required this.isPlaying,
     required this.currentPositionText,
     required this.totalDurationText,
     required this.seekBar,
     required this.onBackPressed,
     required this.onNextEpisodePressed,
-    required this.onSubtitlePressed,
-    required this.onQualityPressed,
+    required this.onSettingsPressed,
     required this.onPipPressed,
     required this.onPlayPausePressed,
     required this.onReplayPressed,
@@ -209,13 +201,9 @@ class _VideoPlayerControlsOverlayState extends State<VideoPlayerControlsOverlay>
                       animeTitle: widget.animeTitle,
                       episodeName: widget.episodeName,
                       hasNextEpisode: widget.hasNextEpisode,
-                      hasSubtitles: widget.hasSubtitles,
-                      hasMultipleVideos: widget.hasMultipleVideos,
-                      isSubtitleActive: widget.isSubtitleActive,
                       onBackPressed: widget.onBackPressed,
                       onNextEpisodePressed: widget.onNextEpisodePressed,
-                      onSubtitlePressed: widget.onSubtitlePressed,
-                      onQualityPressed: widget.onQualityPressed,
+                      onSettingsPressed: widget.onSettingsPressed,
                       onPipPressed: widget.onPipPressed,
                     ),
                   ),

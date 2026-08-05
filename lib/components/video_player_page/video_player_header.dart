@@ -4,13 +4,9 @@ class VideoPlayerHeader extends StatelessWidget implements PreferredSizeWidget {
   final String animeTitle;
   final String episodeName;
   final bool hasNextEpisode;
-  final bool hasSubtitles;
-  final bool hasMultipleVideos;
-  final bool isSubtitleActive;
   final VoidCallback onBackPressed;
   final VoidCallback? onNextEpisodePressed;
-  final VoidCallback onSubtitlePressed;
-  final VoidCallback onQualityPressed;
+  final VoidCallback onSettingsPressed;
   final VoidCallback onPipPressed;
 
   const VideoPlayerHeader({
@@ -18,20 +14,14 @@ class VideoPlayerHeader extends StatelessWidget implements PreferredSizeWidget {
     required this.animeTitle,
     required this.episodeName,
     required this.hasNextEpisode,
-    required this.hasSubtitles,
-    required this.hasMultipleVideos,
-    required this.isSubtitleActive,
     required this.onBackPressed,
     required this.onNextEpisodePressed,
-    required this.onSubtitlePressed,
-    required this.onQualityPressed,
+    required this.onSettingsPressed,
     required this.onPipPressed,
   });
 
   @override
   Widget build(BuildContext context) {
-    final primaryColor = Theme.of(context).colorScheme.primary;
-
     return AppBar(
       backgroundColor: Colors.transparent,
       elevation: 0,
@@ -68,21 +58,11 @@ class VideoPlayerHeader extends StatelessWidget implements PreferredSizeWidget {
             tooltip: 'Next Episode',
             onPressed: onNextEpisodePressed,
           ),
-        if (hasSubtitles)
-          IconButton(
-            icon: Icon(
-              Icons.closed_caption,
-              color: isSubtitleActive ? primaryColor : Colors.white,
-            ),
-            tooltip: 'Subtitles',
-            onPressed: onSubtitlePressed,
-          ),
-        if (hasMultipleVideos)
-          IconButton(
-            icon: const Icon(Icons.settings, color: Colors.white),
-            tooltip: 'Quality',
-            onPressed: onQualityPressed,
-          ),
+        IconButton(
+          icon: const Icon(Icons.settings, color: Colors.white),
+          tooltip: 'Settings',
+          onPressed: onSettingsPressed,
+        ),
       ],
     );
   }

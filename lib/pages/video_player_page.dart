@@ -18,6 +18,7 @@ import 'package:zenbu/services/download_service.dart';
 import 'package:zenbu/components/video_player_page/video_player_gesture_handler.dart';
 import 'package:zenbu/components/video_player_page/buffered_seek_bar_painter.dart';
 import 'package:zenbu/components/video_player_page/video_player_controls_overlay.dart';
+import 'package:zenbu/components/video_player_page/video_player_settings_modal.dart';
 
 class SkipTime {
   final double startTime;
@@ -73,6 +74,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
   String? _errorMessage;
   Duration _currentPosition = Duration.zero;
   bool _isHolding2x = false;
+  double _currentPlaybackSpeed = 1.0;
 
   void _onLongPressStart() {
     if (_videoPlayerController != null &&
@@ -88,7 +90,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
   void _onLongPressEnd() {
     if (_videoPlayerController != null &&
         _videoPlayerController!.value.isInitialized) {
-      _videoPlayerController!.setPlaybackSpeed(1.0);
+      _videoPlayerController!.setPlaybackSpeed(_currentPlaybackSpeed);
     }
     if (_isHolding2x) {
       setState(() {
@@ -883,137 +885,42 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
     });
   }
 
-  void _showSubtitleSelector() {
-    final subtitles = _allSubtitles;
-    showModalBottomSheet(
-      context: context,
-      builder: (context) {
-        return Container(
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-                child: Text(
-                  'Select Subtitles',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-              ),
-              const Divider(),
-              Flexible(
-                child: ListView(
-                  shrinkWrap: true,
-                  children: [
-                    ListTile(
-                      title: const Text('Off'),
-                      trailing: _selectedSubtitle == null
-                          ? Icon(
-                              Icons.check,
-                              color: Theme.of(context).colorScheme.primary,
-                            )
-                          : null,
-                      onTap: () {
-                        Navigator.of(context).pop();
-                        _disableSubtitles();
-                      },
-                    ),
-                    ...subtitles.map((sub) {
-                      final isSelected = _selectedSubtitle?.file == sub.file;
-                      return ListTile(
-                        title: Text(
-                          sub.label,
-                          style: TextStyle(
-                            fontWeight: isSelected
-                                ? FontWeight.bold
-                                : FontWeight.normal,
-                            color: isSelected
-                                ? Theme.of(context).colorScheme.primary
-                                : null,
-                          ),
-                        ),
-                        trailing: isSelected
-                            ? Icon(
-                                Icons.check,
-                                color: Theme.of(context).colorScheme.primary,
-                              )
-                            : null,
-                        onTap: () {
-                          Navigator.of(context).pop();
-                          if (!isSelected) _loadSubtitle(sub);
-                        },
-                      );
-                    }),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
+  void _setPlaybackSpeed(double speed) {
+    if (_videoPlayerController != null &&
+        _videoPlayerController!.value.isInitialized) {
+      _videoPlayerController!.setPlaybackSpeed(speed);
+      setState(() {
+        _currentPlaybackSpeed = speed;
+      });
+    }
   }
 
-  void _showQualitySelector() {
+  void _showSettingsModal() {
+    _startControlsTimer();
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       builder: (context) {
-        return Container(
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-                child: Text(
-                  'Select Video Quality',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-              ),
-              const Divider(),
-              Flexible(
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: _videos.length,
-                  itemBuilder: (context, index) {
-                    final video = _videos[index];
-                    final isSel = video == _selectedVideo;
-                    return ListTile(
-                      title: Text(
-                        video.quality,
-                        style: TextStyle(
-                          fontWeight: isSel
-                              ? FontWeight.bold
-                              : FontWeight.normal,
-                          color: isSel
-                              ? Theme.of(context).colorScheme.primary
-                              : null,
-                        ),
-                      ),
-                      trailing: isSel
-                          ? Icon(
-                              Icons.check,
-                              color: Theme.of(context).colorScheme.primary,
-                            )
-                          : null,
-                      onTap: () {
-                        Navigator.of(context).pop();
-                        if (!isSel) {
-                          _currentPosition =
-                              _videoPlayerController?.value.position ??
-                              Duration.zero;
-                          setState(() => _selectedVideo = video);
-                          _initializePlayer();
-                        }
-                      },
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
+        return VideoPlayerSettingsModal(
+          videos: _videos,
+          selectedVideo: _selectedVideo,
+          onQualitySelected: (video) {
+            _currentPosition =
+                _videoPlayerController?.value.position ?? Duration.zero;
+            setState(() => _selectedVideo = video);
+            _initializePlayer();
+          },
+          subtitles: _allSubtitles,
+          selectedSubtitle: _selectedSubtitle,
+          onSubtitleSelected: (sub) {
+            if (sub == null) {
+              _disableSubtitles();
+            } else {
+              _loadSubtitle(sub);
+            }
+          },
+          currentSpeed: _currentPlaybackSpeed,
+          onSpeedSelected: _setPlaybackSpeed,
         );
       },
     );
@@ -1371,9 +1278,6 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
           animeTitle: widget.animeTitle,
           episodeName: _currentEpisode.name,
           hasNextEpisode: _nextEpisode != null,
-          hasSubtitles: _allSubtitles.isNotEmpty,
-          hasMultipleVideos: _videos.length > 1,
-          isSubtitleActive: _selectedSubtitle != null,
           isPlaying: _videoPlayerController!.value.isPlaying,
           currentPositionText: _formatDuration(currentPosition),
           totalDurationText: _formatDuration(totalDuration),
@@ -1390,14 +1294,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
             _startControlsTimer();
             _playNextEpisode();
           },
-          onSubtitlePressed: () {
-            _startControlsTimer();
-            _showSubtitleSelector();
-          },
-          onQualityPressed: () {
-            _startControlsTimer();
-            _showQualitySelector();
-          },
+          onSettingsPressed: _showSettingsModal,
           onPipPressed: _enterPipMode,
           onPlayPausePressed: () async {
             _startControlsTimer();
