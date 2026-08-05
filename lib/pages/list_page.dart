@@ -4,10 +4,16 @@ import 'package:zenbu/pages/error_page.dart';
 import 'package:flutter/material.dart';
 
 class ListPage extends StatefulWidget {
-  const ListPage({super.key, required this.title, required this.mediaListType});
+  const ListPage({
+    super.key,
+    required this.title,
+    required this.mediaListType,
+    this.userId,
+  });
 
   final String title;
   final MediaType mediaListType;
+  final int? userId;
 
   @override
   State<ListPage> createState() => _ListPageState();
@@ -23,7 +29,7 @@ class _ListPageState extends State<ListPage> {
 
   @override
   void initState() {
-    mediaLists = getMediaLists();
+    mediaLists = getMediaLists(userId: widget.userId);
     super.initState();
   }
 
@@ -35,7 +41,7 @@ class _ListPageState extends State<ListPage> {
 
   void _reloadData() {
     setState(() {
-      mediaLists = getMediaLists();
+      mediaLists = getMediaLists(userId: widget.userId);
     });
   }
 

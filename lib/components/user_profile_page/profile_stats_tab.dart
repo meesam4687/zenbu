@@ -5,16 +5,21 @@ import 'bar_chart.dart';
 import 'pie_chart.dart';
 import 'line_chart.dart';
 import 'horizontal_staff_list.dart';
+import 'profile_list_button.dart';
 
 class ProfileStatsTab extends StatelessWidget {
   const ProfileStatsTab({
     super.key,
     required this.statistics,
     required this.isAnime,
+    required this.userId,
+    required this.username,
   });
 
   final Map<String, dynamic> statistics;
   final bool isAnime;
+  final int userId;
+  final String username;
 
   @override
   Widget build(BuildContext context) {
@@ -220,6 +225,11 @@ class ProfileStatsTab extends StatelessWidget {
           StatsCard(
             title: isAnime ? 'Anime Statistics' : 'Manga Statistics',
             items: statsItems,
+          ),
+          ProfileListButton(
+            userId: userId,
+            username: username,
+            isAnime: isAnime,
           ),
           if (genres.isNotEmpty)
             GenreOverviewCard(title: 'Genre Overview', genres: genres),

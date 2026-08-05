@@ -14,6 +14,7 @@ Future<Map<String, dynamic>> getTrendingAnime(int page, int perPage) async {
           coverImage {
             large
           }
+          bannerImage
           type
           mediaListEntry {
             status

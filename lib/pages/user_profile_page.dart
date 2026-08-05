@@ -151,6 +151,7 @@ class _UserProfilePageState extends State<UserProfilePage>
             );
           }
 
+          final userId = user['id'] as int? ?? widget.userId ?? 0;
           final bannerImage = user['bannerImage'] as String?;
           final avatarUrl = user['avatar']?['large'] as String? ?? '';
           final username = user['name'] as String? ?? 'Unknown';
@@ -198,6 +199,8 @@ class _UserProfilePageState extends State<UserProfilePage>
                     child: ProfileStatsTab(
                       statistics: animeStats,
                       isAnime: true,
+                      userId: userId,
+                      username: username,
                     ),
                   ),
                 ),
@@ -208,6 +211,8 @@ class _UserProfilePageState extends State<UserProfilePage>
                     child: ProfileStatsTab(
                       statistics: mangaStats,
                       isAnime: false,
+                      userId: userId,
+                      username: username,
                     ),
                   ),
                 ),

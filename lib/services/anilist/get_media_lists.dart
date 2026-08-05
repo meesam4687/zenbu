@@ -2,11 +2,16 @@ import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:zenbu/authentication_token_controller.dart';
 import 'package:zenbu/services/anilist/anilist_client.dart';
 
-Future<Map<String, dynamic>> getMediaLists() async {
-  String? token = await TokenStorage.getAccessToken();
-  if (token == null) throw 'No authentication token';
-  Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
-  dynamic userId = decodedToken["sub"];
+Future<Map<String, dynamic>> getMediaLists({int? userId}) async {
+  int targetUserId;
+  if (userId != null) {
+    targetUserId = userId;
+  } else {
+    String? token = await TokenStorage.getAccessToken();
+    if (token == null) throw 'No authentication token';
+    Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
+    targetUserId = decodedToken["sub"];
+  }
 
   const String query = '''
     query (\$type: MediaType!, \$type2: MediaType!, \$userId: Int!) {
@@ -99,6 +104,6 @@ Future<Map<String, dynamic>> getMediaLists() async {
 
   return executeQuery(
     query,
-    variables: {"type": "ANIME", "type2": "MANGA", "userId": userId},
+    variables: {"type": "ANIME", "type2": "MANGA", "userId": targetUserId},
   );
 }
