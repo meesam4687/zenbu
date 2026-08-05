@@ -12,6 +12,7 @@ export 'get_upcoming.dart';
 export 'get_highest_rated.dart';
 export 'search_media.dart';
 export 'update_list_item.dart';
+export 'delete_list_item.dart';
 export 'get_notifications.dart';
 export 'get_simulcasts.dart';
 export 'toggle_favorite.dart';

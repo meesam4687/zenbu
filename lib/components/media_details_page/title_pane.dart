@@ -400,6 +400,7 @@ class _TitlePaneState extends State<TitlePane> {
                                         : mediaListEntry?["score"] ?? 0.0,
                                     repeatCount: mediaListEntry?["repeat"] ?? 0,
                                     mediaId: widget.id,
+                                    entryId: mediaListEntry?["id"],
                                     onUpdate: updateMediaDetails,
                                   ),
                                 );
@@ -644,6 +645,7 @@ class _TitlePaneState extends State<TitlePane> {
                                         : mediaListEntry?["score"] ?? 0.0,
                                     repeatCount: mediaListEntry?["repeat"] ?? 0,
                                     mediaId: widget.id,
+                                    entryId: mediaListEntry?["id"],
                                     onUpdate: updateMediaDetails,
                                   ),
                                 );

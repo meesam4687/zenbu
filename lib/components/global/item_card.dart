@@ -61,6 +61,7 @@ class _ItemCardState extends State<ItemCard> {
                 : entry?['score'] ?? 0.0,
             repeatCount: entry?['repeat'] ?? 0,
             mediaId: widget.id,
+            entryId: entry?['id'],
             onUpdate: (_, _, _) {},
           ),
         );
