@@ -28,6 +28,15 @@ Future<Map<String, dynamic>> getStudioData({
             }
             format
             seasonYear
+            mediaListEntry {
+              id
+              status
+              progress
+              score
+              repeat
+              startedAt { day month year }
+              completedAt { day month year }
+            }
           }
         }
       }
@@ -37,6 +46,5 @@ Future<Map<String, dynamic>> getStudioData({
   return executeQuery(
     query,
     variables: {"id": id, "page": page, "perPage": perPage},
-    requireAuth: false,
   );
 }

@@ -25,6 +25,15 @@ Future<Map<String, dynamic>> getStaffData(int id) async {
               coverImage { 
                 extraLarge 
               } 
+              mediaListEntry {
+                id
+                status
+                progress
+                score
+                repeat
+                startedAt { day month year }
+                completedAt { day month year }
+              }
             } 
             staffRole
           } 

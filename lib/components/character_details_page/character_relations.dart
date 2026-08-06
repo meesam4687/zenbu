@@ -33,11 +33,14 @@ class CharacterRelations extends StatelessWidget {
                 itemCount: relations.length,
                 itemBuilder: (context, index) {
                   final resolvedTitle = provider.resolveTitle(
-                      relations[index]["node"]["title"] as Map?,
-                      fallback: "N/A");
+                    relations[index]["node"]["title"] as Map?,
+                    fallback: "N/A",
+                  );
                   final title = resolvedTitle.length > 16
                       ? '${resolvedTitle.substring(0, 16)}...'
                       : resolvedTitle;
+                  final mediaListEntry =
+                      relations[index]["node"]["mediaListEntry"] as Map?;
                   return ItemCard(
                     title: title,
                     image: relations[index]["node"]["coverImage"]["extraLarge"],
@@ -46,6 +49,8 @@ class CharacterRelations extends StatelessWidget {
                         .toString()
                         .toLowerCase(),
                     state: relations[index]["staffRole"],
+                    mediaListEntry: mediaListEntry,
+                    listDataPreloaded: true,
                   );
                 },
               ),

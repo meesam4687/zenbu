@@ -155,6 +155,7 @@ class _StudioDetailsPageState extends State<StudioDetailsPage> {
                     }
 
                     final media = _medias[index];
+                    final mediaListEntry = media['mediaListEntry'] as Map?;
 
                     return Center(
                       child: Padding(
@@ -166,6 +167,8 @@ class _StudioDetailsPageState extends State<StudioDetailsPage> {
                           image: media['coverImage']?['large'] as String? ?? '',
                           id: media['id'] as int,
                           type: 'anime',
+                          mediaListEntry: mediaListEntry,
+                          listDataPreloaded: true,
                         ),
                       ),
                     );

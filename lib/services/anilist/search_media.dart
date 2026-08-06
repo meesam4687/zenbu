@@ -66,6 +66,7 @@ Future<Map<String, dynamic>> searchAnime(
           coverImage { large } 
           type
           mediaListEntry {
+            id
             status
             progress
             score
@@ -147,6 +148,7 @@ Future<Map<String, dynamic>> searchManga(
           coverImage { large } 
           type
           mediaListEntry {
+            id
             status
             progress
             score
