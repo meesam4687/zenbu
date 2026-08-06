@@ -81,6 +81,7 @@ class MainPageViewState extends State<MainPageView> {
 
     if (isTablet) {
       return Scaffold(
+        resizeToAvoidBottomInset: false,
         body: Row(
           children: [
             Theme(
@@ -91,40 +92,47 @@ class MainPageViewState extends State<MainPageView> {
                   indicatorShape: const StadiumBorder(),
                 ),
               ),
-              child: NavigationRail(
-                backgroundColor: ElevationOverlay.applySurfaceTint(
-                  Theme.of(context).colorScheme.surface,
-                  Theme.of(context).colorScheme.surfaceTint,
-                  3.0,
+              child: MediaQuery(
+                data: MediaQuery.of(context).copyWith(
+                  padding: EdgeInsets.zero,
+                  viewPadding: EdgeInsets.zero,
+                  viewInsets: EdgeInsets.zero,
                 ),
-                groupAlignment: 0.0,
-                selectedIndex: selectedIdx,
-                onDestinationSelected: (value) {
-                  setState(() {
-                    selectedIdx = value;
-                  });
-                },
-                labelType: NavigationRailLabelType.all,
-                destinations: const [
-                  NavigationRailDestination(
-                    padding: EdgeInsets.symmetric(vertical: 16.0),
-                    icon: Icon(Icons.video_collection),
-                    selectedIcon: Icon(Icons.video_collection),
-                    label: Text("Anime"),
+                child: NavigationRail(
+                  backgroundColor: ElevationOverlay.applySurfaceTint(
+                    Theme.of(context).colorScheme.surface,
+                    Theme.of(context).colorScheme.surfaceTint,
+                    3.0,
                   ),
-                  NavigationRailDestination(
-                    padding: EdgeInsets.symmetric(vertical: 16.0),
-                    icon: Icon(Icons.home),
-                    selectedIcon: Icon(Icons.home),
-                    label: Text("Home"),
-                  ),
-                  NavigationRailDestination(
-                    padding: EdgeInsets.symmetric(vertical: 16.0),
-                    icon: Icon(Icons.book_rounded),
-                    selectedIcon: Icon(Icons.book_rounded),
-                    label: Text("Manga"),
-                  ),
-                ],
+                  groupAlignment: 0.0,
+                  selectedIndex: selectedIdx,
+                  onDestinationSelected: (value) {
+                    setState(() {
+                      selectedIdx = value;
+                    });
+                  },
+                  labelType: NavigationRailLabelType.all,
+                  destinations: const [
+                    NavigationRailDestination(
+                      padding: EdgeInsets.symmetric(vertical: 8.0),
+                      icon: Icon(Icons.video_collection),
+                      selectedIcon: Icon(Icons.video_collection),
+                      label: Text("Anime"),
+                    ),
+                    NavigationRailDestination(
+                      padding: EdgeInsets.symmetric(vertical: 8.0),
+                      icon: Icon(Icons.home),
+                      selectedIcon: Icon(Icons.home),
+                      label: Text("Home"),
+                    ),
+                    NavigationRailDestination(
+                      padding: EdgeInsets.symmetric(vertical: 8.0),
+                      icon: Icon(Icons.book_rounded),
+                      selectedIcon: Icon(Icons.book_rounded),
+                      label: Text("Manga"),
+                    ),
+                  ],
+                ),
               ),
             ),
             Expanded(

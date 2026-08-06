@@ -3,9 +3,14 @@ import 'package:zenbu/pages/media_search_page.dart';
 import 'package:zenbu/pages/others_search_page.dart';
 
 class GlobalSearchBar extends StatefulWidget {
-  const GlobalSearchBar({super.key, required this.onSearchStateChanged});
+  const GlobalSearchBar({
+    super.key,
+    required this.onSearchStateChanged,
+    this.maxWidth,
+  });
 
   final ValueChanged<bool> onSearchStateChanged;
+  final double? maxWidth;
 
   @override
   State<GlobalSearchBar> createState() => _GlobalSearchBarState();
@@ -18,11 +23,22 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
   final TextEditingController _searchController = TextEditingController();
   bool _isSearching = false;
 
+  double _getExpandedWidth(BuildContext context) {
+    if (widget.maxWidth != null) {
+      return widget.maxWidth!;
+    }
+    final totalWidth = MediaQuery.of(context).size.width;
+    final bool hasNavRail = totalWidth >= 600;
+    final reserved = hasNavRail ? 200.0 : 120.0;
+    final calc = totalWidth - reserved;
+    return calc.clamp(140.0, calc);
+  }
+
   void _showOverlay() {
     _hideOverlay();
     if (!mounted) return;
 
-    final double expandedWidth = MediaQuery.of(context).size.width - 128;
+    final double expandedWidth = _getExpandedWidth(context);
 
     _overlayEntry = OverlayEntry(
       builder: (context) {
@@ -189,7 +205,7 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
 
   @override
   Widget build(BuildContext context) {
-    final double expandedWidth = MediaQuery.of(context).size.width - 128;
+    final double expandedWidth = _getExpandedWidth(context);
 
     return CompositedTransformTarget(
       link: _layerLink,
@@ -230,32 +246,39 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
           child: ClipRRect(
             borderRadius: BorderRadius.circular(28),
             child: _isSearching
-                ? Row(
-                    children: [
-                      const SizedBox(width: 8),
-                      const Icon(Icons.search, size: 20),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: TextField(
-                          controller: _searchController,
-                          focusNode: _searchFocusNode,
-                          decoration: const InputDecoration(
-                            hintText: 'Search...',
-                            border: InputBorder.none,
-                            isDense: true,
-                            contentPadding: EdgeInsets.zero,
+                ? SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    physics: const NeverScrollableScrollPhysics(),
+                    child: SizedBox(
+                      width: expandedWidth,
+                      child: Row(
+                        children: [
+                          const SizedBox(width: 8),
+                          const Icon(Icons.search, size: 20),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: TextField(
+                              controller: _searchController,
+                              focusNode: _searchFocusNode,
+                              decoration: const InputDecoration(
+                                hintText: 'Search...',
+                                border: InputBorder.none,
+                                isDense: true,
+                                contentPadding: EdgeInsets.zero,
+                              ),
+                              style: const TextStyle(fontSize: 14),
+                            ),
                           ),
-                          style: const TextStyle(fontSize: 14),
-                        ),
+                          IconButton(
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                            icon: const Icon(Icons.close, size: 18),
+                            onPressed: _onSearchTapped,
+                          ),
+                          const SizedBox(width: 4),
+                        ],
                       ),
-                      IconButton(
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
-                        icon: const Icon(Icons.close, size: 18),
-                        onPressed: _onSearchTapped,
-                      ),
-                      const SizedBox(width: 4),
-                    ],
+                    ),
                   )
                 : IconButton(
                     padding: EdgeInsets.zero,
