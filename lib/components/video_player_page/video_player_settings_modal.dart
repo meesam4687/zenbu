@@ -67,47 +67,45 @@ class _VideoPlayerSettingsModalState extends State<VideoPlayerSettingsModal> {
     final String subtitleText = widget.selectedSubtitle?.label ?? 'Off';
     final String speedText = '${widget.currentSpeed}x';
 
-    return SafeArea(
-      child: ClipRect(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxHeight: 295),
-          child: Padding(
-            padding: const EdgeInsets.only(top: 26, bottom: 12),
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 250),
-              switchInCurve: Curves.easeOutCubic,
-              switchOutCurve: Curves.easeInCubic,
-              layoutBuilder:
-                  (Widget? currentChild, List<Widget> previousChildren) {
-                    return Stack(
-                      alignment: Alignment.topCenter,
-                      children: <Widget>[...previousChildren, ?currentChild],
-                    );
-                  },
-              transitionBuilder: (Widget child, Animation<double> animation) {
-                final isSubMenu = child.key == const ValueKey('sub_menu');
-                final inOffset = isSubMenu
-                    ? const Offset(1.0, 0.0)
-                    : const Offset(-1.0, 0.0);
+    return ClipRect(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxHeight: 295),
+        child: Padding(
+          padding: const EdgeInsets.only(top: 26, bottom: 12),
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 250),
+            switchInCurve: Curves.easeOutCubic,
+            switchOutCurve: Curves.easeInCubic,
+            layoutBuilder:
+                (Widget? currentChild, List<Widget> previousChildren) {
+                  return Stack(
+                    alignment: Alignment.topCenter,
+                    children: <Widget>[...previousChildren, ?currentChild],
+                  );
+                },
+            transitionBuilder: (Widget child, Animation<double> animation) {
+              final isSubMenu = child.key == const ValueKey('sub_menu');
+              final inOffset = isSubMenu
+                  ? const Offset(1.0, 0.0)
+                  : const Offset(-1.0, 0.0);
 
-                return SlideTransition(
-                  position: Tween<Offset>(
-                    begin: inOffset,
-                    end: Offset.zero,
-                  ).animate(animation),
-                  child: Align(alignment: Alignment.topCenter, child: child),
-                );
-              },
-              child: _activeSubMenu == _SettingsSubMenu.main
-                  ? _buildMainMenu(
-                      context,
-                      theme,
-                      qualityText,
-                      subtitleText,
-                      speedText,
-                    )
-                  : _buildSubMenu(context, primaryColor),
-            ),
+              return SlideTransition(
+                position: Tween<Offset>(
+                  begin: inOffset,
+                  end: Offset.zero,
+                ).animate(animation),
+                child: Align(alignment: Alignment.topCenter, child: child),
+              );
+            },
+            child: _activeSubMenu == _SettingsSubMenu.main
+                ? _buildMainMenu(
+                    context,
+                    theme,
+                    qualityText,
+                    subtitleText,
+                    speedText,
+                  )
+                : _buildSubMenu(context, primaryColor),
           ),
         ),
       ),

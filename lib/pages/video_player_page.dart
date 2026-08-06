@@ -900,6 +900,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       builder: (context) {
         return VideoPlayerSettingsModal(
           videos: _videos,
