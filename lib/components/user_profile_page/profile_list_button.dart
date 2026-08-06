@@ -2,6 +2,7 @@ import 'dart:math';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:zenbu/components/global/custom_image.dart';
+import 'package:zenbu/components/global/shimmer_placeholder.dart';
 import 'package:zenbu/pages/list_page.dart';
 import 'package:zenbu/services/anilist/anilist.dart';
 
@@ -108,20 +109,26 @@ class _ProfileListButtonState extends State<ProfileListButton> {
         clipBehavior: Clip.antiAlias,
         child: Stack(
           children: [
-            if (_bannerImage != null && _bannerImage!.isNotEmpty)
-              Positioned.fill(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
-                  child: ImageFiltered(
-                    imageFilter: ui.ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-                    child: CustomImage(
-                      imageUrl: _bannerImage!,
-                      fit: BoxFit.cover,
-                      errorWidget: Container(),
-                    ),
-                  ),
-                ),
+            Positioned.fill(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: (_bannerImage != null && _bannerImage!.isNotEmpty)
+                    ? ImageFiltered(
+                        imageFilter:
+                            ui.ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+                        child: CustomImage(
+                          imageUrl: _bannerImage!,
+                          fit: BoxFit.cover,
+                          errorWidget: const ShimmerPlaceholder(
+                            borderRadius: BorderRadius.all(Radius.circular(16)),
+                          ),
+                        ),
+                      )
+                    : const ShimmerPlaceholder(
+                        borderRadius: BorderRadius.all(Radius.circular(16)),
+                      ),
               ),
+            ),
             Container(color: Colors.black.withValues(alpha: 0.4)),
             Container(
               margin: const EdgeInsets.all(10),
