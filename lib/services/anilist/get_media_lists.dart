@@ -10,7 +10,7 @@ Future<Map<String, dynamic>> getMediaLists({int? userId}) async {
     String? token = await TokenStorage.getAccessToken();
     if (token == null) throw 'No authentication token';
     Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
-    targetUserId = decodedToken["sub"];
+    targetUserId = int.parse(decodedToken["sub"].toString());
   }
 
   const String query = '''
@@ -28,6 +28,7 @@ Future<Map<String, dynamic>> getMediaLists({int? userId}) async {
               status
               bannerImage
               mediaListEntry {
+                id
                 status
                 progress
                 score
@@ -50,6 +51,7 @@ Future<Map<String, dynamic>> getMediaLists({int? userId}) async {
               coverImage { extraLarge }
               chapters
               mediaListEntry {
+                id
                 status
                 progress
                 score
@@ -72,6 +74,7 @@ Future<Map<String, dynamic>> getMediaLists({int? userId}) async {
               status
               bannerImage
               mediaListEntry {
+                id
                 status
                 progress
                 score
@@ -88,6 +91,7 @@ Future<Map<String, dynamic>> getMediaLists({int? userId}) async {
               coverImage { extraLarge }
               chapters
               mediaListEntry {
+                id
                 status
                 progress
                 score

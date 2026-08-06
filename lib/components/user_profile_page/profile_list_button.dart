@@ -148,7 +148,6 @@ class _ProfileListButtonState extends State<ProfileListButton> {
                     style: const TextStyle(
                       fontSize: 17,
                       color: Colors.white,
-                      fontWeight: FontWeight.w600,
                       shadows: [
                         Shadow(
                           blurRadius: 5.0,
