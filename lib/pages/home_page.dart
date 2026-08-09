@@ -153,6 +153,7 @@ class _HomePageState extends State<HomePage> {
                             if (providerData.isNotEmpty) {
                               showModalBottomSheet(
                                 context: context,
+                                useSafeArea: true,
                                 builder: (context) {
                                   return UserInfoModalSheet(
                                     profileImage: providerData['data']

@@ -13,7 +13,7 @@ class MainPageView extends StatefulWidget {
   State<MainPageView> createState() => MainPageViewState();
 }
 
-List<Widget> pages = [
+final List<Widget> pages = [
   const MediaDiscoveryPage(isAnime: true, key: ValueKey('anime_discovery')),
   const HomePage(),
   const MediaDiscoveryPage(isAnime: false, key: ValueKey('manga_discovery')),
@@ -21,6 +21,7 @@ List<Widget> pages = [
 
 class MainPageViewState extends State<MainPageView> {
   late int selectedIdx;
+
   @override
   void initState() {
     super.initState();
@@ -32,17 +33,21 @@ class MainPageViewState extends State<MainPageView> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final navigator = Navigator.of(context);
       final updateInfo = await UpdateService.checkUpdate();
+
       if (updateInfo != null && mounted) {
         try {
           final prefs = await SharedPreferences.getInstance();
+
           await prefs.setString(
             'cached_update_version',
             updateInfo.remoteVersion,
           );
+
           await prefs.setString(
             'cached_update_changelog',
             updateInfo.changelog,
           );
+
           await prefs.setString('cached_update_url', updateInfo.downloadUrl);
         } catch (_) {}
 
@@ -70,79 +75,91 @@ class MainPageViewState extends State<MainPageView> {
 
     final Widget bodyContent = PageTransitionSwitcher(
       duration: const Duration(milliseconds: 400),
-      transitionBuilder: (child, animation, secondaryAnimation) =>
-          FadeThroughTransition(
-            animation: animation,
-            secondaryAnimation: secondaryAnimation,
-            child: child,
-          ),
+      transitionBuilder: (child, animation, secondaryAnimation) {
+        return FadeThroughTransition(
+          animation: animation,
+          secondaryAnimation: secondaryAnimation,
+          child: child,
+        );
+      },
       child: pages[selectedIdx],
     );
 
     if (isTablet) {
+      final ThemeData theme = Theme.of(context);
+
+      final Color railColor = ElevationOverlay.applySurfaceTint(
+        theme.colorScheme.surface,
+        theme.colorScheme.surfaceTint,
+        3.0,
+      );
+
       return Scaffold(
         resizeToAvoidBottomInset: false,
         body: Row(
           children: [
-            Theme(
-              data: Theme.of(context).copyWith(
-                navigationRailTheme: Theme.of(context).navigationRailTheme.copyWith(
-                  useIndicator: true,
-                  indicatorColor: Theme.of(context).colorScheme.secondaryContainer,
-                  indicatorShape: const StadiumBorder(),
-                ),
-              ),
-              child: MediaQuery(
-                data: MediaQuery.of(context).copyWith(
-                  padding: EdgeInsets.zero,
-                  viewPadding: EdgeInsets.zero,
-                  viewInsets: EdgeInsets.zero,
-                ),
-                child: NavigationRail(
-                  backgroundColor: ElevationOverlay.applySurfaceTint(
-                    Theme.of(context).colorScheme.surface,
-                    Theme.of(context).colorScheme.surfaceTint,
-                    3.0,
+            ColoredBox(
+              color: railColor,
+              child: SafeArea(
+                left: true,
+                right: false,
+                top: false,
+                bottom: false,
+                child: Theme(
+                  data: theme.copyWith(
+                    navigationRailTheme: theme.navigationRailTheme.copyWith(
+                      useIndicator: true,
+                      indicatorColor: theme.colorScheme.secondaryContainer,
+                      indicatorShape: const StadiumBorder(),
+                    ),
                   ),
-                  groupAlignment: 0.0,
-                  selectedIndex: selectedIdx,
-                  onDestinationSelected: (value) {
-                    setState(() {
-                      selectedIdx = value;
-                    });
-                  },
-                  labelType: NavigationRailLabelType.all,
-                  destinations: const [
-                    NavigationRailDestination(
-                      padding: EdgeInsets.symmetric(vertical: 8.0),
-                      icon: Icon(Icons.video_collection),
-                      selectedIcon: Icon(Icons.video_collection),
-                      label: Text("Anime"),
+                  child: MediaQuery(
+                    data: MediaQuery.of(context).copyWith(
+                      padding: EdgeInsets.zero,
+                      viewPadding: EdgeInsets.zero,
+                      viewInsets: EdgeInsets.zero,
                     ),
-                    NavigationRailDestination(
-                      padding: EdgeInsets.symmetric(vertical: 8.0),
-                      icon: Icon(Icons.home),
-                      selectedIcon: Icon(Icons.home),
-                      label: Text("Home"),
+                    child: NavigationRail(
+                      backgroundColor: Colors.transparent,
+                      groupAlignment: 0.0,
+                      selectedIndex: selectedIdx,
+                      onDestinationSelected: (value) {
+                        setState(() {
+                          selectedIdx = value;
+                        });
+                      },
+                      labelType: NavigationRailLabelType.all,
+                      destinations: const [
+                        NavigationRailDestination(
+                          padding: EdgeInsets.symmetric(vertical: 8.0),
+                          icon: Icon(Icons.video_collection),
+                          selectedIcon: Icon(Icons.video_collection),
+                          label: Text('Anime'),
+                        ),
+                        NavigationRailDestination(
+                          padding: EdgeInsets.symmetric(vertical: 8.0),
+                          icon: Icon(Icons.home),
+                          selectedIcon: Icon(Icons.home),
+                          label: Text('Home'),
+                        ),
+                        NavigationRailDestination(
+                          padding: EdgeInsets.symmetric(vertical: 8.0),
+                          icon: Icon(Icons.book_rounded),
+                          selectedIcon: Icon(Icons.book_rounded),
+                          label: Text('Manga'),
+                        ),
+                      ],
                     ),
-                    NavigationRailDestination(
-                      padding: EdgeInsets.symmetric(vertical: 8.0),
-                      icon: Icon(Icons.book_rounded),
-                      selectedIcon: Icon(Icons.book_rounded),
-                      label: Text("Manga"),
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),
-            Expanded(
-              child: bodyContent,
-            ),
+
+            Expanded(child: bodyContent),
           ],
         ),
       );
     }
-
     return Scaffold(
       bottomNavigationBar: NavigationBar(
         surfaceTintColor: Theme.of(context).colorScheme.surfaceTint,
@@ -155,10 +172,10 @@ class MainPageViewState extends State<MainPageView> {
         destinations: const [
           NavigationDestination(
             icon: Icon(Icons.video_collection),
-            label: "Anime",
+            label: 'Anime',
           ),
-          NavigationDestination(icon: Icon(Icons.home), label: "Home"),
-          NavigationDestination(icon: Icon(Icons.book_rounded), label: "Manga"),
+          NavigationDestination(icon: Icon(Icons.home), label: 'Home'),
+          NavigationDestination(icon: Icon(Icons.book_rounded), label: 'Manga'),
         ],
       ),
       body: bodyContent,

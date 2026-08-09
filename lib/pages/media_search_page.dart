@@ -219,9 +219,11 @@ class _SearchPageState extends State<SearchPage> {
       child: Scaffold(
         appBar: AppBar(
           automaticallyImplyLeading: false,
-          flexibleSpace: SearchSegment(
-            searchText: widget.query,
-            isAnime: widget.isAnime,
+          flexibleSpace: SafeArea(
+            child: SearchSegment(
+              searchText: widget.query,
+              isAnime: widget.isAnime,
+            ),
           ),
           toolbarHeight: 80,
         ),
@@ -264,7 +266,8 @@ class _SearchPageState extends State<SearchPage> {
                                 padding: const EdgeInsets.only(left: 3.0),
                                 child: ItemCard(
                                   title: provider.resolveTitle(
-                                      medias[index]["title"] as Map?),
+                                    medias[index]["title"] as Map?,
+                                  ),
                                   image:
                                       medias[index]["coverImage"]["large"]
                                           as String,

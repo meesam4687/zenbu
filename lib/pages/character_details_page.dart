@@ -69,28 +69,31 @@ class _CharacterDetailsPageState extends State<CharacterDetailsPage> {
         return Scaffold(
           appBar: AppBar(),
           body: SingleChildScrollView(
-            child: Column(
-              children: [
-                CharacterHeader(
-                  characterImage: data["data"]["Character"]["image"]["large"],
-                  characterName: data["data"]["Character"]["name"]["full"],
-                  characterSecondaryNames: (secondaryNames).join(', '),
-                ),
-                CharacterDescription(
-                  characterGender: (data["data"]["Character"]["gender"] != null)
-                      ? data["data"]["Character"]["gender"]
-                      : "N/A",
-                  characterDescription:
-                      (data["data"]["Character"]["description"] != null)
-                      ? data["data"]["Character"]["description"]
-                      : "",
-                ),
-                CharacterRelations(
-                  relations:
-                      data["data"]["Character"]["media"]["edges"] as List,
-                ),
-                if (characterVAs.isNotEmpty) CharacterVAs(vas: characterVAs),
-              ],
+            child: SafeArea(
+              child: Column(
+                children: [
+                  CharacterHeader(
+                    characterImage: data["data"]["Character"]["image"]["large"],
+                    characterName: data["data"]["Character"]["name"]["full"],
+                    characterSecondaryNames: (secondaryNames).join(', '),
+                  ),
+                  CharacterDescription(
+                    characterGender:
+                        (data["data"]["Character"]["gender"] != null)
+                        ? data["data"]["Character"]["gender"]
+                        : "N/A",
+                    characterDescription:
+                        (data["data"]["Character"]["description"] != null)
+                        ? data["data"]["Character"]["description"]
+                        : "",
+                  ),
+                  CharacterRelations(
+                    relations:
+                        data["data"]["Character"]["media"]["edges"] as List,
+                  ),
+                  if (characterVAs.isNotEmpty) CharacterVAs(vas: characterVAs),
+                ],
+              ),
             ),
           ),
         );

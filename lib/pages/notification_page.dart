@@ -174,7 +174,7 @@ class _NotificationPageState extends State<NotificationPage> {
                         gridDelegate:
                             const SliverGridDelegateWithMaxCrossAxisExtent(
                               childAspectRatio: 16 / 9,
-                              maxCrossAxisExtent: 400,
+                              maxCrossAxisExtent: 410,
                             ),
                         itemCount: _isLoading ? items.length + 1 : items.length,
                         itemBuilder: (context, index) {

@@ -47,12 +47,14 @@ class _DownloadsPageState extends State<DownloadsPage> {
             ],
           ),
         ),
-        body: TabBarView(
-          children: [
-            _buildMediaList(1), // Anime
-            _buildMediaList(0), // Manga
-            _buildMediaList(2), // Novel
-          ],
+        body: SafeArea(
+          child: TabBarView(
+            children: [
+              _buildMediaList(1), // Anime
+              _buildMediaList(0), // Manga
+              _buildMediaList(2), // Novel
+            ],
+          ),
         ),
       ),
     );

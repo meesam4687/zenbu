@@ -70,7 +70,7 @@ class _MediaDiscoveryPageState extends State<MediaDiscoveryPage> {
 
     return Scaffold(
       appBar: AppBar(
-        flexibleSpace: SearchSegment(isAnime: widget.isAnime),
+        flexibleSpace: SafeArea(child: SearchSegment(isAnime: widget.isAnime)),
         toolbarHeight: 85,
       ),
       body: RefreshIndicator(
@@ -128,98 +128,100 @@ class _MediaDiscoveryPageState extends State<MediaDiscoveryPage> {
 
     return SingleChildScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
-      child: Column(
-        children: [
-          SizedBox(
-            height: 240,
-            child: PageView.builder(
-              itemCount: mediaList.length,
-              controller: PageController(viewportFraction: 1.0),
-              itemBuilder: (context, index) {
-                final media = mediaList[index];
-                final List? genresList = media["genres"] as List?;
-                final String tagString = genresList != null
-                    ? genresList.map((tag) => tag.toString()).join(" • ")
-                    : "";
-                final String displayTags = tagString.length > 20
-                    ? "${tagString.substring(0, 20)}..."
-                    : tagString;
+      child: SafeArea(
+        child: Column(
+          children: [
+            SizedBox(
+              height: 240,
+              child: PageView.builder(
+                itemCount: mediaList.length,
+                controller: PageController(viewportFraction: 1.0),
+                itemBuilder: (context, index) {
+                  final media = mediaList[index];
+                  final List? genresList = media["genres"] as List?;
+                  final String tagString = genresList != null
+                      ? genresList.map((tag) => tag.toString()).join(" • ")
+                      : "";
+                  final String displayTags = tagString.length > 20
+                      ? "${tagString.substring(0, 20)}..."
+                      : tagString;
 
-                return AiringBanner(
-                  id: media["id"],
-                  bannerImage: media["bannerImage"]?.toString() ?? '',
-                  coverImage: media["coverImage"]?["large"]?.toString() ?? '',
-                  title: Provider.of<StateProvider>(
-                    context,
-                    listen: false,
-                  ).resolveTitle(media["title"] as Map?),
-                  totalEpisodes: widget.isAnime
-                      ? (media["episodes"] != null
-                            ? media["episodes"].toString()
-                            : "??")
-                      : null,
-                  airedEpisodes: widget.isAnime
-                      ? ((media["nextAiringEpisode"] != null)
-                            ? (media["nextAiringEpisode"]["episode"] - 1)
-                                  .toString()
-                            : "0")
-                      : null,
-                  tagString: displayTags,
-                  type: media["type"].toString().toLowerCase(),
-                );
-              },
+                  return AiringBanner(
+                    id: media["id"],
+                    bannerImage: media["bannerImage"]?.toString() ?? '',
+                    coverImage: media["coverImage"]?["large"]?.toString() ?? '',
+                    title: Provider.of<StateProvider>(
+                      context,
+                      listen: false,
+                    ).resolveTitle(media["title"] as Map?),
+                    totalEpisodes: widget.isAnime
+                        ? (media["episodes"] != null
+                              ? media["episodes"].toString()
+                              : "??")
+                        : null,
+                    airedEpisodes: widget.isAnime
+                        ? ((media["nextAiringEpisode"] != null)
+                              ? (media["nextAiringEpisode"]["episode"] - 1)
+                                    .toString()
+                              : "0")
+                        : null,
+                    tagString: displayTags,
+                    type: media["type"].toString().toLowerCase(),
+                  );
+                },
+              ),
             ),
-          ),
-          if (widget.isAnime) ...[
-            SimulcastsButton(medias: mediaList),
-            const SizedBox(height: 10),
-          ] else ...[
-            const SizedBox(height: 10),
+            if (widget.isAnime) ...[
+              SimulcastsButton(medias: mediaList),
+              const SizedBox(height: 10),
+            ] else ...[
+              const SizedBox(height: 10),
+            ],
+            if (widget.isAnime) ...[
+              HorizontalList(
+                heading: "Trending Now",
+                mediaArray: dataMap["data"]["trending"]["media"],
+                pagetype: PageType.trendingAnime,
+              ),
+              HorizontalList(
+                heading: "Popular this season",
+                mediaArray: dataMap["data"]["popularSeason"]["media"],
+                pagetype: PageType.popularSeasonAnime,
+              ),
+              HorizontalList(
+                heading: "Upcoming",
+                mediaArray: dataMap["data"]["upcoming"]["media"],
+                pagetype: PageType.upcomingAnime,
+              ),
+              HorizontalList(
+                heading: "All Time Popular",
+                mediaArray: dataMap["data"]["allTimePopular"]["media"],
+                pagetype: PageType.popularAllTimeAnime,
+              ),
+              HorizontalList(
+                heading: "Highest Rated",
+                mediaArray: dataMap["data"]["highestRated"]["media"],
+                pagetype: PageType.highestRatedAnime,
+              ),
+            ] else ...[
+              HorizontalList(
+                heading: "Trending Now",
+                mediaArray: dataMap["data"]["trending"]["media"],
+                pagetype: PageType.trendingManga,
+              ),
+              HorizontalList(
+                heading: "All Time Popular",
+                mediaArray: dataMap["data"]["allTimePopular"]["media"],
+                pagetype: PageType.popularAllTimeManga,
+              ),
+              HorizontalList(
+                heading: "Highest Rated",
+                mediaArray: dataMap["data"]["highestRated"]["media"],
+                pagetype: PageType.highestRatedManga,
+              ),
+            ],
           ],
-          if (widget.isAnime) ...[
-            HorizontalList(
-              heading: "Trending Now",
-              mediaArray: dataMap["data"]["trending"]["media"],
-              pagetype: PageType.trendingAnime,
-            ),
-            HorizontalList(
-              heading: "Popular this season",
-              mediaArray: dataMap["data"]["popularSeason"]["media"],
-              pagetype: PageType.popularSeasonAnime,
-            ),
-            HorizontalList(
-              heading: "Upcoming",
-              mediaArray: dataMap["data"]["upcoming"]["media"],
-              pagetype: PageType.upcomingAnime,
-            ),
-            HorizontalList(
-              heading: "All Time Popular",
-              mediaArray: dataMap["data"]["allTimePopular"]["media"],
-              pagetype: PageType.popularAllTimeAnime,
-            ),
-            HorizontalList(
-              heading: "Highest Rated",
-              mediaArray: dataMap["data"]["highestRated"]["media"],
-              pagetype: PageType.highestRatedAnime,
-            ),
-          ] else ...[
-            HorizontalList(
-              heading: "Trending Now",
-              mediaArray: dataMap["data"]["trending"]["media"],
-              pagetype: PageType.trendingManga,
-            ),
-            HorizontalList(
-              heading: "All Time Popular",
-              mediaArray: dataMap["data"]["allTimePopular"]["media"],
-              pagetype: PageType.popularAllTimeManga,
-            ),
-            HorizontalList(
-              heading: "Highest Rated",
-              mediaArray: dataMap["data"]["highestRated"]["media"],
-              pagetype: PageType.highestRatedManga,
-            ),
-          ],
-        ],
+        ),
       ),
     );
   }

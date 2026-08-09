@@ -110,14 +110,25 @@ class _AnilistSettingsPageState extends State<AnilistSettingsPage> {
                         const SizedBox(height: 4),
                         Text(
                           'How titles are shown throughout the app. Synced with your AniList account.',
-                          style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+                          style: tt.bodySmall?.copyWith(
+                            color: cs.onSurfaceVariant,
+                          ),
                         ),
                         const SizedBox(height: 14),
                         SegmentedButton<String>(
                           segments: const [
-                            ButtonSegment(value: 'ROMAJI', label: Text('Romaji')),
-                            ButtonSegment(value: 'ENGLISH', label: Text('English')),
-                            ButtonSegment(value: 'NATIVE', label: Text('Native')),
+                            ButtonSegment(
+                              value: 'ROMAJI',
+                              label: Text('Romaji'),
+                            ),
+                            ButtonSegment(
+                              value: 'ENGLISH',
+                              label: Text('English'),
+                            ),
+                            ButtonSegment(
+                              value: 'NATIVE',
+                              label: Text('Native'),
+                            ),
                           ],
                           selected: {provider.titleLanguage},
                           onSelectionChanged: _isSavingLang
@@ -149,7 +160,9 @@ class _AnilistSettingsPageState extends State<AnilistSettingsPage> {
                     leading: Icon(Icons.explicit_rounded, color: cs.primary),
                     title: Text(
                       'Show NSFW Content',
-                      style: tt.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+                      style: tt.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                     subtitle: Text(
                       'Display adult (18+) anime and manga. Synced with your AniList account.',

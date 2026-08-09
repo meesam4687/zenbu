@@ -186,6 +186,10 @@ class _MediaDetailsPageState extends State<MediaDetailsPage>
           );
         }
 
+        final topPadding = MediaQuery.of(context).padding.top;
+        final double expandedHeaderHeight =
+            topPadding + kToolbarHeight + 6 + 210;
+
         return DefaultTabController(
           length: tabViewsList.length,
           child: Scaffold(
@@ -193,7 +197,7 @@ class _MediaDetailsPageState extends State<MediaDetailsPage>
               floatHeaderSlivers: true,
               headerSliverBuilder: (context, innerBoxIsScrolled) => [
                 SliverAppBar(
-                  expandedHeight: 320,
+                  expandedHeight: expandedHeaderHeight,
                   pinned: true,
                   floating: false,
                   snap: false,
@@ -221,7 +225,10 @@ class _MediaDetailsPageState extends State<MediaDetailsPage>
                   delegate: _TabBarDelegate(TabBar(tabs: tabsList)),
                 ),
               ],
-              body: TabBarView(children: tabViewsList),
+              body: SafeArea(
+                top: false,
+                child: TabBarView(children: tabViewsList),
+              ),
             ),
           ),
         );

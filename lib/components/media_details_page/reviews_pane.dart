@@ -155,105 +155,105 @@ class _ReviewsPaneState extends State<ReviewsPane> {
         child: ListView.builder(
           physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-        itemCount: _isLoading && _hasMore
-            ? _reviews.length + 1
-            : _reviews.length,
-        itemBuilder: (context, index) {
-          if (index == _reviews.length) {
-            return const Center(
-              child: Padding(
-                padding: EdgeInsets.all(12.0),
-                child: CircularProgressIndicator(),
+          itemCount: _isLoading && _hasMore
+              ? _reviews.length + 1
+              : _reviews.length,
+          itemBuilder: (context, index) {
+            if (index == _reviews.length) {
+              return const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(12.0),
+                  child: CircularProgressIndicator(),
+                ),
+              );
+            }
+
+            final review = _reviews[index];
+            final summary = review["summary"] ?? "";
+            final body = review["body"] ?? "";
+            final score = review["score"] ?? 0;
+            final user = review["user"];
+            final username = user?["name"] as String?;
+            final avatarUrl = user?["avatar"]?["large"] as String?;
+
+            return Container(
+              margin: const EdgeInsets.symmetric(vertical: 6.0),
+              child: OpenContainer(
+                closedElevation: 2,
+                closedShape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                closedColor: Theme.of(context).colorScheme.onInverseSurface,
+                openColor: Theme.of(context).scaffoldBackgroundColor,
+                closedBuilder: (context, action) {
+                  return InkWell(
+                    borderRadius: BorderRadius.circular(12),
+                    onTap: () {
+                      action();
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              if (avatarUrl != null) ...[
+                                CustomImage(
+                                  imageUrl: avatarUrl,
+                                  width: 28,
+                                  height: 28,
+                                  fit: BoxFit.cover,
+                                  borderRadius: BorderRadius.circular(360),
+                                  errorWidget: const Icon(
+                                    Icons.account_circle,
+                                    size: 28,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                              ],
+                              Expanded(
+                                child: Text(
+                                  username ?? "Anonymous",
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            summary,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              height: 1.4,
+                            ),
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+                openBuilder: (context, action) {
+                  return ReviewPage(
+                    summary: summary,
+                    body: body,
+                    score: score,
+                    username: username,
+                    avatarUrl: avatarUrl,
+                  );
+                },
               ),
             );
-          }
-
-          final review = _reviews[index];
-          final summary = review["summary"] ?? "";
-          final body = review["body"] ?? "";
-          final score = review["score"] ?? 0;
-          final user = review["user"];
-          final username = user?["name"] as String?;
-          final avatarUrl = user?["avatar"]?["large"] as String?;
-
-          return Container(
-            margin: const EdgeInsets.symmetric(vertical: 6.0),
-            child: OpenContainer(
-              closedElevation: 2,
-              closedShape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              closedColor: Theme.of(context).colorScheme.onInverseSurface,
-              openColor: Theme.of(context).scaffoldBackgroundColor,
-              closedBuilder: (context, action) {
-                return InkWell(
-                  borderRadius: BorderRadius.circular(12),
-                  onTap: () {
-                    action();
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            if (avatarUrl != null) ...[
-                              CustomImage(
-                                imageUrl: avatarUrl,
-                                width: 28,
-                                height: 28,
-                                fit: BoxFit.cover,
-                                borderRadius: BorderRadius.circular(360),
-                                errorWidget: const Icon(
-                                  Icons.account_circle,
-                                  size: 28,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                            ],
-                            Expanded(
-                              child: Text(
-                                username ?? "Anonymous",
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          summary,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            height: 1.4,
-                          ),
-                          maxLines: 3,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-              openBuilder: (context, action) {
-                return ReviewPage(
-                  summary: summary,
-                  body: body,
-                  score: score,
-                  username: username,
-                  avatarUrl: avatarUrl,
-                );
-              },
-            ),
-          );
-        },
+          },
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 }

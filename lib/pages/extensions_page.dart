@@ -124,6 +124,7 @@ class _ExtensionsPageState extends State<ExtensionsPage>
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: Colors.transparent,
       builder: (context) => _ExtensionSettingsSheet(ext: ext),
     );
@@ -212,9 +213,11 @@ class _ExtensionsPageState extends State<ExtensionsPage>
           ],
         ),
       ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [_buildExtensionsTab(), _buildReposTab()],
+      body: SafeArea(
+        child: TabBarView(
+          controller: _tabController,
+          children: [_buildExtensionsTab(), _buildReposTab()],
+        ),
       ),
     );
   }
@@ -425,7 +428,11 @@ class _ExtensionsPageState extends State<ExtensionsPage>
                           repoExt != null &&
                           repoExt.version != ext.version;
                       final displayExt = needsUpdate ? repoExt : ext;
-                      return _buildExtensionCard(displayExt, isInst, needsUpdate);
+                      return _buildExtensionCard(
+                        displayExt,
+                        isInst,
+                        needsUpdate,
+                      );
                     },
                   ),
                 ),

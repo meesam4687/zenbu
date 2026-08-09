@@ -8,9 +8,19 @@ import 'package:zenbu/pages/authentication_page.dart';
 import 'package:zenbu/authentication_token_controller.dart';
 import 'package:zenbu/deep_link_controller.dart';
 
+import 'package:flutter/services.dart';
+
 String? token;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      systemNavigationBarColor: Colors.transparent,
+      systemNavigationBarDividerColor: Colors.transparent,
+      statusBarColor: Colors.transparent,
+    ),
+  );
   token = await TokenStorage.getAccessToken();
   runApp(const MyApp());
 }
@@ -87,6 +97,23 @@ class _MyAppState extends State<MyApp> {
                   }
                 }
               }
+
+              final isDark = (provider.themeMode == ThemeMode.dark) ||
+                  (provider.themeMode == ThemeMode.system &&
+                      MediaQuery.platformBrightnessOf(context) ==
+                          Brightness.dark);
+
+              SystemChrome.setSystemUIOverlayStyle(
+                SystemUiOverlayStyle(
+                  systemNavigationBarColor: Colors.transparent,
+                  systemNavigationBarDividerColor: Colors.transparent,
+                  systemNavigationBarIconBrightness:
+                      isDark ? Brightness.light : Brightness.dark,
+                  statusBarColor: Colors.transparent,
+                  statusBarIconBrightness:
+                      isDark ? Brightness.light : Brightness.dark,
+                ),
+              );
 
               return MaterialApp(
                 navigatorKey: _navigatorKey,

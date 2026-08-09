@@ -41,6 +41,7 @@ class _ItemCardState extends State<ItemCard> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       builder: (ctx) {
         return Padding(
           padding: EdgeInsets.only(

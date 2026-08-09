@@ -1005,6 +1005,7 @@ class _MangaReadPaneState extends State<MangaReadPane> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: Colors.transparent,
       builder: (context) {
         return DraggableScrollableSheet(

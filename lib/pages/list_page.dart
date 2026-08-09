@@ -117,146 +117,148 @@ class _ListPageState extends State<ListPage> {
             ),
           ],
         ),
-        body: Column(
-          children: [
-            TabBar(
-              tabAlignment: TabAlignment.start,
-              isScrollable: true,
-              tabs: const [
-                Tab(text: "Current"),
-                Tab(text: "Planning"),
-                Tab(text: "Completed"),
-                Tab(text: "Repeating"),
-                Tab(text: "Paused"),
-                Tab(text: "Dropped"),
-                Tab(text: "All"),
-                Tab(text: "Favourites"),
-              ],
-            ),
-            FutureBuilder(
-              future: mediaLists,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Expanded(
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: const Center(
-                        child: CircularProgressIndicator.adaptive(),
+        body: SafeArea(
+          child: Column(
+            children: [
+              TabBar(
+                tabAlignment: TabAlignment.start,
+                isScrollable: true,
+                tabs: const [
+                  Tab(text: "Current"),
+                  Tab(text: "Planning"),
+                  Tab(text: "Completed"),
+                  Tab(text: "Repeating"),
+                  Tab(text: "Paused"),
+                  Tab(text: "Dropped"),
+                  Tab(text: "All"),
+                  Tab(text: "Favourites"),
+                ],
+              ),
+              FutureBuilder(
+                future: mediaLists,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Expanded(
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: const Center(
+                          child: CircularProgressIndicator.adaptive(),
+                        ),
                       ),
-                    ),
-                  );
-                }
-                if (snapshot.hasError) {
+                    );
+                  }
+                  if (snapshot.hasError) {
+                    return Expanded(
+                      child: Error(
+                        reload: _reloadData,
+                        message: snapshot.error?.toString(),
+                      ),
+                    );
+                  }
+                  final data = snapshot.data!;
+                  final List combinedEntries =
+                      (data["data"][list]["lists"] as List)
+                          .expand((list) => list["entries"] as List)
+                          .toList();
+                  final lists = data["data"][list]["lists"] as List;
+                  final Map<String, int> listNameIndexMap = {};
+                  for (var i = 0; i < lists.length; i++) {
+                    listNameIndexMap[lists[i]["name"]] = i;
+                  }
                   return Expanded(
-                    child: Error(
-                      reload: _reloadData,
-                      message: snapshot.error?.toString(),
-                    ),
-                  );
-                }
-                final data = snapshot.data!;
-                final List combinedEntries =
-                    (data["data"][list]["lists"] as List)
-                        .expand((list) => list["entries"] as List)
-                        .toList();
-                final lists = data["data"][list]["lists"] as List;
-                final Map<String, int> listNameIndexMap = {};
-                for (var i = 0; i < lists.length; i++) {
-                  listNameIndexMap[lists[i]["name"]] = i;
-                }
-                return Expanded(
-                  child: TabBarView(
-                    children: [
-                      ListPageView(
-                        list: _filterList(
-                          (listNameIndexMap[(list == "animeList")
+                    child: TabBarView(
+                      children: [
+                        ListPageView(
+                          list: _filterList(
+                            (listNameIndexMap[(list == "animeList")
+                                        ? "Watching"
+                                        : "Reading"] !=
+                                    null)
+                                ? data["data"][list]["lists"][listNameIndexMap[(list ==
+                                          "animeList")
                                       ? "Watching"
-                                      : "Reading"] !=
-                                  null)
-                              ? data["data"][list]["lists"][listNameIndexMap[(list ==
-                                        "animeList")
-                                    ? "Watching"
-                                    : "Reading"]]["entries"]
-                              : [],
-                          _searchQuery,
+                                      : "Reading"]]["entries"]
+                                : [],
+                            _searchQuery,
+                          ),
+                          mediaType: (list == "animeList") ? "anime" : "manga",
                         ),
-                        mediaType: (list == "animeList") ? "anime" : "manga",
-                      ),
-                      ListPageView(
-                        list: _filterList(
-                          (listNameIndexMap['Planning'] != null)
-                              ? data["data"][list]["lists"][listNameIndexMap['Planning']]["entries"]
-                              : [],
-                          _searchQuery,
+                        ListPageView(
+                          list: _filterList(
+                            (listNameIndexMap['Planning'] != null)
+                                ? data["data"][list]["lists"][listNameIndexMap['Planning']]["entries"]
+                                : [],
+                            _searchQuery,
+                          ),
+                          mediaType: (list == "animeList") ? "anime" : "manga",
                         ),
-                        mediaType: (list == "animeList") ? "anime" : "manga",
-                      ),
-                      ListPageView(
-                        list: _filterList(
-                          (listNameIndexMap['Completed'] != null)
-                              ? data["data"][list]["lists"][listNameIndexMap['Completed']]["entries"]
-                              : [],
-                          _searchQuery,
+                        ListPageView(
+                          list: _filterList(
+                            (listNameIndexMap['Completed'] != null)
+                                ? data["data"][list]["lists"][listNameIndexMap['Completed']]["entries"]
+                                : [],
+                            _searchQuery,
+                          ),
+                          mediaType: (list == "animeList") ? "anime" : "manga",
                         ),
-                        mediaType: (list == "animeList") ? "anime" : "manga",
-                      ),
-                      ListPageView(
-                        list: _filterList(
-                          (listNameIndexMap[(list == "animeList")
+                        ListPageView(
+                          list: _filterList(
+                            (listNameIndexMap[(list == "animeList")
+                                        ? "Rewatching"
+                                        : "Rereading"] !=
+                                    null)
+                                ? data["data"][list]["lists"][listNameIndexMap[(list ==
+                                          "animeList")
                                       ? "Rewatching"
-                                      : "Rereading"] !=
-                                  null)
-                              ? data["data"][list]["lists"][listNameIndexMap[(list ==
-                                        "animeList")
-                                    ? "Rewatching"
-                                    : "Rereading"]]["entries"]
-                              : [],
-                          _searchQuery,
+                                      : "Rereading"]]["entries"]
+                                : [],
+                            _searchQuery,
+                          ),
+                          mediaType: (list == "animeList") ? "anime" : "manga",
                         ),
-                        mediaType: (list == "animeList") ? "anime" : "manga",
-                      ),
-                      ListPageView(
-                        list: _filterList(
-                          (listNameIndexMap['Paused'] != null)
-                              ? data["data"][list]["lists"][listNameIndexMap['Paused']]["entries"]
-                              : [],
-                          _searchQuery,
+                        ListPageView(
+                          list: _filterList(
+                            (listNameIndexMap['Paused'] != null)
+                                ? data["data"][list]["lists"][listNameIndexMap['Paused']]["entries"]
+                                : [],
+                            _searchQuery,
+                          ),
+                          mediaType: (list == "animeList") ? "anime" : "manga",
                         ),
-                        mediaType: (list == "animeList") ? "anime" : "manga",
-                      ),
-                      ListPageView(
-                        list: _filterList(
-                          (listNameIndexMap['Dropped'] != null)
-                              ? data["data"][list]["lists"][listNameIndexMap['Dropped']]["entries"]
-                              : [],
-                          _searchQuery,
+                        ListPageView(
+                          list: _filterList(
+                            (listNameIndexMap['Dropped'] != null)
+                                ? data["data"][list]["lists"][listNameIndexMap['Dropped']]["entries"]
+                                : [],
+                            _searchQuery,
+                          ),
+                          mediaType: (list == "animeList") ? "anime" : "manga",
                         ),
-                        mediaType: (list == "animeList") ? "anime" : "manga",
-                      ),
-                      ListPageView(
-                        list: _filterList(combinedEntries, _searchQuery),
-                        mediaType: (list == "animeList") ? "anime" : "manga",
-                      ),
-                      ListPageView(
-                        list: _filterList(
-                          (data["data"]?["favourites"]?["favourites"]?[list ==
-                                              "animeList"
-                                          ? "anime"
-                                          : "manga"]?["nodes"]
-                                      as List? ??
-                                  [])
-                              .map((media) => {"media": media})
-                              .toList(),
-                          _searchQuery,
+                        ListPageView(
+                          list: _filterList(combinedEntries, _searchQuery),
+                          mediaType: (list == "animeList") ? "anime" : "manga",
                         ),
-                        mediaType: (list == "animeList") ? "anime" : "manga",
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ],
+                        ListPageView(
+                          list: _filterList(
+                            (data["data"]?["favourites"]?["favourites"]?[list ==
+                                                "animeList"
+                                            ? "anime"
+                                            : "manga"]?["nodes"]
+                                        as List? ??
+                                    [])
+                                .map((media) => {"media": media})
+                                .toList(),
+                            _searchQuery,
+                          ),
+                          mediaType: (list == "animeList") ? "anime" : "manga",
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -356,6 +356,7 @@ class _NovelReaderPageState extends State<NovelReaderPage> {
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
+      useSafeArea: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -495,6 +496,7 @@ class _NovelReaderPageState extends State<NovelReaderPage> {
     showModalBottomSheet(
       context: context,
       backgroundColor: bgColor,
+      useSafeArea: true,
       builder: (context) {
         return ListView.builder(
           itemCount: widget.chapters.length,

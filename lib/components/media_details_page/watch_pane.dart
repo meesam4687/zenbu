@@ -692,40 +692,39 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
                                           SizedBox(
                                             width: 140,
                                             height: 80,
-                                            child: (ep.thumbnailUrl != null &&
+                                            child:
+                                                (ep.thumbnailUrl != null &&
                                                     ep.thumbnailUrl!.isNotEmpty)
                                                 ? CustomImage(
                                                     imageUrl: ep.thumbnailUrl!,
                                                     fit: BoxFit.cover,
                                                     errorWidget:
                                                         (widget.coverImage !=
-                                                                    null &&
-                                                                widget
-                                                                    .coverImage!
-                                                                    .isNotEmpty)
-                                                            ? CustomImage(
-                                                                imageUrl:
-                                                                    widget
-                                                                        .coverImage!,
-                                                                fit: BoxFit
-                                                                    .cover,
-                                                                errorWidget:
-                                                                    _buildPlaceholderThumbnail(),
-                                                              )
-                                                            : _buildPlaceholderThumbnail(),
+                                                                null &&
+                                                            widget
+                                                                .coverImage!
+                                                                .isNotEmpty)
+                                                        ? CustomImage(
+                                                            imageUrl: widget
+                                                                .coverImage!,
+                                                            fit: BoxFit.cover,
+                                                            errorWidget:
+                                                                _buildPlaceholderThumbnail(),
+                                                          )
+                                                        : _buildPlaceholderThumbnail(),
                                                   )
                                                 : (widget.coverImage != null &&
-                                                        widget
-                                                            .coverImage!
-                                                            .isNotEmpty)
-                                                    ? CustomImage(
-                                                        imageUrl:
-                                                            widget.coverImage!,
-                                                        fit: BoxFit.cover,
-                                                        errorWidget:
-                                                            _buildPlaceholderThumbnail(),
-                                                      )
-                                                    : _buildPlaceholderThumbnail(),
+                                                      widget
+                                                          .coverImage!
+                                                          .isNotEmpty)
+                                                ? CustomImage(
+                                                    imageUrl:
+                                                        widget.coverImage!,
+                                                    fit: BoxFit.cover,
+                                                    errorWidget:
+                                                        _buildPlaceholderThumbnail(),
+                                                  )
+                                                : _buildPlaceholderThumbnail(),
                                           ),
                                           const SizedBox(width: 16),
                                           Expanded(
@@ -955,6 +954,7 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: Colors.transparent,
       builder: (context) {
         return DraggableScrollableSheet(

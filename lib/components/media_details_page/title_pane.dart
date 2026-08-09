@@ -229,121 +229,66 @@ class _TitlePaneState extends State<TitlePane> {
               ),
             ),
           ),
-          SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  const SizedBox(height: 20),
-                  Center(
-                    child: SizedBox(
-                      height: 220,
-                      width: 155.68,
-                      child: Card(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        clipBehavior: Clip.antiAlias,
-                        elevation: 6,
-                        child: CustomImage(
-                          imageUrl: widget.cover,
-                          fit: BoxFit.cover,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
+          SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const SizedBox(height: 20),
+                Center(
+                  child: SizedBox(
+                    height: 220,
+                    width: 155.68,
+                    child: Card(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      clipBehavior: Clip.antiAlias,
+                      elevation: 6,
+                      child: CustomImage(
+                        imageUrl: widget.cover,
+                        fit: BoxFit.cover,
+                        borderRadius: BorderRadius.circular(12),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 24),
-                  GestureDetector(
-                    onLongPress: () {
-                      Clipboard.setData(ClipboardData(text: widget.fullTitle));
-                      HapticFeedback.mediumImpact();
-                    },
-                    child: Text(
-                      widget.title,
-                      style: const TextStyle(fontSize: 22),
-                      textAlign: TextAlign.center,
-                      maxLines: 4,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                ),
+                const SizedBox(height: 24),
+                GestureDetector(
+                  onLongPress: () {
+                    Clipboard.setData(ClipboardData(text: widget.fullTitle));
+                    HapticFeedback.mediumImpact();
+                  },
+                  child: Text(
+                    widget.title,
+                    style: const TextStyle(fontSize: 22),
+                    textAlign: TextAlign.center,
+                    maxLines: 4,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 12),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(progress, style: const TextStyle(fontSize: 14)),
-                      if (mediaState == 'CURRENT') ...[
-                        const SizedBox(width: 8),
-                        ClipOval(
-                          child: Material(
-                            color: _isIncrementing
-                                ? Colors.grey.shade600
-                                : Theme.of(
-                                    context,
-                                  ).colorScheme.primaryContainer,
-                            child: InkWell(
-                              onTap: _isIncrementing
-                                  ? null
-                                  : _incrementProgress,
-                              child: SizedBox(
-                                width: 32,
-                                height: 32,
-                                child: Center(
-                                  child: _isIncrementing
-                                      ? const SizedBox(
-                                          width: 16,
-                                          height: 16,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2,
-                                            valueColor:
-                                                AlwaysStoppedAnimation<Color>(
-                                                  Colors.white,
-                                                ),
-                                          ),
-                                        )
-                                      : Text(
-                                          "+1",
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 14,
-                                            color: Theme.of(
-                                              context,
-                                            ).colorScheme.onPrimaryContainer,
-                                          ),
-                                        ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  Row(
-                    children: [
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(progress, style: const TextStyle(fontSize: 14)),
+                    if (mediaState == 'CURRENT') ...[
+                      const SizedBox(width: 8),
                       ClipOval(
                         child: Material(
-                          color: _isTogglingFavourite
+                          color: _isIncrementing
                               ? Colors.grey.shade600
-                              : (isFavourite
-                                    ? Colors.red.shade600
-                                    : Theme.of(
-                                        context,
-                                      ).colorScheme.primaryContainer),
+                              : Theme.of(context).colorScheme.primaryContainer,
                           child: InkWell(
-                            onTap: _isTogglingFavourite
-                                ? null
-                                : _toggleFavourite,
+                            onTap: _isIncrementing ? null : _incrementProgress,
                             child: SizedBox(
-                              width: 40,
-                              height: 40,
+                              width: 32,
+                              height: 32,
                               child: Center(
-                                child: _isTogglingFavourite
+                                child: _isIncrementing
                                     ? const SizedBox(
-                                        width: 20,
-                                        height: 20,
+                                        width: 16,
+                                        height: 16,
                                         child: CircularProgressIndicator(
                                           strokeWidth: 2,
                                           valueColor:
@@ -352,74 +297,122 @@ class _TitlePaneState extends State<TitlePane> {
                                               ),
                                         ),
                                       )
-                                    : Icon(
-                                        isFavourite
-                                            ? Icons.favorite
-                                            : Icons.favorite_border,
-                                        color: Theme.of(
-                                          context,
-                                        ).colorScheme.onPrimaryContainer,
-                                        size: 20,
+                                    : Text(
+                                        "+1",
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 14,
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.onPrimaryContainer,
+                                        ),
                                       ),
                               ),
                             ),
                           ),
                         ),
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: FilledButton(
-                          onPressed: () {
-                            showModalBottomSheet(
-                              context: context,
-                              isScrollControlled: true,
-                              builder: (context) {
-                                return Padding(
-                                  padding: EdgeInsets.only(
-                                    bottom: MediaQuery.of(
+                    ],
+                  ],
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    ClipOval(
+                      child: Material(
+                        color: _isTogglingFavourite
+                            ? Colors.grey.shade600
+                            : (isFavourite
+                                  ? Colors.red.shade600
+                                  : Theme.of(
                                       context,
-                                    ).viewInsets.bottom,
-                                  ),
-                                  child: ListEditorBottomSheet(
-                                    isAnime: widget.isAnime,
-                                    status: mediaListEntry?["status"] ?? "NONE",
-                                    progress: mediaListEntry?["progress"] ?? 0,
-                                    startDate:
-                                        (mediaListEntry?["startedAt"]?["day"] ==
-                                            null)
-                                        ? {"day": -1}
-                                        : mediaListEntry?["startedAt"] ??
-                                              {"day": -1},
-                                    endDate:
-                                        (mediaListEntry?["completedAt"]?["day"] ==
-                                            null)
-                                        ? {"day": -1}
-                                        : mediaListEntry?["completedAt"] ??
-                                              {"day": -1},
-                                    score: (mediaListEntry?["score"] is int)
-                                        ? (mediaListEntry?["score"] as int)
-                                              .toDouble()
-                                        : mediaListEntry?["score"] ?? 0.0,
-                                    repeatCount: mediaListEntry?["repeat"] ?? 0,
-                                    mediaId: widget.id,
-                                    entryId: mediaListEntry?["id"],
-                                    onUpdate: updateMediaDetails,
-                                  ),
-                                );
-                              },
-                            );
-                          },
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            spacing: 5,
-                            children: elementList,
+                                    ).colorScheme.primaryContainer),
+                        child: InkWell(
+                          onTap: _isTogglingFavourite ? null : _toggleFavourite,
+                          child: SizedBox(
+                            width: 40,
+                            height: 40,
+                            child: Center(
+                              child: _isTogglingFavourite
+                                  ? const SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                              Colors.white,
+                                            ),
+                                      ),
+                                    )
+                                  : Icon(
+                                      isFavourite
+                                          ? Icons.favorite
+                                          : Icons.favorite_border,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.onPrimaryContainer,
+                                      size: 20,
+                                    ),
+                            ),
                           ),
                         ),
                       ),
-                    ],
-                  ),
-                ],
-              ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: FilledButton(
+                        onPressed: () {
+                          showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            useSafeArea: true,
+                            builder: (context) {
+                              return Padding(
+                                padding: EdgeInsets.only(
+                                  bottom: MediaQuery.of(
+                                    context,
+                                  ).viewInsets.bottom,
+                                ),
+                                child: ListEditorBottomSheet(
+                                  isAnime: widget.isAnime,
+                                  status: mediaListEntry?["status"] ?? "NONE",
+                                  progress: mediaListEntry?["progress"] ?? 0,
+                                  startDate:
+                                      (mediaListEntry?["startedAt"]?["day"] ==
+                                          null)
+                                      ? {"day": -1}
+                                      : mediaListEntry?["startedAt"] ??
+                                            {"day": -1},
+                                  endDate:
+                                      (mediaListEntry?["completedAt"]?["day"] ==
+                                          null)
+                                      ? {"day": -1}
+                                      : mediaListEntry?["completedAt"] ??
+                                            {"day": -1},
+                                  score: (mediaListEntry?["score"] is int)
+                                      ? (mediaListEntry?["score"] as int)
+                                            .toDouble()
+                                      : mediaListEntry?["score"] ?? 0.0,
+                                  repeatCount: mediaListEntry?["repeat"] ?? 0,
+                                  mediaId: widget.id,
+                                  entryId: mediaListEntry?["id"],
+                                  onUpdate: updateMediaDetails,
+                                ),
+                              );
+                            },
+                          );
+                        },
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          spacing: 5,
+                          children: elementList,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
           Positioned(
@@ -435,8 +428,11 @@ class _TitlePaneState extends State<TitlePane> {
       );
     }
 
+    final topPadding = MediaQuery.of(context).padding.top;
+    final double headerHeight = topPadding + kToolbarHeight + 6 + 210;
+
     return SizedBox(
-      height: 350,
+      height: headerHeight,
       child: Stack(
         fit: StackFit.expand,
         children: [
@@ -462,211 +458,216 @@ class _TitlePaneState extends State<TitlePane> {
             ),
           ),
           Container(
-            margin: const EdgeInsets.only(top: 90),
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      margin: const EdgeInsets.only(left: 10),
-                      decoration: const BoxDecoration(
-                        borderRadius: BorderRadius.all(Radius.circular(10)),
-                      ),
-                      height: 180,
-                      width: 127.38,
-                      child: Card(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+            margin: EdgeInsets.only(top: topPadding + kToolbarHeight + 6),
+            child: SingleChildScrollView(
+              physics: const NeverScrollableScrollPhysics(),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        margin: const EdgeInsets.only(left: 10),
+                        decoration: const BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(10)),
                         ),
-                        clipBehavior: Clip.antiAlias,
-                        child: CustomImage(
-                          imageUrl: widget.cover,
-                          fit: BoxFit.cover,
-                          height: 180,
-                          width: 127.38,
-                          borderRadius: BorderRadius.circular(10),
+                        height: 180,
+                        width: 127.38,
+                        child: Card(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          clipBehavior: Clip.antiAlias,
+                          child: CustomImage(
+                            imageUrl: widget.cover,
+                            fit: BoxFit.cover,
+                            height: 180,
+                            width: 127.38,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
                         ),
                       ),
-                    ),
-                    Container(
-                      margin: const EdgeInsets.only(left: 10),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          GestureDetector(
-                            onLongPress: () {
-                              Clipboard.setData(
-                                ClipboardData(text: widget.fullTitle),
-                              );
-                              HapticFeedback.mediumImpact();
-                            },
-                            child: SizedBox(
-                              width: 200,
-                              child: Text(
-                                widget.title,
-                                style: const TextStyle(fontSize: 27),
-                                maxLines: 3,
-                                overflow: TextOverflow.ellipsis,
+                      Container(
+                        margin: const EdgeInsets.only(left: 10),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            GestureDetector(
+                              onLongPress: () {
+                                Clipboard.setData(
+                                  ClipboardData(text: widget.fullTitle),
+                                );
+                                HapticFeedback.mediumImpact();
+                              },
+                              child: SizedBox(
+                                width: 200,
+                                child: Text(
+                                  widget.title,
+                                  style: const TextStyle(fontSize: 27),
+                                  maxLines: 3,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                               ),
                             ),
-                          ),
-                          Row(
-                            children: [
-                              Text(progress),
-                              if (mediaState == 'CURRENT') ...[
-                                const SizedBox(width: 8),
-                                ClipOval(
-                                  child: Material(
-                                    color: _isIncrementing
-                                        ? Colors.grey.shade600
-                                        : Theme.of(
-                                            context,
-                                          ).colorScheme.primaryContainer,
-                                    child: InkWell(
-                                      onTap: _isIncrementing
-                                          ? null
-                                          : _incrementProgress,
-                                      child: SizedBox(
-                                        width: 32,
-                                        height: 32,
-                                        child: Center(
-                                          child: _isIncrementing
-                                              ? const SizedBox(
-                                                  width: 16,
-                                                  height: 16,
-                                                  child: CircularProgressIndicator(
-                                                    strokeWidth: 2,
-                                                    valueColor:
-                                                        AlwaysStoppedAnimation<
-                                                          Color
-                                                        >(Colors.white),
+                            Row(
+                              children: [
+                                Text(progress),
+                                if (mediaState == 'CURRENT') ...[
+                                  const SizedBox(width: 8),
+                                  ClipOval(
+                                    child: Material(
+                                      color: _isIncrementing
+                                          ? Colors.grey.shade600
+                                          : Theme.of(
+                                              context,
+                                            ).colorScheme.primaryContainer,
+                                      child: InkWell(
+                                        onTap: _isIncrementing
+                                            ? null
+                                            : _incrementProgress,
+                                        child: SizedBox(
+                                          width: 32,
+                                          height: 32,
+                                          child: Center(
+                                            child: _isIncrementing
+                                                ? const SizedBox(
+                                                    width: 16,
+                                                    height: 16,
+                                                    child: CircularProgressIndicator(
+                                                      strokeWidth: 2,
+                                                      valueColor:
+                                                          AlwaysStoppedAnimation<
+                                                            Color
+                                                          >(Colors.white),
+                                                    ),
+                                                  )
+                                                : Text(
+                                                    "+1",
+                                                    style: TextStyle(
+                                                      fontWeight: FontWeight.bold,
+                                                      fontSize: 14,
+                                                      color: Theme.of(context)
+                                                          .colorScheme
+                                                          .onPrimaryContainer,
+                                                    ),
                                                   ),
-                                                )
-                                              : Text(
-                                                  "+1",
-                                                  style: TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 14,
-                                                    color: Theme.of(context)
-                                                        .colorScheme
-                                                        .onPrimaryContainer,
-                                                  ),
-                                                ),
+                                          ),
                                         ),
                                       ),
                                     ),
                                   ),
-                                ),
+                                ],
                               ],
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                Container(
-                  margin: const EdgeInsets.only(left: 12, right: 12, top: 10),
-                  child: Row(
-                    children: [
-                      ClipOval(
-                        child: Material(
-                          color: _isTogglingFavourite
-                              ? Colors.grey.shade600
-                              : (isFavourite
-                                    ? Colors.red.shade600
-                                    : Theme.of(
-                                        context,
-                                      ).colorScheme.primaryContainer),
-                          child: InkWell(
-                            onTap: _isTogglingFavourite
-                                ? null
-                                : _toggleFavourite,
-                            child: SizedBox(
-                              width: 40,
-                              height: 40,
-                              child: Center(
-                                child: _isTogglingFavourite
-                                    ? const SizedBox(
-                                        width: 20,
-                                        height: 20,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                          valueColor:
-                                              AlwaysStoppedAnimation<Color>(
-                                                Colors.white,
-                                              ),
-                                        ),
-                                      )
-                                    : Icon(
-                                        isFavourite
-                                            ? Icons.favorite
-                                            : Icons.favorite_border,
-                                        color: Theme.of(
-                                          context,
-                                        ).colorScheme.onPrimaryContainer,
-                                        size: 20,
-                                      ),
-                              ),
                             ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: FilledButton(
-                          onPressed: () {
-                            showModalBottomSheet(
-                              context: context,
-                              isScrollControlled: true,
-                              builder: (context) {
-                                return Padding(
-                                  padding: EdgeInsets.only(
-                                    bottom: MediaQuery.of(
-                                      context,
-                                    ).viewInsets.bottom,
-                                  ),
-                                  child: ListEditorBottomSheet(
-                                    isAnime: widget.isAnime,
-                                    status: mediaListEntry?["status"] ?? "NONE",
-                                    progress: mediaListEntry?["progress"] ?? 0,
-                                    startDate:
-                                        (mediaListEntry?["startedAt"]?["day"] ==
-                                            null)
-                                        ? {"day": -1}
-                                        : mediaListEntry?["startedAt"] ??
-                                              {"day": -1},
-                                    endDate:
-                                        (mediaListEntry?["completedAt"]?["day"] ==
-                                            null)
-                                        ? {"day": -1}
-                                        : mediaListEntry?["completedAt"] ??
-                                              {"day": -1},
-                                    score: (mediaListEntry?["score"] is int)
-                                        ? (mediaListEntry?["score"] as int)
-                                              .toDouble()
-                                        : mediaListEntry?["score"] ?? 0.0,
-                                    repeatCount: mediaListEntry?["repeat"] ?? 0,
-                                    mediaId: widget.id,
-                                    entryId: mediaListEntry?["id"],
-                                    onUpdate: updateMediaDetails,
-                                  ),
-                                );
-                              },
-                            );
-                          },
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            spacing: 5,
-                            children: elementList,
-                          ),
+                          ],
                         ),
                       ),
                     ],
                   ),
-                ),
-              ],
+                  Container(
+                    margin: const EdgeInsets.only(left: 12, right: 12, top: 10),
+                    child: Row(
+                      children: [
+                        ClipOval(
+                          child: Material(
+                            color: _isTogglingFavourite
+                                ? Colors.grey.shade600
+                                : (isFavourite
+                                      ? Colors.red.shade600
+                                      : Theme.of(
+                                          context,
+                                        ).colorScheme.primaryContainer),
+                            child: InkWell(
+                              onTap: _isTogglingFavourite
+                                  ? null
+                                  : _toggleFavourite,
+                              child: SizedBox(
+                                width: 40,
+                                height: 40,
+                                child: Center(
+                                  child: _isTogglingFavourite
+                                      ? const SizedBox(
+                                          width: 20,
+                                          height: 20,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            valueColor:
+                                                AlwaysStoppedAnimation<Color>(
+                                                  Colors.white,
+                                                ),
+                                          ),
+                                        )
+                                      : Icon(
+                                          isFavourite
+                                              ? Icons.favorite
+                                              : Icons.favorite_border,
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.onPrimaryContainer,
+                                          size: 20,
+                                        ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: FilledButton(
+                            onPressed: () {
+                              showModalBottomSheet(
+                                context: context,
+                                isScrollControlled: true,
+                                useSafeArea: true,
+                                builder: (context) {
+                                  return Padding(
+                                    padding: EdgeInsets.only(
+                                      bottom: MediaQuery.of(
+                                        context,
+                                      ).viewInsets.bottom,
+                                    ),
+                                    child: ListEditorBottomSheet(
+                                      isAnime: widget.isAnime,
+                                      status: mediaListEntry?["status"] ?? "NONE",
+                                      progress: mediaListEntry?["progress"] ?? 0,
+                                      startDate:
+                                          (mediaListEntry?["startedAt"]?["day"] ==
+                                              null)
+                                          ? {"day": -1}
+                                          : mediaListEntry?["startedAt"] ??
+                                                {"day": -1},
+                                      endDate:
+                                          (mediaListEntry?["completedAt"]?["day"] ==
+                                              null)
+                                          ? {"day": -1}
+                                          : mediaListEntry?["completedAt"] ??
+                                                {"day": -1},
+                                      score: (mediaListEntry?["score"] is int)
+                                          ? (mediaListEntry?["score"] as int)
+                                                .toDouble()
+                                          : mediaListEntry?["score"] ?? 0.0,
+                                      repeatCount: mediaListEntry?["repeat"] ?? 0,
+                                      mediaId: widget.id,
+                                      entryId: mediaListEntry?["id"],
+                                      onUpdate: updateMediaDetails,
+                                    ),
+                                  );
+                                },
+                              );
+                            },
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              spacing: 5,
+                              children: elementList,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],

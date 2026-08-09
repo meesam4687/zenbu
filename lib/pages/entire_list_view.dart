@@ -176,52 +176,55 @@ class _EntireListViewState extends State<EntireListView> {
                   child: Center(child: CircularProgressIndicator()),
                 ),
               )
-            : Container(
-                margin: const EdgeInsets.only(left: 10, right: 10, top: 10),
-                child: Column(
-                  children: [
-                    Expanded(
-                      child: GridView.builder(
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        controller: _scrollController,
-                        gridDelegate: const ConstantSliverGridDelegate(
-                          itemWidth: 110.0,
-                          itemHeight: 226.0,
-                        ),
-                        itemCount: _isLoading
-                            ? medias.length + 1
-                            : medias.length,
-                        itemBuilder: (context, index) {
-                          if (index == medias.length && _isLoading == true) {
-                            return const Center(
+            : SafeArea(
+                child: Container(
+                  margin: const EdgeInsets.only(left: 10, right: 10, top: 10),
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: GridView.builder(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          controller: _scrollController,
+                          gridDelegate: const ConstantSliverGridDelegate(
+                            itemWidth: 110.0,
+                            itemHeight: 226.0,
+                          ),
+                          itemCount: _isLoading
+                              ? medias.length + 1
+                              : medias.length,
+                          itemBuilder: (context, index) {
+                            if (index == medias.length && _isLoading == true) {
+                              return const Center(
+                                child: Padding(
+                                  padding: EdgeInsets.all(8.0),
+                                  child: CircularProgressIndicator(),
+                                ),
+                              );
+                            }
+                            return Center(
                               child: Padding(
-                                padding: EdgeInsets.all(8.0),
-                                child: CircularProgressIndicator(),
+                                padding: const EdgeInsets.only(right: 3.0),
+                                child: ItemCard(
+                                  title: provider.resolveTitle(
+                                    medias[index]["title"] as Map?,
+                                  ),
+                                  image:
+                                      medias[index]["coverImage"]["large"]
+                                          as String,
+                                  id: medias[index]["id"] as int,
+                                  type: (medias[index]["type"] as String)
+                                      .toLowerCase(),
+                                  mediaListEntry:
+                                      medias[index]["mediaListEntry"] as Map?,
+                                  listDataPreloaded: true,
+                                ),
                               ),
                             );
-                          }
-                          return Center(
-                            child: Padding(
-                              padding: const EdgeInsets.only(right: 3.0),
-                              child: ItemCard(
-                                title: provider.resolveTitle(
-                                    medias[index]["title"] as Map?),
-                                image:
-                                    medias[index]["coverImage"]["large"]
-                                        as String,
-                                id: medias[index]["id"] as int,
-                                type: (medias[index]["type"] as String)
-                                    .toLowerCase(),
-                                mediaListEntry:
-                                    medias[index]["mediaListEntry"] as Map?,
-                                listDataPreloaded: true,
-                              ),
-                            ),
-                          );
-                        },
+                          },
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
       ),

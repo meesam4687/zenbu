@@ -54,56 +54,58 @@ class SimulcastsPage extends StatelessWidget {
       length: 7,
       child: Scaffold(
         appBar: AppBar(title: Text("Simulcasts")),
-        body: Column(
-          children: [
-            TabBar(
-              tabAlignment: TabAlignment.start,
-              isScrollable: true,
-              tabs: [
-                Tab(text: tabList[0]),
-                Tab(text: tabList[1]),
-                Tab(text: tabList[2]),
-                Tab(text: tabList[3]),
-                Tab(text: tabList[4]),
-                Tab(text: tabList[5]),
-                Tab(text: tabList[6]),
-              ],
-            ),
-            Expanded(
-              child: TabBarView(
-                children: [
-                  SimulcastPageView(
-                    epochLower: epochs[0][1],
-                    epochUpper: epochs[0][2],
-                  ),
-                  SimulcastPageView(
-                    epochLower: epochs[1][1],
-                    epochUpper: epochs[1][2],
-                  ),
-                  SimulcastPageView(
-                    epochLower: epochs[2][1],
-                    epochUpper: epochs[2][2],
-                  ),
-                  SimulcastPageView(
-                    epochLower: epochs[3][1],
-                    epochUpper: epochs[3][2],
-                  ),
-                  SimulcastPageView(
-                    epochLower: epochs[4][1],
-                    epochUpper: epochs[4][2],
-                  ),
-                  SimulcastPageView(
-                    epochLower: epochs[5][1],
-                    epochUpper: epochs[5][2],
-                  ),
-                  SimulcastPageView(
-                    epochLower: epochs[6][1],
-                    epochUpper: epochs[6][2],
-                  ),
+        body: SafeArea(
+          child: Column(
+            children: [
+              TabBar(
+                tabAlignment: TabAlignment.start,
+                isScrollable: true,
+                tabs: [
+                  Tab(text: tabList[0]),
+                  Tab(text: tabList[1]),
+                  Tab(text: tabList[2]),
+                  Tab(text: tabList[3]),
+                  Tab(text: tabList[4]),
+                  Tab(text: tabList[5]),
+                  Tab(text: tabList[6]),
                 ],
               ),
-            ),
-          ],
+              Expanded(
+                child: TabBarView(
+                  children: [
+                    SimulcastPageView(
+                      epochLower: epochs[0][1],
+                      epochUpper: epochs[0][2],
+                    ),
+                    SimulcastPageView(
+                      epochLower: epochs[1][1],
+                      epochUpper: epochs[1][2],
+                    ),
+                    SimulcastPageView(
+                      epochLower: epochs[2][1],
+                      epochUpper: epochs[2][2],
+                    ),
+                    SimulcastPageView(
+                      epochLower: epochs[3][1],
+                      epochUpper: epochs[3][2],
+                    ),
+                    SimulcastPageView(
+                      epochLower: epochs[4][1],
+                      epochUpper: epochs[4][2],
+                    ),
+                    SimulcastPageView(
+                      epochLower: epochs[5][1],
+                      epochUpper: epochs[5][2],
+                    ),
+                    SimulcastPageView(
+                      epochLower: epochs[6][1],
+                      epochUpper: epochs[6][2],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

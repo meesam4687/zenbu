@@ -189,34 +189,36 @@ class _UserProfilePageState extends State<UserProfilePage>
                 ),
               ];
             },
-            body: TabBarView(
-              controller: _tabController,
-              children: [
-                _KeepAliveWrapper(
-                  child: SingleChildScrollView(
-                    key: const PageStorageKey('user_anime_stats'),
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    child: ProfileStatsTab(
-                      statistics: animeStats,
-                      isAnime: true,
-                      userId: userId,
-                      username: username,
+            body: SafeArea(
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  _KeepAliveWrapper(
+                    child: SingleChildScrollView(
+                      key: const PageStorageKey('user_anime_stats'),
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      child: ProfileStatsTab(
+                        statistics: animeStats,
+                        isAnime: true,
+                        userId: userId,
+                        username: username,
+                      ),
                     ),
                   ),
-                ),
-                _KeepAliveWrapper(
-                  child: SingleChildScrollView(
-                    key: const PageStorageKey('user_manga_stats'),
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    child: ProfileStatsTab(
-                      statistics: mangaStats,
-                      isAnime: false,
-                      userId: userId,
-                      username: username,
+                  _KeepAliveWrapper(
+                    child: SingleChildScrollView(
+                      key: const PageStorageKey('user_manga_stats'),
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      child: ProfileStatsTab(
+                        statistics: mangaStats,
+                        isAnime: false,
+                        userId: userId,
+                        username: username,
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           );
         },

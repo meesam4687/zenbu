@@ -52,27 +52,29 @@ class _StaffDetailsPageState extends State<StaffDetailsPage> {
         return Scaffold(
           appBar: AppBar(),
           body: SingleChildScrollView(
-            child: Column(
-              children: [
-                CharacterHeader(
-                  characterImage: data["data"]["Staff"]["image"]["large"],
-                  characterName: data["data"]["Staff"]["name"]["full"],
-                  characterSecondaryNames: (secondaryNames).join(', '),
-                ),
-                CharacterDescription(
-                  characterGender: (data["data"]["Staff"]["gender"] != null)
-                      ? data["data"]["Staff"]["gender"]
-                      : "N/A",
-                  characterDescription:
-                      (data["data"]["Staff"]["description"] != null)
-                      ? data["data"]["Staff"]["description"]
-                      : "",
-                ),
-                CharacterRelations(
-                  relations:
-                      data["data"]["Staff"]["staffMedia"]["edges"] as List,
-                ),
-              ],
+            child: SafeArea(
+              child: Column(
+                children: [
+                  CharacterHeader(
+                    characterImage: data["data"]["Staff"]["image"]["large"],
+                    characterName: data["data"]["Staff"]["name"]["full"],
+                    characterSecondaryNames: (secondaryNames).join(', '),
+                  ),
+                  CharacterDescription(
+                    characterGender: (data["data"]["Staff"]["gender"] != null)
+                        ? data["data"]["Staff"]["gender"]
+                        : "N/A",
+                    characterDescription:
+                        (data["data"]["Staff"]["description"] != null)
+                        ? data["data"]["Staff"]["description"]
+                        : "",
+                  ),
+                  CharacterRelations(
+                    relations:
+                        data["data"]["Staff"]["staffMedia"]["edges"] as List,
+                  ),
+                ],
+              ),
             ),
           ),
         );
