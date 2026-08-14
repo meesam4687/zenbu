@@ -156,12 +156,12 @@ class _HomePageState extends State<HomePage> {
                                 useSafeArea: true,
                                 builder: (context) {
                                   return UserInfoModalSheet(
-                                    profileImage: providerData['data']
-                                            ['Viewer']['avatar']['large'],
-                                    username: providerData['data']['Viewer']
-                                        ['name'],
-                                    userId: providerData['data']['Viewer']
-                                        ['id'],
+                                    profileImage:
+                                        providerData['data']['Viewer']['avatar']['large'],
+                                    username:
+                                        providerData['data']['Viewer']['name'],
+                                    userId:
+                                        providerData['data']['Viewer']['id'],
                                   );
                                 },
                               );
@@ -335,12 +335,14 @@ class _HomePageState extends State<HomePage> {
                         (listWidgets.first as MediaList).isAnime;
                     final double topSpacing = firstIsAnime ? 24.0 : 16.0;
 
-                    return Column(
-                      children: [
-                        SizedBox(height: topSpacing),
-                        ...listWidgets,
-                        const SizedBox(height: 16),
-                      ],
+                    return SafeArea(
+                      child: Column(
+                        children: [
+                          SizedBox(height: topSpacing),
+                          ...listWidgets,
+                          const SizedBox(height: 16),
+                        ],
+                      ),
                     );
                   },
                 ),
