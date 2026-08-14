@@ -29,7 +29,9 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
     }
     final totalWidth = MediaQuery.of(context).size.width;
     final bool hasNavRail = totalWidth >= 600;
-    final reserved = hasNavRail ? 200.0 : 120.0;
+    final paddingRight = MediaQuery.of(context).padding.right;
+    final paddingLeft = MediaQuery.of(context).padding.left;
+    final reserved = (hasNavRail ? 254.0 : 130.0) + paddingRight + paddingLeft;
     final calc = totalWidth - reserved;
     return calc.clamp(140.0, calc);
   }

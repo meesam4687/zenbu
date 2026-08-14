@@ -71,283 +71,297 @@ class _HomePageState extends State<HomePage> {
     final showRecommendations = provider.showRecommendationsList;
     final homeListOrder = provider.homeListOrder;
 
-    return Scaffold(
-      appBar: AppBar(
-        toolbarHeight: 60,
-        title: _isSearching ? const SizedBox() : const Text("Home"),
-        actions: [
-          GlobalSearchBar(
-            onSearchStateChanged: (isSearching) {
-              setState(() {
-                _isSearching = isSearching;
-              });
-            },
-          ),
-          const SizedBox(width: 8),
-          const HomeDownloadButton(),
-          const SizedBox(width: 8),
-          Badge(
-            isLabelVisible: (providerData.isNotEmpty)
-                ? (providerData["data"]["Viewer"]["unreadNotificationCount"] >
-                      0)
-                : false,
-            smallSize: 12,
-            child: Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: Theme.of(context).colorScheme.onSecondary,
-                ),
-                borderRadius: const BorderRadius.all(Radius.circular(360)),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final double paddingRight = MediaQuery.of(context).padding.right;
+        final double paddingLeft = MediaQuery.of(context).padding.left;
+        final double availableWidth = constraints.maxWidth;
+        final double reservedSpace = 130.0 + paddingRight + paddingLeft;
+        final double maxSearchWidth = (availableWidth - reservedSpace).clamp(
+          134.0,
+          availableWidth,
+        );
+
+        return Scaffold(
+          appBar: AppBar(
+            toolbarHeight: 60,
+            title: _isSearching ? const SizedBox() : const Text("Home"),
+            actions: [
+              GlobalSearchBar(
+                maxWidth: maxSearchWidth,
+                onSearchStateChanged: (isSearching) {
+                  setState(() {
+                    _isSearching = isSearching;
+                  });
+                },
               ),
-              child: ClipOval(
-                child: Stack(
-                  children: [
-                    (providerData.isEmpty)
-                        ? FutureBuilder(
-                            future: _alData,
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.waiting) {
-                                return const SizedBox(
-                                  height: 40,
-                                  width: 40,
-                                  child: Icon(Icons.face),
-                                );
-                              }
-                              if (snapshot.hasError) {
-                                return const SizedBox(
-                                  height: 40,
-                                  width: 40,
-                                  child: Icon(Icons.face),
-                                );
-                              }
-                              final data = snapshot.data!;
-                              return CustomImage(
+              const SizedBox(width: 8),
+              const HomeDownloadButton(),
+              const SizedBox(width: 8),
+              Badge(
+                isLabelVisible: (providerData.isNotEmpty)
+                    ? (providerData["data"]["Viewer"]["unreadNotificationCount"] >
+                          0)
+                    : false,
+                smallSize: 12,
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: Theme.of(context).colorScheme.onSecondary,
+                    ),
+                    borderRadius: const BorderRadius.all(Radius.circular(360)),
+                  ),
+                  child: ClipOval(
+                    child: Stack(
+                      children: [
+                        (providerData.isEmpty)
+                            ? FutureBuilder(
+                                future: _alData,
+                                builder: (context, snapshot) {
+                                  if (snapshot.connectionState ==
+                                      ConnectionState.waiting) {
+                                    return const SizedBox(
+                                      height: 40,
+                                      width: 40,
+                                      child: Icon(Icons.face),
+                                    );
+                                  }
+                                  if (snapshot.hasError) {
+                                    return const SizedBox(
+                                      height: 40,
+                                      width: 40,
+                                      child: Icon(Icons.face),
+                                    );
+                                  }
+                                  final data = snapshot.data!;
+                                  return CustomImage(
+                                    height: 40,
+                                    width: 40,
+                                    fit: BoxFit.fill,
+                                    imageUrl:
+                                        data['data']['Viewer']['avatar']['large']
+                                            as String,
+                                    borderRadius: BorderRadius.circular(360),
+                                  );
+                                },
+                              )
+                            : CustomImage(
                                 height: 40,
                                 width: 40,
                                 fit: BoxFit.fill,
                                 imageUrl:
-                                    data['data']['Viewer']['avatar']['large']
+                                    providerData['data']['Viewer']['avatar']['large']
                                         as String,
                                 borderRadius: BorderRadius.circular(360),
-                              );
-                            },
-                          )
-                        : CustomImage(
-                            height: 40,
-                            width: 40,
-                            fit: BoxFit.fill,
-                            imageUrl:
-                                providerData['data']['Viewer']['avatar']['large']
-                                    as String,
-                            borderRadius: BorderRadius.circular(360),
-                          ),
-                    Positioned.fill(
-                      child: Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(360),
-                          onTap: () {
-                            if (providerData.isNotEmpty) {
-                              showModalBottomSheet(
-                                context: context,
-                                useSafeArea: true,
-                                builder: (context) {
-                                  return UserInfoModalSheet(
-                                    profileImage:
-                                        providerData['data']['Viewer']['avatar']['large'],
-                                    username:
-                                        providerData['data']['Viewer']['name'],
-                                    userId:
-                                        providerData['data']['Viewer']['id'],
+                              ),
+                        Positioned.fill(
+                          child: Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(360),
+                              onTap: () {
+                                if (providerData.isNotEmpty) {
+                                  showModalBottomSheet(
+                                    context: context,
+                                    useSafeArea: true,
+                                    builder: (context) {
+                                      return UserInfoModalSheet(
+                                        profileImage:
+                                            providerData['data']['Viewer']['avatar']['large'],
+                                        username:
+                                            providerData['data']['Viewer']['name'],
+                                        userId:
+                                            providerData['data']['Viewer']['id'],
+                                      );
+                                    },
                                   );
-                                },
-                              );
-                            }
-                          },
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-        ],
-      ),
-      body: RefreshIndicator(
-        onRefresh: _handleRefresh,
-        child: (providerData.isEmpty)
-            ? FutureBuilder(
-                future: _alData,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(
-                      child: CircularProgressIndicator.adaptive(),
-                    );
-                  }
-                  if (snapshot.hasError) {
-                    return SingleChildScrollView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      child: SizedBox(
-                        height: MediaQuery.of(context).size.height - 120,
-                        child: Center(
-                          child: ErrorPage(
-                            scaffold: false,
-                            message: snapshot.error?.toString(),
-                            onReload: () {
-                              setState(() {
-                                _alData = getHomePageData();
-                              });
-                            },
+                                }
+                              },
+                            ),
                           ),
                         ),
-                      ),
-                    );
-                  }
-                  final data = snapshot.data!;
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    Provider.of<StateProvider>(
-                      context,
-                      listen: false,
-                    ).updateData(data);
-                  });
-                  final animeData = _extractListEntries(data, "animeList");
-                  final mangaData = _extractListEntries(data, "mangaList");
-
-                  if (!showAnime && !showManga && !showRecommendations) {
-                    return const _BothDisabledView();
-                  }
-
-                  final bool recommendationsActive =
-                      showRecommendations &&
-                      provider.recommendations.isNotEmpty;
-                  final int activeCount =
-                      (showAnime ? 1 : 0) +
-                      (showManga ? 1 : 0) +
-                      (recommendationsActive ? 1 : 0);
-                  final bool singleListActive = activeCount == 1;
-
-                  final List<Widget> listWidgets = [];
-                  for (var key in homeListOrder) {
-                    if (key == 'anime' && showAnime) {
-                      listWidgets.add(
-                        MediaList(
-                          items: animeData,
-                          isAnime: true,
-                          multiRow: singleListActive,
-                        ),
-                      );
-                    } else if (key == 'manga' && showManga) {
-                      listWidgets.add(
-                        MediaList(
-                          items: mangaData,
-                          isAnime: false,
-                          multiRow: singleListActive,
-                        ),
-                      );
-                    } else if (key == 'recommendations' &&
-                        recommendationsActive) {
-                      listWidgets.add(
-                        MediaList(
-                          items: provider.recommendations,
-                          isAnime: true,
-                          title: "Recommended for You",
-                          multiRow: singleListActive,
-                        ),
-                      );
-                    }
-                  }
-
-                  final bool firstIsAnime =
-                      listWidgets.isNotEmpty &&
-                      (listWidgets.first as MediaList).isAnime;
-                  final double topSpacing = firstIsAnime ? 24.0 : 16.0;
-
-                  return SingleChildScrollView(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    child: Column(
-                      children: [
-                        SizedBox(height: topSpacing),
-                        ...listWidgets,
                       ],
                     ),
-                  );
-                },
-              )
-            : (!showAnime && !showManga && !showRecommendations)
-            ? const _BothDisabledView()
-            : SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                child: Builder(
-                  builder: (context) {
-                    final bool recommendationsActive =
-                        showRecommendations &&
-                        provider.recommendations.isNotEmpty;
-                    final int activeCount =
-                        (showAnime ? 1 : 0) +
-                        (showManga ? 1 : 0) +
-                        (recommendationsActive ? 1 : 0);
-                    final bool singleListActive = activeCount == 1;
-
-                    final List<Widget> listWidgets = [];
-                    for (var key in homeListOrder) {
-                      if (key == 'anime' && showAnime) {
-                        listWidgets.add(
-                          MediaList(
-                            items: _extractListEntries(
-                              providerData,
-                              "animeList",
-                            ),
-                            isAnime: true,
-                            multiRow: singleListActive,
-                          ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+            ],
+          ),
+          body: RefreshIndicator(
+            onRefresh: _handleRefresh,
+            child: (providerData.isEmpty)
+                ? FutureBuilder(
+                    future: _alData,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(
+                          child: CircularProgressIndicator.adaptive(),
                         );
-                      } else if (key == 'manga' && showManga) {
-                        listWidgets.add(
-                          MediaList(
-                            items: _extractListEntries(
-                              providerData,
-                              "mangaList",
+                      }
+                      if (snapshot.hasError) {
+                        return SingleChildScrollView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          child: SizedBox(
+                            height: MediaQuery.of(context).size.height - 120,
+                            child: Center(
+                              child: ErrorPage(
+                                scaffold: false,
+                                message: snapshot.error?.toString(),
+                                onReload: () {
+                                  setState(() {
+                                    _alData = getHomePageData();
+                                  });
+                                },
+                              ),
                             ),
-                            isAnime: false,
-                            multiRow: singleListActive,
-                          ),
-                        );
-                      } else if (key == 'recommendations' &&
-                          recommendationsActive) {
-                        listWidgets.add(
-                          MediaList(
-                            items: provider.recommendations,
-                            isAnime: true,
-                            title: "Recommended for You",
-                            multiRow: singleListActive,
                           ),
                         );
                       }
-                    }
+                      final data = snapshot.data!;
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        Provider.of<StateProvider>(
+                          context,
+                          listen: false,
+                        ).updateData(data);
+                      });
+                      final animeData = _extractListEntries(data, "animeList");
+                      final mangaData = _extractListEntries(data, "mangaList");
 
-                    final bool firstIsAnime =
-                        listWidgets.isNotEmpty &&
-                        (listWidgets.first as MediaList).isAnime;
-                    final double topSpacing = firstIsAnime ? 24.0 : 16.0;
+                      if (!showAnime && !showManga && !showRecommendations) {
+                        return const _BothDisabledView();
+                      }
 
-                    return SafeArea(
-                      child: Column(
-                        children: [
-                          SizedBox(height: topSpacing),
-                          ...listWidgets,
-                          const SizedBox(height: 16),
-                        ],
-                      ),
-                    );
-                  },
-                ),
-              ),
-      ),
+                      final bool recommendationsActive =
+                          showRecommendations &&
+                          provider.recommendations.isNotEmpty;
+                      final int activeCount =
+                          (showAnime ? 1 : 0) +
+                          (showManga ? 1 : 0) +
+                          (recommendationsActive ? 1 : 0);
+                      final bool singleListActive = activeCount == 1;
+
+                      final List<Widget> listWidgets = [];
+                      for (var key in homeListOrder) {
+                        if (key == 'anime' && showAnime) {
+                          listWidgets.add(
+                            MediaList(
+                              items: animeData,
+                              isAnime: true,
+                              multiRow: singleListActive,
+                            ),
+                          );
+                        } else if (key == 'manga' && showManga) {
+                          listWidgets.add(
+                            MediaList(
+                              items: mangaData,
+                              isAnime: false,
+                              multiRow: singleListActive,
+                            ),
+                          );
+                        } else if (key == 'recommendations' &&
+                            recommendationsActive) {
+                          listWidgets.add(
+                            MediaList(
+                              items: provider.recommendations,
+                              isAnime: true,
+                              title: "Recommended for You",
+                              multiRow: singleListActive,
+                            ),
+                          );
+                        }
+                      }
+
+                      final bool firstIsAnime =
+                          listWidgets.isNotEmpty &&
+                          (listWidgets.first as MediaList).isAnime;
+                      final double topSpacing = firstIsAnime ? 24.0 : 16.0;
+
+                      return SingleChildScrollView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        child: Column(
+                          children: [
+                            SizedBox(height: topSpacing),
+                            ...listWidgets,
+                          ],
+                        ),
+                      );
+                    },
+                  )
+                : (!showAnime && !showManga && !showRecommendations)
+                ? const _BothDisabledView()
+                : SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    child: Builder(
+                      builder: (context) {
+                        final bool recommendationsActive =
+                            showRecommendations &&
+                            provider.recommendations.isNotEmpty;
+                        final int activeCount =
+                            (showAnime ? 1 : 0) +
+                            (showManga ? 1 : 0) +
+                            (recommendationsActive ? 1 : 0);
+                        final bool singleListActive = activeCount == 1;
+
+                        final List<Widget> listWidgets = [];
+                        for (var key in homeListOrder) {
+                          if (key == 'anime' && showAnime) {
+                            listWidgets.add(
+                              MediaList(
+                                items: _extractListEntries(
+                                  providerData,
+                                  "animeList",
+                                ),
+                                isAnime: true,
+                                multiRow: singleListActive,
+                              ),
+                            );
+                          } else if (key == 'manga' && showManga) {
+                            listWidgets.add(
+                              MediaList(
+                                items: _extractListEntries(
+                                  providerData,
+                                  "mangaList",
+                                ),
+                                isAnime: false,
+                                multiRow: singleListActive,
+                              ),
+                            );
+                          } else if (key == 'recommendations' &&
+                              recommendationsActive) {
+                            listWidgets.add(
+                              MediaList(
+                                items: provider.recommendations,
+                                isAnime: true,
+                                title: "Recommended for You",
+                                multiRow: singleListActive,
+                              ),
+                            );
+                          }
+                        }
+
+                        final bool firstIsAnime =
+                            listWidgets.isNotEmpty &&
+                            (listWidgets.first as MediaList).isAnime;
+                        final double topSpacing = firstIsAnime ? 24.0 : 16.0;
+
+                        return SafeArea(
+                          child: Column(
+                            children: [
+                              SizedBox(height: topSpacing),
+                              ...listWidgets,
+                              const SizedBox(height: 16),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+          ),
+        );
+      },
     );
   }
 }
