@@ -14,6 +14,9 @@ class VideoPlayerControlsOverlay extends StatefulWidget {
   final String totalDurationText;
   final Widget seekBar;
 
+  final VoidCallback onZoomPressed;
+  final String zoomModeName;
+
   final VoidCallback onBackPressed;
   final VoidCallback onNextEpisodePressed;
   final VoidCallback onSettingsPressed;
@@ -38,6 +41,8 @@ class VideoPlayerControlsOverlay extends StatefulWidget {
     required this.currentPositionText,
     required this.totalDurationText,
     required this.seekBar,
+    required this.onZoomPressed,
+    required this.zoomModeName,
     required this.onBackPressed,
     required this.onNextEpisodePressed,
     required this.onSettingsPressed,
@@ -203,6 +208,8 @@ class _VideoPlayerControlsOverlayState extends State<VideoPlayerControlsOverlay>
                       hasNextEpisode: widget.hasNextEpisode,
                       onBackPressed: widget.onBackPressed,
                       onNextEpisodePressed: widget.onNextEpisodePressed,
+                      onZoomPressed: widget.onZoomPressed,
+                      zoomModeName: widget.zoomModeName,
                       onSettingsPressed: widget.onSettingsPressed,
                       onPipPressed: widget.onPipPressed,
                     ),

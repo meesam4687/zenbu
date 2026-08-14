@@ -73,7 +73,8 @@ class DeepLinkController {
 
       try {
         int addedCount = 0;
-        final int totalUrls = (animeUrl != null ? 1 : 0) +
+        final int totalUrls =
+            (animeUrl != null ? 1 : 0) +
             (mangaUrl != null ? 1 : 0) +
             (novelUrl != null ? 1 : 0);
 

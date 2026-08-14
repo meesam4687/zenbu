@@ -98,7 +98,8 @@ class _MyAppState extends State<MyApp> {
                 }
               }
 
-              final isDark = (provider.themeMode == ThemeMode.dark) ||
+              final isDark =
+                  (provider.themeMode == ThemeMode.dark) ||
                   (provider.themeMode == ThemeMode.system &&
                       MediaQuery.platformBrightnessOf(context) ==
                           Brightness.dark);
@@ -107,11 +108,13 @@ class _MyAppState extends State<MyApp> {
                 SystemUiOverlayStyle(
                   systemNavigationBarColor: Colors.transparent,
                   systemNavigationBarDividerColor: Colors.transparent,
-                  systemNavigationBarIconBrightness:
-                      isDark ? Brightness.light : Brightness.dark,
+                  systemNavigationBarIconBrightness: isDark
+                      ? Brightness.light
+                      : Brightness.dark,
                   statusBarColor: Colors.transparent,
-                  statusBarIconBrightness:
-                      isDark ? Brightness.light : Brightness.dark,
+                  statusBarIconBrightness: isDark
+                      ? Brightness.light
+                      : Brightness.dark,
                 ),
               );
 

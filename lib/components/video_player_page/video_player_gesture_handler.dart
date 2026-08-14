@@ -324,8 +324,9 @@ class _VideoPlayerGestureHandlerState extends State<VideoPlayerGestureHandler>
                                 widthFactor: 1.0,
                                 child: Container(
                                   decoration: BoxDecoration(
-                                    color:
-                                        Theme.of(context).colorScheme.primary,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
                                     borderRadius: BorderRadius.circular(6),
                                   ),
                                 ),

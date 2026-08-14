@@ -5,6 +5,7 @@ import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_subtitle/flutter_subtitle.dart' hide Subtitle;
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:video_player/video_player.dart';
 import 'package:zenbu/services/mangayomi/models/extensions_models.dart';
@@ -32,6 +33,8 @@ class SkipTime {
   });
 }
 
+enum VideoZoomMode { fit, fill, stretch }
+
 class VideoPlayerPage extends StatefulWidget {
   final ExtEpisode episode;
   final ExtSource source;
@@ -58,6 +61,57 @@ class VideoPlayerPage extends StatefulWidget {
 
 class _VideoPlayerPageState extends State<VideoPlayerPage>
     with TickerProviderStateMixin {
+  VideoZoomMode _zoomMode = VideoZoomMode.fit;
+
+  void _toggleZoomMode() {
+    _startControlsTimer();
+    setState(() {
+      switch (_zoomMode) {
+        case VideoZoomMode.fit:
+          _zoomMode = VideoZoomMode.fill;
+          Fluttertoast.showToast(msg: 'Zoom: Fill');
+          break;
+        case VideoZoomMode.fill:
+          _zoomMode = VideoZoomMode.stretch;
+          Fluttertoast.showToast(msg: 'Zoom: Stretch');
+          break;
+        case VideoZoomMode.stretch:
+          _zoomMode = VideoZoomMode.fit;
+          Fluttertoast.showToast(msg: 'Zoom: Fit (Default)');
+          break;
+      }
+    });
+  }
+
+  void _setZoomModeByName(String modeName) {
+    _startControlsTimer();
+    setState(() {
+      switch (modeName.toLowerCase()) {
+        case 'fill':
+          _zoomMode = VideoZoomMode.fill;
+          break;
+        case 'stretch':
+          _zoomMode = VideoZoomMode.stretch;
+          break;
+        case 'fit':
+        default:
+          _zoomMode = VideoZoomMode.fit;
+          break;
+      }
+    });
+  }
+
+  String _getZoomModeName() {
+    switch (_zoomMode) {
+      case VideoZoomMode.fill:
+        return 'Fill';
+      case VideoZoomMode.stretch:
+        return 'Stretch';
+      case VideoZoomMode.fit:
+        return 'Fit';
+    }
+  }
+
   static const _pipChannel = MethodChannel('zenbu/pip');
   bool _isInPip = false;
   bool _lastIsPlaying = false;
@@ -922,6 +976,8 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
           },
           currentSpeed: _currentPlaybackSpeed,
           onSpeedSelected: _setPlaybackSpeed,
+          zoomModeName: _getZoomModeName(),
+          onZoomSelected: _setZoomModeByName,
         );
       },
     );
@@ -1148,6 +1204,50 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
 
   final GlobalKey _seekBarKey = GlobalKey();
 
+  Widget _buildVideoDisplay() {
+    if (_videoPlayerController == null ||
+        !_videoPlayerController!.value.isInitialized ||
+        _chewieController == null) {
+      return const SizedBox.shrink();
+    }
+
+    final size = _videoPlayerController!.value.size;
+    final double videoWidth = size.width > 0 ? size.width : 16.0;
+    final double videoHeight = size.height > 0 ? size.height : 9.0;
+
+    switch (_zoomMode) {
+      case VideoZoomMode.fill:
+        return SizedBox.expand(
+          child: FittedBox(
+            fit: BoxFit.cover,
+            child: SizedBox(
+              width: videoWidth,
+              height: videoHeight,
+              child: Chewie(controller: _chewieController!),
+            ),
+          ),
+        );
+      case VideoZoomMode.stretch:
+        return SizedBox.expand(
+          child: FittedBox(
+            fit: BoxFit.fill,
+            child: SizedBox(
+              width: videoWidth,
+              height: videoHeight,
+              child: Chewie(controller: _chewieController!),
+            ),
+          ),
+        );
+      case VideoZoomMode.fit:
+        return Center(
+          child: AspectRatio(
+            aspectRatio: _videoPlayerController!.value.aspectRatio,
+            child: Chewie(controller: _chewieController!),
+          ),
+        );
+    }
+  }
+
   Widget _buildPlayerUI() {
     if (_videoPlayerController == null ||
         !_videoPlayerController!.value.isInitialized ||
@@ -1166,12 +1266,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
     return Stack(
       alignment: Alignment.center,
       children: [
-        Center(
-          child: AspectRatio(
-            aspectRatio: _videoPlayerController!.value.aspectRatio,
-            child: Chewie(controller: _chewieController!),
-          ),
-        ),
+        _buildVideoDisplay(),
 
         Positioned.fill(
           child: Row(
@@ -1283,6 +1378,8 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
           currentPositionText: _formatDuration(currentPosition),
           totalDurationText: _formatDuration(totalDuration),
           seekBar: _buildSeekBar(currentPosition, totalDuration, primaryColor),
+          onZoomPressed: _toggleZoomMode,
+          zoomModeName: _getZoomModeName(),
           onBackPressed: () async {
             final navigator = Navigator.of(context);
             await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
@@ -1429,12 +1526,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
           _chewieController != null) {
         return Scaffold(
           backgroundColor: Colors.black,
-          body: Center(
-            child: AspectRatio(
-              aspectRatio: _videoPlayerController!.value.aspectRatio,
-              child: Chewie(controller: _chewieController!),
-            ),
-          ),
+          body: _buildVideoDisplay(),
         );
       }
     }

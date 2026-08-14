@@ -6,6 +6,8 @@ class VideoPlayerHeader extends StatelessWidget implements PreferredSizeWidget {
   final bool hasNextEpisode;
   final VoidCallback onBackPressed;
   final VoidCallback? onNextEpisodePressed;
+  final VoidCallback onZoomPressed;
+  final String zoomModeName;
   final VoidCallback onSettingsPressed;
   final VoidCallback onPipPressed;
 
@@ -16,9 +18,23 @@ class VideoPlayerHeader extends StatelessWidget implements PreferredSizeWidget {
     required this.hasNextEpisode,
     required this.onBackPressed,
     required this.onNextEpisodePressed,
+    required this.onZoomPressed,
+    required this.zoomModeName,
     required this.onSettingsPressed,
     required this.onPipPressed,
   });
+
+  IconData _getZoomIcon() {
+    switch (zoomModeName.toLowerCase()) {
+      case 'fill':
+        return Icons.crop_free;
+      case 'stretch':
+        return Icons.fullscreen;
+      case 'fit':
+      default:
+        return Icons.aspect_ratio;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -58,6 +74,11 @@ class VideoPlayerHeader extends StatelessWidget implements PreferredSizeWidget {
             tooltip: 'Next Episode',
             onPressed: onNextEpisodePressed,
           ),
+        IconButton(
+          icon: Icon(_getZoomIcon(), color: Colors.white),
+          tooltip: 'Zoom Mode ($zoomModeName)',
+          onPressed: onZoomPressed,
+        ),
         IconButton(
           icon: const Icon(Icons.settings, color: Colors.white),
           tooltip: 'Settings',
