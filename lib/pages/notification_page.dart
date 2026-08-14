@@ -165,35 +165,39 @@ class _NotificationPageState extends State<NotificationPage> {
                     ))
             : Container(
                 margin: const EdgeInsets.only(left: 10, right: 10, top: 10),
-                child: Column(
-                  children: [
-                    Expanded(
-                      child: GridView.builder(
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        controller: _scrollController,
-                        gridDelegate:
-                            const SliverGridDelegateWithMaxCrossAxisExtent(
-                              childAspectRatio: 16 / 9,
-                              maxCrossAxisExtent: 410,
-                            ),
-                        itemCount: _isLoading ? items.length + 1 : items.length,
-                        itemBuilder: (context, index) {
-                          if (index == items.length && _isLoading == true) {
-                            return const Center(
-                              child: Padding(
-                                padding: EdgeInsets.all(8.0),
-                                child: CircularProgressIndicator(),
+                child: SafeArea(
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: GridView.builder(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          controller: _scrollController,
+                          gridDelegate:
+                              const SliverGridDelegateWithMaxCrossAxisExtent(
+                                childAspectRatio: 16 / 9,
+                                maxCrossAxisExtent: 410,
                               ),
+                          itemCount: _isLoading
+                              ? items.length + 1
+                              : items.length,
+                          itemBuilder: (context, index) {
+                            if (index == items.length && _isLoading == true) {
+                              return const Center(
+                                child: Padding(
+                                  padding: EdgeInsets.all(8.0),
+                                  child: CircularProgressIndicator(),
+                                ),
+                              );
+                            }
+                            return NotificationCard(
+                              notificationData: items[index],
+                              isUnread: index < _unreadCount,
                             );
-                          }
-                          return NotificationCard(
-                            notificationData: items[index],
-                            isUnread: index < _unreadCount,
-                          );
-                        },
+                          },
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
       ),
