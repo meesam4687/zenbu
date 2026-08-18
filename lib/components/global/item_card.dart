@@ -75,6 +75,15 @@ class _ItemCardState extends State<ItemCard> {
     _openListEditor(context, widget.mediaListEntry);
   }
 
+  String _formatState(String state) {
+    if (state.isEmpty) return state;
+    final words = state.replaceAll('_', ' ').split(' ');
+    return words
+        .where((w) => w.isNotEmpty)
+        .map((word) => word[0].toUpperCase() + word.substring(1).toLowerCase())
+        .join(' ');
+  }
+
   @override
   Widget build(BuildContext context) {
     final bool isMedia = widget.type == 'anime' || widget.type == 'manga';
@@ -162,7 +171,7 @@ class _ItemCardState extends State<ItemCard> {
                   ),
                   (widget.state != null)
                       ? Text(
-                          widget.state as String,
+                          _formatState(widget.state as String),
                           textAlign: TextAlign.center,
                           style: const TextStyle(fontWeight: FontWeight.w200),
                           maxLines: 1,
