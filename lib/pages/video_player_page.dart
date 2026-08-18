@@ -348,7 +348,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
     _disposePlayer();
     _disposeEngine();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+    SystemChrome.setPreferredOrientations([]);
     DiscordService.clearPresence();
     super.dispose();
   }
