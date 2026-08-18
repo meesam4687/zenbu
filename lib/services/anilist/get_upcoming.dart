@@ -16,6 +16,7 @@ Future<Map<String, dynamic>> getUpcomingAnime(int page, int perPage) async {
           }
           type
           mediaListEntry {
+            id
             status
             progress
             score

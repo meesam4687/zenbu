@@ -77,6 +77,7 @@ Future<Map<String, dynamic>> getAnimeData(int id) async {
                 } 
                 type
                 mediaListEntry {
+                  id
                   status
                   progress
                   score
@@ -104,6 +105,7 @@ Future<Map<String, dynamic>> getAnimeData(int id) async {
                   extraLarge
                 }
                 mediaListEntry {
+                  id
                   status
                   progress
                   score

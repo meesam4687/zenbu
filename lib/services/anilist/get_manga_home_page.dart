@@ -20,6 +20,7 @@ Future<Map<String, dynamic>> getMangaHomePage(int page, int perPage) async {
           volumes
           type
           mediaListEntry {
+            id
             status
             progress
             score
@@ -42,6 +43,7 @@ Future<Map<String, dynamic>> getMangaHomePage(int page, int perPage) async {
           }
           type
           mediaListEntry {
+            id
             status
             progress
             score
@@ -64,6 +66,7 @@ Future<Map<String, dynamic>> getMangaHomePage(int page, int perPage) async {
           }
           type
           mediaListEntry {
+            id
             status
             progress
             score

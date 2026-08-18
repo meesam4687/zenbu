@@ -22,6 +22,7 @@ Future<Map<String, dynamic>> getPopularSeason(int page, int perPage) async {
           }
           type
           mediaListEntry {
+            id
             status
             progress
             score
@@ -66,6 +67,7 @@ Future<Map<String, dynamic>> getPopularAllTimeAnime(
           }
           type
           mediaListEntry {
+            id
             status
             progress
             score
@@ -100,6 +102,7 @@ Future<Map<String, dynamic>> getPopularAllTimeManga(
           }
           type
           mediaListEntry {
+            id
             status
             progress
             score

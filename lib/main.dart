@@ -7,7 +7,6 @@ import 'package:zenbu/main_page_view.dart';
 import 'package:zenbu/pages/authentication_page.dart';
 import 'package:zenbu/authentication_token_controller.dart';
 import 'package:zenbu/deep_link_controller.dart';
-
 import 'package:flutter/services.dart';
 
 String? token;

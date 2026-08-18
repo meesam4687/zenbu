@@ -17,6 +17,7 @@ Future<Map<String, dynamic>> getTrendingAnime(int page, int perPage) async {
           bannerImage
           type
           mediaListEntry {
+            id
             status
             progress
             score
@@ -52,6 +53,7 @@ Future<Map<String, dynamic>> getTrendingManga(int page, int perPage) async {
           volumes
           type
           mediaListEntry {
+            id
             status
             progress
             score

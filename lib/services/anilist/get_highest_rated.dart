@@ -16,6 +16,7 @@ Future<Map<String, dynamic>> getHighestRatedAnime(int page, int perPage) async {
           }
           type
           mediaListEntry {
+            id
             status
             progress
             score
@@ -47,6 +48,7 @@ Future<Map<String, dynamic>> getHighestRatedManga(int page, int perPage) async {
           }
           type
           mediaListEntry {
+            id
             status
             progress
             score

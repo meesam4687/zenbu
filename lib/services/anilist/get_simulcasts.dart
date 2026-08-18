@@ -22,6 +22,7 @@ Future<Map<String, dynamic>> getSimulcasts(
             } 
             type
             mediaListEntry {
+              id
               status
               progress
               score
