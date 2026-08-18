@@ -31,9 +31,9 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
     final bool hasNavRail = totalWidth >= 600;
     final paddingRight = MediaQuery.of(context).padding.right;
     final paddingLeft = MediaQuery.of(context).padding.left;
-    final reserved = (hasNavRail ? 254.0 : 130.0) + paddingRight + paddingLeft;
+    final reserved = (hasNavRail ? 244.0 : 120.0) + paddingRight + paddingLeft;
     final calc = totalWidth - reserved;
-    return calc.clamp(140.0, calc);
+    return calc.clamp(150.0, calc);
   }
 
   void _showOverlay() {

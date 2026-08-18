@@ -76,9 +76,9 @@ class _HomePageState extends State<HomePage> {
         final double paddingRight = MediaQuery.of(context).padding.right;
         final double paddingLeft = MediaQuery.of(context).padding.left;
         final double availableWidth = constraints.maxWidth;
-        final double reservedSpace = 130.0 + paddingRight + paddingLeft;
+        final double reservedSpace = 120.0 + paddingRight + paddingLeft;
         final double maxSearchWidth = (availableWidth - reservedSpace).clamp(
-          134.0,
+          144.0,
           availableWidth,
         );
 
