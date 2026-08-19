@@ -207,38 +207,42 @@ class _OthersSearchPageState extends State<OthersSearchPage> {
         child: (_results.isEmpty && _isLoading)
             ? const Center(child: CircularProgressIndicator.adaptive())
             : (_results.isNotEmpty)
-            ? Container(
-                margin: const EdgeInsets.only(left: 10, right: 10, top: 10),
-                child: GridView.builder(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  controller: _scrollController,
-                  gridDelegate: const ConstantSliverGridDelegate(
-                    itemWidth: 110.0,
-                    itemHeight: 226.0,
-                  ),
-                  itemCount: _isLoading ? _results.length + 1 : _results.length,
-                  itemBuilder: (context, index) {
-                    if (index == _results.length && _isLoading) {
-                      return const Center(
+            ? SafeArea(
+                child: Container(
+                  margin: const EdgeInsets.only(left: 10, right: 10, top: 10),
+                  child: GridView.builder(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    controller: _scrollController,
+                    gridDelegate: const ConstantSliverGridDelegate(
+                      itemWidth: 110.0,
+                      itemHeight: 226.0,
+                    ),
+                    itemCount: _isLoading
+                        ? _results.length + 1
+                        : _results.length,
+                    itemBuilder: (context, index) {
+                      if (index == _results.length && _isLoading) {
+                        return const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: CircularProgressIndicator.adaptive(),
+                          ),
+                        );
+                      }
+                      final item = _results[index];
+                      return Center(
                         child: Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: CircularProgressIndicator.adaptive(),
+                          padding: const EdgeInsets.only(left: 3.0),
+                          child: ItemCard(
+                            title: _getItemTitle(item),
+                            image: _getItemImage(item),
+                            id: item["id"] as int,
+                            type: widget.type,
+                          ),
                         ),
                       );
-                    }
-                    final item = _results[index];
-                    return Center(
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 3.0),
-                        child: ItemCard(
-                          title: _getItemTitle(item),
-                          image: _getItemImage(item),
-                          id: item["id"] as int,
-                          type: widget.type,
-                        ),
-                      ),
-                    );
-                  },
+                    },
+                  ),
                 ),
               )
             : SingleChildScrollView(
