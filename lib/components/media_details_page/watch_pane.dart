@@ -657,6 +657,8 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
                                 ),
                                 child: InkWell(
                                   onTap: () {
+                                    final ext = _selectedExtension;
+                                    if (ext == null) return;
                                     final allEpisodes = _allRawEpisodes
                                         .map(
                                           (e) => ExtEpisode.fromJson(
@@ -670,7 +672,7 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
                                             builder: (context) =>
                                                 VideoPlayerPage(
                                                   episode: ep,
-                                                  source: _selectedExtension!,
+                                                  source: ext,
                                                   animeTitle: widget.animeTitle,
                                                   coverImage: widget.coverImage,
                                                   malId: widget.malId,

@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:ui' as ui;
+import 'package:flutter/rendering.dart';
 import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -127,8 +129,81 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
   String _loadingText = 'Resolving stream links...';
   String? _errorMessage;
   Duration _currentPosition = Duration.zero;
+  Duration _totalDuration = Duration.zero;
   bool _isHolding2x = false;
   double _currentPlaybackSpeed = 1.0;
+
+  int _autoRetryCount = 0;
+  static const int _maxAutoRetries = 10;
+  bool _isAutoRetrying = false;
+  bool _playerFailed = false;
+  bool _wasPlaybackEstablished = false;
+
+  final GlobalKey _repaintKey = GlobalKey();
+  Uint8List? _lastFrameBytes;
+
+  Future<void> _captureCurrentFrame() async {
+    try {
+      final RenderRepaintBoundary? boundary =
+          _repaintKey.currentContext?.findRenderObject()
+              as RenderRepaintBoundary?;
+      if (boundary != null && boundary.hasSize) {
+        final image = await boundary.toImage(pixelRatio: 1.0);
+        final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+        if (byteData != null) {
+          _lastFrameBytes = byteData.buffer.asUint8List();
+        }
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _triggerAutoRetry() async {
+    if (!_wasPlaybackEstablished) return;
+
+    if (_autoRetryCount < _maxAutoRetries) {
+      _autoRetryCount++;
+
+      if (!_isAutoRetrying) {
+        _isAutoRetrying = true;
+
+        await _captureCurrentFrame();
+
+        final controller = _videoPlayerController;
+        if (controller != null && controller.value.isInitialized) {
+          final pos = controller.value.position;
+          final dur = controller.value.duration;
+          if (pos > Duration.zero) _currentPosition = pos;
+          if (dur > Duration.zero) _totalDuration = dur;
+          try {
+            controller.pause();
+          } catch (_) {}
+        }
+
+        if (mounted) {
+          setState(() {
+            _errorMessage = null;
+            _isLoading = false;
+          });
+        }
+      }
+
+      await Future.delayed(const Duration(seconds: 3));
+      if (!mounted) return;
+      _fetchVideoList();
+    } else {
+      _disposePlayer();
+      if (mounted) {
+        setState(() {
+          _isAutoRetrying = false;
+          _playerFailed = true;
+          _lastFrameBytes = null;
+          _errorMessage =
+              'Unable to load video stream. Please check your internet connection and try again.';
+          _isLoading = false;
+        });
+      }
+    }
+  }
 
   void _onLongPressStart() {
     if (_videoPlayerController != null &&
@@ -192,6 +267,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
       _videos = [];
       _selectedVideo = null;
       _currentPosition = Duration.zero;
+      _wasPlaybackEstablished = false;
     });
 
     _fetchVideoList();
@@ -347,6 +423,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
     }
     _disposePlayer();
     _disposeEngine();
+    _lastFrameBytes = null;
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     SystemChrome.setPreferredOrientations([]);
     DiscordService.clearPresence();
@@ -366,6 +443,12 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
 
   void _onPlaybackStateChanged() {
     if (_videoPlayerController == null) return;
+    if (_videoPlayerController!.value.hasError) {
+      if (!_isAutoRetrying) {
+        _triggerAutoRetry();
+      }
+      return;
+    }
     final isPlaying = _videoPlayerController!.value.isPlaying;
     if (isPlaying != _lastIsPlaying) {
       _lastIsPlaying = isPlaying;
@@ -435,11 +518,17 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
   }
 
   Future<void> _fetchVideoList() async {
-    setState(() {
-      _isLoading = true;
-      _loadingText = 'Resolving stream links...';
-      _errorMessage = null;
-    });
+    if (_autoRetryCount == 0) {
+      setState(() {
+        _isLoading = true;
+        _loadingText = 'Resolving stream links...';
+        _errorMessage = null;
+      });
+    } else {
+      setState(() {
+        _errorMessage = null;
+      });
+    }
 
     if (widget.source.id == -1) {
       final List<ExtSubtitle> localSubtitles = [];
@@ -517,8 +606,17 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
           .toList();
 
       if (list.isEmpty) {
+        if (_wasPlaybackEstablished && _autoRetryCount < _maxAutoRetries) {
+          _triggerAutoRetry();
+          return;
+        }
+        _disposePlayer();
         setState(() {
-          _errorMessage = 'No video streams found for this episode.';
+          _isAutoRetrying = false;
+          _playerFailed = _wasPlaybackEstablished;
+          _lastFrameBytes = null;
+          _errorMessage =
+              'No video streams found. Please check your internet connection and try again.';
           _isLoading = false;
         });
         return;
@@ -532,8 +630,17 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
       await _initializePlayer();
     } catch (e) {
       if (!mounted) return;
+      if (_wasPlaybackEstablished && _autoRetryCount < _maxAutoRetries) {
+        _triggerAutoRetry();
+        return;
+      }
+      _disposePlayer();
       setState(() {
-        _errorMessage = 'Failed to load video links: $e';
+        _isAutoRetrying = false;
+        _playerFailed = _wasPlaybackEstablished;
+        _lastFrameBytes = null;
+        _errorMessage =
+            'Unable to load video stream. Please check your internet connection and try again.';
         _isLoading = false;
       });
     }
@@ -624,22 +731,25 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
   }
 
   Future<void> _initializePlayer() async {
-    if (_selectedVideo == null) return;
-
+    final video = _selectedVideo;
+    if (video == null) return;
     if (!mounted) return;
 
-    setState(() {
-      _isLoading = true;
-      _loadingText = 'Initializing player...';
-    });
+    if (_autoRetryCount == 0) {
+      setState(() {
+        _isLoading = true;
+        _loadingText = 'Initializing player...';
+      });
+    }
+
+    VideoPlayerController? newController;
+    ChewieController? newChewieController;
 
     try {
-      _disposePlayer();
-
       _skipTimes = [];
       _activeSkipTimeNotifier.value = null;
 
-      final headers = Map<String, String>.from(_selectedVideo!.headers);
+      final headers = Map<String, String>.from(video.headers);
       final hasUserAgent = headers.keys.any(
         (k) => k.toLowerCase() == 'user-agent',
       );
@@ -650,10 +760,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
 
       if (!mounted) return;
 
-      final resolvedResult = await _resolveRedirects(
-        _selectedVideo!.url,
-        headers,
-      );
+      final resolvedResult = await _resolveRedirects(video.url, headers);
       if (!mounted) return;
 
       final resolvedUrl = resolvedResult.url;
@@ -661,7 +768,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
 
       VideoFormat? formatHint;
       final lowerUrl = resolvedUrl.toLowerCase();
-      final lowerOrigUrl = _selectedVideo!.url.toLowerCase();
+      final lowerOrigUrl = video.url.toLowerCase();
       final lowerContentType = contentType?.toLowerCase() ?? '';
       if (lowerUrl.startsWith('data:application/x-mpegurl') ||
           lowerUrl.startsWith('data:application/vnd.apple.mpegurl') ||
@@ -690,11 +797,11 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
 
       final isLocal =
           resolvedUrl.startsWith('file://') || File(resolvedUrl).existsSync();
+
       if (isLocal) {
         final filePath = resolvedUrl.startsWith('file://')
             ? Uri.parse(resolvedUrl).toFilePath()
             : resolvedUrl;
-
         final isValid = await _isLocalVideoFileValid(filePath);
         if (!isValid) {
           if (!mounted) return;
@@ -705,10 +812,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
           });
           return;
         }
-
-        _videoPlayerController = VideoPlayerController.file(File(filePath));
+        newController = VideoPlayerController.file(File(filePath));
       } else {
-        _videoPlayerController = VideoPlayerController.networkUrl(
+        newController = VideoPlayerController.networkUrl(
           Uri.parse(resolvedUrl),
           httpHeaders: headers,
           formatHint: formatHint,
@@ -716,60 +822,56 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
       }
 
       try {
-        await _videoPlayerController!.initialize();
+        await newController.initialize();
       } catch (e, stack) {
         debugPrint('[VIDEO PLAYER INIT EXCEPTION] $e\n$stack');
-        _disposePlayer();
+        newController.dispose();
+        newController = null;
         if (!mounted) return;
-        setState(() {
-          _errorMessage =
-              'Failed to initialize video player: ${e.toString().split('\n').first}';
-          _isLoading = false;
-        });
+        _triggerAutoRetry();
         return;
       }
-      if (!mounted) return;
+      if (!mounted) {
+        newController.dispose();
+        return;
+      }
 
-      _videoPlayerController!.addListener(_onPlaybackStateChanged);
-
-      if (widget.mediaId != null) {
-        final pos = await ProgressService.getAnimeEpisodeProgressPosition(
-          mediaId: widget.mediaId!,
-          episodeUrl: _currentEpisode.url,
-          episodeName: _currentEpisode.name,
-        );
-        if (pos != null) {
-          await _videoPlayerController!.seekTo(Duration(seconds: pos));
+      Duration targetPosition = _currentPosition;
+      if (targetPosition == Duration.zero && _autoRetryCount == 0) {
+        final mediaId = widget.mediaId;
+        if (mediaId != null) {
+          final pos = await ProgressService.getAnimeEpisodeProgressPosition(
+            mediaId: mediaId,
+            episodeUrl: _currentEpisode.url,
+            episodeName: _currentEpisode.name,
+          );
+          if (pos != null && pos > 0) {
+            targetPosition = Duration(seconds: pos);
+          }
+        }
+      }
+      if (targetPosition > Duration.zero) {
+        await newController.seekTo(targetPosition);
+        if (!mounted) {
+          newController.dispose();
+          return;
         }
       }
 
-      _chewieController = ChewieController(
-        videoPlayerController: _videoPlayerController!,
-        autoPlay: false,
-        looping: false,
-        showControls: false,
-        allowFullScreen: false,
-        allowMuting: false,
-        showOptions: false,
-        deviceOrientationsAfterFullScreen: [DeviceOrientation.portraitUp],
-      );
-
-      if (_selectedVideo!.subtitles.isNotEmpty) {
-        final firstSub = _selectedVideo!.subtitles.first;
+      if (video.subtitles.isNotEmpty) {
+        final firstSub = video.subtitles.first;
         final matchedSub = _allSubtitles.firstWhere(
           (s) => s.file == firstSub.file,
           orElse: () => firstSub,
         );
         await _loadSubtitle(matchedSub);
-        if (!mounted) return;
+        if (!mounted) {
+          newController.dispose();
+          return;
+        }
       } else {
         _selectedSubtitle = null;
         _activeSubtitleCtrl = null;
-      }
-
-      if (_currentPosition != Duration.zero) {
-        await _videoPlayerController!.seekTo(_currentPosition);
-        if (!mounted) return;
       }
 
       bool loadedLocalSkip = false;
@@ -780,36 +882,112 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
                   ? Uri.parse(_currentEpisode.url).toFilePath()
                   : _currentEpisode.url);
         loadedLocalSkip = await _loadLocalSkipTimes(filePath);
-        if (!mounted) return;
-      }
-
-      if (!loadedLocalSkip && widget.malId != null) {
-        final double? epNum = parseEpisodeNumber(_currentEpisode);
-        if (epNum != null) {
-          final durationSec = _videoPlayerController!.value.duration.inSeconds;
-          await _fetchSkipTimes(widget.malId!, epNum, durationSec);
-          if (!mounted) return;
+        if (!mounted) {
+          newController.dispose();
+          return;
         }
       }
 
-      _videoPlayerController!.addListener(_onPlayerPositionChanged);
+      final malId = widget.malId;
+      if (!loadedLocalSkip && malId != null) {
+        final double? epNum = parseEpisodeNumber(_currentEpisode);
+        if (epNum != null) {
+          final durationSec = newController.value.duration.inSeconds;
+          await _fetchSkipTimes(malId, epNum, durationSec);
+          if (!mounted) {
+            newController.dispose();
+            return;
+          }
+        }
+      }
 
-      await _videoPlayerController!.play();
+      newChewieController = ChewieController(
+        videoPlayerController: newController,
+        autoPlay: false,
+        looping: false,
+        showControls: false,
+        allowFullScreen: false,
+        allowMuting: false,
+        showOptions: false,
+        deviceOrientationsAfterFullScreen: [DeviceOrientation.portraitUp],
+      );
 
-      WakelockPlus.enable();
+      if (!mounted) {
+        newController.dispose();
+        newChewieController.dispose();
+        return;
+      }
 
-      if (!mounted) return;
+      final oldVideoController = _videoPlayerController;
+      final oldChewieController = _chewieController;
+      oldVideoController?.removeListener(_onPlayerPositionChanged);
+      oldVideoController?.removeListener(_onPlaybackStateChanged);
+
+      newController.addListener(_onPlaybackStateChanged);
+      newController.addListener(_onPlayerPositionChanged);
+
+      if (!mounted) {
+        newController.dispose();
+        newChewieController.dispose();
+        return;
+      }
+
+      final createdVideoCtrl = newController;
+      final createdChewieCtrl = newChewieController;
       setState(() {
+        _videoPlayerController = createdVideoCtrl;
+        _chewieController = createdChewieCtrl;
+        _currentPosition = targetPosition;
+        _totalDuration = createdVideoCtrl.value.duration;
         _isLoading = false;
         _showControls = true;
+        _isAutoRetrying = false;
+        _playerFailed = false;
+        _wasPlaybackEstablished = true;
+        _autoRetryCount = 0;
+        _errorMessage = null;
+        _lastFrameBytes = null;
+        _lastIsPlaying = true;
       });
+
+      try {
+        oldChewieController?.dispose();
+      } catch (_) {}
+      try {
+        oldVideoController?.dispose();
+      } catch (_) {}
+
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        if (!mounted) return;
+        try {
+          await createdVideoCtrl.play();
+          WakelockPlus.enable();
+          _pipChannel.invokeMethod('setVideoPlaying', {'isPlaying': true});
+        } catch (_) {}
+      });
+
       _startControlsTimer();
     } catch (e) {
+      try {
+        newChewieController?.dispose();
+      } catch (_) {}
+      try {
+        newController?.dispose();
+      } catch (_) {}
       if (!mounted) return;
-      setState(() {
-        _errorMessage = 'Failed to play video stream: $e';
-        _isLoading = false;
-      });
+      if (_wasPlaybackEstablished && _autoRetryCount < _maxAutoRetries) {
+        _triggerAutoRetry();
+      } else {
+        _disposePlayer();
+        setState(() {
+          _isAutoRetrying = false;
+          _playerFailed = _wasPlaybackEstablished;
+          _lastFrameBytes = null;
+          _errorMessage =
+              'Unable to load video stream. Please check your internet connection and try again.';
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -1082,8 +1260,14 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
   }
 
   void _onPlayerPositionChanged() {
-    if (_videoPlayerController == null ||
-        !_videoPlayerController!.value.isInitialized) {
+    if (_videoPlayerController == null) return;
+    if (_videoPlayerController!.value.hasError) {
+      if (!_isAutoRetrying) {
+        _triggerAutoRetry();
+      }
+      return;
+    }
+    if (!_videoPlayerController!.value.isInitialized) {
       return;
     }
 
@@ -1091,7 +1275,12 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
       setState(() {});
     }
 
-    final currentPosSec = _videoPlayerController!.value.position.inSeconds;
+    final pos = _videoPlayerController!.value.position;
+    if (pos > Duration.zero) {
+      _currentPosition = pos;
+    }
+
+    final currentPosSec = pos.inSeconds;
     final totalDurSec = _videoPlayerController!.value.duration.inSeconds;
     final now = DateTime.now();
     if (_lastProgressSaveTime == null ||
@@ -1223,7 +1412,10 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
             child: SizedBox(
               width: videoWidth,
               height: videoHeight,
-              child: Chewie(controller: _chewieController!),
+              child: Chewie(
+                key: ValueKey(_chewieController),
+                controller: _chewieController!,
+              ),
             ),
           ),
         );
@@ -1234,7 +1426,10 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
             child: SizedBox(
               width: videoWidth,
               height: videoHeight,
-              child: Chewie(controller: _chewieController!),
+              child: Chewie(
+                key: ValueKey(_chewieController),
+                controller: _chewieController!,
+              ),
             ),
           ),
         );
@@ -1242,31 +1437,58 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
         return Center(
           child: AspectRatio(
             aspectRatio: _videoPlayerController!.value.aspectRatio,
-            child: Chewie(controller: _chewieController!),
+            child: Chewie(
+              key: ValueKey(_chewieController),
+              controller: _chewieController!,
+            ),
           ),
         );
     }
   }
 
   Widget _buildPlayerUI() {
-    if (_videoPlayerController == null ||
-        !_videoPlayerController!.value.isInitialized ||
-        _chewieController == null) {
+    final primaryColor = Theme.of(context).colorScheme.primary;
+
+    final bool isPlayerInitialized =
+        _videoPlayerController != null &&
+        _videoPlayerController!.value.isInitialized &&
+        _chewieController != null;
+    final bool isPlayerReady = isPlayerInitialized && !_isAutoRetrying;
+
+    if (!isPlayerReady && _errorMessage != null) {
       return const SizedBox.shrink();
     }
 
-    final totalDuration = _videoPlayerController!.value.duration;
-    final isBuffering = _videoPlayerController!.value.isBuffering;
-    final currentPosition = _isDraggingSlider
-        ? Duration(seconds: _sliderDragValue.toInt())
-        : _videoPlayerController!.value.position;
-
-    final primaryColor = Theme.of(context).colorScheme.primary;
+    final totalDuration = isPlayerReady
+        ? _videoPlayerController!.value.duration
+        : (_totalDuration != Duration.zero ? _totalDuration : Duration.zero);
+    final isBuffering =
+        _isAutoRetrying ||
+        (isPlayerReady && _videoPlayerController!.value.isBuffering);
+    final currentPosition = isPlayerReady
+        ? (_isDraggingSlider
+              ? Duration(seconds: _sliderDragValue.toInt())
+              : _videoPlayerController!.value.position)
+        : _currentPosition;
 
     return Stack(
       alignment: Alignment.center,
       children: [
-        _buildVideoDisplay(),
+        if (isPlayerInitialized)
+          RepaintBoundary(key: _repaintKey, child: _buildVideoDisplay())
+        else if (_lastFrameBytes != null)
+          SizedBox.expand(
+            child: Image.memory(
+              _lastFrameBytes!,
+              fit: _zoomMode == VideoZoomMode.fill
+                  ? BoxFit.cover
+                  : (_zoomMode == VideoZoomMode.stretch
+                        ? BoxFit.fill
+                        : BoxFit.contain),
+            ),
+          )
+        else
+          Container(color: Colors.black),
 
         Positioned.fill(
           child: Row(
@@ -1351,6 +1573,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
 
         if (isBuffering)
           Center(
+            key: const Key('buffering_spinner_container'),
             child: Container(
               width: 56,
               height: 56,
@@ -1361,6 +1584,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
               child: Padding(
                 padding: const EdgeInsets.all(12.0),
                 child: CircularProgressIndicator(
+                  key: const Key('buffering_spinner'),
                   strokeWidth: 3,
                   valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
                 ),
@@ -1374,7 +1598,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
           animeTitle: widget.animeTitle,
           episodeName: _currentEpisode.name,
           hasNextEpisode: _nextEpisode != null,
-          isPlaying: _videoPlayerController!.value.isPlaying,
+          isPlaying:
+              isPlayerReady &&
+              (_videoPlayerController?.value.isPlaying ?? false),
           currentPositionText: _formatDuration(currentPosition),
           totalDurationText: _formatDuration(totalDuration),
           seekBar: _buildSeekBar(currentPosition, totalDuration, primaryColor),
@@ -1396,41 +1622,29 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
           onPipPressed: _enterPipMode,
           onPlayPausePressed: () async {
             _startControlsTimer();
-            if (_videoPlayerController!.value.isPlaying) {
-              await _videoPlayerController!.pause();
-              await WakelockPlus.disable();
-            } else {
-              await _videoPlayerController!.play();
-              await WakelockPlus.enable();
+            final ctrl = _videoPlayerController;
+            if (ctrl != null && ctrl.value.isInitialized) {
+              if (ctrl.value.isPlaying) {
+                await ctrl.pause();
+                await WakelockPlus.disable();
+              } else {
+                await ctrl.play();
+                await WakelockPlus.enable();
+              }
+              if (mounted) setState(() {});
             }
-            setState(() {});
           },
           onReplayPressed: () {
             _startControlsTimer();
-            final newPos =
-                _videoPlayerController!.value.position -
-                const Duration(seconds: 10);
-            _videoPlayerController!.seekTo(
-              newPos < Duration.zero ? Duration.zero : newPos,
-            );
+            _skipSeconds(-10);
           },
           onForwardPressed: () {
             _startControlsTimer();
-            final newPos =
-                _videoPlayerController!.value.position +
-                const Duration(seconds: 10);
-            _videoPlayerController!.seekTo(
-              newPos > totalDuration ? totalDuration : newPos,
-            );
+            _skipSeconds(10);
           },
           onSkip85Pressed: () {
             _startControlsTimer();
-            final newPos =
-                _videoPlayerController!.value.position +
-                const Duration(seconds: 85);
-            _videoPlayerController!.seekTo(
-              newPos > totalDuration ? totalDuration : newPos,
-            );
+            _skipSeconds(85);
           },
           onRotatePressed: _toggleOrientation,
           onBackgroundTap: _toggleControlsVisibility,
@@ -1438,7 +1652,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
           onLongPressEnd: _onLongPressEnd,
         ),
 
-        if (_activeSubtitleCtrl != null && _videoPlayerController != null)
+        if (_activeSubtitleCtrl != null &&
+            _videoPlayerController != null &&
+            _videoPlayerController!.value.isInitialized)
           AnimatedPositioned(
             duration: const Duration(milliseconds: 135),
             curve: _showControls ? Curves.easeOutCubic : Curves.easeInCubic,
@@ -1561,6 +1777,76 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
                       style: const TextStyle(color: Colors.white, fontSize: 16),
                     ),
                   ],
+                )
+              : _playerFailed
+              ? Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.wifi_off_rounded,
+                        size: 54,
+                        color: Colors.white54,
+                      ),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Playback Failed',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        _errorMessage ?? '',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: Colors.white54,
+                          fontSize: 13,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      Wrap(
+                        alignment: WrapAlignment.center,
+                        spacing: 12,
+                        runSpacing: 12,
+                        children: [
+                          FilledButton(
+                            onPressed: () {
+                              setState(() {
+                                _autoRetryCount = 0;
+                                _isAutoRetrying = true;
+                                _playerFailed = false;
+                                _errorMessage = null;
+                              });
+                              _fetchVideoList();
+                            },
+                            child: const Text('Retry'),
+                          ),
+                          OutlinedButton(
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: Colors.white,
+                              side: const BorderSide(color: Colors.white30),
+                            ),
+                            onPressed: () async {
+                              final navigator = Navigator.of(context);
+                              await SystemChrome.setEnabledSystemUIMode(
+                                SystemUiMode.edgeToEdge,
+                              );
+                              await SystemChrome.setPreferredOrientations([
+                                DeviceOrientation.portraitUp,
+                              ]);
+                              navigator.pop();
+                            },
+                            child: const Text('Go Back'),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 )
               : _errorMessage != null
               ? Padding(
