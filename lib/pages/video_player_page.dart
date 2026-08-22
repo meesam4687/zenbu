@@ -17,11 +17,13 @@ import 'package:zenbu/services/repo_service.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:zenbu/services/progress_service.dart';
 import 'package:zenbu/services/discord_service.dart';
-import 'package:zenbu/services/download_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:zenbu/components/video_player_page/video_player_gesture_handler.dart';
 import 'package:zenbu/components/video_player_page/buffered_seek_bar_painter.dart';
 import 'package:zenbu/components/video_player_page/video_player_controls_overlay.dart';
 import 'package:zenbu/components/video_player_page/video_player_settings_modal.dart';
+import 'package:zenbu/components/video_player_page/custom_subtitle_view.dart';
+import 'package:zenbu/components/video_player_page/video_player_error_view.dart';
 
 class SkipTime {
   final double startTime;
@@ -80,24 +82,6 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
         case VideoZoomMode.stretch:
           _zoomMode = VideoZoomMode.fit;
           Fluttertoast.showToast(msg: 'Zoom: Fit (Default)');
-          break;
-      }
-    });
-  }
-
-  void _setZoomModeByName(String modeName) {
-    _startControlsTimer();
-    setState(() {
-      switch (modeName.toLowerCase()) {
-        case 'fill':
-          _zoomMode = VideoZoomMode.fill;
-          break;
-        case 'stretch':
-          _zoomMode = VideoZoomMode.stretch;
-          break;
-        case 'fit':
-        default:
-          _zoomMode = VideoZoomMode.fit;
           break;
       }
     });
@@ -299,6 +283,35 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
 
   ExtSubtitle? _selectedSubtitle;
   SubtitleController? _activeSubtitleCtrl;
+  SubtitleConfig _subtitleConfig = const SubtitleConfig();
+
+  Future<void> _loadSubtitleConfig() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString('zenbu_subtitle_config');
+      if (raw != null) {
+        final map = jsonDecode(raw) as Map<String, dynamic>;
+        if (mounted) {
+          setState(() {
+            _subtitleConfig = SubtitleConfig.fromJson(map);
+          });
+        }
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _saveSubtitleConfig(SubtitleConfig config) async {
+    setState(() {
+      _subtitleConfig = config;
+    });
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(
+        'zenbu_subtitle_config',
+        jsonEncode(config.toJson()),
+      );
+    } catch (_) {}
+  }
 
   bool _showControls = true;
   Timer? _controlsTimer;
@@ -327,6 +340,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
   @override
   void initState() {
     super.initState();
+    _loadSubtitleConfig();
     _currentEpisode = widget.episode;
     _updateNextEpisode();
     _fetchVideoList();
@@ -1155,8 +1169,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
           },
           currentSpeed: _currentPlaybackSpeed,
           onSpeedSelected: _setPlaybackSpeed,
-          zoomModeName: _getZoomModeName(),
-          onZoomSelected: _setZoomModeByName,
+          subtitleConfig: _subtitleConfig,
+          onSubtitleConfigChanged: _saveSubtitleConfig,
+          previewImageUrl: widget.coverImage,
         );
       },
     );
@@ -1676,18 +1691,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
                     _activeSubtitleCtrl!.subtitles,
                   );
                   if (text.isEmpty) return const SizedBox.shrink();
-                  return SubtitleView(
+                  return CustomSubtitleView(
                     text: text,
-                    backgroundColor: Colors.transparent,
-                    subtitleStyle: SubtitleStyle(
-                      fontSize: 20.0,
-                      textColor: Colors.white,
-                      bordered: true,
-                      borderStyle: const SubtitleBorderStyle(
-                        strokeWidth: 2.0,
-                        color: Colors.black,
-                      ),
-                    ),
+                    config: _subtitleConfig,
                   );
                 },
               ),
@@ -1783,150 +1789,25 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
                     ),
                   ],
                 )
-              : _playerFailed
-              ? Padding(
-                  padding: const EdgeInsets.all(24.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.wifi_off_rounded,
-                        size: 54,
-                        color: Colors.white54,
-                      ),
-                      const SizedBox(height: 16),
-                      const Text(
-                        'Playback Failed',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        _errorMessage ?? '',
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          color: Colors.white54,
-                          fontSize: 13,
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      Wrap(
-                        alignment: WrapAlignment.center,
-                        spacing: 12,
-                        runSpacing: 12,
-                        children: [
-                          FilledButton(
-                            onPressed: () {
-                              setState(() {
-                                _autoRetryCount = 0;
-                                _isAutoRetrying = true;
-                                _playerFailed = false;
-                                _errorMessage = null;
-                              });
-                              _fetchVideoList();
-                            },
-                            child: const Text('Retry'),
-                          ),
-                          OutlinedButton(
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: Colors.white,
-                              side: const BorderSide(color: Colors.white30),
-                            ),
-                            onPressed: () async {
-                              final navigator = Navigator.of(context);
-                              await SystemChrome.setEnabledSystemUIMode(
-                                SystemUiMode.edgeToEdge,
-                              );
-                              await SystemChrome.setPreferredOrientations([
-                                DeviceOrientation.portraitUp,
-                              ]);
-                              navigator.pop();
-                            },
-                            child: const Text('Go Back'),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                )
-              : _errorMessage != null
-              ? Padding(
-                  padding: const EdgeInsets.all(24.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.error_outline,
-                        size: 54,
-                        color: Colors.red,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        _errorMessage!,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          color: Colors.white70,
-                          fontSize: 14,
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      Wrap(
-                        alignment: WrapAlignment.center,
-                        spacing: 12,
-                        runSpacing: 12,
-                        children: [
-                          if (widget.source.id == -1) ...[
-                            FilledButton.icon(
-                              style: FilledButton.styleFrom(
-                                backgroundColor: Theme.of(
-                                  context,
-                                ).colorScheme.error,
-                              ),
-                              onPressed: () async {
-                                await DownloadService().deleteDownloadedItem(
-                                  false,
-                                  widget.episode.url,
-                                );
-                                if (context.mounted) {
-                                  Navigator.of(context).pop();
-                                }
-                              },
-                              icon: const Icon(Icons.delete_outline),
-                              label: const Text('Delete Download'),
-                            ),
-                          ] else ...[
-                            FilledButton(
-                              onPressed: _fetchVideoList,
-                              child: const Text('Retry'),
-                            ),
-                          ],
-                          OutlinedButton(
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: Colors.white,
-                              side: const BorderSide(color: Colors.white30),
-                            ),
-                            onPressed: () async {
-                              final navigator = Navigator.of(context);
-                              await SystemChrome.setEnabledSystemUIMode(
-                                SystemUiMode.edgeToEdge,
-                              );
-                              await SystemChrome.setPreferredOrientations([
-                                DeviceOrientation.portraitUp,
-                              ]);
-                              navigator.pop();
-                            },
-                            child: const Text('Go Back'),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                )
-              : _buildPlayerUI(),
+              : (_playerFailed || _errorMessage != null)
+                  ? VideoPlayerErrorView(
+                      playerFailed: _playerFailed,
+                      errorMessage: _errorMessage,
+                      isLocalSource: widget.source.id == -1,
+                      episodeUrl: widget.episode.url,
+                      onRetry: () {
+                        if (_playerFailed) {
+                          setState(() {
+                            _autoRetryCount = 0;
+                            _isAutoRetrying = true;
+                            _playerFailed = false;
+                            _errorMessage = null;
+                          });
+                        }
+                        _fetchVideoList();
+                      },
+                    )
+                  : _buildPlayerUI(),
         ),
       ),
     );

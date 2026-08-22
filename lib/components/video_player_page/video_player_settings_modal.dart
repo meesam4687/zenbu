@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:zenbu/components/video_player_page/custom_subtitle_view.dart';
+import 'package:zenbu/components/video_player_page/subtitle_customization_sheet.dart';
 import 'package:zenbu/services/mangayomi/models/extensions_models.dart';
 
-enum _SettingsSubMenu { main, quality, subtitles, speed, zoom }
+enum _SettingsSubMenu { main, quality, subtitles, speed, customizeSubtitles }
 
 class VideoPlayerSettingsModal extends StatefulWidget {
   final List<ExtVideo> videos;
@@ -15,8 +17,9 @@ class VideoPlayerSettingsModal extends StatefulWidget {
   final double currentSpeed;
   final ValueChanged<double> onSpeedSelected;
 
-  final String zoomModeName;
-  final ValueChanged<String> onZoomSelected;
+  final SubtitleConfig subtitleConfig;
+  final ValueChanged<SubtitleConfig> onSubtitleConfigChanged;
+  final String? previewImageUrl;
 
   const VideoPlayerSettingsModal({
     super.key,
@@ -28,8 +31,9 @@ class VideoPlayerSettingsModal extends StatefulWidget {
     required this.onSubtitleSelected,
     required this.currentSpeed,
     required this.onSpeedSelected,
-    required this.zoomModeName,
-    required this.onZoomSelected,
+    required this.subtitleConfig,
+    required this.onSubtitleConfigChanged,
+    this.previewImageUrl,
   });
 
   @override
@@ -72,11 +76,19 @@ class _VideoPlayerSettingsModalState extends State<VideoPlayerSettingsModal> {
     final String subtitleText = widget.selectedSubtitle?.label ?? 'Off';
     final String speedText = '${widget.currentSpeed}x';
 
+    final double maxHeight =
+        _activeSubMenu == _SettingsSubMenu.customizeSubtitles
+            ? MediaQuery.of(context).size.height * 0.85
+            : 320.0;
+
     return ClipRect(
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxHeight: 295),
+        constraints: BoxConstraints(maxHeight: maxHeight),
         child: Padding(
-          padding: const EdgeInsets.only(top: 26, bottom: 12),
+          padding: EdgeInsets.only(
+            top: _activeSubMenu == _SettingsSubMenu.customizeSubtitles ? 10 : 26,
+            bottom: 12,
+          ),
           child: AnimatedSwitcher(
             duration: const Duration(milliseconds: 250),
             switchInCurve: Curves.easeOutCubic,
@@ -89,7 +101,8 @@ class _VideoPlayerSettingsModalState extends State<VideoPlayerSettingsModal> {
                   );
                 },
             transitionBuilder: (Widget child, Animation<double> animation) {
-              final isSubMenu = child.key == const ValueKey('sub_menu');
+              final isSubMenu = child.key == const ValueKey('sub_menu') ||
+                  child.key == const ValueKey('customize_subs_menu');
               final inOffset = isSubMenu
                   ? const Offset(1.0, 0.0)
                   : const Offset(-1.0, 0.0);
@@ -110,9 +123,22 @@ class _VideoPlayerSettingsModalState extends State<VideoPlayerSettingsModal> {
                     subtitleText,
                     speedText,
                   )
-                : _buildSubMenu(context, primaryColor),
+                : _activeSubMenu == _SettingsSubMenu.customizeSubtitles
+                    ? _buildCustomizeSubtitlesView()
+                    : _buildSubMenu(context, primaryColor),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildCustomizeSubtitlesView() {
+    return Container(
+      key: const ValueKey('customize_subs_menu'),
+      child: SubtitleCustomizationSheet(
+        initialConfig: widget.subtitleConfig,
+        onConfigChanged: widget.onSubtitleConfigChanged,
+        previewImageUrl: widget.previewImageUrl,
       ),
     );
   }
@@ -176,19 +202,6 @@ class _VideoPlayerSettingsModalState extends State<VideoPlayerSettingsModal> {
             trailing: const Icon(Icons.chevron_right),
             onTap: () => _navigateToSubMenu(_SettingsSubMenu.speed),
           ),
-          ListTile(
-            leading: const Icon(Icons.aspect_ratio),
-            title: const Text('Zoom Mode'),
-            subtitle: Text(
-              widget.zoomModeName,
-              style: TextStyle(
-                color: theme.colorScheme.onSurfaceVariant,
-                fontSize: 13,
-              ),
-            ),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => _navigateToSubMenu(_SettingsSubMenu.zoom),
-          ),
         ],
       ),
     );
@@ -236,10 +249,10 @@ class _VideoPlayerSettingsModalState extends State<VideoPlayerSettingsModal> {
         return 'Select Quality';
       case _SettingsSubMenu.subtitles:
         return 'Select Subtitles';
+      case _SettingsSubMenu.customizeSubtitles:
+        return 'Customize Subtitles';
       case _SettingsSubMenu.speed:
         return 'Playback Speed';
-      case _SettingsSubMenu.zoom:
-        return 'Zoom Mode';
       case _SettingsSubMenu.main:
         return 'Settings';
     }
@@ -268,6 +281,13 @@ class _VideoPlayerSettingsModalState extends State<VideoPlayerSettingsModal> {
 
       case _SettingsSubMenu.subtitles:
         return [
+          ListTile(
+            leading: const Icon(Icons.tune),
+            title: const Text('Customize Subtitles'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => _navigateToSubMenu(_SettingsSubMenu.customizeSubtitles),
+          ),
+          const Divider(height: 1),
           ListTile(
             title: Text(
               'Off',
@@ -324,33 +344,7 @@ class _VideoPlayerSettingsModalState extends State<VideoPlayerSettingsModal> {
           );
         }).toList();
 
-      case _SettingsSubMenu.zoom:
-        final zoomOptions = [
-          {'name': 'Fit (default)', 'value': 'fit'},
-          {'name': 'Fill', 'value': 'fill'},
-          {'name': 'Stretch', 'value': 'stretch'},
-        ];
-        return zoomOptions.map((opt) {
-          final isSel =
-              opt['value'] == widget.zoomModeName.toLowerCase() ||
-              (opt['value'] == 'fit' &&
-                  (widget.zoomModeName.toLowerCase().contains('fit')));
-          return ListTile(
-            title: Text(
-              opt['name']!,
-              style: TextStyle(
-                fontWeight: isSel ? FontWeight.bold : FontWeight.normal,
-                color: isSel ? primaryColor : null,
-              ),
-            ),
-            trailing: isSel ? Icon(Icons.check, color: primaryColor) : null,
-            onTap: () {
-              Navigator.of(context).pop();
-              widget.onZoomSelected(opt['value']!);
-            },
-          );
-        }).toList();
-
+      case _SettingsSubMenu.customizeSubtitles:
       case _SettingsSubMenu.main:
         return [];
     }

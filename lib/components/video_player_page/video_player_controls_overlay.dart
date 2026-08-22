@@ -1,7 +1,4 @@
-import 'package:flutter/material.dart';
-import 'video_player_header.dart';
-import 'video_player_center_controls.dart';
-import 'video_player_bottom_controls.dart';
+﻿import 'package:flutter/material.dart';
 
 class VideoPlayerControlsOverlay extends StatefulWidget {
   final bool visible;
@@ -161,6 +158,18 @@ class _VideoPlayerControlsOverlayState extends State<VideoPlayerControlsOverlay>
     super.dispose();
   }
 
+  IconData _getZoomIcon() {
+    switch (widget.zoomModeName.toLowerCase()) {
+      case 'fill':
+        return Icons.crop_free;
+      case 'stretch':
+        return Icons.fullscreen;
+      case 'fit':
+      default:
+        return Icons.aspect_ratio;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
@@ -177,15 +186,9 @@ class _VideoPlayerControlsOverlayState extends State<VideoPlayerControlsOverlay>
               Positioned.fill(
                 child: GestureDetector(
                   onTap: widget.onBackgroundTap,
-                  onLongPressStart: (_) {
-                    widget.onLongPressStart?.call();
-                  },
-                  onLongPressEnd: (_) {
-                    widget.onLongPressEnd?.call();
-                  },
-                  onLongPressCancel: () {
-                    widget.onLongPressEnd?.call();
-                  },
+                  onLongPressStart: (_) => widget.onLongPressStart?.call(),
+                  onLongPressEnd: (_) => widget.onLongPressEnd?.call(),
+                  onLongPressCancel: () => widget.onLongPressEnd?.call(),
                   behavior: HitTestBehavior.opaque,
                   child: Opacity(
                     opacity: _bgOpacity.value,
@@ -202,29 +205,12 @@ class _VideoPlayerControlsOverlayState extends State<VideoPlayerControlsOverlay>
                   offset: Offset(0, _topOffset.value),
                   child: Opacity(
                     opacity: _topOpacity.value,
-                    child: VideoPlayerHeader(
-                      animeTitle: widget.animeTitle,
-                      episodeName: widget.episodeName,
-                      hasNextEpisode: widget.hasNextEpisode,
-                      onBackPressed: widget.onBackPressed,
-                      onNextEpisodePressed: widget.onNextEpisodePressed,
-                      onZoomPressed: widget.onZoomPressed,
-                      zoomModeName: widget.zoomModeName,
-                      onSettingsPressed: widget.onSettingsPressed,
-                      onPipPressed: widget.onPipPressed,
-                    ),
+                    child: _buildHeader(),
                   ),
                 ),
               ),
 
-              VideoPlayerCenterControls(
-                isPlaying: widget.isPlaying,
-                onPlayPausePressed: widget.onPlayPausePressed,
-                onReplayPressed: widget.onReplayPressed,
-                onForwardPressed: widget.onForwardPressed,
-                centerScale: _centerScale,
-                centerOpacity: _centerOpacity,
-              ),
+              _buildCenterControls(),
 
               Positioned(
                 bottom: 16.0,
@@ -234,13 +220,7 @@ class _VideoPlayerControlsOverlayState extends State<VideoPlayerControlsOverlay>
                   offset: Offset(0, _bottomOffset.value),
                   child: Opacity(
                     opacity: _bottomOpacity.value,
-                    child: VideoPlayerBottomControls(
-                      currentPositionText: widget.currentPositionText,
-                      totalDurationText: widget.totalDurationText,
-                      seekBar: widget.seekBar,
-                      onSkip85Pressed: widget.onSkip85Pressed,
-                      onRotatePressed: widget.onRotatePressed,
-                    ),
+                    child: _buildBottomControls(),
                   ),
                 ),
               ),
@@ -248,6 +228,153 @@ class _VideoPlayerControlsOverlayState extends State<VideoPlayerControlsOverlay>
           ),
         );
       },
+    );
+  }
+
+  Widget _buildHeader() {
+    return AppBar(
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back, color: Colors.white),
+        onPressed: widget.onBackPressed,
+      ),
+      title: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            widget.animeTitle,
+            style: const TextStyle(fontSize: 12, color: Colors.white70),
+          ),
+          Text(
+            widget.episodeName,
+            style: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.picture_in_picture_alt, color: Colors.white),
+          tooltip: 'Picture in Picture',
+          onPressed: widget.onPipPressed,
+        ),
+        if (widget.hasNextEpisode)
+          IconButton(
+            icon: const Icon(Icons.skip_next, color: Colors.white),
+            tooltip: 'Next Episode',
+            onPressed: widget.onNextEpisodePressed,
+          ),
+        IconButton(
+          icon: Icon(_getZoomIcon(), color: Colors.white),
+          tooltip: 'Zoom Mode (${widget.zoomModeName})',
+          onPressed: widget.onZoomPressed,
+        ),
+        IconButton(
+          icon: const Icon(Icons.settings, color: Colors.white),
+          tooltip: 'Settings',
+          onPressed: widget.onSettingsPressed,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCenterControls() {
+    return Center(
+      child: Transform.scale(
+        scale: _centerScale.value,
+        child: Opacity(
+          opacity: _centerOpacity.value,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              IconButton(
+                iconSize: 42,
+                icon: const Icon(Icons.replay_10, color: Colors.white),
+                onPressed: widget.onReplayPressed,
+              ),
+              const SizedBox(width: 32),
+              IconButton(
+                iconSize: 64,
+                icon: Icon(
+                  widget.isPlaying
+                      ? Icons.pause_circle_filled
+                      : Icons.play_circle_filled,
+                  color: Colors.white,
+                ),
+                onPressed: widget.onPlayPausePressed,
+              ),
+              const SizedBox(width: 32),
+              IconButton(
+                iconSize: 42,
+                icon: const Icon(Icons.forward_10, color: Colors.white),
+                onPressed: widget.onForwardPressed,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBottomControls() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Row(
+          children: [
+            Text(
+              widget.currentPositionText,
+              style: const TextStyle(color: Colors.white, fontSize: 12),
+            ),
+            const SizedBox(width: 8),
+            Expanded(child: widget.seekBar),
+            const SizedBox(width: 8),
+            Text(
+              widget.totalDurationText,
+              style: const TextStyle(color: Colors.white, fontSize: 12),
+            ),
+          ],
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            InkWell(
+              onTap: widget.onSkip85Pressed,
+              borderRadius: BorderRadius.circular(8),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.white, width: 1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Text(
+                  '+85s',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+            IconButton(
+              icon: const Icon(
+                Icons.screen_rotation_rounded,
+                color: Colors.white,
+              ),
+              tooltip: 'Rotate',
+              onPressed: widget.onRotatePressed,
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
