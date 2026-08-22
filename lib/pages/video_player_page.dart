@@ -210,6 +210,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
         _videoPlayerController!.value.isInitialized) {
       _hideControls();
       _videoPlayerController!.setPlaybackSpeed(2.0);
+      HapticFeedback.mediumImpact();
       setState(() {
         _isHolding2x = true;
       });
@@ -1545,25 +1546,29 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
                       ),
                     ],
                   ),
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        '2x',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 0.5,
+                  child: SafeArea(
+                    left: false,
+                    right: false,
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          '2x',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 0.5,
+                          ),
                         ),
-                      ),
-                      SizedBox(width: 4),
-                      Icon(
-                        Icons.fast_forward_rounded,
-                        color: Colors.white,
-                        size: 18,
-                      ),
-                    ],
+                        SizedBox(width: 4),
+                        Icon(
+                          Icons.fast_forward_rounded,
+                          color: Colors.white,
+                          size: 18,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
