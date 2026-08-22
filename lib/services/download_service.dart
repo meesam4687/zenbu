@@ -130,23 +130,39 @@ class DownloadService extends ChangeNotifier {
     List<int> bytes, [
     Map<String, String>? headers,
   ]) {
-    if (headers != null) {
-      final contentType = headers.entries
-          .firstWhere(
-            (e) => e.key.toLowerCase() == 'content-type',
-            orElse: () => const MapEntry('', ''),
-          )
-          .value
-          .toLowerCase();
-      if (contentType.contains('text/html') ||
-          contentType.contains('application/json')) {
-        return true;
+    if (bytes.isEmpty) return false;
+
+    if (bytes.isNotEmpty && bytes[0] == 0x47) {
+      return false;
+    }
+
+    if (bytes.length >= 8) {
+      if (bytes[0] == 0x1A &&
+          bytes[1] == 0x45 &&
+          bytes[2] == 0xDF &&
+          bytes[3] == 0xA3) {
+        return false;
+      }
+      final brand = utf8.decode(bytes.sublist(4, 8), allowMalformed: true);
+      if (brand == 'ftyp' ||
+          brand == 'moov' ||
+          brand == 'styp' ||
+          brand == 'wide' ||
+          brand == 'mdat') {
+        return false;
       }
     }
 
-    if (bytes.isEmpty) return false;
+    if (bytes.length >= 376) {
+      final searchLimit = bytes.length < 2048 ? bytes.length - 376 : 2048 - 376;
+      for (int i = 0; i <= searchLimit; i++) {
+        if (bytes[i] == 0x47 && bytes[i + 188] == 0x47) {
+          return false;
+        }
+      }
+    }
 
-    final checkLength = bytes.length < 512 ? bytes.length : 512;
+    final checkLength = bytes.length < 1024 ? bytes.length : 1024;
     final snippet = utf8
         .decode(bytes.sublist(0, checkLength), allowMalformed: true)
         .trimLeft()
@@ -158,9 +174,31 @@ class DownloadService extends ChangeNotifier {
         snippet.startsWith('<script') ||
         snippet.startsWith('{"error"') ||
         snippet.startsWith('{"message"') ||
-        snippet.startsWith('{"success":false')) {
+        snippet.startsWith('{"success":false') ||
+        snippet.contains('<html>') ||
+        snippet.contains('<!doctype html>') ||
+        snippet.contains('<title>error') ||
+        snippet.contains('<title>403 forbidden') ||
+        snippet.contains('<title>404 not found') ||
+        snippet.contains('<title>just a moment')) {
       return true;
     }
+
+    if (headers != null) {
+      final contentType = headers.entries
+          .firstWhere(
+            (e) => e.key.toLowerCase() == 'content-type',
+            orElse: () => const MapEntry('', ''),
+          )
+          .value
+          .toLowerCase();
+      if ((contentType.contains('text/html') ||
+              contentType.contains('application/json')) &&
+          (snippet.startsWith('{') || snippet.startsWith('<'))) {
+        return true;
+      }
+    }
+
     return false;
   }
 

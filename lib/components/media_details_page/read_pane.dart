@@ -1132,6 +1132,7 @@ class _MangaReadPaneState extends State<MangaReadPane> {
       downloadService.cancelDownload(true, chap.url);
       if (mounted) {
         if (!wasCancelled && !e.toString().contains('Cancelled by user.')) {
+          debugPrint('$e');
           Fluttertoast.showToast(
             msg: 'Download failed: $e',
             toastLength: Toast.LENGTH_LONG,

@@ -1080,6 +1080,7 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
       downloadService.cancelDownload(false, ep.url);
       if (mounted) {
         if (!wasCancelled && !e.toString().contains('Cancelled by user.')) {
+          debugPrint('$e');
           Fluttertoast.showToast(
             msg: 'Download failed: $e',
             toastLength: Toast.LENGTH_LONG,
