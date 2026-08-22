@@ -10,13 +10,22 @@ class Details extends StatelessWidget {
     return Column(
       spacing: 5,
       children: items.map((item) {
+        final isNextEpisode =
+            item.label == "Next Episode in" ||
+            (item.label.startsWith("Episode ") && item.label.endsWith(" in"));
         return Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               item.label,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w300),
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: isNextEpisode ? FontWeight.bold : FontWeight.w300,
+                color: isNextEpisode
+                    ? Theme.of(context).colorScheme.surfaceTint
+                    : null,
+              ),
             ),
             const SizedBox(width: 12),
             Flexible(
@@ -27,7 +36,7 @@ class Details extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: (item.label == "Next Episode in")
+                    color: isNextEpisode
                         ? Theme.of(context).colorScheme.surfaceTint
                         : null,
                   ),

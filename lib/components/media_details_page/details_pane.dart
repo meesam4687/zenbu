@@ -157,7 +157,11 @@ class _DetailsPaneState extends State<DetailsPane>
           final secondsRemaining = airingAt - now;
           if (secondsRemaining > 0) {
             final formattedTime = _formatTimeRemaining(secondsRemaining);
-            detailsItems.add((label: "Next Episode in", value: formattedTime));
+            final episode = nextEp["episode"];
+            detailsItems.add((
+              label: "Episode $episode in",
+              value: formattedTime,
+            ));
           }
         }
         final meanScoreVal = media["meanScore"] != null
