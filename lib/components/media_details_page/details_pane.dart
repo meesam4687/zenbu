@@ -98,6 +98,43 @@ class _DetailsPaneState extends State<DetailsPane>
     return parts.join(" ");
   }
 
+  String _formatDate(Map? date, Map<int, String> months) {
+    if (date == null) return "N/A";
+    final int? year = date["year"] as int?;
+    final int? monthNum = date["month"] as int?;
+    final int? day = date["day"] as int?;
+
+    if (year == null && monthNum == null && day == null) {
+      return "N/A";
+    }
+
+    final String? monthName = monthNum != null ? months[monthNum] : null;
+
+    if (monthName != null && day != null && year != null) {
+      return "$monthName $day, $year";
+    }
+    if (monthName != null && day != null && year == null) {
+      return "$monthName $day";
+    }
+    if (monthName != null && day == null && year != null) {
+      return "$monthName, $year";
+    }
+    if (monthName != null && day == null && year == null) {
+      return monthName;
+    }
+    if (monthName == null && day != null && year != null) {
+      return "$day, $year";
+    }
+    if (monthName == null && day != null && year == null) {
+      return "$day";
+    }
+    if (monthName == null && day == null && year != null) {
+      return "$year";
+    }
+
+    return "N/A";
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -217,19 +254,17 @@ class _DetailsPaneState extends State<DetailsPane>
           value: statusVal.replaceAll("_", " "),
         ));
 
-        final startDateVal = (months[media["startDate"]["month"]] != null)
-            ? "${months[media["startDate"]["month"]]} ${media["startDate"]["day"]}, ${media["startDate"]["year"]}"
-            : "N/A";
+        final startDateVal = _formatDate(media["startDate"] as Map?, months);
         detailsItems.add((label: "Start Date", value: startDateVal));
 
-        final endDateVal = (media["endDate"]["day"] == null)
-            ? "N/A"
-            : "${months[media["endDate"]["month"]]} ${media["endDate"]["day"]}, ${media["endDate"]["year"]}";
+        final endDateVal = _formatDate(media["endDate"] as Map?, months);
         detailsItems.add((label: "End Date", value: endDateVal));
 
         if (widget.isAnime) {
+          final seasonYear =
+              media["seasonYear"] ?? media["startDate"]?["year"];
           final seasonVal = media["season"] != null
-              ? "${(media["season"].toString()).substring(0, 1).toUpperCase()}${(media["season"].toString()).substring(1).toLowerCase()}, ${media["startDate"]["year"]}"
+              ? "${(media["season"].toString()).substring(0, 1).toUpperCase()}${(media["season"].toString()).substring(1).toLowerCase()}${seasonYear != null ? ', $seasonYear' : ''}"
               : "N/A";
           detailsItems.add((label: "Season", value: seasonVal));
         }
