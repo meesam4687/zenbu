@@ -194,7 +194,7 @@ class _MediaDetailsPageState extends State<MediaDetailsPage>
           length: tabViewsList.length,
           child: Scaffold(
             body: NestedScrollView(
-              floatHeaderSlivers: true,
+              floatHeaderSlivers: false,
               headerSliverBuilder: (context, innerBoxIsScrolled) => [
                 SliverAppBar(
                   expandedHeight: expandedHeaderHeight,
@@ -257,7 +257,8 @@ class _TabBarDelegate extends SliverPersistentHeaderDelegate {
   }
 
   @override
-  bool shouldRebuild(_) => false;
+  bool shouldRebuild(covariant _TabBarDelegate oldDelegate) =>
+      oldDelegate.tabBar != tabBar;
 }
 
 class _KeepAliveWrapper extends StatefulWidget {

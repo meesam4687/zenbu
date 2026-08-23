@@ -447,7 +447,7 @@ class _TitlePaneState extends State<TitlePane> {
                     ),
                   ),
           ),
-          Scaffold(backgroundColor: surfaceColor.withAlpha(120)),
+          Container(color: surfaceColor.withAlpha(120)),
           Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -545,7 +545,8 @@ class _TitlePaneState extends State<TitlePane> {
                                                 : Text(
                                                     "+1",
                                                     style: TextStyle(
-                                                      fontWeight: FontWeight.bold,
+                                                      fontWeight:
+                                                          FontWeight.bold,
                                                       fontSize: 14,
                                                       color: Theme.of(context)
                                                           .colorScheme
@@ -629,8 +630,10 @@ class _TitlePaneState extends State<TitlePane> {
                                     ),
                                     child: ListEditorBottomSheet(
                                       isAnime: widget.isAnime,
-                                      status: mediaListEntry?["status"] ?? "NONE",
-                                      progress: mediaListEntry?["progress"] ?? 0,
+                                      status:
+                                          mediaListEntry?["status"] ?? "NONE",
+                                      progress:
+                                          mediaListEntry?["progress"] ?? 0,
                                       startDate:
                                           (mediaListEntry?["startedAt"]?["day"] ==
                                               null)
@@ -647,7 +650,8 @@ class _TitlePaneState extends State<TitlePane> {
                                           ? (mediaListEntry?["score"] as int)
                                                 .toDouble()
                                           : mediaListEntry?["score"] ?? 0.0,
-                                      repeatCount: mediaListEntry?["repeat"] ?? 0,
+                                      repeatCount:
+                                          mediaListEntry?["repeat"] ?? 0,
                                       mediaId: widget.id,
                                       entryId: mediaListEntry?["id"],
                                       onUpdate: updateMediaDetails,

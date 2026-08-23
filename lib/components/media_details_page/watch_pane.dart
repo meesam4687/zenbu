@@ -302,44 +302,61 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    if (_isLoadingExtensions) {
-      return Container(
-        height: 200,
-        alignment: Alignment.center,
-        child: CircularProgressIndicator.adaptive(
-          valueColor: AlwaysStoppedAnimation<Color>(
-            Theme.of(context).colorScheme.primary,
-          ),
-        ),
-      );
-    }
+  Widget _buildHeader() {
+    final target = _getResumeTarget();
+    final totalPages = (_allRawEpisodes.length / 30).ceil();
 
-    if (_installedExtensions.isEmpty) {
-      return Container(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
           children: [
-            const Icon(
-              Icons.extension_off_outlined,
-              size: 54,
-              color: Colors.grey,
-            ),
-            const SizedBox(height: 16),
             const Text(
-              'No Extensions Installed',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              'Source: ',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
             ),
-            const SizedBox(height: 8),
-            const Text(
-              'To start watching, add repositories and install an anime extension.',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 13, color: Colors.grey),
+            const SizedBox(width: 8),
+            Expanded(
+              child: DropdownButton<ExtSource>(
+                value: _selectedExtension,
+                isExpanded: true,
+                items: _installedExtensions.map((ext) {
+                  final label = ext.id == -1
+                      ? ext.name
+                      : '${ext.name} (${ext.lang.toUpperCase()})';
+                  return DropdownMenuItem<ExtSource>(
+                    value: ext,
+                    child: Text(label),
+                  );
+                }).toList(),
+                onChanged: (ext) {
+                  if (ext != null) {
+                    _cachedEngine?.dispose();
+                    _cachedEngine = null;
+                    setState(() {
+                      _selectedExtension = ext;
+                    });
+                    _loadEpisodes();
+                  }
+                },
+              ),
             ),
-            const SizedBox(height: 20),
-            ElevatedButton.icon(
+            if (_selectedExtension != null) ...[
+              IconButton(
+                icon: Icon(
+                  _customLinkActive != null ? Icons.link : Icons.link_off,
+                  color: _customLinkActive != null
+                      ? Theme.of(context).colorScheme.primary
+                      : null,
+                ),
+                tooltip: _customLinkActive != null
+                    ? 'Custom Link Active (Tap to edit/reset)'
+                    : 'Wrong Title',
+                onPressed: _showWrongTitleBottomSheet,
+              ),
+            ],
+            IconButton(
+              icon: const Icon(Icons.settings),
               onPressed: () async {
                 await Navigator.of(context).push(
                   MaterialPageRoute(
@@ -348,469 +365,434 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
                 );
                 _loadExtensions();
               },
-              icon: const Icon(Icons.settings),
-              label: const Text('Manage Extensions'),
             ),
           ],
         ),
+        if (!_isLoadingEpisodes &&
+            _errorMessage == null &&
+            _allRawEpisodes.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Episodes (${_allRawEpisodes.length})',
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              if (target != null)
+                TextButton.icon(
+                  onPressed: () => _launchEpisode(target.episode),
+                  icon: const Icon(Icons.play_arrow),
+                  label: Text(
+                    '${target.isResume ? "Resume" : "Start"} Ep. ${(ProgressService.parseEpisodeNumber(target.episode.url, target.episode.name) ?? 1.0).toString().replaceAll(RegExp(r'\.0$'), '')}',
+                  ),
+                  style: TextButton.styleFrom(
+                    foregroundColor: Theme.of(context).colorScheme.primary,
+                    visualDensity: VisualDensity.compact,
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                  ),
+                ),
+            ],
+          ),
+          if (totalPages > 1) ...[
+            const SizedBox(height: 12),
+            SizedBox(
+              height: 40,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: totalPages,
+                itemBuilder: (context, idx) {
+                  final startEp = idx * 30 + 1;
+                  final endEp = (idx + 1) * 30 < _allRawEpisodes.length
+                      ? (idx + 1) * 30
+                      : _allRawEpisodes.length;
+                  final isSelected = _currentPage == idx;
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8.0),
+                    child: ChoiceChip(
+                      label: Text('$startEp - $endEp'),
+                      selected: isSelected,
+                      onSelected: (selected) {
+                        if (selected) {
+                          _changePage(idx);
+                        }
+                      },
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+          const SizedBox(height: 8),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildErrorWidget() {
+    if (_errorMessage == 'Local directory is not configured.' ||
+        _errorMessage == 'Configured directory does not exist.') {
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.folder_open_outlined,
+            size: 48,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+          const SizedBox(height: 12),
+          const Text(
+            'Local directory is not configured or does not exist.',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 13),
+          ),
+          const SizedBox(height: 16),
+          FilledButton.icon(
+            onPressed: _pickAnimeDirectory,
+            icon: const Icon(Icons.folder_open),
+            label: const Text('Choose Directory'),
+          ),
+        ],
+      );
+    } else if (_errorMessage == 'No matching anime folder found.') {
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.folder_off_outlined,
+            size: 48,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'No folder matching "${widget.animeTitle}" found in local directory.',
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 13),
+          ),
+          const SizedBox(height: 16),
+          FilledButton.icon(
+            onPressed: _showWrongTitleBottomSheet,
+            icon: const Icon(Icons.link),
+            label: const Text('Map Local Folder'),
+          ),
+        ],
       );
     }
 
-    return Padding(
-      padding: const EdgeInsets.only(top: 16.0, left: 16.0, right: 16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Text(
-                'Source: ',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: DropdownButton<ExtSource>(
-                  value: _selectedExtension,
-                  isExpanded: true,
-                  items: _installedExtensions.map((ext) {
-                    final label = ext.id == -1
-                        ? ext.name
-                        : '${ext.name} (${ext.lang.toUpperCase()})';
-                    return DropdownMenuItem<ExtSource>(
-                      value: ext,
-                      child: Text(label),
-                    );
-                  }).toList(),
-                  onChanged: (ext) {
-                    if (ext != null) {
-                      _cachedEngine?.dispose();
-                      _cachedEngine = null;
-                      setState(() {
-                        _selectedExtension = ext;
-                      });
-                      _loadEpisodes();
-                    }
-                  },
-                ),
-              ),
-              if (_selectedExtension != null) ...[
-                IconButton(
-                  icon: Icon(
-                    _customLinkActive != null ? Icons.link : Icons.link_off,
-                    color: _customLinkActive != null
-                        ? Theme.of(context).colorScheme.primary
-                        : null,
-                  ),
-                  tooltip: _customLinkActive != null
-                      ? 'Custom Link Active (Tap to edit/reset)'
-                      : 'Wrong Title',
-                  onPressed: _showWrongTitleBottomSheet,
-                ),
-              ],
-              IconButton(
-                icon: const Icon(Icons.settings),
-                onPressed: () async {
-                  await Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => const ExtensionsPage(),
-                    ),
-                  );
-                  _loadExtensions();
-                },
-              ),
-            ],
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(
+          Icons.error_outline,
+          size: 40,
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+        ),
+        const SizedBox(height: 12),
+        Text(
+          _is403Error
+              ? 'Cloudflare might be preventing fetching. Try opening in browser and completing the captcha.'
+              : 'An error occurred while loading episodes.',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 13,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
-          const SizedBox(height: 16),
-          if (_isLoadingEpisodes)
-            Expanded(
-              child: Center(
-                child: CircularProgressIndicator.adaptive(
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    Theme.of(context).colorScheme.primary,
+        ),
+        const SizedBox(height: 16),
+        if (_is403Error && _selectedExtension != null) ...[
+          OutlinedButton.icon(
+            onPressed: () async {
+              final urlString = _failedUrl ?? _selectedExtension!.baseUrl;
+              final url = Uri.parse(urlString);
+              try {
+                await launchUrl(url, mode: LaunchMode.externalApplication);
+              } catch (_) {}
+            },
+            icon: const Icon(Icons.open_in_browser),
+            label: const Text('Open in Browser'),
+          ),
+          const SizedBox(height: 12),
+        ],
+        FilledButton(onPressed: _loadEpisodes, child: const Text('Retry')),
+      ],
+    );
+  }
+
+  Widget _buildEpisodeCard(dynamic rawEp) {
+    final ep = ExtEpisode.fromJson(Map<String, dynamic>.from(rawEp));
+    final progressRatio = _episodesProgress[ep.url] ?? 0.0;
+
+    return Card(
+      color: Theme.of(context).colorScheme.onInverseSurface,
+      elevation: 0,
+      margin: const EdgeInsets.symmetric(vertical: 6),
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: InkWell(
+        onTap: () {
+          final ext = _selectedExtension;
+          if (ext == null) return;
+          final allEpisodes = _allRawEpisodes
+              .map((e) => ExtEpisode.fromJson(Map<String, dynamic>.from(e)))
+              .toList();
+          Navigator.of(context)
+              .push(
+                MaterialPageRoute(
+                  builder: (context) => VideoPlayerPage(
+                    episode: ep,
+                    source: ext,
+                    animeTitle: widget.animeTitle,
+                    coverImage: widget.coverImage,
+                    malId: widget.malId,
+                    mediaId: widget.mediaId,
+                    allEpisodes: allEpisodes,
                   ),
                 ),
-              ),
-            )
-          else if (_errorMessage != null)
-            Expanded(
-              child: Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: (() {
-                    if (_errorMessage == 'Local directory is not configured.' ||
-                        _errorMessage ==
-                            'Configured directory does not exist.') {
-                      return Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.folder_open_outlined,
-                            size: 48,
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.onSurfaceVariant,
-                          ),
-                          const SizedBox(height: 12),
-                          const Text(
-                            'Local directory is not configured or does not exist.',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(fontSize: 13),
-                          ),
-                          const SizedBox(height: 16),
-                          FilledButton.icon(
-                            onPressed: _pickAnimeDirectory,
-                            icon: const Icon(Icons.folder_open),
-                            label: const Text('Choose Directory'),
-                          ),
-                        ],
-                      );
-                    } else if (_errorMessage ==
-                        'No matching anime folder found.') {
-                      return Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.folder_off_outlined,
-                            size: 48,
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.onSurfaceVariant,
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            'No folder matching "${widget.animeTitle}" found in local directory.',
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(fontSize: 13),
-                          ),
-                          const SizedBox(height: 16),
-                          FilledButton.icon(
-                            onPressed: _showWrongTitleBottomSheet,
-                            icon: const Icon(Icons.link),
-                            label: const Text('Map Local Folder'),
-                          ),
-                        ],
-                      );
-                    }
-
-                    return Column(
+              )
+              .then((_) {
+                _loadLocalProgress();
+              });
+        },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                SizedBox(
+                  width: 140,
+                  height: 80,
+                  child:
+                      (ep.thumbnailUrl != null && ep.thumbnailUrl!.isNotEmpty)
+                      ? CustomImage(
+                          imageUrl: ep.thumbnailUrl!,
+                          fit: BoxFit.cover,
+                          errorWidget:
+                              (widget.coverImage != null &&
+                                  widget.coverImage!.isNotEmpty)
+                              ? CustomImage(
+                                  imageUrl: widget.coverImage!,
+                                  fit: BoxFit.cover,
+                                  errorWidget: _buildPlaceholderThumbnail(),
+                                )
+                              : _buildPlaceholderThumbnail(),
+                        )
+                      : (widget.coverImage != null &&
+                            widget.coverImage!.isNotEmpty)
+                      ? CustomImage(
+                          imageUrl: widget.coverImage!,
+                          fit: BoxFit.cover,
+                          errorWidget: _buildPlaceholderThumbnail(),
+                        )
+                      : _buildPlaceholderThumbnail(),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 8,
+                      horizontal: 8,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
-                          Icons.error_outline,
-                          size: 40,
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                        const SizedBox(height: 12),
                         Text(
-                          _is403Error
-                              ? 'Cloudflare might be preventing fetching. Try opening in browser and completing the captcha.'
-                              : 'An error occurred while loading episodes.',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        if (_is403Error && _selectedExtension != null) ...[
-                          OutlinedButton.icon(
-                            onPressed: () async {
-                              final urlString =
-                                  _failedUrl ?? _selectedExtension!.baseUrl;
-                              final url = Uri.parse(urlString);
-                              try {
-                                await launchUrl(
-                                  url,
-                                  mode: LaunchMode.externalApplication,
-                                );
-                              } catch (_) {}
-                            },
-                            icon: const Icon(Icons.open_in_browser),
-                            label: const Text('Open in Browser'),
-                          ),
-                          const SizedBox(height: 12),
-                        ],
-                        FilledButton(
-                          onPressed: _loadEpisodes,
-                          child: const Text('Retry'),
-                        ),
-                      ],
-                    );
-                  })(),
-                ),
-              ),
-            )
-          else if (_allRawEpisodes.isEmpty)
-            const Expanded(
-              child: Center(
-                child: Text(
-                  'No episodes found for this show.',
-                  style: TextStyle(color: Colors.grey),
-                ),
-              ),
-            )
-          else
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  (() {
-                    final target = _getResumeTarget();
-                    return Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Episodes (${_allRawEpisodes.length})',
+                          ep.name,
                           style: const TextStyle(
-                            fontSize: 15,
                             fontWeight: FontWeight.bold,
+                            fontSize: 14,
                           ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        if (target != null)
-                          TextButton.icon(
-                            onPressed: () => _launchEpisode(target.episode),
-                            icon: const Icon(Icons.play_arrow),
-                            label: Text(
-                              '${target.isResume ? "Resume" : "Start"} Ep. ${(ProgressService.parseEpisodeNumber(target.episode.url, target.episode.name) ?? 1.0).toString().replaceAll(RegExp(r'\.0$'), '')}',
+                        if (ep.description != null &&
+                            ep.description!.isNotEmpty) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            ep.description!,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color:
+                                  Theme.of(
+                                    context,
+                                  ).textTheme.bodySmall?.color ??
+                                  Colors.grey,
                             ),
-                            style: TextButton.styleFrom(
-                              foregroundColor: Theme.of(
-                                context,
-                              ).colorScheme.primary,
-                              visualDensity: VisualDensity.compact,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                              ),
-                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
+                        ],
                       ],
-                    );
-                  })(),
-                  const SizedBox(height: 12),
-                  (() {
-                    final totalPages = (_allRawEpisodes.length / 30).ceil();
-                    if (totalPages <= 1) return const SizedBox.shrink();
-                    return Column(
-                      children: [
-                        SizedBox(
-                          height: 40,
-                          child: ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            itemCount: totalPages,
-                            itemBuilder: (context, idx) {
-                              final startEp = idx * 30 + 1;
-                              final endEp =
-                                  (idx + 1) * 30 < _allRawEpisodes.length
-                                  ? (idx + 1) * 30
-                                  : _allRawEpisodes.length;
-                              final isSelected = _currentPage == idx;
-                              return Padding(
-                                padding: const EdgeInsets.only(right: 8.0),
-                                child: ChoiceChip(
-                                  label: Text('$startEp - $endEp'),
-                                  selected: isSelected,
-                                  onSelected: (selected) {
-                                    if (selected) {
-                                      _changePage(idx);
-                                    }
-                                  },
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                      ],
-                    );
-                  })(),
-                  Expanded(
-                    child: _isLoadingPage
-                        ? Center(
-                            child: CircularProgressIndicator.adaptive(
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                Theme.of(context).colorScheme.primary,
-                              ),
-                            ),
-                          )
-                        : ListView.builder(
-                            padding: const EdgeInsets.only(bottom: 20),
-                            itemCount: _rawEpisodes.length,
-                            itemBuilder: (context, index) {
-                              final rawEp = _rawEpisodes[index];
-                              final ep = ExtEpisode.fromJson(
-                                Map<String, dynamic>.from(rawEp),
-                              );
-                              final progressRatio =
-                                  _episodesProgress[ep.url] ?? 0.0;
-
-                              return Card(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onInverseSurface,
-                                elevation: 0,
-                                margin: const EdgeInsets.symmetric(vertical: 6),
-                                clipBehavior: Clip.antiAlias,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: InkWell(
-                                  onTap: () {
-                                    final ext = _selectedExtension;
-                                    if (ext == null) return;
-                                    final allEpisodes = _allRawEpisodes
-                                        .map(
-                                          (e) => ExtEpisode.fromJson(
-                                            Map<String, dynamic>.from(e),
-                                          ),
-                                        )
-                                        .toList();
-                                    Navigator.of(context)
-                                        .push(
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                VideoPlayerPage(
-                                                  episode: ep,
-                                                  source: ext,
-                                                  animeTitle: widget.animeTitle,
-                                                  coverImage: widget.coverImage,
-                                                  malId: widget.malId,
-                                                  mediaId: widget.mediaId,
-                                                  allEpisodes: allEpisodes,
-                                                ),
-                                          ),
-                                        )
-                                        .then((_) {
-                                          _loadLocalProgress();
-                                        });
-                                  },
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.stretch,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          SizedBox(
-                                            width: 140,
-                                            height: 80,
-                                            child:
-                                                (ep.thumbnailUrl != null &&
-                                                    ep.thumbnailUrl!.isNotEmpty)
-                                                ? CustomImage(
-                                                    imageUrl: ep.thumbnailUrl!,
-                                                    fit: BoxFit.cover,
-                                                    errorWidget:
-                                                        (widget.coverImage !=
-                                                                null &&
-                                                            widget
-                                                                .coverImage!
-                                                                .isNotEmpty)
-                                                        ? CustomImage(
-                                                            imageUrl: widget
-                                                                .coverImage!,
-                                                            fit: BoxFit.cover,
-                                                            errorWidget:
-                                                                _buildPlaceholderThumbnail(),
-                                                          )
-                                                        : _buildPlaceholderThumbnail(),
-                                                  )
-                                                : (widget.coverImage != null &&
-                                                      widget
-                                                          .coverImage!
-                                                          .isNotEmpty)
-                                                ? CustomImage(
-                                                    imageUrl:
-                                                        widget.coverImage!,
-                                                    fit: BoxFit.cover,
-                                                    errorWidget:
-                                                        _buildPlaceholderThumbnail(),
-                                                  )
-                                                : _buildPlaceholderThumbnail(),
-                                          ),
-                                          const SizedBox(width: 16),
-                                          Expanded(
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                    vertical: 8,
-                                                    horizontal: 8,
-                                                  ),
-                                              child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.center,
-                                                children: [
-                                                  Text(
-                                                    ep.name,
-                                                    style: const TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      fontSize: 14,
-                                                    ),
-                                                    maxLines: 2,
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                  ),
-                                                  if (ep.description != null &&
-                                                      ep
-                                                          .description!
-                                                          .isNotEmpty) ...[
-                                                    const SizedBox(height: 4),
-                                                    Text(
-                                                      ep.description!,
-                                                      style: TextStyle(
-                                                        fontSize: 12,
-                                                        color:
-                                                            Theme.of(context)
-                                                                .textTheme
-                                                                .bodySmall
-                                                                ?.color ??
-                                                            Colors.grey,
-                                                      ),
-                                                      maxLines: 1,
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
-                                                    ),
-                                                  ],
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                          if (_selectedExtension!.id != -1)
-                                            _buildDownloadButton(ep),
-                                        ],
-                                      ),
-                                      if (progressRatio > 0.0)
-                                        Container(
-                                          height: 3,
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .primary
-                                              .withValues(alpha: 0.3),
-                                          alignment: Alignment.centerLeft,
-                                          child: FractionallySizedBox(
-                                            widthFactor: progressRatio,
-                                            child: Container(
-                                              color: Theme.of(
-                                                context,
-                                              ).colorScheme.primary,
-                                            ),
-                                          ),
-                                        ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
+                    ),
                   ),
-                ],
+                ),
+                if (_selectedExtension!.id != -1) _buildDownloadButton(ep),
+              ],
+            ),
+            if (progressRatio > 0.0)
+              Container(
+                height: 3,
+                color: Theme.of(
+                  context,
+                ).colorScheme.primary.withValues(alpha: 0.3),
+                alignment: Alignment.centerLeft,
+                child: FractionallySizedBox(
+                  widthFactor: progressRatio,
+                  child: Container(
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_isLoadingExtensions) {
+      return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.all(24),
+        children: [
+          Container(
+            height: 200,
+            alignment: Alignment.center,
+            child: CircularProgressIndicator.adaptive(
+              valueColor: AlwaysStoppedAnimation<Color>(
+                Theme.of(context).colorScheme.primary,
               ),
             ),
+          ),
         ],
-      ),
+      );
+    }
+
+    if (_installedExtensions.isEmpty) {
+      return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.all(24),
+        children: [
+          Container(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(
+                  Icons.extension_off_outlined,
+                  size: 54,
+                  color: Colors.grey,
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'No Extensions Installed',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'To start watching, add repositories and install an anime extension.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 13, color: Colors.grey),
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton.icon(
+                  onPressed: () async {
+                    await Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const ExtensionsPage(),
+                      ),
+                    );
+                    _loadExtensions();
+                  },
+                  icon: const Icon(Icons.settings),
+                  label: const Text('Manage Extensions'),
+                ),
+              ],
+            ),
+          ),
+        ],
+      );
+    }
+
+    if (_isLoadingEpisodes) {
+      return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 20.0),
+        children: [
+          _buildHeader(),
+          const SizedBox(height: 48),
+          Center(
+            child: CircularProgressIndicator.adaptive(
+              valueColor: AlwaysStoppedAnimation<Color>(
+                Theme.of(context).colorScheme.primary,
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    if (_errorMessage != null) {
+      return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 20.0),
+        children: [
+          _buildHeader(),
+          const SizedBox(height: 24),
+          _buildErrorWidget(),
+        ],
+      );
+    }
+
+    if (_allRawEpisodes.isEmpty) {
+      return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 20.0),
+        children: [
+          _buildHeader(),
+          const SizedBox(height: 48),
+          const Center(
+            child: Text(
+              'No episodes found for this show.',
+              style: TextStyle(color: Colors.grey),
+            ),
+          ),
+        ],
+      );
+    }
+
+    if (_isLoadingPage) {
+      return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 20.0),
+        children: [
+          _buildHeader(),
+          const SizedBox(height: 48),
+          Center(
+            child: CircularProgressIndicator.adaptive(
+              valueColor: AlwaysStoppedAnimation<Color>(
+                Theme.of(context).colorScheme.primary,
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    return ListView.builder(
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 20.0),
+      itemCount: 1 + _rawEpisodes.length,
+      itemBuilder: (context, index) {
+        if (index == 0) {
+          return _buildHeader();
+        }
+        return _buildEpisodeCard(_rawEpisodes[index - 1]);
+      },
     );
   }
 
