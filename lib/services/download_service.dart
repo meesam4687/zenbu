@@ -824,6 +824,7 @@ class DownloadService extends ChangeNotifier {
     required Map<String, String> headers,
     String? rootPath,
     List<ExtSubtitle>? subtitles,
+    double? episodeNumber,
   }) async {
     final effectiveRootPath = (rootPath != null && rootPath.isNotEmpty)
         ? rootPath
@@ -853,6 +854,11 @@ class DownloadService extends ChangeNotifier {
 
       final animeRootPath =
           '$effectiveRootPath${Platform.isWindows ? '\\' : '/'}anime';
+      final animeRootDir = Directory(animeRootPath);
+      if (!await animeRootDir.exists()) {
+        await animeRootDir.create(recursive: true);
+      }
+
       final showPath =
           '$animeRootPath${Platform.isWindows ? '\\' : '/'}$sanitizedTitle';
       final showDir = Directory(showPath);
@@ -874,10 +880,9 @@ class DownloadService extends ChangeNotifier {
 
       if (malId != null) {
         try {
-          final epNum = ProgressService.parseEpisodeNumber(
-            episodeUrl,
-            episodeName,
-          );
+          final epNum =
+              episodeNumber ??
+              ProgressService.parseEpisodeNumber(episodeUrl, episodeName);
           if (epNum != null) {
             final skipApiUrl =
                 'https://api.aniskip.com/v2/skip-times/$malId/$epNum?types[]=op&types[]=ed&types[]=mixed-op&types[]=mixed-ed&types[]=recap&episodeLength=0';

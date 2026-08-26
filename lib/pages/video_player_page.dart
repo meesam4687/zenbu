@@ -469,13 +469,17 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
       _lastIsPlaying = isPlaying;
       _pipChannel.invokeMethod('setVideoPlaying', {'isPlaying': isPlaying});
       if (isPlaying) {
-        final epNumDouble = parseEpisodeNumber(_currentEpisode);
-        final epNumStr = epNumDouble != null
-            ? epNumDouble.toString().replaceAll(RegExp(r'\.0$'), '')
+        final curIdx = widget.allEpisodes != null
+            ? widget.allEpisodes!.indexWhere(
+                (e) => e.url == _currentEpisode.url,
+              )
+            : -1;
+        final epNumStr = curIdx >= 0 ? "${curIdx + 1}" : "";
+        final episodeText = epNumStr.isNotEmpty
+            ? (_currentEpisode.name.contains(epNumStr)
+                  ? _currentEpisode.name
+                  : "Ep. $epNumStr: ${_currentEpisode.name}")
             : _currentEpisode.name;
-        final episodeText = epNumDouble != null
-            ? "Episode: $epNumStr"
-            : epNumStr;
 
         DiscordService.updateWatchingStatus(
           animeTitle: widget.animeTitle,
@@ -905,7 +909,17 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
 
       final malId = widget.malId;
       if (!loadedLocalSkip && malId != null) {
-        final double? epNum = parseEpisodeNumber(_currentEpisode);
+        final curIdx = widget.allEpisodes != null
+            ? widget.allEpisodes!.indexWhere(
+                (e) => e.url == _currentEpisode.url,
+              )
+            : -1;
+        final double? epNum = curIdx >= 0
+            ? (curIdx + 1).toDouble()
+            : ProgressService.parseEpisodeNumber(
+                _currentEpisode.url,
+                _currentEpisode.name,
+              );
         if (epNum != null) {
           final durationSec = newController.value.duration.inSeconds;
           await _fetchSkipTimes(malId, epNum, durationSec);
@@ -1790,24 +1804,24 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
                   ],
                 )
               : (_playerFailed || _errorMessage != null)
-                  ? VideoPlayerErrorView(
-                      playerFailed: _playerFailed,
-                      errorMessage: _errorMessage,
-                      isLocalSource: widget.source.id == -1,
-                      episodeUrl: widget.episode.url,
-                      onRetry: () {
-                        if (_playerFailed) {
-                          setState(() {
-                            _autoRetryCount = 0;
-                            _isAutoRetrying = true;
-                            _playerFailed = false;
-                            _errorMessage = null;
-                          });
-                        }
-                        _fetchVideoList();
-                      },
-                    )
-                  : _buildPlayerUI(),
+              ? VideoPlayerErrorView(
+                  playerFailed: _playerFailed,
+                  errorMessage: _errorMessage,
+                  isLocalSource: widget.source.id == -1,
+                  episodeUrl: widget.episode.url,
+                  onRetry: () {
+                    if (_playerFailed) {
+                      setState(() {
+                        _autoRetryCount = 0;
+                        _isAutoRetrying = true;
+                        _playerFailed = false;
+                        _errorMessage = null;
+                      });
+                    }
+                    _fetchVideoList();
+                  },
+                )
+              : _buildPlayerUI(),
         ),
       ),
     );
@@ -1815,35 +1829,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
 }
 
 double? parseEpisodeNumber(ExtEpisode episode) {
-  try {
-    final parsed = jsonDecode(episode.url);
-    if (parsed is Map && parsed.containsKey('num')) {
-      return double.tryParse(parsed['num'].toString());
-    }
-  } catch (_) {}
-
-  if (episode.url.contains('/')) {
-    final parts = episode.url.split('/');
-    final parsed = double.tryParse(parts.last);
-    if (parsed != null) return parsed;
-  }
-
-  if (episode.url.contains('|')) {
-    final parts = episode.url.split('|');
-    final parsed = double.tryParse(parts.last);
-    if (parsed != null) return parsed;
-  }
-
-  final match = RegExp(
-    r'(?:episode|ep|e)\.?\s*(\d+(?:\.\d+)?)',
-    caseSensitive: false,
-  ).firstMatch(episode.name);
-  if (match != null) return double.tryParse(match.group(1)!);
-
-  final matchAny = RegExp(r'(\d+(?:\.\d+)?)').firstMatch(episode.name);
-  if (matchAny != null) return double.tryParse(matchAny.group(1)!);
-
-  return null;
+  return ProgressService.parseEpisodeNumber(episode.url, episode.name);
 }
 
 class _ResolvedStream {
@@ -1853,41 +1839,29 @@ class _ResolvedStream {
 }
 
 ExtEpisode? findNextEpisode(ExtEpisode current, List<ExtEpisode> allEpisodes) {
-  final currentNum = parseEpisodeNumber(current);
-  if (currentNum == null) {
-    final firstNum = allEpisodes.isNotEmpty
-        ? parseEpisodeNumber(allEpisodes.first)
-        : null;
-    final lastNum = allEpisodes.isNotEmpty
-        ? parseEpisodeNumber(allEpisodes.last)
-        : null;
-    final currentIndex = allEpisodes.indexWhere((e) => e.url == current.url);
-    if (currentIndex == -1) return null;
-
-    if (firstNum != null && lastNum != null && firstNum < lastNum) {
-      if (currentIndex + 1 < allEpisodes.length) {
-        return allEpisodes[currentIndex + 1];
-      }
-    } else {
-      if (currentIndex - 1 >= 0) {
-        return allEpisodes[currentIndex - 1];
-      }
+  final currentIndex = allEpisodes.indexWhere((e) => e.url == current.url);
+  if (currentIndex != -1) {
+    if (currentIndex + 1 < allEpisodes.length) {
+      return allEpisodes[currentIndex + 1];
     }
     return null;
   }
 
-  ExtEpisode? bestMatch;
-  double? bestMatchNum;
-
-  for (final ep in allEpisodes) {
-    final num = parseEpisodeNumber(ep);
-    if (num != null && num > currentNum) {
-      if (bestMatchNum == null || num < bestMatchNum) {
-        bestMatch = ep;
-        bestMatchNum = num;
+  final currentNum = parseEpisodeNumber(current);
+  if (currentNum != null) {
+    ExtEpisode? bestMatch;
+    double? bestMatchNum;
+    for (final ep in allEpisodes) {
+      final num = parseEpisodeNumber(ep);
+      if (num != null && num > currentNum) {
+        if (bestMatchNum == null || num < bestMatchNum) {
+          bestMatch = ep;
+          bestMatchNum = num;
+        }
       }
     }
+    return bestMatch;
   }
 
-  return bestMatch;
+  return null;
 }

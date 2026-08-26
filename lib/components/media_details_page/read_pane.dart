@@ -61,7 +61,9 @@ class _MangaReadPaneState extends State<MangaReadPane> {
     final Map<String, bool> readStatus = {};
     final Map<String, Map<String, int>> partialProgress = {};
 
-    for (final chap in _allRawChapters) {
+    final chronological = _allRawChapters.reversed.toList();
+    for (int i = 0; i < chronological.length; i++) {
+      final chap = chronological[i];
       final extChapter = ExtEpisode.fromJson(Map<String, dynamic>.from(chap));
 
       final isRead = await ProgressService.isMangaChapterRead(
@@ -69,6 +71,7 @@ class _MangaReadPaneState extends State<MangaReadPane> {
         chapterUrl: extChapter.url,
         chapterName: extChapter.name,
         anilistProgress: widget.anilistProgress,
+        chapterIndex: i + 1,
       );
       if (isRead) {
         readStatus[extChapter.url] = true;
@@ -415,7 +418,7 @@ class _MangaReadPaneState extends State<MangaReadPane> {
                   onPressed: () => _launchChapter(target.episode),
                   icon: const Icon(Icons.chrome_reader_mode),
                   label: Text(
-                    '${target.isResume ? "Resume" : "Start"} Ch. ${(ProgressService.parseEpisodeNumber(target.episode.url, target.episode.name) ?? 1.0).toString().replaceAll(RegExp(r'\.0$'), '')}',
+                    '${target.isResume ? "Resume" : "Start"} Ch. ${target.displayNumber}',
                   ),
                   style: TextButton.styleFrom(
                     foregroundColor: Theme.of(context).colorScheme.primary,
@@ -826,69 +829,65 @@ class _MangaReadPaneState extends State<MangaReadPane> {
       return null;
     }
 
-    final chronologicalChapters = _allRawChapters
+    final chronologicalChapters = _allRawChapters.reversed
         .map((e) => ExtEpisode.fromJson(Map<String, dynamic>.from(e)))
         .toList();
-    chronologicalChapters.sort((a, b) {
-      final numA = ProgressService.parseEpisodeNumber(a.url, a.name) ?? 0.0;
-      final numB = ProgressService.parseEpisodeNumber(b.url, b.name) ?? 0.0;
-      return numA.compareTo(numB);
-    });
 
     ExtEpisode? lastStarted;
-    double highestReadChapterNum = -1.0;
+    int lastStartedIdx = -1;
+    int lastReadIndex = -1;
     bool hasAnyProgress = false;
 
-    for (final chap in chronologicalChapters) {
+    for (int i = 0; i < chronologicalChapters.length; i++) {
+      final chap = chronologicalChapters[i];
       final isRead = _chaptersReadStatus[chap.url] ?? false;
       final progress = _chaptersPartialProgress[chap.url];
-      final chapNum =
-          ProgressService.parseEpisodeNumber(chap.url, chap.name) ?? 0.0;
 
       if (isRead || progress != null) {
         hasAnyProgress = true;
       }
       if (progress != null && !isRead) {
         lastStarted = chap;
+        lastStartedIdx = i;
       }
       if (isRead) {
-        if (chapNum > highestReadChapterNum) {
-          highestReadChapterNum = chapNum;
-        }
+        lastReadIndex = i;
       }
     }
-
-    final lastChap = chronologicalChapters.last;
-    final lastChapNum =
-        ProgressService.parseEpisodeNumber(lastChap.url, lastChap.name) ?? 0.0;
 
     final isCompleted =
         widget.mediaState == 'COMPLETED' ||
         widget.anilistProgress >= chronologicalChapters.length ||
-        highestReadChapterNum >= lastChapNum;
+        (lastReadIndex >= 0 &&
+            lastReadIndex == chronologicalChapters.length - 1);
 
     if (isCompleted) {
       return null;
     }
 
     if (lastStarted != null) {
-      return ResumeTarget(episode: lastStarted, isResume: true);
+      return ResumeTarget(
+        episode: lastStarted,
+        isResume: true,
+        displayNumber: (lastStartedIdx + 1).toString(),
+      );
     }
 
-    if (highestReadChapterNum >= 0) {
-      for (final chap in chronologicalChapters) {
-        final chapNum =
-            ProgressService.parseEpisodeNumber(chap.url, chap.name) ?? 0.0;
-        if (chapNum > highestReadChapterNum) {
-          return ResumeTarget(episode: chap, isResume: true);
-        }
-      }
+    if (lastReadIndex >= 0 &&
+        lastReadIndex + 1 < chronologicalChapters.length) {
+      final nextChap = chronologicalChapters[lastReadIndex + 1];
+      return ResumeTarget(
+        episode: nextChap,
+        isResume: true,
+        displayNumber: (lastReadIndex + 2).toString(),
+      );
     }
 
     if (chronologicalChapters.isNotEmpty) {
       return ResumeTarget(
         episode: chronologicalChapters.first,
         isResume: hasAnyProgress,
+        displayNumber: '1',
       );
     }
 
@@ -1173,7 +1172,12 @@ class _MangaReadPaneState extends State<MangaReadPane> {
 class ResumeTarget {
   final ExtEpisode episode;
   final bool isResume;
-  ResumeTarget({required this.episode, required this.isResume});
+  final String displayNumber;
+  ResumeTarget({
+    required this.episode,
+    required this.isResume,
+    this.displayNumber = '1',
+  });
 }
 
 class _WrongTitleBottomSheet extends StatefulWidget {

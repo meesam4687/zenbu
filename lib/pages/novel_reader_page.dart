@@ -223,16 +223,10 @@ class _NovelReaderPageState extends State<NovelReaderPage> {
         _scrollController.jumpTo(0);
       }
 
-      final chapNumDouble = ProgressService.parseEpisodeNumber(
-        currentChapter.url,
-        currentChapter.name,
-      );
-      final chapNumStr = chapNumDouble != null
-          ? chapNumDouble.toString().replaceAll(RegExp(r'\.0$'), '')
-          : currentChapter.name;
-      final chapterText = chapNumDouble != null
-          ? "Chapter: $chapNumStr"
-          : chapNumStr;
+      final chapNumStr = "${_currentChapterIndex + 1}";
+      final chapterText = currentChapter.name.contains(chapNumStr)
+          ? currentChapter.name
+          : "Ch. $chapNumStr: ${currentChapter.name}";
 
       DiscordService.updateReadingStatus(
         mangaTitle: widget.novelTitle,

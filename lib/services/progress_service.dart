@@ -10,9 +10,22 @@ class ProgressService {
       }
     } catch (_) {}
 
+    final matchExplicit = RegExp(
+      r'\b(?:episode|ep|chapter|chap|ch)[\s._-]*(\d+(?:\.\d+)?)\b',
+      caseSensitive: false,
+    ).firstMatch(name);
+    if (matchExplicit != null) return double.tryParse(matchExplicit.group(1)!);
+
     if (url.contains('/')) {
       final parts = url.split('/');
-      final parsed = double.tryParse(parts.last);
+      final last = parts.last;
+      final matchUrl = RegExp(
+        r'\b(?:episode|ep|chapter|chap|ch)[\s._-]*(\d+(?:\.\d+)?)\b',
+        caseSensitive: false,
+      ).firstMatch(last);
+      if (matchUrl != null) return double.tryParse(matchUrl.group(1)!);
+
+      final parsed = double.tryParse(last);
       if (parsed != null) return parsed;
     }
 
@@ -22,31 +35,26 @@ class ProgressService {
       if (parsed != null) return parsed;
     }
 
-    final match = RegExp(
-      r'(?:episode|ep|e|chapter|chap|ch)\.?\s*(\d+(?:\.\d+)?)',
-      caseSensitive: false,
+    final matchShorthand = RegExp(
+      r'(?:\b[EeCc]|\b#)\s*(\d+(?:\.\d+)?)\b',
     ).firstMatch(name);
-    if (match != null) return double.tryParse(match.group(1)!);
+    if (matchShorthand != null) {
+      return double.tryParse(matchShorthand.group(1)!);
+    }
 
-    final matchAny = RegExp(r'(\d+(?:\.\d+)?)').firstMatch(name);
-    if (matchAny != null) return double.tryParse(matchAny.group(1)!);
+    final matchDash = RegExp(r'-\s*(\d+(?:\.\d+)?)\b').firstMatch(name);
+    if (matchDash != null) {
+      return double.tryParse(matchDash.group(1)!);
+    }
 
     return null;
   }
 
-  static String _getMangaKeyPrefix(int mediaId, String url, String name) {
-    final num = parseEpisodeNumber(url, name);
-    if (num != null) {
-      return 'manga_progress_${mediaId}_num_$num';
-    }
+  static String _getMangaKeyPrefix(int mediaId, String url) {
     return 'manga_progress_${mediaId}_url_$url';
   }
 
-  static String _getAnimeKeyPrefix(int mediaId, String url, String name) {
-    final num = parseEpisodeNumber(url, name);
-    if (num != null) {
-      return 'anime_progress_${mediaId}_num_$num';
-    }
+  static String _getAnimeKeyPrefix(int mediaId, String url) {
     return 'anime_progress_${mediaId}_url_$url';
   }
 
@@ -60,7 +68,7 @@ class ProgressService {
     if (totalPages <= 0) return;
     final prefs = await SharedPreferences.getInstance();
 
-    final prefix = _getMangaKeyPrefix(mediaId, chapterUrl, chapterName);
+    final prefix = _getMangaKeyPrefix(mediaId, chapterUrl);
     final keyPage = '${prefix}_page';
     final keyTotal = '${prefix}_total';
     final keyRead = '${prefix}_read';
@@ -78,14 +86,14 @@ class ProgressService {
     required String chapterUrl,
     required String chapterName,
     required int anilistProgress,
+    int? chapterIndex,
   }) async {
-    final chapterNum = parseEpisodeNumber(chapterUrl, chapterName);
-    if (chapterNum != null && chapterNum <= anilistProgress) {
+    if (chapterIndex != null && chapterIndex <= anilistProgress) {
       return true;
     }
 
     final prefs = await SharedPreferences.getInstance();
-    final prefix = _getMangaKeyPrefix(mediaId, chapterUrl, chapterName);
+    final prefix = _getMangaKeyPrefix(mediaId, chapterUrl);
     final keyRead = '${prefix}_read';
     return prefs.getBool(keyRead) ?? false;
   }
@@ -96,7 +104,7 @@ class ProgressService {
     required String chapterName,
   }) async {
     final prefs = await SharedPreferences.getInstance();
-    final prefix = _getMangaKeyPrefix(mediaId, chapterUrl, chapterName);
+    final prefix = _getMangaKeyPrefix(mediaId, chapterUrl);
     final keyPage = '${prefix}_page';
     final keyTotal = '${prefix}_total';
 
@@ -119,7 +127,7 @@ class ProgressService {
     if (durationSeconds <= 0) return;
     final prefs = await SharedPreferences.getInstance();
 
-    final prefix = _getAnimeKeyPrefix(mediaId, episodeUrl, episodeName);
+    final prefix = _getAnimeKeyPrefix(mediaId, episodeUrl);
     final keyPos = '${prefix}_pos';
     final keyDur = '${prefix}_dur';
     final keyWatched = '${prefix}_watched';
@@ -140,14 +148,14 @@ class ProgressService {
     required String episodeUrl,
     required String episodeName,
     required int anilistProgress,
+    int? episodeIndex,
   }) async {
-    final episodeNum = parseEpisodeNumber(episodeUrl, episodeName);
-    if (episodeNum != null && episodeNum <= anilistProgress) {
+    if (episodeIndex != null && episodeIndex <= anilistProgress) {
       return true;
     }
 
     final prefs = await SharedPreferences.getInstance();
-    final prefix = _getAnimeKeyPrefix(mediaId, episodeUrl, episodeName);
+    final prefix = _getAnimeKeyPrefix(mediaId, episodeUrl);
     final keyWatched = '${prefix}_watched';
     return prefs.getBool(keyWatched) ?? false;
   }
@@ -157,19 +165,21 @@ class ProgressService {
     required String episodeUrl,
     required String episodeName,
     required int anilistProgress,
+    int? episodeIndex,
   }) async {
     final watched = await isAnimeEpisodeWatched(
       mediaId: mediaId,
       episodeUrl: episodeUrl,
       episodeName: episodeName,
       anilistProgress: anilistProgress,
+      episodeIndex: episodeIndex,
     );
     if (watched) {
       return 1.0;
     }
 
     final prefs = await SharedPreferences.getInstance();
-    final prefix = _getAnimeKeyPrefix(mediaId, episodeUrl, episodeName);
+    final prefix = _getAnimeKeyPrefix(mediaId, episodeUrl);
     final keyPos = '${prefix}_pos';
     final keyDur = '${prefix}_dur';
 
@@ -188,7 +198,7 @@ class ProgressService {
     required String episodeName,
   }) async {
     final prefs = await SharedPreferences.getInstance();
-    final prefix = _getAnimeKeyPrefix(mediaId, episodeUrl, episodeName);
+    final prefix = _getAnimeKeyPrefix(mediaId, episodeUrl);
     final keyPos = '${prefix}_pos';
     final keyDur = '${prefix}_dur';
     final pos = prefs.getInt(keyPos);

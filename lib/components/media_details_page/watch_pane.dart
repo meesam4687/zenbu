@@ -56,13 +56,16 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
   Future<void> _loadLocalProgress() async {
     final Map<String, double> progressMap = {};
 
-    for (final epJson in _allRawEpisodes) {
+    final chronological = _allRawEpisodes.reversed.toList();
+    for (int i = 0; i < chronological.length; i++) {
+      final epJson = chronological[i];
       final extEpisode = ExtEpisode.fromJson(Map<String, dynamic>.from(epJson));
       final ratio = await ProgressService.getAnimeEpisodeProgressRatio(
         mediaId: widget.mediaId,
         episodeUrl: extEpisode.url,
         episodeName: extEpisode.name,
         anilistProgress: widget.anilistProgress,
+        episodeIndex: i + 1,
       );
       if (ratio > 0.0) {
         progressMap[extEpisode.url] = ratio;
@@ -387,7 +390,7 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
                   onPressed: () => _launchEpisode(target.episode),
                   icon: const Icon(Icons.play_arrow),
                   label: Text(
-                    '${target.isResume ? "Resume" : "Start"} Ep. ${(ProgressService.parseEpisodeNumber(target.episode.url, target.episode.name) ?? 1.0).toString().replaceAll(RegExp(r'\.0$'), '')}',
+                    '${target.isResume ? "Resume" : "Start"} Ep. ${target.displayNumber}',
                   ),
                   style: TextButton.styleFrom(
                     foregroundColor: Theme.of(context).colorScheme.primary,
@@ -535,7 +538,7 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
         onTap: () {
           final ext = _selectedExtension;
           if (ext == null) return;
-          final allEpisodes = _allRawEpisodes
+          final allEpisodes = _allRawEpisodes.reversed
               .map((e) => ExtEpisode.fromJson(Map<String, dynamic>.from(e)))
               .toList();
           Navigator.of(context)
@@ -814,66 +817,63 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
       return null;
     }
 
-    final chronologicalEpisodes = _allRawEpisodes
+    final chronologicalEpisodes = _allRawEpisodes.reversed
         .map((e) => ExtEpisode.fromJson(Map<String, dynamic>.from(e)))
         .toList();
-    chronologicalEpisodes.sort((a, b) {
-      final numA = ProgressService.parseEpisodeNumber(a.url, a.name) ?? 0.0;
-      final numB = ProgressService.parseEpisodeNumber(b.url, b.name) ?? 0.0;
-      return numA.compareTo(numB);
-    });
 
     ExtEpisode? lastStarted;
-    double highestWatchedEpisodeNum = -1.0;
+    int lastStartedIdx = -1;
+    int lastWatchedIndex = -1;
     bool hasAnyProgress = false;
 
-    for (final ep in chronologicalEpisodes) {
+    for (int i = 0; i < chronologicalEpisodes.length; i++) {
+      final ep = chronologicalEpisodes[i];
       final ratio = _episodesProgress[ep.url] ?? 0.0;
-      final epNum = ProgressService.parseEpisodeNumber(ep.url, ep.name) ?? 0.0;
       if (ratio > 0.0) {
         hasAnyProgress = true;
       }
       if (ratio > 0.0 && ratio < 0.95) {
         lastStarted = ep;
+        lastStartedIdx = i;
       }
       if (ratio >= 0.95) {
-        if (epNum > highestWatchedEpisodeNum) {
-          highestWatchedEpisodeNum = epNum;
-        }
+        lastWatchedIndex = i;
       }
     }
-
-    final lastEp = chronologicalEpisodes.last;
-    final lastEpNum =
-        ProgressService.parseEpisodeNumber(lastEp.url, lastEp.name) ?? 0.0;
 
     final isCompleted =
         widget.mediaState == 'COMPLETED' ||
         widget.anilistProgress >= chronologicalEpisodes.length ||
-        highestWatchedEpisodeNum >= lastEpNum;
+        (lastWatchedIndex >= 0 &&
+            lastWatchedIndex == chronologicalEpisodes.length - 1);
 
     if (isCompleted) {
       return null;
     }
 
     if (lastStarted != null) {
-      return ResumeTarget(episode: lastStarted, isResume: true);
+      return ResumeTarget(
+        episode: lastStarted,
+        isResume: true,
+        displayNumber: (lastStartedIdx + 1).toString(),
+      );
     }
 
-    if (highestWatchedEpisodeNum >= 0) {
-      for (final ep in chronologicalEpisodes) {
-        final epNum =
-            ProgressService.parseEpisodeNumber(ep.url, ep.name) ?? 0.0;
-        if (epNum > highestWatchedEpisodeNum) {
-          return ResumeTarget(episode: ep, isResume: true);
-        }
-      }
+    if (lastWatchedIndex >= 0 &&
+        lastWatchedIndex + 1 < chronologicalEpisodes.length) {
+      final nextEp = chronologicalEpisodes[lastWatchedIndex + 1];
+      return ResumeTarget(
+        episode: nextEp,
+        isResume: true,
+        displayNumber: (lastWatchedIndex + 2).toString(),
+      );
     }
 
     if (chronologicalEpisodes.isNotEmpty) {
       return ResumeTarget(
         episode: chronologicalEpisodes.first,
         isResume: hasAnyProgress,
+        displayNumber: '1',
       );
     }
 
@@ -881,7 +881,7 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
   }
 
   void _launchEpisode(ExtEpisode ep) {
-    final allEpisodes = _allRawEpisodes
+    final allEpisodes = _allRawEpisodes.reversed
         .map((e) => ExtEpisode.fromJson(Map<String, dynamic>.from(e)))
         .toList();
     Navigator.of(context)
@@ -1045,6 +1045,12 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
         throw Exception('Stream URL is empty.');
       }
 
+      final chronologicalEpisodes = _allRawEpisodes.reversed.toList();
+      final epIdx = chronologicalEpisodes.indexWhere(
+        (e) => (e is Map ? e['url'] : e.url) == ep.url,
+      );
+      final double? epNumber = epIdx >= 0 ? (epIdx + 1).toDouble() : null;
+
       await downloadService.startAnimeDownload(
         mediaId: widget.mediaId,
         malId: widget.malId,
@@ -1055,6 +1061,7 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
         videoStreamUrl: videoUrl,
         headers: headers,
         subtitles: extVideo.subtitles,
+        episodeNumber: epNumber,
       );
     } catch (e) {
       final wasCancelled = downloadService.wasManuallyCancelled(ep.url);
@@ -1132,7 +1139,12 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
 class ResumeTarget {
   final ExtEpisode episode;
   final bool isResume;
-  ResumeTarget({required this.episode, required this.isResume});
+  final String displayNumber;
+  ResumeTarget({
+    required this.episode,
+    required this.isResume,
+    this.displayNumber = '1',
+  });
 }
 
 class _WrongTitleBottomSheet extends StatefulWidget {
