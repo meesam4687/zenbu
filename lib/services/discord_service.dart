@@ -59,7 +59,7 @@ class PendingPresenceUpdate {
 
 class DiscordService {
   static const String clientId = "1525102908377530468";
-  static const String redirectUri = "https://cdn.meesam.dev/zenbu-discord";
+  static const String redirectUri = "https://cdn.meesam.app/zenbu-discord";
 
   static int _connectionStatus = 0;
   static PendingPresenceUpdate? _pendingUpdate;

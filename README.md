@@ -18,15 +18,15 @@
 ## 📸 Screenshots
 
 <p align="center">
-  <img src="https://cdn.meesam.dev/zenbu/Screenshot_20260629_171223.jpg" width="220">
-  <img src="https://cdn.meesam.dev/home.jpg" width="220">
-  <img src="https://cdn.meesam.dev/anime.jpg" width="220">
+  <img src="https://cdn.meesam.app/zenbu/Screenshot_20260629_171223.jpg" width="220">
+  <img src="https://cdn.meesam.app/home.jpg" width="220">
+  <img src="https://cdn.meesam.app/anime.jpg" width="220">
 </p>
 
 <p align="center">
-  <img src="https://cdn.meesam.dev/manga.jpg" width="220">
-  <img src="https://cdn.meesam.dev/animep.jpg" width="220">
-  <img src="https://cdn.meesam.dev/mangap.jpg" width="220">
+  <img src="https://cdn.meesam.app/manga.jpg" width="220">
+  <img src="https://cdn.meesam.app/animep.jpg" width="220">
+  <img src="https://cdn.meesam.app/mangap.jpg" width="220">
 </p>
 
 ---

@@ -262,7 +262,7 @@ class _ExtensionsPageState extends State<ExtensionsPage>
             TextButton(
               onPressed: () {
                 launchUrl(
-                  Uri.parse('https://zenbu.meesam.dev/guide/'),
+                  Uri.parse('https://zenbu.meesam.app/guide/'),
                   mode: LaunchMode.externalApplication,
                 );
               },
@@ -699,7 +699,7 @@ class _ExtensionsPageState extends State<ExtensionsPage>
                   TextButton(
                     onPressed: () {
                       launchUrl(
-                        Uri.parse('https://zenbu.meesam.dev/guide/'),
+                        Uri.parse('https://zenbu.meesam.app/guide/'),
                         mode: LaunchMode.externalApplication,
                       );
                     },
