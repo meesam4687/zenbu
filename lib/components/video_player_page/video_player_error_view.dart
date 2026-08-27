@@ -21,9 +21,7 @@ class VideoPlayerErrorView extends StatelessWidget {
   Future<void> _goBack(BuildContext context) async {
     final navigator = Navigator.of(context);
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-    await SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-    ]);
+    await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     navigator.pop();
   }
 
@@ -35,11 +33,7 @@ class VideoPlayerErrorView extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.wifi_off_rounded,
-              size: 54,
-              color: Colors.white54,
-            ),
+            const Icon(Icons.wifi_off_rounded, size: 54, color: Colors.white54),
             const SizedBox(height: 16),
             const Text(
               'Playback Failed',
@@ -62,10 +56,7 @@ class VideoPlayerErrorView extends StatelessWidget {
               spacing: 12,
               runSpacing: 12,
               children: [
-                FilledButton(
-                  onPressed: onRetry,
-                  child: const Text('Retry'),
-                ),
+                FilledButton(onPressed: onRetry, child: const Text('Retry')),
                 OutlinedButton(
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.white,
@@ -87,11 +78,7 @@ class VideoPlayerErrorView extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.error_outline,
-              size: 54,
-              color: Colors.red,
-            ),
+            const Icon(Icons.error_outline, size: 54, color: Colors.red),
             const SizedBox(height: 16),
             Text(
               errorMessage!,
@@ -122,10 +109,7 @@ class VideoPlayerErrorView extends StatelessWidget {
                     label: const Text('Delete Download'),
                   ),
                 ] else ...[
-                  FilledButton(
-                    onPressed: onRetry,
-                    child: const Text('Retry'),
-                  ),
+                  FilledButton(onPressed: onRetry, child: const Text('Retry')),
                 ],
                 OutlinedButton(
                   style: OutlinedButton.styleFrom(

@@ -114,8 +114,10 @@ class _ProfileListButtonState extends State<ProfileListButton> {
                 borderRadius: BorderRadius.circular(16),
                 child: (_bannerImage != null && _bannerImage!.isNotEmpty)
                     ? ImageFiltered(
-                        imageFilter:
-                            ui.ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+                        imageFilter: ui.ImageFilter.blur(
+                          sigmaX: 15,
+                          sigmaY: 15,
+                        ),
                         child: CustomImage(
                           imageUrl: _bannerImage!,
                           fit: BoxFit.cover,

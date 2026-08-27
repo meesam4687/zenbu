@@ -78,15 +78,17 @@ class _VideoPlayerSettingsModalState extends State<VideoPlayerSettingsModal> {
 
     final double maxHeight =
         _activeSubMenu == _SettingsSubMenu.customizeSubtitles
-            ? MediaQuery.of(context).size.height * 0.85
-            : 320.0;
+        ? MediaQuery.of(context).size.height * 0.85
+        : 320.0;
 
     return ClipRect(
       child: ConstrainedBox(
         constraints: BoxConstraints(maxHeight: maxHeight),
         child: Padding(
           padding: EdgeInsets.only(
-            top: _activeSubMenu == _SettingsSubMenu.customizeSubtitles ? 10 : 26,
+            top: _activeSubMenu == _SettingsSubMenu.customizeSubtitles
+                ? 10
+                : 26,
             bottom: 12,
           ),
           child: AnimatedSwitcher(
@@ -101,7 +103,8 @@ class _VideoPlayerSettingsModalState extends State<VideoPlayerSettingsModal> {
                   );
                 },
             transitionBuilder: (Widget child, Animation<double> animation) {
-              final isSubMenu = child.key == const ValueKey('sub_menu') ||
+              final isSubMenu =
+                  child.key == const ValueKey('sub_menu') ||
                   child.key == const ValueKey('customize_subs_menu');
               final inOffset = isSubMenu
                   ? const Offset(1.0, 0.0)
@@ -124,8 +127,8 @@ class _VideoPlayerSettingsModalState extends State<VideoPlayerSettingsModal> {
                     speedText,
                   )
                 : _activeSubMenu == _SettingsSubMenu.customizeSubtitles
-                    ? _buildCustomizeSubtitlesView()
-                    : _buildSubMenu(context, primaryColor),
+                ? _buildCustomizeSubtitlesView()
+                : _buildSubMenu(context, primaryColor),
           ),
         ),
       ),
@@ -285,7 +288,8 @@ class _VideoPlayerSettingsModalState extends State<VideoPlayerSettingsModal> {
             leading: const Icon(Icons.tune),
             title: const Text('Customize Subtitles'),
             trailing: const Icon(Icons.chevron_right),
-            onTap: () => _navigateToSubMenu(_SettingsSubMenu.customizeSubtitles),
+            onTap: () =>
+                _navigateToSubMenu(_SettingsSubMenu.customizeSubtitles),
           ),
           const Divider(height: 1),
           ListTile(

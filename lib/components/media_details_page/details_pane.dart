@@ -261,8 +261,7 @@ class _DetailsPaneState extends State<DetailsPane>
         detailsItems.add((label: "End Date", value: endDateVal));
 
         if (widget.isAnime) {
-          final seasonYear =
-              media["seasonYear"] ?? media["startDate"]?["year"];
+          final seasonYear = media["seasonYear"] ?? media["startDate"]?["year"];
           final seasonVal = media["season"] != null
               ? "${(media["season"].toString()).substring(0, 1).toUpperCase()}${(media["season"].toString()).substring(1).toLowerCase()}${seasonYear != null ? ', $seasonYear' : ''}"
               : "N/A";

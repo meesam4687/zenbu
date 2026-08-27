@@ -158,7 +158,8 @@ class ExtEpisode {
     return ExtEpisode(
       name: json['name'] ?? '',
       url: json['url'] ?? '',
-      thumbnailUrl: json['thumbnailUrl'] ??
+      thumbnailUrl:
+          json['thumbnailUrl'] ??
           json['thumbnail'] ??
           json['coverUrl'] ??
           json['cover'],

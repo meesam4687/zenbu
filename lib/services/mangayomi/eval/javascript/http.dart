@@ -191,62 +191,66 @@ class JsHttpClient {
           : null;
 
       final client = http.Client();
-      final uri = Uri.parse(url);
-
-      late http.Response response;
-
-      switch (method) {
-        case "HEAD":
-          response = await client.head(uri, headers: headers);
-          break;
-        case "GET":
-          response = await client.get(uri, headers: headers);
-          break;
-        case "POST":
-          response = await client.post(uri, headers: headers, body: body);
-          break;
-        case "PUT":
-          response = await client.put(uri, headers: headers, body: body);
-          break;
-        case "DELETE":
-          response = await client.delete(uri, headers: headers, body: body);
-          break;
-        case "PATCH":
-          response = await client.patch(uri, headers: headers, body: body);
-          break;
-        default:
-          response = await client.get(uri, headers: headers);
-      }
-
-      String bodyString;
       try {
-        bodyString = utf8.decode(response.bodyBytes, allowMalformed: true);
-      } catch (_) {
-        bodyString = response.body;
+        final uri = Uri.parse(url);
+
+        late http.Response response;
+
+        switch (method) {
+          case "HEAD":
+            response = await client.head(uri, headers: headers);
+            break;
+          case "GET":
+            response = await client.get(uri, headers: headers);
+            break;
+          case "POST":
+            response = await client.post(uri, headers: headers, body: body);
+            break;
+          case "PUT":
+            response = await client.put(uri, headers: headers, body: body);
+            break;
+          case "DELETE":
+            response = await client.delete(uri, headers: headers, body: body);
+            break;
+          case "PATCH":
+            response = await client.patch(uri, headers: headers, body: body);
+            break;
+          default:
+            response = await client.get(uri, headers: headers);
+        }
+
+        String bodyString;
+        try {
+          bodyString = utf8.decode(response.bodyBytes, allowMalformed: true);
+        } catch (_) {
+          bodyString = response.body;
+        }
+
+        if (service != null) {
+          service!.lastStatusCode = response.statusCode;
+          service!.lastRequestUrl = url;
+        }
+
+        final resMap = {
+          'body': bodyString,
+          'headers': response.headers,
+          'isRedirect': response.isRedirect,
+          'persistentConnection': response.persistentConnection,
+          'reasonPhrase': response.reasonPhrase,
+          'statusCode': response.statusCode,
+          'request': {
+            'contentLength': response.request?.contentLength,
+            'followRedirects': response.request?.followRedirects,
+            'headers': response.request?.headers,
+            'method': response.request?.method,
+            'url': response.request?.url.toString(),
+          },
+        };
+
+        return jsonEncode(resMap);
+      } finally {
+        client.close();
       }
-
-      if (service != null) {
-        service!.lastStatusCode = response.statusCode;
-        service!.lastRequestUrl = url;
-      }
-
-      final resMap = {
-        'body': bodyString,
-        'headers': response.headers,
-        'isRedirect': response.isRedirect,
-        'persistentConnection': response.persistentConnection,
-        'reasonPhrase': response.reasonPhrase,
-        'statusCode': response.statusCode,
-        'request': {
-          'contentLength': response.request?.contentLength,
-          'followRedirects': response.request?.followRedirects,
-          'headers': response.request?.headers,
-          'method': response.request?.method,
-          'url': response.request?.url.toString(),
-        },
-      };
-
-      return jsonEncode(resMap);
     } catch (e) {
       return jsonEncode({
         'statusCode': 500,

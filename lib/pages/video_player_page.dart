@@ -239,12 +239,17 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
   void _playNextEpisode() {
     if (_nextEpisode == null) return;
 
-    if (_videoPlayerController != null &&
-        _videoPlayerController!.value.isInitialized) {
-      final pos = _videoPlayerController!.value.position.inSeconds;
-      final dur = _videoPlayerController!.value.duration.inSeconds;
+    final controller = _videoPlayerController;
+    if (controller != null && controller.value.isInitialized) {
+      final pos = controller.value.position.inSeconds;
+      final dur = controller.value.duration.inSeconds;
       _saveEpisodeProgress(pos, dur);
+      try {
+        controller.pause();
+      } catch (_) {}
     }
+
+    _disposePlayer();
 
     setState(() {
       _currentEpisode = _nextEpisode!;
@@ -253,6 +258,8 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
       _selectedVideo = null;
       _currentPosition = Duration.zero;
       _wasPlaybackEstablished = false;
+      _isLoading = true;
+      _loadingText = 'Resolving stream links...';
     });
 
     _fetchVideoList();
@@ -428,6 +435,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
 
   @override
   void dispose() {
+    _pipChannel.setMethodCallHandler(null);
     WakelockPlus.disable();
     _activeSkipTimeNotifier.dispose();
     if (_videoPlayerController != null &&
@@ -446,11 +454,20 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
   }
 
   void _disposePlayer() {
-    _videoPlayerController?.removeListener(_onPlayerPositionChanged);
-    _videoPlayerController?.removeListener(_onPlaybackStateChanged);
+    final controller = _videoPlayerController;
+    final chewie = _chewieController;
+    controller?.removeListener(_onPlayerPositionChanged);
+    controller?.removeListener(_onPlaybackStateChanged);
+    try {
+      controller?.pause();
+    } catch (_) {}
     _pipChannel.invokeMethod('setVideoPlaying', {'isPlaying': false});
-    _chewieController?.dispose();
-    _videoPlayerController?.dispose();
+    try {
+      chewie?.dispose();
+    } catch (_) {}
+    try {
+      controller?.dispose();
+    } catch (_) {}
     _chewieController = null;
     _videoPlayerController = null;
     _lastIsPlaying = false;
@@ -979,6 +996,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
         _lastIsPlaying = true;
       });
 
+      try {
+        oldVideoController?.pause();
+      } catch (_) {}
       try {
         oldChewieController?.dispose();
       } catch (_) {}

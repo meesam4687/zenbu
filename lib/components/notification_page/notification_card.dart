@@ -18,17 +18,16 @@ class NotificationCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final provider = Provider.of<StateProvider>(context);
     final mediaTitle = provider.resolveTitle(
-        notificationData["media"]?["title"] as Map?);
+      notificationData["media"]?["title"] as Map?,
+    );
     String notificationText = "";
     if (notificationData["type"] == "AIRING") {
       notificationText =
           "Episode ${notificationData["episode"].toString()} of $mediaTitle aired";
     } else if (notificationData["type"] == "RELATED_MEDIA_ADDITION") {
-      notificationText =
-          "$mediaTitle was recently added to the site.";
+      notificationText = "$mediaTitle was recently added to the site.";
     } else if (notificationData["type"] == "MEDIA_DATA_CHANGE") {
-      notificationText =
-          "$mediaTitle received site data changes";
+      notificationText = "$mediaTitle received site data changes";
     } else if (notificationData["type"] == "MEDIA_MERGE") {
       notificationText =
           "${notificationData["deletedMediaTitles"][0]} was merged with $mediaTitle";

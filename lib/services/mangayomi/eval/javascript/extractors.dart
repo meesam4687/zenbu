@@ -190,4 +190,3 @@ extension MapExtension on Map? {
   Map<String, String>? get toMapStringString =>
       this?.map((key, value) => MapEntry(key.toString(), value.toString()));
 }
-
