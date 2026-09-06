@@ -12,7 +12,7 @@ class CharacterRelations extends StatelessWidget {
   Widget build(BuildContext context) {
     final provider = Provider.of<StateProvider>(context);
     return Container(
-      margin: EdgeInsets.all(12),
+      margin: EdgeInsets.only(left: 12, right: 12),
       width: double.infinity,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -23,10 +23,10 @@ class CharacterRelations extends StatelessWidget {
           ),
           Container(
             margin: EdgeInsets.only(top: 10),
-            height: 260,
+            height: 230,
             width: double.infinity,
             child: SizedBox(
-              height: 260,
+              height: 230,
               width: double.infinity,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
