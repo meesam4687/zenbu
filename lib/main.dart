@@ -121,6 +121,18 @@ class _MyAppState extends State<MyApp> {
                 navigatorKey: _navigatorKey,
                 debugShowCheckedModeBanner: false,
                 title: 'Zenbu',
+                builder: (context, child) {
+                  final mediaQuery = MediaQuery.of(context);
+                  return MediaQuery(
+                    data: mediaQuery.copyWith(
+                      textScaler: mediaQuery.textScaler.clamp(
+                        minScaleFactor: 1.0,
+                        maxScaleFactor: 1.2,
+                      ),
+                    ),
+                    child: child!,
+                  );
+                },
                 theme: ThemeData(
                   colorScheme: lightScheme,
                   scaffoldBackgroundColor:

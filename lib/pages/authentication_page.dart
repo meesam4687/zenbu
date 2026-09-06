@@ -22,20 +22,31 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: SizedBox(
-          width: 150,
-          height: 200,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                "Zenbu",
-                style: TextStyle(fontSize: 50, fontWeight: FontWeight.w100),
+              const FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  "Zenbu",
+                  maxLines: 1,
+                  softWrap: false,
+                  style: TextStyle(fontSize: 50, fontWeight: FontWeight.w100),
+                ),
               ),
-              Text(
-                "*insert some line here*",
-                style: TextStyle(fontWeight: FontWeight.w200),
+              const FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  "*insert some line here*",
+                  maxLines: 1,
+                  softWrap: false,
+                  style: TextStyle(fontWeight: FontWeight.w200),
+                ),
               ),
-              Padding(padding: EdgeInsetsGeometry.all(10)),
+              const SizedBox(height: 20),
               FilledButton(
                 onPressed: () {
                   final uri = Uri.tryParse(
@@ -45,23 +56,32 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
                     launchUrl(uri, mode: LaunchMode.externalApplication);
                   }
                 },
-                style: ButtonStyle(
+                style: const ButtonStyle(
                   padding: WidgetStatePropertyAll(EdgeInsets.all(20)),
-                  minimumSize: WidgetStatePropertyAll(Size.fromHeight(10)),
+                  minimumSize: WidgetStatePropertyAll(Size(150, 10)),
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text("Login with", style: TextStyle(fontSize: 16)),
-                    Padding(padding: EdgeInsetsGeometry.all(2)),
-                    SvgPicture.asset(
-                      'assets/alLogo.svg',
-                      width: 18,
-                      height: 18,
-                      // ignore: deprecated_member_use
-                      color: Theme.of(context).colorScheme.onSecondary,
-                    ),
-                  ],
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text(
+                        "Login with",
+                        maxLines: 1,
+                        softWrap: false,
+                        style: TextStyle(fontSize: 16),
+                      ),
+                      const SizedBox(width: 4),
+                      SvgPicture.asset(
+                        'assets/alLogo.svg',
+                        width: 18,
+                        height: 18,
+                        // ignore: deprecated_member_use
+                        color: Theme.of(context).colorScheme.onSecondary,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
