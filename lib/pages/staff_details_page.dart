@@ -2,6 +2,7 @@ import 'package:zenbu/services/anilist/anilist.dart';
 import 'package:zenbu/components/character_details_page/character_description.dart';
 import 'package:zenbu/components/character_details_page/character_header.dart';
 import 'package:zenbu/components/character_details_page/character_relations.dart';
+import 'package:zenbu/components/staff_details_page/characters_voiced.dart';
 import 'package:zenbu/pages/error_page.dart';
 import 'package:flutter/material.dart';
 
@@ -44,11 +45,28 @@ class _StaffDetailsPageState extends State<StaffDetailsPage> {
           );
         }
         final data = snapshot.data!;
+        final staff = data["data"]["Staff"];
         final secondaryNames = [
-          if (data["data"]["Staff"]["name"]["native"] != null)
-            data["data"]["Staff"]["name"]["native"],
-          ...((data["data"]["Staff"]["name"]["alternative"] as List)),
+          if (staff["name"]["native"] != null) staff["name"]["native"],
+          ...((staff["name"]["alternative"] as List)),
         ];
+
+        final staffMediaRelations =
+            staff["staffMedia"]?["edges"] as List? ?? [];
+
+        final characterEdges = staff["characters"]?["edges"] as List? ?? [];
+        final Map<int, dynamic> uniqueCharacters = {};
+        for (var edge in characterEdges) {
+          final characterNode = edge["node"];
+          if (characterNode != null && characterNode["id"] != null) {
+            uniqueCharacters[characterNode["id"]] = {
+              ...characterNode,
+              "role": edge["role"],
+            };
+          }
+        }
+        final voicedCharacters = uniqueCharacters.values.toList();
+
         return Scaffold(
           appBar: AppBar(),
           body: SingleChildScrollView(
@@ -56,23 +74,22 @@ class _StaffDetailsPageState extends State<StaffDetailsPage> {
               child: Column(
                 children: [
                   CharacterHeader(
-                    characterImage: data["data"]["Staff"]["image"]["large"],
-                    characterName: data["data"]["Staff"]["name"]["full"],
+                    characterImage: staff["image"]["large"],
+                    characterName: staff["name"]["full"],
                     characterSecondaryNames: (secondaryNames).join(', '),
                   ),
                   CharacterDescription(
-                    characterGender: (data["data"]["Staff"]["gender"] != null)
-                        ? data["data"]["Staff"]["gender"]
+                    characterGender: (staff["gender"] != null)
+                        ? staff["gender"]
                         : "N/A",
-                    characterDescription:
-                        (data["data"]["Staff"]["description"] != null)
-                        ? data["data"]["Staff"]["description"]
+                    characterDescription: (staff["description"] != null)
+                        ? staff["description"]
                         : "",
                   ),
-                  CharacterRelations(
-                    relations:
-                        data["data"]["Staff"]["staffMedia"]["edges"] as List,
-                  ),
+                  if (staffMediaRelations.isNotEmpty)
+                    CharacterRelations(relations: staffMediaRelations),
+                  if (voicedCharacters.isNotEmpty)
+                    CharactersVoiced(characters: voicedCharacters),
                 ],
               ),
             ),

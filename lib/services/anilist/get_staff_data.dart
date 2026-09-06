@@ -38,6 +38,20 @@ Future<Map<String, dynamic>> getStaffData(int id) async {
             staffRole
           } 
         } 
+        characters(sort: FAVOURITES_DESC) {
+          edges { 
+            role
+            node { 
+              id 
+              name { 
+                full 
+              } 
+              image { 
+                large 
+              } 
+            } 
+          } 
+        } 
       }
     }
   ''';
