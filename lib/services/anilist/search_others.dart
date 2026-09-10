@@ -32,7 +32,6 @@ Future<Map<String, dynamic>> searchCharacters(
   return executeQuery(
     query,
     variables: {"page": page, "perPage": perPage, "search": searchQuery},
-    requireAuth: false,
   );
 }
 
@@ -68,7 +67,6 @@ Future<Map<String, dynamic>> searchStaff(
   return executeQuery(
     query,
     variables: {"page": page, "perPage": perPage, "search": searchQuery},
-    requireAuth: false,
   );
 }
 
@@ -98,7 +96,6 @@ Future<Map<String, dynamic>> searchStudios(
   return executeQuery(
     query,
     variables: {"page": page, "perPage": perPage, "search": searchQuery},
-    requireAuth: false,
   );
 }
 
@@ -131,6 +128,5 @@ Future<Map<String, dynamic>> searchUsers(
   return executeQuery(
     query,
     variables: {"page": page, "perPage": perPage, "search": searchQuery},
-    requireAuth: false,
   );
 }

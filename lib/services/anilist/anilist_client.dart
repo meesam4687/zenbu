@@ -7,16 +7,13 @@ const String _anilistApiUrl = 'https://graphql.anilist.co';
 Future<Map<String, dynamic>> executeQuery(
   String query, {
   Map<String, dynamic>? variables,
-  bool requireAuth = true,
 }) async {
   try {
     Map<String, String> headers = {"Content-Type": "application/json"};
 
-    if (requireAuth) {
-      String? token = await TokenStorage.getAccessToken();
-      if (token == null) throw Exception('No authentication token');
-      headers["Authorization"] = 'Bearer $token';
-    }
+    String? token = await TokenStorage.getAccessToken();
+    if (token == null) throw Exception('No authentication token');
+    headers["Authorization"] = 'Bearer $token';
 
     final res = await http.post(
       Uri.parse(_anilistApiUrl),

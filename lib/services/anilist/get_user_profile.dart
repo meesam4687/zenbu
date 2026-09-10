@@ -133,5 +133,5 @@ Future<Map<String, dynamic>> getUserProfile({String? name, int? id}) async {
   if (name != null) variables['name'] = name;
   if (id != null) variables['id'] = id;
 
-  return executeQuery(query, variables: variables, requireAuth: false);
+  return executeQuery(query, variables: variables);
 }
