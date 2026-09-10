@@ -117,6 +117,8 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                                 fontWeight: FontWeight.bold,
                                 fontSize: 20,
                               ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                             LayoutBuilder(
                               builder: (context, c) => DropdownMenu(
@@ -189,12 +191,13 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           spacing: 10,
                           children: [
-                            Text(
+                            const Text(
                               "Progress",
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 20,
                               ),
+                              maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
                             TextField(
@@ -224,6 +227,8 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                                 fontWeight: FontWeight.bold,
                                 fontSize: 20,
                               ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                             InkWell(
                               borderRadius: BorderRadius.circular(4),
@@ -284,6 +289,8 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                                 fontWeight: FontWeight.bold,
                                 fontSize: 20,
                               ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                             InkWell(
                               borderRadius: BorderRadius.circular(4),
@@ -348,6 +355,8 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                                 fontWeight: FontWeight.bold,
                                 fontSize: 20,
                               ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                             TextField(
                               keyboardType: TextInputType.number,
@@ -374,6 +383,7 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                                 fontWeight: FontWeight.bold,
                                 fontSize: 20,
                               ),
+                              maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
                             TextField(

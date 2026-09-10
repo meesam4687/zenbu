@@ -185,23 +185,80 @@ class _TitlePaneState extends State<TitlePane> {
     if (mediaState == 'CURRENT') {
       elementList = [
         const Icon(Icons.edit),
-        Text(widget.isAnime ? " Watching" : " Reading"),
+        Flexible(
+          child: Text(
+            widget.isAnime ? " Watching" : " Reading",
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
       ];
     } else if (mediaState == 'COMPLETED') {
-      elementList = [const Icon(Icons.check), const Text(" Completed")];
+      elementList = [
+        const Icon(Icons.check),
+        const Flexible(
+          child: Text(
+            " Completed",
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ];
     } else if (mediaState == 'PLANNING') {
-      elementList = [const Icon(Icons.schedule), const Text(" Planning")];
+      elementList = [
+        const Icon(Icons.schedule),
+        const Flexible(
+          child: Text(
+            " Planning",
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ];
     } else if (mediaState == 'DROPPED') {
-      elementList = [const Icon(Icons.cancel), const Text(" Dropped")];
+      elementList = [
+        const Icon(Icons.cancel),
+        const Flexible(
+          child: Text(
+            " Dropped",
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ];
     } else if (mediaState == 'PAUSED') {
-      elementList = [const Icon(Icons.pause), const Text(" Paused")];
+      elementList = [
+        const Icon(Icons.pause),
+        const Flexible(
+          child: Text(
+            " Paused",
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ];
     } else if (mediaState == 'REPEATING') {
       elementList = [
         const Icon(Icons.loop),
-        Text(widget.isAnime ? " Rewatching" : " Rereading"),
+        Flexible(
+          child: Text(
+            widget.isAnime ? " Rewatching" : " Rereading",
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
       ];
     } else {
-      elementList = [const Icon(Icons.add), const Text(" Add to List")];
+      elementList = [
+        const Icon(Icons.add),
+        const Flexible(
+          child: Text(
+            " Add to List",
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ];
     }
 
     if (widget.isTablet) {
@@ -487,33 +544,41 @@ class _TitlePaneState extends State<TitlePane> {
                           ),
                         ),
                       ),
-                      Container(
-                        margin: const EdgeInsets.only(left: 10),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            GestureDetector(
-                              onLongPress: () {
-                                Clipboard.setData(
-                                  ClipboardData(text: widget.fullTitle),
-                                );
-                                HapticFeedback.mediumImpact();
-                              },
-                              child: SizedBox(
-                                width: 200,
-                                child: Text(
-                                  widget.title,
-                                  style: const TextStyle(fontSize: 27),
-                                  maxLines: 3,
-                                  overflow: TextOverflow.ellipsis,
+                      Expanded(
+                        child: Container(
+                          margin: const EdgeInsets.only(left: 10, right: 10),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              GestureDetector(
+                                onLongPress: () {
+                                  Clipboard.setData(
+                                    ClipboardData(text: widget.fullTitle),
+                                  );
+                                  HapticFeedback.mediumImpact();
+                                },
+                                child: ConstrainedBox(
+                                  constraints:
+                                      const BoxConstraints(maxWidth: 550),
+                                  child: Text(
+                                    widget.title,
+                                    style: const TextStyle(fontSize: 27),
+                                    maxLines: 3,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ),
                               ),
-                            ),
-                            Row(
-                              children: [
-                                Text(progress),
-                                if (mediaState == 'CURRENT') ...[
+                              Row(
+                                children: [
+                                  Flexible(
+                                    child: Text(
+                                      progress,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  if (mediaState == 'CURRENT') ...[
                                   const SizedBox(width: 8),
                                   ClipOval(
                                     child: Material(
@@ -564,6 +629,7 @@ class _TitlePaneState extends State<TitlePane> {
                           ],
                         ),
                       ),
+                    ),
                     ],
                   ),
                   Container(

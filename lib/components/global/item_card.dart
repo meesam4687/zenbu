@@ -20,12 +20,14 @@ class ItemCard extends StatefulWidget {
     required this.type,
     this.mediaListEntry,
     this.listDataPreloaded = false,
+    this.cardHeight,
   });
   final String? title;
   final String? state;
   final String? image;
   final int id;
   final String type;
+  final double? cardHeight;
 
   final Map? mediaListEntry;
 
@@ -103,7 +105,7 @@ class _ItemCardState extends State<ItemCard> {
           onLongPress: isMedia ? () => _onLongPress(context) : null,
           child: Material(
             child: Ink(
-              height: 230,
+              height: widget.cardHeight ?? 230,
               width: 110.0,
               child: Column(
                 children: [

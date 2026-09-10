@@ -24,58 +24,93 @@ class MediaList extends StatelessWidget {
     return Container(
       margin: EdgeInsets.zero,
       width: double.infinity,
-      height: multiRow ? 536 : 288,
       child: Column(
         children: [
-          SizedBox(
-            width: double.infinity,
-            height: 40,
-            child: Padding(
-              padding: const EdgeInsets.only(
-                left: 12.0,
-                right: 6.0,
-                bottom: 10,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    title ??
-                        (isAnime ? "Currently Watching" : "Currently Reading"),
-                    style: const TextStyle(fontSize: 20),
-                  ),
-                  if (title == null)
-                    MaterialButton(
-                      padding: const EdgeInsets.only(left: 10, right: 10),
-                      shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(100)),
-                      ),
-                      onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) {
-                              return ListPage(
-                                title: isAnime ? "Anime List" : "Manga List",
-                                mediaListType: isAnime
-                                    ? MediaType.anime
-                                    : MediaType.manga,
-                              );
-                            },
-                          ),
-                        );
-                      },
-                      child: const Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text('View All  '),
-                          Icon(Icons.arrow_forward),
-                        ],
-                      ),
+          Padding(
+            padding: const EdgeInsets.only(
+              left: 12.0,
+              right: 6.0,
+              bottom: 10,
+            ),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final String displayTitle =
+                      title ??
+                      (isAnime ? "Currently Watching" : "Currently Reading");
+                  final textScaler = MediaQuery.textScalerOf(context);
+                  final buttonTextPainter = TextPainter(
+                    text: TextSpan(
+                      text: 'View All  ',
+                      style: Theme.of(context).textTheme.labelLarge ??
+                          const TextStyle(fontSize: 14),
                     ),
-                ],
+                    maxLines: 1,
+                    textDirection: Directionality.of(context),
+                    textScaler: textScaler,
+                  )..layout();
+
+                  final double fullButtonWidth =
+                      buttonTextPainter.width + 48;
+                  final bool showFullButton =
+                      (constraints.maxWidth - fullButtonWidth) >= 120 &&
+                      constraints.maxWidth >= 280;
+
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          displayTitle,
+                          style: const TextStyle(fontSize: 20),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      if (title == null)
+                        MaterialButton(
+                          minWidth: 0,
+                          padding: showFullButton
+                              ? const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 8,
+                                )
+                              : const EdgeInsets.all(8),
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(100),
+                            ),
+                          ),
+                          onPressed: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) {
+                                  return ListPage(
+                                    title: isAnime
+                                        ? "Anime List"
+                                        : "Manga List",
+                                    mediaListType: isAnime
+                                        ? MediaType.anime
+                                        : MediaType.manga,
+                                  );
+                                },
+                              ),
+                            );
+                          },
+                          child: showFullButton
+                              ? const Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text('View All  '),
+                                    Icon(Icons.arrow_forward),
+                                  ],
+                                )
+                              : const Icon(Icons.arrow_forward),
+                        ),
+                    ],
+                  );
+                },
               ),
             ),
-          ),
           items.isEmpty
               ? Container(
                   width: double.infinity,

@@ -66,7 +66,7 @@ class _SimulcastPageViewState extends State<SimulcastPageView>
             itemCount: airingSchedules.length,
             gridDelegate: const ConstantSliverGridDelegate(
               itemWidth: 110.0,
-              itemHeight: 230.0,
+              itemHeight: 240.0,
             ),
             itemBuilder: (context, index) {
               final schedule = airingSchedules[index];
@@ -82,6 +82,7 @@ class _SimulcastPageViewState extends State<SimulcastPageView>
                     state: "Episode: ${schedule["episode"].toString()}",
                     mediaListEntry: media["mediaListEntry"] as Map?,
                     listDataPreloaded: true,
+                    cardHeight: 240.0,
                   ),
                 ),
               );

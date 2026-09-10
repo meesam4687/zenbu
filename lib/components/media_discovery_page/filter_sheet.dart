@@ -107,6 +107,8 @@ class _FilterSheetState extends State<FilterSheet> {
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
                             ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                           IconButton(
                             icon: const Icon(Icons.close),
@@ -275,6 +277,8 @@ class _FilterSheetState extends State<FilterSheet> {
                               fontSize: 30,
                               fontWeight: FontWeight.bold,
                             ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                           const Padding(padding: EdgeInsets.all(6)),
                           SizedBox(
@@ -323,6 +327,8 @@ class _FilterSheetState extends State<FilterSheet> {
                                   fontSize: 30,
                                   fontWeight: FontWeight.bold,
                                 ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
                               TextButton.icon(
                                 onPressed: _showExpandedTags,
@@ -377,6 +383,8 @@ class _FilterSheetState extends State<FilterSheet> {
                                         fontSize: 22,
                                         fontWeight: FontWeight.bold,
                                       ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
                                     const Padding(padding: EdgeInsets.all(5)),
                                     LayoutBuilder(
@@ -437,6 +445,8 @@ class _FilterSheetState extends State<FilterSheet> {
                                         fontSize: 22,
                                         fontWeight: FontWeight.bold,
                                       ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
                                     const Padding(padding: EdgeInsets.all(5)),
                                     if (widget.isAnime)
@@ -522,6 +532,8 @@ class _FilterSheetState extends State<FilterSheet> {
                                         fontSize: 22,
                                         fontWeight: FontWeight.bold,
                                       ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
                                     const Padding(padding: EdgeInsets.all(5)),
                                     LayoutBuilder(
@@ -602,6 +614,7 @@ class _FilterSheetState extends State<FilterSheet> {
                                         fontSize: 22,
                                         fontWeight: FontWeight.bold,
                                       ),
+                                      maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                     const Padding(padding: EdgeInsets.all(5)),
@@ -663,6 +676,8 @@ class _FilterSheetState extends State<FilterSheet> {
                                           fontSize: 16,
                                           fontWeight: FontWeight.bold,
                                         ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
                                       ),
                                       const Padding(padding: EdgeInsets.all(5)),
                                       LayoutBuilder(
@@ -759,6 +774,8 @@ class _FilterSheetState extends State<FilterSheet> {
                                           fontSize: 16,
                                           fontWeight: FontWeight.bold,
                                         ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
                                       ),
                                       const Padding(padding: EdgeInsets.all(5)),
                                       LayoutBuilder(
@@ -807,6 +824,8 @@ class _FilterSheetState extends State<FilterSheet> {
                                           fontSize: 16,
                                           fontWeight: FontWeight.bold,
                                         ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
                                       ),
                                       const Padding(padding: EdgeInsets.all(5)),
                                       LayoutBuilder(
@@ -870,6 +889,7 @@ class _FilterSheetState extends State<FilterSheet> {
                                           fontSize: 22,
                                           fontWeight: FontWeight.bold,
                                         ),
+                                        maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                       const Padding(padding: EdgeInsets.all(5)),
@@ -967,6 +987,8 @@ class _FilterSheetState extends State<FilterSheet> {
                                           fontSize: 22,
                                           fontWeight: FontWeight.bold,
                                         ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
                                       ),
                                       const Padding(padding: EdgeInsets.all(5)),
                                       LayoutBuilder(

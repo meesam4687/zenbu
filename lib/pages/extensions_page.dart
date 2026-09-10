@@ -354,30 +354,33 @@ class _ExtensionsPageState extends State<ExtensionsPage>
         ),
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 10, 16, 4),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _TypeChip(
-                label: 'Anime',
-                icon: Icons.tv_rounded,
-                selected: _selectedType == 'anime',
-                onTap: () => setState(() => _selectedType = 'anime'),
-              ),
-              const SizedBox(width: 16),
-              _TypeChip(
-                label: 'Manga',
-                icon: Icons.menu_book_rounded,
-                selected: _selectedType == 'manga',
-                onTap: () => setState(() => _selectedType = 'manga'),
-              ),
-              const SizedBox(width: 16),
-              _TypeChip(
-                label: 'Novel',
-                icon: Icons.auto_stories_rounded,
-                selected: _selectedType == 'novel',
-                onTap: () => setState(() => _selectedType = 'novel'),
-              ),
-            ],
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _TypeChip(
+                  label: 'Anime',
+                  icon: Icons.tv_rounded,
+                  selected: _selectedType == 'anime',
+                  onTap: () => setState(() => _selectedType = 'anime'),
+                ),
+                const SizedBox(width: 16),
+                _TypeChip(
+                  label: 'Manga',
+                  icon: Icons.menu_book_rounded,
+                  selected: _selectedType == 'manga',
+                  onTap: () => setState(() => _selectedType = 'manga'),
+                ),
+                const SizedBox(width: 16),
+                _TypeChip(
+                  label: 'Novel',
+                  icon: Icons.auto_stories_rounded,
+                  selected: _selectedType == 'novel',
+                  onTap: () => setState(() => _selectedType = 'novel'),
+                ),
+              ],
+            ),
           ),
         ),
         Expanded(
@@ -497,160 +500,216 @@ class _ExtensionsPageState extends State<ExtensionsPage>
   }
 
   Widget _buildExtensionCard(ExtSource ext, bool isInst, bool needsUpdate) {
+    final actionButtons = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (isInst) ...[
+          IconButton(
+            icon: const Icon(Icons.settings),
+            tooltip: 'Settings',
+            onPressed: () => _showExtensionSettings(ext),
+          ),
+          const SizedBox(width: 4),
+        ],
+        if (!isInst)
+          ElevatedButton.icon(
+            onPressed: () => _installExtension(ext),
+            icon: const Icon(Icons.download, size: 16),
+            label: const Text('Install'),
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 4,
+              ),
+            ),
+          )
+        else if (needsUpdate)
+          FilledButton.icon(
+            onPressed: () => _installExtension(ext),
+            icon: const Icon(Icons.update, size: 16),
+            label: const Text('Update'),
+            style: FilledButton.styleFrom(
+              backgroundColor: Colors.orange,
+              padding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 4,
+              ),
+            ),
+          )
+        else
+          OutlinedButton.icon(
+            onPressed: () => _uninstallExtension(ext),
+            icon: const Icon(
+              Icons.delete_outline,
+              size: 16,
+              color: Colors.red,
+            ),
+            label: const Text(
+              'Uninstall',
+              style: TextStyle(color: Colors.red),
+            ),
+            style: OutlinedButton.styleFrom(
+              side: BorderSide(color: Colors.red.shade200),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 4,
+              ),
+            ),
+          ),
+      ],
+    );
+
+    final leadingIcon = Container(
+      width: 48,
+      height: 48,
+      decoration: BoxDecoration(
+        color: Colors.grey.shade200,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: ext.iconUrl.isNotEmpty
+          ? ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: CustomImage(
+                imageUrl: ext.iconUrl,
+                fit: BoxFit.cover,
+                borderRadius: BorderRadius.circular(8),
+                errorWidget: const Icon(
+                  Icons.extension,
+                  color: Colors.blueGrey,
+                  size: 28,
+                ),
+              ),
+            )
+          : const Icon(Icons.extension, color: Colors.blueGrey, size: 28),
+    );
+
+    final subtitleWidget = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 4),
+        Wrap(
+          spacing: 8,
+          runSpacing: 4,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 6,
+                vertical: 2,
+              ),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primaryContainer,
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Text(
+                ext.lang.toUpperCase(),
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.onPrimaryContainer,
+                ),
+              ),
+            ),
+            if (ext.isNsfw)
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 6,
+                  vertical: 2,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade100,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  '18+',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.red.shade900,
+                  ),
+                ),
+              ),
+            Text(
+              'v${ext.version}',
+              style: const TextStyle(fontSize: 12, color: Colors.grey),
+            ),
+            if (isInst && !needsUpdate)
+              const Text(
+                'Installed',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.green,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+          ],
+        ),
+      ],
+    );
+
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       elevation: 1.5,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        leading: Container(
-          width: 48,
-          height: 48,
-          decoration: BoxDecoration(
-            color: Colors.grey.shade200,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: ext.iconUrl.isNotEmpty
-              ? ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: CustomImage(
-                    imageUrl: ext.iconUrl,
-                    fit: BoxFit.cover,
-                    borderRadius: BorderRadius.circular(8),
-                    errorWidget: const Icon(
-                      Icons.extension,
-                      color: Colors.blueGrey,
-                      size: 28,
-                    ),
-                  ),
-                )
-              : const Icon(Icons.extension, color: Colors.blueGrey, size: 28),
-        ),
-        title: Text(
-          ext.name,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 4),
-            Wrap(
-              spacing: 8,
-              runSpacing: 4,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 6,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primaryContainer,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Text(
-                    ext.lang.toUpperCase(),
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.onPrimaryContainer,
-                    ),
-                  ),
-                ),
-                if (ext.isNsfw)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.red.shade100,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      '18+',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.red.shade900,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final double textScale = MediaQuery.textScalerOf(context).scale(1.0);
+          final bool wrapToNextLine =
+              constraints.maxWidth < 380 ||
+              (textScale > 1.15 && constraints.maxWidth < 440);
+
+          if (wrapToNextLine) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      leadingIcon,
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              ext.name,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                            subtitleWidget,
+                          ],
+                        ),
                       ),
-                    ),
+                    ],
                   ),
-                Text(
-                  'v${ext.version}',
-                  style: const TextStyle(fontSize: 12, color: Colors.grey),
-                ),
-                if (isInst && !needsUpdate)
-                  const Text(
-                    'Installed',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.green,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  const SizedBox(height: 10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [actionButtons],
                   ),
-              ],
+                ],
+              ),
+            );
+          }
+
+          return ListTile(
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 8,
             ),
-          ],
-        ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (isInst) ...[
-              IconButton(
-                icon: const Icon(Icons.settings),
-                tooltip: 'Settings',
-                onPressed: () => _showExtensionSettings(ext),
-              ),
-              const SizedBox(width: 4),
-            ],
-            if (!isInst)
-              ElevatedButton.icon(
-                onPressed: () => _installExtension(ext),
-                icon: const Icon(Icons.download, size: 16),
-                label: const Text('Install'),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 4,
-                  ),
-                ),
-              )
-            else if (needsUpdate)
-              FilledButton.icon(
-                onPressed: () => _installExtension(ext),
-                icon: const Icon(Icons.update, size: 16),
-                label: const Text('Update'),
-                style: FilledButton.styleFrom(
-                  backgroundColor: Colors.orange,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 4,
-                  ),
-                ),
-              )
-            else
-              OutlinedButton.icon(
-                onPressed: () => _uninstallExtension(ext),
-                icon: const Icon(
-                  Icons.delete_outline,
-                  size: 16,
-                  color: Colors.red,
-                ),
-                label: const Text(
-                  'Uninstall',
-                  style: TextStyle(color: Colors.red),
-                ),
-                style: OutlinedButton.styleFrom(
-                  side: BorderSide(color: Colors.red.shade200),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 4,
-                  ),
-                ),
-              ),
-          ],
-        ),
+            leading: leadingIcon,
+            title: Text(
+              ext.name,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+            subtitle: subtitleWidget,
+            trailing: actionButtons,
+          );
+        },
       ),
     );
   }

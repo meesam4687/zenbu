@@ -25,30 +25,72 @@ class HorizontalList extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(heading, style: const TextStyle(fontSize: 20)),
-              MaterialButton(
-                padding: const EdgeInsets.only(left: 10, right: 10),
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(100)),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final textScaler = MediaQuery.textScalerOf(context);
+              final buttonTextPainter = TextPainter(
+                text: TextSpan(
+                  text: 'View All  ',
+                  style: Theme.of(context).textTheme.labelLarge ??
+                      const TextStyle(fontSize: 14),
                 ),
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) {
-                        return EntireListView(heading: heading, type: pagetype);
-                      },
+                maxLines: 1,
+                textDirection: Directionality.of(context),
+                textScaler: textScaler,
+              )..layout();
+
+              final double fullButtonWidth = buttonTextPainter.width + 48;
+              final bool showFullButton =
+                  (constraints.maxWidth - fullButtonWidth) >= 120 &&
+                  constraints.maxWidth >= 280;
+
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      heading,
+                      style: const TextStyle(fontSize: 20),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                  );
-                },
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [Text('View All  '), Icon(Icons.arrow_forward)],
-                ),
-              ),
-            ],
+                  ),
+                  MaterialButton(
+                    minWidth: 0,
+                    padding: showFullButton
+                        ? const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 8,
+                          )
+                        : const EdgeInsets.all(8),
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(100)),
+                    ),
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) {
+                            return EntireListView(
+                              heading: heading,
+                              type: pagetype,
+                            );
+                          },
+                        ),
+                      );
+                    },
+                    child: showFullButton
+                        ? const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text('View All  '),
+                              Icon(Icons.arrow_forward),
+                            ],
+                          )
+                        : const Icon(Icons.arrow_forward),
+                  ),
+                ],
+              );
+            },
           ),
           Container(
             margin: const EdgeInsets.only(top: 12),
