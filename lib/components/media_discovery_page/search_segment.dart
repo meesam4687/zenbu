@@ -6,10 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:zenbu/state_provider.dart';
 
 class _SearchShuttle extends StatefulWidget {
-  const _SearchShuttle({
-    required this.animation,
-    required this.queryText,
-  });
+  const _SearchShuttle({required this.animation, required this.queryText});
 
   final Animation<double> animation;
   final String? queryText;
@@ -82,9 +79,15 @@ class _SearchShuttleState extends State<_SearchShuttle> {
       animation: widget.animation,
       builder: (context, child) {
         final double t = widget.animation.value.clamp(0.0, 1.0);
-        final double hintOpacity = t <= 0.3 ? (1.0 - (t / 0.3)).clamp(0.0, 1.0) : 0.0;
-        final double morphProgress = t <= 0.3 ? 0.0 : ((t - 0.3) / 0.7).clamp(0.0, 1.0);
-        final double textOpacity = t <= 0.3 ? 0.0 : ((t - 0.3) / 0.7).clamp(0.0, 1.0);
+        final double hintOpacity = t <= 0.3
+            ? (1.0 - (t / 0.3)).clamp(0.0, 1.0)
+            : 0.0;
+        final double morphProgress = t <= 0.3
+            ? 0.0
+            : ((t - 0.3) / 0.7).clamp(0.0, 1.0);
+        final double textOpacity = t <= 0.3
+            ? 0.0
+            : ((t - 0.3) / 0.7).clamp(0.0, 1.0);
 
         return Material(
           type: MaterialType.transparency,
@@ -123,9 +126,7 @@ class _SearchShuttleState extends State<_SearchShuttle> {
                   backgroundColor: const WidgetStatePropertyAll(
                     Colors.transparent,
                   ),
-                  shadowColor: const WidgetStatePropertyAll(
-                    Colors.transparent,
-                  ),
+                  shadowColor: const WidgetStatePropertyAll(Colors.transparent),
                   surfaceTintColor: const WidgetStatePropertyAll(
                     Colors.transparent,
                   ),
@@ -173,10 +174,7 @@ class SearchSegment extends StatelessWidget {
       }
     }
 
-    return _SearchShuttle(
-      animation: animation,
-      queryText: queryText,
-    );
+    return _SearchShuttle(animation: animation, queryText: queryText);
   }
 
   Widget _buildLeading(BuildContext context) {
@@ -264,8 +262,8 @@ class SearchSegment extends StatelessWidget {
                               : null,
                           releaseYear: filters["releaseYear"],
                           season: isAnime && filters["season"] != ""
-                            ? filters["season"]
-                            : null,
+                              ? filters["season"]
+                              : null,
                           format: filters["format"] != ""
                               ? filters["format"]
                               : null,

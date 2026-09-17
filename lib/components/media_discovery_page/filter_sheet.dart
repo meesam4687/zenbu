@@ -1159,10 +1159,7 @@ class _FilterSheetState extends State<FilterSheet> {
         );
       },
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        return FadeTransition(
-          opacity: animation,
-          child: child,
-        );
+        return FadeTransition(opacity: animation, child: child);
       },
     );
 
