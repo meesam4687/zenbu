@@ -33,12 +33,6 @@ Locale resolveAppLocale(Locale? locale, Iterable<Locale> supportedLocales) {
         return supportedLocale;
       }
     }
-    if (locale.languageCode == 'en') {
-      if (locale.countryCode == 'US') {
-        return const Locale('en', 'US');
-      }
-      return const Locale('en', 'GB');
-    }
   }
   return const Locale('en', 'GB');
 }
