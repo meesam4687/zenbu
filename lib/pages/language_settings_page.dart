@@ -6,33 +6,36 @@ import 'package:zenbu/state_provider.dart';
 class LanguageSettingsPage extends StatelessWidget {
   const LanguageSettingsPage({super.key});
 
+  static List<({String name, Locale? locale})> getLanguages(
+    BuildContext context,
+  ) => [
+    (name: context.l10n.systemDefault, locale: null),
+    (
+      name: context.l10n.englishGB,
+      locale: const Locale('en', 'GB'),
+    ),
+    (
+      name: context.l10n.englishUS,
+      locale: const Locale('en', 'US'),
+    ),
+  ];
+
+  static String getLanguageName(BuildContext context, Locale? locale) {
+    for (final lang in getLanguages(context)) {
+      if (lang.locale == locale) {
+        return lang.name;
+      }
+    }
+    return context.l10n.systemDefault;
+  }
+
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<StateProvider>(context);
     final cs = Theme.of(context).colorScheme;
 
     final currentLocale = provider.locale;
-    final selectedCode = currentLocale == null
-        ? 'system'
-        : currentLocale.countryCode == 'GB'
-        ? 'en_GB'
-        : currentLocale.countryCode == 'US'
-        ? 'en_US'
-        : 'system';
-
-    final languages = [
-      (code: 'system', name: context.l10n.systemDefault, locale: null),
-      (
-        code: 'en_GB',
-        name: context.l10n.englishGB,
-        locale: const Locale('en', 'GB'),
-      ),
-      (
-        code: 'en_US',
-        name: context.l10n.englishUS,
-        locale: const Locale('en', 'US'),
-      ),
-    ];
+    final languages = getLanguages(context);
 
     return Scaffold(
       appBar: AppBar(title: Text(context.l10n.appLanguage)),
@@ -60,15 +63,15 @@ class LanguageSettingsPage extends StatelessWidget {
                             title: Text(
                               languages[i].name,
                               style: TextStyle(
-                                fontWeight: selectedCode == languages[i].code
+                                fontWeight: currentLocale == languages[i].locale
                                     ? FontWeight.w600
                                     : FontWeight.normal,
-                                color: selectedCode == languages[i].code
+                                color: currentLocale == languages[i].locale
                                     ? cs.primary
                                     : cs.onSurface,
                               ),
                             ),
-                            trailing: selectedCode == languages[i].code
+                            trailing: currentLocale == languages[i].locale
                                 ? Icon(Icons.check_rounded, color: cs.primary)
                                 : null,
                             onTap: () {

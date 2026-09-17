@@ -40,11 +40,10 @@ class AppearanceSettingsPage extends StatelessWidget {
                         ),
                       ),
                       subtitle: Text(
-                        provider.locale == null
-                            ? context.l10n.systemDefault
-                            : provider.locale?.countryCode == 'GB'
-                            ? context.l10n.englishGB
-                            : context.l10n.englishUS,
+                        LanguageSettingsPage.getLanguageName(
+                          context,
+                          provider.locale,
+                        ),
                         style: tt.bodySmall?.copyWith(
                           color: cs.onSurfaceVariant,
                         ),
