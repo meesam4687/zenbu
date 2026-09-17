@@ -228,7 +228,9 @@ class SearchSegment extends StatelessWidget {
                         : provider.currentMangaFilters;
 
                     final route = PageRouteBuilder(
-                      transitionDuration: const Duration(milliseconds: 350),
+                      transitionDuration: isSearchPage
+                          ? Duration.zero
+                          : const Duration(milliseconds: 350),
                       pageBuilder: (context, animation, secondaryAnimation) {
                         return SearchPage(
                           isAnime: isAnime,
@@ -276,13 +278,15 @@ class SearchSegment extends StatelessWidget {
                           sortBy: filters["sortBy"],
                         );
                       },
-                      transitionsBuilder:
-                          (context, animation, secondaryAnimation, child) {
-                            return FadeTransition(
-                              opacity: animation,
-                              child: child,
-                            );
-                          },
+                      transitionsBuilder: isSearchPage
+                          ? (context, animation, secondaryAnimation, child) =>
+                              child
+                          : (context, animation, secondaryAnimation, child) {
+                              return FadeTransition(
+                                opacity: animation,
+                                child: child,
+                              );
+                            },
                     );
 
                     if (!Navigator.of(context).canPop()) {
