@@ -12,6 +12,7 @@ import 'package:zenbu/components/manga_reader_page/manga_header.dart';
 import 'package:zenbu/components/manga_reader_page/manga_bottom_controls.dart';
 import 'package:zenbu/services/progress_service.dart';
 import 'package:zenbu/services/discord_service.dart';
+import 'package:zenbu/l10n/l10n_extension.dart';
 
 enum MangaReadingMode { webtoon, leftToRight, rightToLeft }
 
@@ -207,19 +208,25 @@ class _MangaReaderPageState extends State<MangaReaderPage>
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 8,
+                ),
                 child: Text(
-                  'Reading Mode',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  context.l10n.readingMode,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
               ListTile(
                 leading: const Icon(Icons.view_day),
-                title: const Text('Webnovel'),
-                subtitle: const Text(
-                  'Vertical scrolling',
-                  style: TextStyle(fontSize: 12),
+                title: Text(context.l10n.webnovel),
+                subtitle: Text(
+                  context.l10n.verticalScrolling,
+                  style: const TextStyle(fontSize: 12),
                 ),
                 trailing: _readingMode == MangaReadingMode.webtoon
                     ? Icon(Icons.check, color: primaryColor)
@@ -231,10 +238,10 @@ class _MangaReaderPageState extends State<MangaReaderPage>
               ),
               ListTile(
                 leading: const Icon(Icons.swipe_left),
-                title: const Text('Right to left swipe'),
-                subtitle: const Text(
-                  'Pages go from right to left',
-                  style: TextStyle(fontSize: 12),
+                title: Text(context.l10n.rightToLeftSwipe),
+                subtitle: Text(
+                  context.l10n.pagesRightToLeft,
+                  style: const TextStyle(fontSize: 12),
                 ),
                 trailing: _readingMode == MangaReadingMode.leftToRight
                     ? Icon(Icons.check, color: primaryColor)
@@ -246,10 +253,10 @@ class _MangaReaderPageState extends State<MangaReaderPage>
               ),
               ListTile(
                 leading: const Icon(Icons.swipe_right),
-                title: const Text('Left to right swipe'),
-                subtitle: const Text(
-                  'Pages go from left to right',
-                  style: TextStyle(fontSize: 12),
+                title: Text(context.l10n.leftToRightSwipe),
+                subtitle: Text(
+                  context.l10n.pagesLeftToRight,
+                  style: const TextStyle(fontSize: 12),
                 ),
                 trailing: _readingMode == MangaReadingMode.rightToLeft
                     ? Icon(Icons.check, color: primaryColor)
@@ -397,7 +404,7 @@ class _MangaReaderPageState extends State<MangaReaderPage>
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _errorMessage = 'Failed to load pages: $e';
+        _errorMessage = context.l10n.failedToLoadPages(e.toString());
         _isLoading = false;
       });
     }
@@ -444,19 +451,19 @@ class _MangaReaderPageState extends State<MangaReaderPage>
               onDoubleTap: _handleDoubleTap,
               behavior: HitTestBehavior.translucent,
               child: _isLoading
-                  ? const Center(
+                  ? Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          CircularProgressIndicator.adaptive(
+                          const CircularProgressIndicator.adaptive(
                             valueColor: AlwaysStoppedAnimation<Color>(
                               Colors.white,
                             ),
                           ),
-                          SizedBox(height: 16),
+                          const SizedBox(height: 16),
                           Text(
-                            'Loading pages...',
-                            style: TextStyle(
+                            context.l10n.loadingPages,
+                            style: const TextStyle(
                               color: Colors.white70,
                               fontSize: 14,
                             ),
@@ -488,17 +495,17 @@ class _MangaReaderPageState extends State<MangaReaderPage>
                             const SizedBox(height: 24),
                             FilledButton(
                               onPressed: _loadChapterPages,
-                              child: const Text('Retry'),
+                              child: Text(context.l10n.retry),
                             ),
                           ],
                         ),
                       ),
                     )
                   : _pages.isEmpty
-                  ? const Center(
+                  ? Center(
                       child: Text(
-                        'No pages found for this chapter.',
-                        style: TextStyle(color: Colors.white70),
+                        context.l10n.noPagesFound,
+                        style: const TextStyle(color: Colors.white70),
                       ),
                     )
                   : _isWebtoonMode
@@ -604,8 +611,8 @@ class _MangaReaderPageState extends State<MangaReaderPage>
                       errorBuilder: (context, error, stackTrace) => Container(
                         height: 400,
                         color: Colors.black,
-                        child: const Center(
-                          child: Text('Failed to load local image'),
+                        child: Center(
+                          child: Text(context.l10n.failedToLoadLocalImage),
                         ),
                       ),
                     )
@@ -633,19 +640,19 @@ class _MangaReaderPageState extends State<MangaReaderPage>
                       errorWidget: (context, url, error) => Container(
                         height: 300,
                         color: Colors.grey.shade900,
-                        child: const Center(
+                        child: Center(
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(
+                              const Icon(
                                 Icons.error_outline,
                                 color: Colors.redAccent,
                                 size: 36,
                               ),
-                              SizedBox(height: 8),
+                              const SizedBox(height: 8),
                               Text(
-                                'Failed to load image',
-                                style: TextStyle(
+                                context.l10n.failedToLoadImage,
+                                style: const TextStyle(
                                   color: Colors.white54,
                                   fontSize: 12,
                                 ),
@@ -711,13 +718,12 @@ class _MangaReaderPageState extends State<MangaReaderPage>
                             : url,
                       ),
                       fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) =>
-                          const SizedBox(
-                            height: 300,
-                            child: Center(
-                              child: Text('Failed to load local image'),
-                            ),
-                          ),
+                      errorBuilder: (context, error, stackTrace) => SizedBox(
+                        height: 300,
+                        child: Center(
+                          child: Text(context.l10n.failedToLoadLocalImage),
+                        ),
+                      ),
                     )
                   : CachedNetworkImage(
                       imageUrl: url,
@@ -738,19 +744,19 @@ class _MangaReaderPageState extends State<MangaReaderPage>
                       errorWidget: (context, url, error) => Container(
                         height: 300,
                         color: Colors.transparent,
-                        child: const Center(
+                        child: Center(
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(
+                              const Icon(
                                 Icons.error_outline,
                                 color: Colors.redAccent,
                                 size: 36,
                               ),
-                              SizedBox(height: 8),
+                              const SizedBox(height: 8),
                               Text(
-                                'Failed to load image',
-                                style: TextStyle(
+                                context.l10n.failedToLoadImage,
+                                style: const TextStyle(
                                   color: Colors.white54,
                                   fontSize: 12,
                                 ),

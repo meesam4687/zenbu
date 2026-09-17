@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:zenbu/l10n/l10n_extension.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:provider/provider.dart';
@@ -101,9 +102,9 @@ class _FilterSheetState extends State<FilterSheet> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text(
-                            "All Tags",
-                            style: TextStyle(
+                          Text(
+                            context.l10n.allTags,
+                            style: const TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
                             ),
@@ -118,7 +119,7 @@ class _FilterSheetState extends State<FilterSheet> {
                       ),
                       const SizedBox(height: 10),
                       SearchBar(
-                        hintText: "Search tags...",
+                        hintText: context.l10n.searchTags,
                         leading: Container(
                           margin: const EdgeInsets.only(left: 5, right: 5),
                           child: const Icon(Icons.search),
@@ -187,24 +188,24 @@ class _FilterSheetState extends State<FilterSheet> {
     });
   }
 
-  String getSortByLabel(String value) {
+  String getSortByLabel(String value, BuildContext context) {
     switch (value) {
       case "TITLE_ROMAJI":
-        return "Title (A-Z)";
+        return context.l10n.titleAZ;
       case "POPULARITY_DESC":
-        return "Popularity";
+        return context.l10n.popularity;
       case "SCORE_DESC":
-        return "Score";
+        return context.l10n.scoreDesc;
       case "TRENDING_DESC":
-        return "Trending";
+        return context.l10n.trending;
       case "FAVOURITES_DESC":
-        return "Favourites";
+        return context.l10n.favorites;
       case "ID_DESC":
-        return "Date Added";
+        return context.l10n.dateAdded;
       case "START_DATE_DESC":
-        return "Release Date";
+        return context.l10n.releaseDate;
       default:
-        return "Popularity";
+        return context.l10n.popularity;
     }
   }
 
@@ -271,9 +272,9 @@ class _FilterSheetState extends State<FilterSheet> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            "Genre",
-                            style: TextStyle(
+                          Text(
+                            context.l10n.genre,
+                            style: const TextStyle(
                               fontSize: 30,
                               fontWeight: FontWeight.bold,
                             ),
@@ -321,9 +322,9 @@ class _FilterSheetState extends State<FilterSheet> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text(
-                                "Tags",
-                                style: TextStyle(
+                              Text(
+                                context.l10n.tags,
+                                style: const TextStyle(
                                   fontSize: 30,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -333,7 +334,7 @@ class _FilterSheetState extends State<FilterSheet> {
                               TextButton.icon(
                                 onPressed: _showExpandedTags,
                                 icon: const Icon(Icons.grid_view),
-                                label: const Text("Expand"),
+                                label: Text(context.l10n.expand),
                               ),
                             ],
                           ),
@@ -377,9 +378,9 @@ class _FilterSheetState extends State<FilterSheet> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Text(
-                                      "Release Year",
-                                      style: TextStyle(
+                                    Text(
+                                      context.l10n.releaseYear,
+                                      style: const TextStyle(
                                         fontSize: 22,
                                         fontWeight: FontWeight.bold,
                                       ),
@@ -415,7 +416,7 @@ class _FilterSheetState extends State<FilterSheet> {
                                                 decoration: InputDecoration(
                                                   hintText: releaseYear != null
                                                       ? releaseYear.toString()
-                                                      : "Select year",
+                                                      : context.l10n.selectYear,
                                                   border: OutlineInputBorder(
                                                     borderRadius:
                                                         BorderRadius.circular(
@@ -440,7 +441,9 @@ class _FilterSheetState extends State<FilterSheet> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      widget.isAnime ? "Season" : "Origin",
+                                      widget.isAnime
+                                          ? context.l10n.season
+                                          : context.l10n.origin,
                                       style: const TextStyle(
                                         fontSize: 22,
                                         fontWeight: FontWeight.bold,
@@ -455,27 +458,27 @@ class _FilterSheetState extends State<FilterSheet> {
                                           width: c.maxWidth,
                                           hintText: season != ""
                                               ? season
-                                              : "Any",
-                                          dropdownMenuEntries: const [
+                                              : context.l10n.any,
+                                          dropdownMenuEntries: [
                                             DropdownMenuEntry(
                                               value: "SPRING",
-                                              label: "Spring",
+                                              label: context.l10n.spring,
                                             ),
                                             DropdownMenuEntry(
                                               value: "SUMMER",
-                                              label: "Summer",
+                                              label: context.l10n.summer,
                                             ),
                                             DropdownMenuEntry(
                                               value: "FALL",
-                                              label: "Fall",
+                                              label: context.l10n.fall,
                                             ),
                                             DropdownMenuEntry(
                                               value: "WINTER",
-                                              label: "Winter",
+                                              label: context.l10n.winter,
                                             ),
                                             DropdownMenuEntry(
                                               value: "",
-                                              label: "Any",
+                                              label: context.l10n.any,
                                             ),
                                           ],
                                           onSelected: (value) {
@@ -489,23 +492,23 @@ class _FilterSheetState extends State<FilterSheet> {
                                           width: c.maxWidth,
                                           hintText: countryOfOrigin != ""
                                               ? countryOfOrigin
-                                              : "Any",
-                                          dropdownMenuEntries: const [
+                                              : context.l10n.any,
+                                          dropdownMenuEntries: [
                                             DropdownMenuEntry(
                                               value: "CN",
-                                              label: "China",
+                                              label: context.l10n.china,
                                             ),
                                             DropdownMenuEntry(
                                               value: "JP",
-                                              label: "Japan",
+                                              label: context.l10n.japan,
                                             ),
                                             DropdownMenuEntry(
                                               value: "KR",
-                                              label: "Korea",
+                                              label: context.l10n.korea,
                                             ),
                                             DropdownMenuEntry(
                                               value: "",
-                                              label: "Any",
+                                              label: context.l10n.any,
                                             ),
                                           ],
                                           onSelected: (value) {
@@ -526,9 +529,9 @@ class _FilterSheetState extends State<FilterSheet> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Text(
-                                      "Format",
-                                      style: TextStyle(
+                                    Text(
+                                      context.l10n.format,
+                                      style: const TextStyle(
                                         fontSize: 22,
                                         fontWeight: FontWeight.bold,
                                       ),
@@ -539,58 +542,61 @@ class _FilterSheetState extends State<FilterSheet> {
                                     LayoutBuilder(
                                       builder: (context, c) => DropdownMenu(
                                         width: c.maxWidth,
-                                        hintText: format != "" ? format : "Any",
+                                        hintText: format != ""
+                                            ? format
+                                            : context.l10n.any,
                                         dropdownMenuEntries: widget.isAnime
-                                            ? const [
+                                            ? [
                                                 DropdownMenuEntry(
                                                   value: "TV",
-                                                  label: "TV",
+                                                  label: context.l10n.tv,
                                                 ),
                                                 DropdownMenuEntry(
                                                   value: "TV_SHORT",
-                                                  label: "TV Short",
+                                                  label: context.l10n.tvShort,
                                                 ),
                                                 DropdownMenuEntry(
                                                   value: "MOVIE",
-                                                  label: "Movie",
+                                                  label: context.l10n.movie,
                                                 ),
                                                 DropdownMenuEntry(
                                                   value: "SPECIAL",
-                                                  label: "Special",
+                                                  label: context.l10n.special,
                                                 ),
                                                 DropdownMenuEntry(
                                                   value: "OVA",
-                                                  label: "OVA",
+                                                  label: context.l10n.ova,
                                                 ),
                                                 DropdownMenuEntry(
                                                   value: "ONA",
-                                                  label: "ONA",
+                                                  label: context.l10n.ona,
                                                 ),
                                                 DropdownMenuEntry(
                                                   value: "MUSIC",
-                                                  label: "Music",
+                                                  label: context.l10n.music,
                                                 ),
                                                 DropdownMenuEntry(
                                                   value: "",
-                                                  label: "Any",
+                                                  label: context.l10n.any,
                                                 ),
                                               ]
-                                            : const [
+                                            : [
                                                 DropdownMenuEntry(
                                                   value: "MANGA",
-                                                  label: "Manga",
+                                                  label:
+                                                      context.l10n.mangaFormat,
                                                 ),
                                                 DropdownMenuEntry(
                                                   value: "NOVEL",
-                                                  label: "Novel",
+                                                  label: context.l10n.novel,
                                                 ),
                                                 DropdownMenuEntry(
                                                   value: "ONE_SHOT",
-                                                  label: "One Shot",
+                                                  label: context.l10n.oneShot,
                                                 ),
                                                 DropdownMenuEntry(
                                                   value: "",
-                                                  label: "Any",
+                                                  label: context.l10n.any,
                                                 ),
                                               ],
                                         onSelected: (value) {
@@ -608,8 +614,8 @@ class _FilterSheetState extends State<FilterSheet> {
                                   children: [
                                     Text(
                                       widget.isAnime
-                                          ? "Airing Status"
-                                          : "Status",
+                                          ? context.l10n.airingStatus
+                                          : context.l10n.status,
                                       style: const TextStyle(
                                         fontSize: 22,
                                         fontWeight: FontWeight.bold,
@@ -623,31 +629,31 @@ class _FilterSheetState extends State<FilterSheet> {
                                         width: c.maxWidth,
                                         hintText: airingStatus != ""
                                             ? airingStatus
-                                            : "Any",
-                                        dropdownMenuEntries: const [
+                                            : context.l10n.any,
+                                        dropdownMenuEntries: [
                                           DropdownMenuEntry(
                                             value: "RELEASING",
-                                            label: "Releasing",
+                                            label: context.l10n.releasing,
                                           ),
                                           DropdownMenuEntry(
                                             value: "FINISHED",
-                                            label: "Finished",
+                                            label: context.l10n.finished,
                                           ),
                                           DropdownMenuEntry(
                                             value: "NOT_YET_RELEASED",
-                                            label: "Not released yet",
+                                            label: context.l10n.notReleasedYet,
                                           ),
                                           DropdownMenuEntry(
                                             value: "CANCELLED",
-                                            label: "Cancelled",
+                                            label: context.l10n.cancelled,
                                           ),
                                           DropdownMenuEntry(
                                             value: "HIATUS",
-                                            label: "Hiatus",
+                                            label: context.l10n.hiatus,
                                           ),
                                           DropdownMenuEntry(
                                             value: "",
-                                            label: "Any",
+                                            label: context.l10n.any,
                                           ),
                                         ],
                                         onSelected: (value) {
@@ -670,9 +676,9 @@ class _FilterSheetState extends State<FilterSheet> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      const Text(
-                                        "Source",
-                                        style: TextStyle(
+                                      Text(
+                                        context.l10n.source,
+                                        style: const TextStyle(
                                           fontSize: 16,
                                           fontWeight: FontWeight.bold,
                                         ),
@@ -685,71 +691,73 @@ class _FilterSheetState extends State<FilterSheet> {
                                           width: c.maxWidth,
                                           hintText: sourceMaterial != ""
                                               ? sourceMaterial
-                                              : "Any",
-                                          dropdownMenuEntries: const [
+                                              : context.l10n.any,
+                                          dropdownMenuEntries: [
                                             DropdownMenuEntry(
                                               value: "ORIGINAL",
-                                              label: "Original",
+                                              label: context.l10n.original,
                                             ),
                                             DropdownMenuEntry(
                                               value: "MANGA",
-                                              label: "Manga",
+                                              label: context.l10n.mangaFormat,
                                             ),
                                             DropdownMenuEntry(
                                               value: "LIGHT_NOVEL",
-                                              label: "Light Novel",
+                                              label: context.l10n.lightNovel,
                                             ),
                                             DropdownMenuEntry(
                                               value: "VISUAL_NOVEL",
-                                              label: "Visual Novel",
+                                              label: context.l10n.visualNovel,
                                             ),
                                             DropdownMenuEntry(
                                               value: "VIDEO_GAME",
-                                              label: "Video Game",
+                                              label: context.l10n.videoGame,
                                             ),
                                             DropdownMenuEntry(
                                               value: "OTHER",
-                                              label: "Other",
+                                              label: context.l10n.other,
                                             ),
                                             DropdownMenuEntry(
                                               value: "NOVEL",
-                                              label: "Novel",
+                                              label: context.l10n.novel,
                                             ),
                                             DropdownMenuEntry(
                                               value: "DOUJINSHI",
-                                              label: "Doujinshi",
+                                              label: context.l10n.doujinshi,
                                             ),
                                             DropdownMenuEntry(
                                               value: "ANIME",
-                                              label: "Anime",
+                                              label: context.l10n.anime,
                                             ),
                                             DropdownMenuEntry(
                                               value: "WEB_NOVEL",
-                                              label: "Web Novel",
+                                              label: context.l10n.webNovel,
                                             ),
                                             DropdownMenuEntry(
                                               value: "LIVE_ACTION",
-                                              label: "Live Action",
+                                              label: context.l10n.liveAction,
                                             ),
                                             DropdownMenuEntry(
                                               value: "GAME",
-                                              label: "Game",
+                                              label: context.l10n.game,
                                             ),
                                             DropdownMenuEntry(
                                               value: "COMIC",
-                                              label: "Comic",
+                                              label: context.l10n.comic,
                                             ),
                                             DropdownMenuEntry(
                                               value: "MULTIMEDIA_PROJECT",
-                                              label: "Multimedia Project",
+                                              label: context
+                                                  .l10n
+                                                  .multimediaProject,
                                             ),
                                             DropdownMenuEntry(
                                               value: "PICTURE_BOOK",
-                                              label: "Picture Book",
+                                              label: context.l10n.pictureBook,
                                             ),
                                             DropdownMenuEntry(
                                               value: "",
-                                              label: "Any",
+                                              label: context.l10n.any,
                                             ),
                                           ],
                                           onSelected: (value) {
@@ -768,9 +776,9 @@ class _FilterSheetState extends State<FilterSheet> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      const Text(
-                                        "Origin",
-                                        style: TextStyle(
+                                      Text(
+                                        context.l10n.origin,
+                                        style: const TextStyle(
                                           fontSize: 16,
                                           fontWeight: FontWeight.bold,
                                         ),
@@ -783,23 +791,23 @@ class _FilterSheetState extends State<FilterSheet> {
                                           width: c.maxWidth,
                                           hintText: countryOfOrigin != ""
                                               ? countryOfOrigin
-                                              : "Any",
-                                          dropdownMenuEntries: const [
+                                              : context.l10n.any,
+                                          dropdownMenuEntries: [
                                             DropdownMenuEntry(
                                               value: "CN",
-                                              label: "China",
+                                              label: context.l10n.china,
                                             ),
                                             DropdownMenuEntry(
                                               value: "JP",
-                                              label: "Japan",
+                                              label: context.l10n.japan,
                                             ),
                                             DropdownMenuEntry(
                                               value: "KR",
-                                              label: "Korea",
+                                              label: context.l10n.korea,
                                             ),
                                             DropdownMenuEntry(
                                               value: "",
-                                              label: "Any",
+                                              label: context.l10n.any,
                                             ),
                                           ],
                                           onSelected: (value) {
@@ -818,9 +826,9 @@ class _FilterSheetState extends State<FilterSheet> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      const Text(
-                                        "Sort",
-                                        style: TextStyle(
+                                      Text(
+                                        context.l10n.sort,
+                                        style: const TextStyle(
                                           fontSize: 16,
                                           fontWeight: FontWeight.bold,
                                         ),
@@ -831,35 +839,38 @@ class _FilterSheetState extends State<FilterSheet> {
                                       LayoutBuilder(
                                         builder: (context, c) => DropdownMenu(
                                           width: c.maxWidth,
-                                          hintText: getSortByLabel(sortBy),
-                                          dropdownMenuEntries: const [
+                                          hintText: getSortByLabel(
+                                            sortBy,
+                                            context,
+                                          ),
+                                          dropdownMenuEntries: [
                                             DropdownMenuEntry(
                                               value: "TITLE_ROMAJI",
-                                              label: "Title (A-Z)",
+                                              label: context.l10n.titleAZ,
                                             ),
                                             DropdownMenuEntry(
                                               value: "POPULARITY_DESC",
-                                              label: "Popularity",
+                                              label: context.l10n.popularity,
                                             ),
                                             DropdownMenuEntry(
                                               value: "SCORE_DESC",
-                                              label: "Score",
+                                              label: context.l10n.scoreDesc,
                                             ),
                                             DropdownMenuEntry(
                                               value: "TRENDING_DESC",
-                                              label: "Trending",
+                                              label: context.l10n.trending,
                                             ),
                                             DropdownMenuEntry(
                                               value: "FAVOURITES_DESC",
-                                              label: "Favourites",
+                                              label: context.l10n.favorites,
                                             ),
                                             DropdownMenuEntry(
                                               value: "ID_DESC",
-                                              label: "Date Added",
+                                              label: context.l10n.dateAdded,
                                             ),
                                             DropdownMenuEntry(
                                               value: "START_DATE_DESC",
-                                              label: "Release Date",
+                                              label: context.l10n.releaseDate,
                                             ),
                                           ],
                                           onSelected: (value) {
@@ -883,9 +894,9 @@ class _FilterSheetState extends State<FilterSheet> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      const Text(
-                                        "Source Material",
-                                        style: TextStyle(
+                                      Text(
+                                        context.l10n.sourceMaterial,
+                                        style: const TextStyle(
                                           fontSize: 22,
                                           fontWeight: FontWeight.bold,
                                         ),
@@ -898,71 +909,73 @@ class _FilterSheetState extends State<FilterSheet> {
                                           width: c.maxWidth,
                                           hintText: sourceMaterial != ""
                                               ? sourceMaterial
-                                              : "Any",
-                                          dropdownMenuEntries: const [
+                                              : context.l10n.any,
+                                          dropdownMenuEntries: [
                                             DropdownMenuEntry(
                                               value: "ORIGINAL",
-                                              label: "Original",
+                                              label: context.l10n.original,
                                             ),
                                             DropdownMenuEntry(
                                               value: "MANGA",
-                                              label: "Manga",
+                                              label: context.l10n.mangaFormat,
                                             ),
                                             DropdownMenuEntry(
                                               value: "LIGHT_NOVEL",
-                                              label: "Light Novel",
+                                              label: context.l10n.lightNovel,
                                             ),
                                             DropdownMenuEntry(
                                               value: "VISUAL_NOVEL",
-                                              label: "Visual Novel",
+                                              label: context.l10n.visualNovel,
                                             ),
                                             DropdownMenuEntry(
                                               value: "VIDEO_GAME",
-                                              label: "Video Game",
+                                              label: context.l10n.videoGame,
                                             ),
                                             DropdownMenuEntry(
                                               value: "OTHER",
-                                              label: "Other",
+                                              label: context.l10n.other,
                                             ),
                                             DropdownMenuEntry(
                                               value: "NOVEL",
-                                              label: "Novel",
+                                              label: context.l10n.novel,
                                             ),
                                             DropdownMenuEntry(
                                               value: "DOUJINSHI",
-                                              label: "Doujinshi",
+                                              label: context.l10n.doujinshi,
                                             ),
                                             DropdownMenuEntry(
                                               value: "ANIME",
-                                              label: "Anime",
+                                              label: context.l10n.anime,
                                             ),
                                             DropdownMenuEntry(
                                               value: "WEB_NOVEL",
-                                              label: "Web Novel",
+                                              label: context.l10n.webNovel,
                                             ),
                                             DropdownMenuEntry(
                                               value: "LIVE_ACTION",
-                                              label: "Live Action",
+                                              label: context.l10n.liveAction,
                                             ),
                                             DropdownMenuEntry(
                                               value: "GAME",
-                                              label: "Game",
+                                              label: context.l10n.game,
                                             ),
                                             DropdownMenuEntry(
                                               value: "COMIC",
-                                              label: "Comic",
+                                              label: context.l10n.comic,
                                             ),
                                             DropdownMenuEntry(
                                               value: "MULTIMEDIA_PROJECT",
-                                              label: "Multimedia Project",
+                                              label: context
+                                                  .l10n
+                                                  .multimediaProject,
                                             ),
                                             DropdownMenuEntry(
                                               value: "PICTURE_BOOK",
-                                              label: "Picture Book",
+                                              label: context.l10n.pictureBook,
                                             ),
                                             DropdownMenuEntry(
                                               value: "",
-                                              label: "Any",
+                                              label: context.l10n.any,
                                             ),
                                           ],
                                           onSelected: (value) {
@@ -981,9 +994,9 @@ class _FilterSheetState extends State<FilterSheet> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      const Text(
-                                        "Sort By",
-                                        style: TextStyle(
+                                      Text(
+                                        context.l10n.sortBy,
+                                        style: const TextStyle(
                                           fontSize: 22,
                                           fontWeight: FontWeight.bold,
                                         ),
@@ -994,35 +1007,38 @@ class _FilterSheetState extends State<FilterSheet> {
                                       LayoutBuilder(
                                         builder: (context, c) => DropdownMenu(
                                           width: c.maxWidth,
-                                          hintText: getSortByLabel(sortBy),
-                                          dropdownMenuEntries: const [
+                                          hintText: getSortByLabel(
+                                            sortBy,
+                                            context,
+                                          ),
+                                          dropdownMenuEntries: [
                                             DropdownMenuEntry(
                                               value: "TITLE_ROMAJI",
-                                              label: "Title (A-Z)",
+                                              label: context.l10n.titleAZ,
                                             ),
                                             DropdownMenuEntry(
                                               value: "POPULARITY_DESC",
-                                              label: "Popularity",
+                                              label: context.l10n.popularity,
                                             ),
                                             DropdownMenuEntry(
                                               value: "SCORE_DESC",
-                                              label: "Score",
+                                              label: context.l10n.scoreDesc,
                                             ),
                                             DropdownMenuEntry(
                                               value: "TRENDING_DESC",
-                                              label: "Trending",
+                                              label: context.l10n.trending,
                                             ),
                                             DropdownMenuEntry(
                                               value: "FAVOURITES_DESC",
-                                              label: "Favourites",
+                                              label: context.l10n.favorites,
                                             ),
                                             DropdownMenuEntry(
                                               value: "ID_DESC",
-                                              label: "Date Added",
+                                              label: context.l10n.dateAdded,
                                             ),
                                             DropdownMenuEntry(
                                               value: "START_DATE_DESC",
-                                              label: "Release Date",
+                                              label: context.l10n.releaseDate,
                                             ),
                                           ],
                                           onSelected: (value) {
@@ -1054,7 +1070,7 @@ class _FilterSheetState extends State<FilterSheet> {
                                   _clearFilters();
                                   _applyFilters();
                                 },
-                                child: const Text("Clear Filters"),
+                                child: Text(context.l10n.clearFilters),
                               ),
                               const SizedBox(width: 10),
                               FilledButton(
@@ -1066,7 +1082,7 @@ class _FilterSheetState extends State<FilterSheet> {
                                   ),
                                 ),
                                 onPressed: _applyFilters,
-                                child: const Text("Apply Filters"),
+                                child: Text(context.l10n.applyFilters),
                               ),
                             ],
                           ),

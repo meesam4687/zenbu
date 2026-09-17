@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:zenbu/components/global/pie_progress_indicator.dart';
+import 'package:zenbu/l10n/l10n_extension.dart';
 
 class DownloadActionButton extends StatelessWidget {
   final bool isDownloading;
@@ -32,7 +33,7 @@ class DownloadActionButton extends StatelessWidget {
         width: 40,
         height: 40,
         child: PopupMenuButton<String>(
-          tooltip: 'Download Options',
+          tooltip: context.l10n.downloadOptions,
           borderRadius: BorderRadius.circular(20),
           padding: EdgeInsets.zero,
           onSelected: (value) {
@@ -52,17 +53,17 @@ class DownloadActionButton extends StatelessWidget {
                     size: 20,
                   ),
                   const SizedBox(width: 8),
-                  Text(isPaused ? 'Resume' : 'Pause'),
+                  Text(isPaused ? context.l10n.resume : context.l10n.pause),
                 ],
               ),
             ),
             PopupMenuItem<String>(
               value: 'cancel',
-              child: const Row(
+              child: Row(
                 children: [
-                  Icon(Icons.close_rounded, size: 20),
-                  SizedBox(width: 8),
-                  Text('Cancel'),
+                  const Icon(Icons.close_rounded, size: 20),
+                  const SizedBox(width: 8),
+                  Text(context.l10n.cancel),
                 ],
               ),
             ),

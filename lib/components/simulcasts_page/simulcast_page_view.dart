@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:zenbu/l10n/l10n_extension.dart';
 import 'package:provider/provider.dart';
 import 'package:zenbu/state_provider.dart';
 import 'package:zenbu/services/anilist/anilist.dart';
@@ -43,7 +44,7 @@ class _SimulcastPageViewState extends State<SimulcastPageView>
           return const Center(child: CircularProgressIndicator.adaptive());
         }
         if (asyncSnapshot.hasError || asyncSnapshot.data == null) {
-          return const Center(child: Text("Error loading simulcasts"));
+          return Center(child: Text(context.l10n.errorLoadingSimulcasts));
         }
         Map data = asyncSnapshot.data!;
 
@@ -79,7 +80,9 @@ class _SimulcastPageViewState extends State<SimulcastPageView>
                     image: media["coverImage"]?["large"] ?? "",
                     id: media["id"],
                     type: "anime",
-                    state: "Episode: ${schedule["episode"].toString()}",
+                    state: context.l10n.episodeWithNumber(
+                      schedule["episode"].toString(),
+                    ),
                     mediaListEntry: media["mediaListEntry"] as Map?,
                     listDataPreloaded: true,
                     cardHeight: 240.0,

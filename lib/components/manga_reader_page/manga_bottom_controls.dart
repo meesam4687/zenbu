@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:zenbu/l10n/l10n_extension.dart';
 
 class MangaBottomControls extends StatelessWidget {
   final int currentPageIndex;
@@ -41,7 +42,7 @@ class MangaBottomControls extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(bottom: 8.0),
               child: Text(
-                'Page ${currentPageIndex + 1} / $totalPages',
+                context.l10n.pageOutOfTotal(currentPageIndex + 1, totalPages),
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 13,
@@ -56,7 +57,7 @@ class MangaBottomControls extends StatelessWidget {
               ElevatedButton.icon(
                 onPressed: onPrevChapter,
                 icon: const Icon(Icons.skip_previous, size: 18),
-                label: const Text('Prev'),
+                label: Text(context.l10n.prev),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.white24,
                   foregroundColor: Colors.white,
@@ -70,14 +71,17 @@ class MangaBottomControls extends StatelessWidget {
               ),
 
               Text(
-                'Chapter ${currentChapterIndex + 1} of $totalChapters',
+                context.l10n.chapterOutOfTotal(
+                  currentChapterIndex + 1,
+                  totalChapters,
+                ),
                 style: const TextStyle(color: Colors.white70, fontSize: 12),
               ),
 
               ElevatedButton.icon(
                 onPressed: onNextChapter,
                 icon: const Icon(Icons.skip_next, size: 18),
-                label: const Text('Next'),
+                label: Text(context.l10n.next),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.white24,
                   foregroundColor: Colors.white,

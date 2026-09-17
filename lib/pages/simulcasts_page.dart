@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:zenbu/l10n/l10n_extension.dart';
 import 'package:zenbu/components/simulcasts_page/simulcast_page_view.dart';
 
 List getScheduleEpochs() {
@@ -37,14 +38,14 @@ class SimulcastsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     List epochs = getScheduleEpochs();
     List tabList = [];
-    Map weekdays = {
-      "1": "Monday",
-      "2": "Tuesday",
-      "3": "Wednesday",
-      "4": "Thursday",
-      "5": "Friday",
-      "6": "Saturday",
-      "7": "Sunday",
+    Map<String, String> weekdays = {
+      "1": context.l10n.monday,
+      "2": context.l10n.tuesday,
+      "3": context.l10n.wednesday,
+      "4": context.l10n.thursday,
+      "5": context.l10n.friday,
+      "6": context.l10n.saturday,
+      "7": context.l10n.sunday,
     };
     for (int i = 0; i < epochs.length; i++) {
       tabList.add(weekdays[epochs[i][0].toString()]);
@@ -53,7 +54,7 @@ class SimulcastsPage extends StatelessWidget {
       initialIndex: 1,
       length: 7,
       child: Scaffold(
-        appBar: AppBar(title: Text("Simulcasts")),
+        appBar: AppBar(title: Text(context.l10n.simulcasts)),
         body: SafeArea(
           child: Column(
             children: [

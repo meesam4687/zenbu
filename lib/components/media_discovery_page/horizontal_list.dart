@@ -1,3 +1,4 @@
+import 'package:zenbu/l10n/l10n_extension.dart';
 import 'package:zenbu/components/global/item_card.dart';
 import 'package:zenbu/pages/entire_list_view.dart';
 import 'package:flutter/material.dart';
@@ -30,8 +31,9 @@ class HorizontalList extends StatelessWidget {
               final textScaler = MediaQuery.textScalerOf(context);
               final buttonTextPainter = TextPainter(
                 text: TextSpan(
-                  text: 'View All  ',
-                  style: Theme.of(context).textTheme.labelLarge ??
+                  text: '${context.l10n.viewAll}  ',
+                  style:
+                      Theme.of(context).textTheme.labelLarge ??
                       const TextStyle(fontSize: 14),
                 ),
                 maxLines: 1,
@@ -79,11 +81,11 @@ class HorizontalList extends StatelessWidget {
                       );
                     },
                     child: showFullButton
-                        ? const Row(
+                        ? Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Text('View All  '),
-                              Icon(Icons.arrow_forward),
+                              Text('${context.l10n.viewAll}  '),
+                              const Icon(Icons.arrow_forward),
                             ],
                           )
                         : const Icon(Icons.arrow_forward),

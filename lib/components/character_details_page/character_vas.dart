@@ -1,5 +1,6 @@
 import 'package:zenbu/components/global/item_card.dart';
 import 'package:flutter/material.dart';
+import 'package:zenbu/l10n/l10n_extension.dart';
 
 class CharacterVAs extends StatelessWidget {
   const CharacterVAs({super.key, required this.vas});
@@ -9,17 +10,17 @@ class CharacterVAs extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(left: 12, right: 12),
+      margin: const EdgeInsets.only(left: 12, right: 12),
       width: double.infinity,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "Voiced By",
-            style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+            context.l10n.voicedBy,
+            style: const TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
           ),
           Container(
-            margin: EdgeInsets.only(top: 10),
+            margin: const EdgeInsets.only(top: 10),
             height: 230,
             width: double.infinity,
             child: SizedBox(
@@ -33,7 +34,7 @@ class CharacterVAs extends StatelessWidget {
                       ? ((vas[index]["name"]["full"] as String).length > 16)
                             ? '${(vas[index]["name"]["full"] as String).substring(0, 16)}...'
                             : (vas[index]["name"]["full"] as String)
-                      : "N/A";
+                      : context.l10n.na;
                   return ItemCard(
                     title: name,
                     image: vas[index]["image"]["large"],

@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:zenbu/l10n/l10n_extension.dart';
 
 class LineChart extends StatefulWidget {
   const LineChart({super.key, required this.title, required this.data});
@@ -102,6 +103,8 @@ class _LineChartState extends State<LineChart> {
                           color: theme.colorScheme.onSurfaceVariant,
                           fontSize: 9,
                         ),
+                        tooltipFormatter: (count, year) =>
+                            context.l10n.entriesInYear(count, year),
                       ),
                     ),
                   ),
@@ -148,6 +151,7 @@ class _LineChartPainter extends CustomPainter {
   final Color primaryColor;
   final Color gridColor;
   final TextStyle labelStyle;
+  final String Function(int count, int year)? tooltipFormatter;
 
   _LineChartPainter({
     required this.data,
@@ -158,6 +162,7 @@ class _LineChartPainter extends CustomPainter {
     required this.primaryColor,
     required this.gridColor,
     required this.labelStyle,
+    this.tooltipFormatter,
   });
 
   @override
@@ -266,7 +271,9 @@ class _LineChartPainter extends CustomPainter {
       canvas.drawCircle(selectedOffset, 6.0, highlightPaint);
       canvas.drawCircle(selectedOffset, 6.0, highlightStroke);
 
-      final tooltipText = "$count entries in $selectedYear";
+      final tooltipText = tooltipFormatter != null
+          ? tooltipFormatter!(count, selectedYear!)
+          : "$count entries in $selectedYear";
       final textSpan = TextSpan(
         text: tooltipText,
         style: labelStyle.copyWith(

@@ -1,4 +1,5 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
+import 'package:zenbu/l10n/l10n_extension.dart';
 
 class VideoPlayerControlsOverlay extends StatefulWidget {
   final bool visible;
@@ -259,23 +260,23 @@ class _VideoPlayerControlsOverlayState extends State<VideoPlayerControlsOverlay>
       actions: [
         IconButton(
           icon: const Icon(Icons.picture_in_picture_alt, color: Colors.white),
-          tooltip: 'Picture in Picture',
+          tooltip: context.l10n.pip,
           onPressed: widget.onPipPressed,
         ),
         if (widget.hasNextEpisode)
           IconButton(
             icon: const Icon(Icons.skip_next, color: Colors.white),
-            tooltip: 'Next Episode',
+            tooltip: context.l10n.nextEpisode,
             onPressed: widget.onNextEpisodePressed,
           ),
         IconButton(
           icon: Icon(_getZoomIcon(), color: Colors.white),
-          tooltip: 'Zoom Mode (${widget.zoomModeName})',
+          tooltip: '${context.l10n.zoomMode} (${widget.zoomModeName})',
           onPressed: widget.onZoomPressed,
         ),
         IconButton(
           icon: const Icon(Icons.settings, color: Colors.white),
-          tooltip: 'Settings',
+          tooltip: context.l10n.settings,
           onPressed: widget.onSettingsPressed,
         ),
       ],
@@ -369,7 +370,7 @@ class _VideoPlayerControlsOverlayState extends State<VideoPlayerControlsOverlay>
                 Icons.screen_rotation_rounded,
                 color: Colors.white,
               ),
-              tooltip: 'Rotate',
+              tooltip: context.l10n.rotate,
               onPressed: widget.onRotatePressed,
             ),
           ],

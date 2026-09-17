@@ -5,6 +5,7 @@ import 'package:zenbu/pages/video_player_page.dart';
 import 'package:zenbu/pages/manga_reader_page.dart';
 import 'package:zenbu/pages/novel_reader_page.dart';
 import 'package:zenbu/components/global/custom_image.dart';
+import 'package:zenbu/l10n/l10n_extension.dart';
 
 class DownloadsPage extends StatefulWidget {
   const DownloadsPage({super.key});
@@ -38,12 +39,12 @@ class _DownloadsPageState extends State<DownloadsPage> {
       length: 3,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Downloads'),
-          bottom: const TabBar(
+          title: Text(context.l10n.downloads),
+          bottom: TabBar(
             tabs: [
-              Tab(text: 'Anime'),
-              Tab(text: 'Manga'),
-              Tab(text: 'Novel'),
+              Tab(text: context.l10n.anime),
+              Tab(text: context.l10n.mangaFormat),
+              Tab(text: context.l10n.novel),
             ],
           ),
         ),
@@ -66,7 +67,7 @@ class _DownloadsPageState extends State<DownloadsPage> {
     bool isManga,
     bool isTablet,
   ) {
-    final name = _downloadService.activeNames[url] ?? 'Downloading...';
+    final name = _downloadService.activeNames[url] ?? context.l10n.downloading;
     final mediaTitle = _downloadService.activeMediaTitles[url] ?? '';
     final progress = _downloadService.activeDownloads[url] ?? 0.0;
     return Card(
@@ -98,7 +99,7 @@ class _DownloadsPageState extends State<DownloadsPage> {
               children: [
                 Text(
                   progress == 0.0
-                      ? 'Resolving...'
+                      ? context.l10n.resolving
                       : '${(progress * 100).toInt()}%',
                   style: TextStyle(
                     fontSize: 11,
@@ -203,7 +204,13 @@ class _DownloadsPageState extends State<DownloadsPage> {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      '${media.items.length} downloaded ${isManga ? "chapter" : "episode"}${media.items.length == 1 ? "" : "s"}',
+                      isManga
+                          ? context.l10n.downloadedChaptersCount(
+                              media.items.length,
+                            )
+                          : context.l10n.downloadedEpisodesCount(
+                              media.items.length,
+                            ),
                       style: TextStyle(
                         fontSize: 13,
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -238,8 +245,8 @@ class _DownloadsPageState extends State<DownloadsPage> {
     }).toList();
 
     final String tabName = tabType == 2
-        ? 'novels'
-        : (tabType == 0 ? 'manga' : 'anime');
+        ? context.l10n.novel
+        : (tabType == 0 ? context.l10n.mangaFormat : context.l10n.anime);
     final IconData iconData = tabType == 2
         ? Icons.auto_stories_outlined
         : (tabType == 0 ? Icons.book_outlined : Icons.movie_outlined);
@@ -256,7 +263,7 @@ class _DownloadsPageState extends State<DownloadsPage> {
             ),
             const SizedBox(height: 12),
             Text(
-              'No downloaded $tabName found.',
+              context.l10n.noDownloadedMediaFound(tabName),
               style: TextStyle(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
@@ -284,7 +291,7 @@ class _DownloadsPageState extends State<DownloadsPage> {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    'Downloading (${activeKeys.length})',
+                    context.l10n.downloadingWithCount(activeKeys.length),
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
@@ -426,16 +433,16 @@ class _DownloadedItemsListPageState extends State<DownloadedItemsListPage> {
             final confirm = await showDialog<bool>(
               context: context,
               builder: (context) => AlertDialog(
-                title: const Text('Delete Download'),
-                content: Text('Are you sure you want to delete ${item.name}?'),
+                title: Text(context.l10n.deleteDownload),
+                content: Text(context.l10n.areYouSureDelete(item.name)),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(false),
-                    child: const Text('Cancel'),
+                    child: Text(context.l10n.cancel),
                   ),
                   FilledButton(
                     onPressed: () => Navigator.of(context).pop(true),
-                    child: const Text('Delete'),
+                    child: Text(context.l10n.delete),
                   ),
                 ],
               ),

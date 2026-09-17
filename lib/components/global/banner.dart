@@ -4,6 +4,7 @@ import 'package:zenbu/pages/character_details_page.dart';
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:zenbu/components/global/custom_image.dart';
+import 'package:zenbu/l10n/l10n_extension.dart';
 
 class AiringBanner extends StatelessWidget {
   const AiringBanner({
@@ -117,7 +118,7 @@ class AiringBanner extends StatelessWidget {
                               ),
                               (totalEpisodes != null && airedEpisodes != null)
                                   ? Text(
-                                      "Episodes: $airedEpisodes/$totalEpisodes\n$tagString",
+                                      "${context.l10n.episodesCount(airedEpisodes!, totalEpisodes!)}\n$tagString",
                                       style: const TextStyle(
                                         fontSize: 15,
                                         shadows: [

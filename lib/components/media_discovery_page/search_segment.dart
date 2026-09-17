@@ -4,6 +4,7 @@ import 'package:zenbu/components/media_discovery_page/filter_sheet.dart';
 import 'package:zenbu/pages/media_search_page.dart';
 import 'package:flutter/material.dart';
 import 'package:zenbu/state_provider.dart';
+import 'package:zenbu/l10n/l10n_extension.dart';
 
 class _SearchShuttle extends StatefulWidget {
   const _SearchShuttle({required this.animation, required this.queryText});
@@ -102,7 +103,7 @@ class _SearchShuttleState extends State<_SearchShuttle> {
                     child: _buildMorphIcon(morphProgress, iconColor),
                   ),
                 ),
-                hintText: "Search...",
+                hintText: context.l10n.searchEllipsis,
                 hintStyle: WidgetStatePropertyAll(
                   theme.textTheme.bodyLarge?.copyWith(
                     color: hintColor.withValues(alpha: hintOpacity),
@@ -207,7 +208,7 @@ class SearchSegment extends StatelessWidget {
               flightShuttleBuilder: _buildFlightShuttle,
               child: SearchBar(
                 leading: _buildLeading(context),
-                hintText: isSearchPage ? "" : "Search...",
+                hintText: isSearchPage ? "" : context.l10n.searchEllipsis,
                 backgroundColor: WidgetStatePropertyAll(
                   Theme.of(context).colorScheme.onInverseSurface,
                 ),
@@ -280,7 +281,7 @@ class SearchSegment extends StatelessWidget {
                       },
                       transitionsBuilder: isSearchPage
                           ? (context, animation, secondaryAnimation, child) =>
-                              child
+                                child
                           : (context, animation, secondaryAnimation, child) {
                               return FadeTransition(
                                 opacity: animation,

@@ -1,3 +1,4 @@
+import 'package:zenbu/l10n/l10n_extension.dart';
 import 'package:zenbu/components/global/item_card.dart';
 import 'package:zenbu/components/global/constant_sliver_grid_delegate.dart';
 import 'package:flutter/material.dart';
@@ -25,7 +26,7 @@ class ListPageView extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              "Empty list",
+              context.l10n.emptyList,
               style: TextStyle(
                 fontSize: 16,
                 color: Theme.of(context).colorScheme.outline,

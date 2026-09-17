@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:zenbu/components/global/custom_image.dart';
 import 'package:zenbu/components/video_player_page/custom_subtitle_view.dart';
+import 'package:zenbu/l10n/l10n_extension.dart';
 
 class SubtitleCustomizationSheet extends StatefulWidget {
   final SubtitleConfig initialConfig;
@@ -81,14 +82,17 @@ class _SubtitleCustomizationSheetState
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Customize Subtitles',
-                  style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold),
+                Text(
+                  context.l10n.customizeSubtitles,
+                  style: const TextStyle(
+                    fontSize: 19,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 IconButton(
                   icon: const Icon(Icons.close),
                   onPressed: () => Navigator.of(context).pop(),
-                  tooltip: 'Close',
+                  tooltip: context.l10n.close,
                 ),
               ],
             ),
@@ -104,9 +108,12 @@ class _SubtitleCustomizationSheetState
 
                   const SizedBox(height: 18),
 
-                  const Text(
-                    'Preset Style',
-                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                  Text(
+                    context.l10n.presetStyle,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 10),
 
@@ -117,16 +124,16 @@ class _SubtitleCustomizationSheetState
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
-                        'Customization Options',
-                        style: TextStyle(
+                      Text(
+                        context.l10n.customizationOptions,
+                        style: const TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       if (!isCustom)
                         Text(
-                          'Select Custom above to edit',
+                          context.l10n.selectCustomToEdit,
                           style: TextStyle(
                             fontSize: 12,
                             color: theme.colorScheme.primary,
@@ -165,10 +172,10 @@ class _SubtitleCustomizationSheetState
 
                           SwitchListTile(
                             contentPadding: EdgeInsets.zero,
-                            title: const Text('Drop Shadow'),
-                            subtitle: const Text(
-                              'Adds depth and high contrast against bright scenes',
-                              style: TextStyle(fontSize: 12),
+                            title: Text(context.l10n.dropShadow),
+                            subtitle: Text(
+                              context.l10n.dropShadowSubtitle,
+                              style: const TextStyle(fontSize: 12),
                             ),
                             value: _config.hasShadow,
                             onChanged: (val) {
@@ -246,9 +253,9 @@ class _SubtitleCustomizationSheetState
                   color: Colors.black.withValues(alpha: 0.65),
                   borderRadius: BorderRadius.circular(6),
                 ),
-                child: const Text(
-                  'LIVE PREVIEW',
-                  style: TextStyle(
+                child: Text(
+                  context.l10n.livePreview,
+                  style: const TextStyle(
                     color: Colors.white70,
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
@@ -263,7 +270,7 @@ class _SubtitleCustomizationSheetState
               right: 12,
               bottom: 14,
               child: CustomSubtitleView(
-                text: 'Subtitles will look like this\nAnime subtitle preview',
+                text: context.l10n.subtitlePreviewText,
                 config: _config,
               ),
             ),
@@ -278,7 +285,7 @@ class _SubtitleCustomizationSheetState
       children: [
         Expanded(
           child: _buildPresetCard(
-            title: 'Default',
+            title: context.l10n.defaultOption,
             icon: Icons.auto_awesome,
             preset: SubtitlePreset.defaultOutline,
             primaryColor: primaryColor,
@@ -288,7 +295,7 @@ class _SubtitleCustomizationSheetState
         const SizedBox(width: 8),
         Expanded(
           child: _buildPresetCard(
-            title: 'Normal',
+            title: context.l10n.normal,
             icon: Icons.border_style,
             preset: SubtitlePreset.classicBorder,
             primaryColor: primaryColor,
@@ -298,7 +305,7 @@ class _SubtitleCustomizationSheetState
         const SizedBox(width: 8),
         Expanded(
           child: _buildPresetCard(
-            title: 'Custom',
+            title: context.l10n.custom,
             icon: Icons.tune,
             preset: SubtitlePreset.custom,
             primaryColor: primaryColor,
@@ -365,6 +372,37 @@ class _SubtitleCustomizationSheetState
     );
   }
 
+  String _getColorName(BuildContext context, int value) {
+    switch (value) {
+      case 0xFFFFFFFF:
+        return context.l10n.colorWhite;
+      case 0xFFFFF176:
+        return context.l10n.colorYellow;
+      case 0xFF80DEEA:
+        return context.l10n.colorCyan;
+      case 0xFFA5D6A7:
+        return context.l10n.colorGreen;
+      case 0xFFFF8A80:
+        return context.l10n.colorCoral;
+      default:
+        return '';
+    }
+  }
+
+  String _getBorderName(BuildContext context, double value) {
+    if (value == 0.0) return context.l10n.borderNone;
+    if ((value - 1.5).abs() < 0.1) return context.l10n.borderThin;
+    if ((value - 2.8).abs() < 0.1) return context.l10n.borderMedium;
+    return context.l10n.borderThick;
+  }
+
+  String _getBackgroundName(BuildContext context, double value) {
+    if (value == 0.0) return context.l10n.bgNone;
+    if ((value - 0.30).abs() < 0.05) return context.l10n.bgSubtle;
+    if ((value - 0.60).abs() < 0.05) return context.l10n.bgMedium;
+    return context.l10n.bgSolid;
+  }
+
   Widget _buildFontSizeSection(ThemeData theme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -372,9 +410,9 @@ class _SubtitleCustomizationSheetState
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
-              'Font Size',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+            Text(
+              context.l10n.fontSize,
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
             ),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
@@ -432,9 +470,9 @@ class _SubtitleCustomizationSheetState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Font Family',
-          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+        Text(
+          context.l10n.fontFamily,
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 8),
         Wrap(
@@ -458,13 +496,17 @@ class _SubtitleCustomizationSheetState
   }
 
   Widget _buildFontWeightSection(ThemeData theme) {
-    const weightLabels = ['Normal', 'Semi-Bold', 'Bold'];
+    final weightLabels = [
+      context.l10n.normal,
+      context.l10n.semiBold,
+      context.l10n.bold,
+    ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Font Weight',
-          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+        Text(
+          context.l10n.fontWeight,
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 8),
         Wrap(
@@ -490,9 +532,9 @@ class _SubtitleCustomizationSheetState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Text Color',
-          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+        Text(
+          context.l10n.textColor,
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 8),
         Wrap(
@@ -541,7 +583,7 @@ class _SubtitleCustomizationSheetState
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      opt['name'] as String,
+                      _getColorName(context, colorVal),
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: isSelected
@@ -560,30 +602,24 @@ class _SubtitleCustomizationSheetState
   }
 
   Widget _buildBorderWidthSection(ThemeData theme) {
-    const borders = [
-      {'name': 'None', 'value': 0.0},
-      {'name': 'Thin (1.5px)', 'value': 1.5},
-      {'name': 'Medium (2.8px)', 'value': 2.8},
-      {'name': 'Thick (4.0px)', 'value': 4.0},
-    ];
+    const borders = [0.0, 1.5, 2.8, 4.0];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Border Outline',
-          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+        Text(
+          context.l10n.borderOutline,
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
           runSpacing: 8,
-          children: borders.map((opt) {
-            final val = opt['value'] as double;
+          children: borders.map((val) {
             final isSelected = (_config.borderWidth - val).abs() < 0.1;
 
             return ChoiceChip(
-              label: Text(opt['name'] as String),
+              label: Text(_getBorderName(context, val)),
               selected: isSelected,
               onSelected: (selected) {
                 if (selected) {
@@ -598,30 +634,24 @@ class _SubtitleCustomizationSheetState
   }
 
   Widget _buildBackgroundSection(ThemeData theme) {
-    const backgrounds = [
-      {'name': 'None', 'value': 0.0},
-      {'name': 'Subtle (30%)', 'value': 0.30},
-      {'name': 'Medium (60%)', 'value': 0.60},
-      {'name': 'Solid (100%)', 'value': 1.0},
-    ];
+    const backgrounds = [0.0, 0.30, 0.60, 1.0];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Background Box',
-          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+        Text(
+          context.l10n.backgroundBox,
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
           runSpacing: 8,
-          children: backgrounds.map((opt) {
-            final val = opt['value'] as double;
+          children: backgrounds.map((val) {
             final isSelected = (_config.backgroundOpacity - val).abs() < 0.05;
 
             return ChoiceChip(
-              label: Text(opt['name'] as String),
+              label: Text(_getBackgroundName(context, val)),
               selected: isSelected,
               onSelected: (selected) {
                 if (selected) {

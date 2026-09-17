@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:zenbu/services/mangayomi/models/extensions_models.dart';
+import 'package:zenbu/l10n/l10n_extension.dart';
 
 class MangaHeader extends StatelessWidget implements PreferredSizeWidget {
   final String mangaTitle;
@@ -57,7 +58,7 @@ class MangaHeader extends StatelessWidget implements PreferredSizeWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.settings, color: Colors.white),
-            tooltip: 'Settings',
+            tooltip: context.l10n.settings,
             onPressed: onSettingsPressed,
           ),
         ],

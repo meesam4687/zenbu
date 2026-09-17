@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:zenbu/l10n/l10n_extension.dart';
 
 class BarChart extends StatefulWidget {
   const BarChart({super.key, required this.title, required this.data});
@@ -92,8 +93,11 @@ class _BarChartState extends State<BarChart> {
                           ),
                           const SizedBox(height: 4),
                           Tooltip(
-                            message:
-                                '$label: $count entries (${(count / totalCount * 100).toStringAsFixed(1)}%)',
+                            message: context.l10n.barChartTooltip(
+                              label,
+                              count,
+                              (count / totalCount * 100).toStringAsFixed(1),
+                            ),
                             child: AnimatedContainer(
                               duration: const Duration(milliseconds: 250),
                               curve: Curves.easeOut,

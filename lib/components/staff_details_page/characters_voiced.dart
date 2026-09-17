@@ -1,5 +1,6 @@
 import 'package:zenbu/components/global/item_card.dart';
 import 'package:flutter/material.dart';
+import 'package:zenbu/l10n/l10n_extension.dart';
 
 class CharactersVoiced extends StatelessWidget {
   const CharactersVoiced({super.key, required this.characters});
@@ -14,9 +15,9 @@ class CharactersVoiced extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Characters Voiced',
-            style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+          Text(
+            context.l10n.charactersVoiced,
+            style: const TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
           ),
           Container(
             margin: const EdgeInsets.only(top: 10),
@@ -35,7 +36,7 @@ class CharactersVoiced extends StatelessWidget {
                       ? (fullName.length > 16)
                             ? '${fullName.substring(0, 16)}...'
                             : fullName
-                      : 'N/A';
+                      : context.l10n.na;
                   return ItemCard(
                     title: name,
                     image: character['image']?['large'],

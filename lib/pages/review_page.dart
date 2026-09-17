@@ -10,6 +10,7 @@ import 'package:zenbu/pages/character_details_page.dart';
 import 'package:zenbu/pages/media_details_page.dart';
 import 'package:zenbu/pages/staff_details_page.dart';
 import 'package:zenbu/pages/user_profile_page.dart';
+import 'package:zenbu/l10n/l10n_extension.dart';
 
 class ReviewSegment {
   final String type;
@@ -221,7 +222,7 @@ class _LoopVideoPlayerState extends State<LoopVideoPlayer> {
             const Icon(Icons.error_outline, color: Colors.grey, size: 36),
             const SizedBox(height: 8),
             Text(
-              "Failed to load video clip",
+              context.l10n.failedToLoadVideoClip,
               style: TextStyle(color: Colors.grey.shade600),
             ),
           ],
@@ -266,7 +267,7 @@ class ReviewPage extends StatelessWidget {
     final segments = _parseReviewBody(body);
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Review")),
+      appBar: AppBar(title: Text(context.l10n.review)),
       body: SafeArea(
         child: Column(
           children: [
@@ -291,9 +292,12 @@ class ReviewPage extends StatelessWidget {
                     const SizedBox(height: 16),
                     Row(
                       children: [
-                        const Text(
-                          "Written by ",
-                          style: TextStyle(fontSize: 14, color: Colors.grey),
+                        Text(
+                          context.l10n.writtenBy,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey,
+                          ),
                         ),
                         if (username != null)
                           InkWell(
@@ -339,9 +343,9 @@ class ReviewPage extends StatelessWidget {
                             ),
                           )
                         else
-                          const Text(
-                            "Anonymous",
-                            style: TextStyle(
+                          Text(
+                            context.l10n.anonymous,
+                            style: const TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
                             ),
@@ -416,7 +420,7 @@ class ReviewPage extends StatelessWidget {
               ),
               alignment: Alignment.center,
               child: Text(
-                "Score: $score / 100",
+                context.l10n.scoreWithMax(score),
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,

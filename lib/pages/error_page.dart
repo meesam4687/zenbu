@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:zenbu/l10n/l10n_extension.dart';
 
 class Error extends StatelessWidget {
   final VoidCallback reload;
@@ -7,7 +8,7 @@ class Error extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String displayMessage = "Your Internet might not be working";
+    String displayMessage = context.l10n.internetMightNotBeWorking;
     if (message != null && message!.trim().isNotEmpty) {
       displayMessage = message!.replaceFirst(
         RegExp(
@@ -27,7 +28,7 @@ class Error extends StatelessWidget {
               vertical: 16.0,
             ),
             child: Text(
-              "Failed to Load\n\n$displayMessage",
+              "${context.l10n.failedToLoad}\n\n$displayMessage",
               textAlign: TextAlign.center,
               style: const TextStyle(fontSize: 16),
             ),
@@ -38,10 +39,13 @@ class Error extends StatelessWidget {
             height: 50,
             child: FilledButton(
               onPressed: reload,
-              child: const Row(
+              child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
-                children: [Icon(Icons.refresh), Text("  Reload")],
+                children: [
+                  const Icon(Icons.refresh),
+                  Text("  ${context.l10n.reload}"),
+                ],
               ),
             ),
           ),

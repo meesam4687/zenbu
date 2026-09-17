@@ -3,6 +3,7 @@ import 'package:zenbu/components/global/constant_sliver_grid_delegate.dart';
 import 'package:zenbu/components/global/item_card.dart';
 import 'package:zenbu/pages/error_page.dart';
 import 'package:zenbu/services/anilist/get_studio_data.dart';
+import 'package:zenbu/l10n/l10n_extension.dart';
 
 class StudioDetailsPage extends StatefulWidget {
   const StudioDetailsPage({super.key, required this.studioId, this.studioName});
@@ -98,7 +99,9 @@ class _StudioDetailsPageState extends State<StudioDetailsPage> {
         });
       } else {
         setState(() {
-          _errorMessage = "Studio details not found.";
+          _errorMessage = mounted
+              ? context.l10n.studioDetailsNotFound
+              : "Studio details not found.";
         });
       }
     } catch (e) {
@@ -126,7 +129,7 @@ class _StudioDetailsPageState extends State<StudioDetailsPage> {
       );
     }
 
-    final title = _resolvedStudioName ?? "Studio Details";
+    final title = _resolvedStudioName ?? context.l10n.studioDetails;
 
     return Scaffold(
       appBar: AppBar(title: Text(title)),

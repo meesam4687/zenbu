@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:zenbu/l10n/l10n_extension.dart';
 
 class GenreOverviewCard extends StatelessWidget {
   const GenreOverviewCard({
@@ -107,7 +108,7 @@ class GenreOverviewCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          '${item.count} Entries',
+                          context.l10n.entriesCount(item.count),
                           style: TextStyle(
                             color: item.color,
                             fontWeight: FontWeight.w600,

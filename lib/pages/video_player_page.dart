@@ -24,6 +24,7 @@ import 'package:zenbu/components/video_player_page/video_player_controls_overlay
 import 'package:zenbu/components/video_player_page/video_player_settings_modal.dart';
 import 'package:zenbu/components/video_player_page/custom_subtitle_view.dart';
 import 'package:zenbu/components/video_player_page/video_player_error_view.dart';
+import 'package:zenbu/l10n/l10n_extension.dart';
 
 class SkipTime {
   final double startTime;
@@ -73,15 +74,15 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
       switch (_zoomMode) {
         case VideoZoomMode.fit:
           _zoomMode = VideoZoomMode.fill;
-          Fluttertoast.showToast(msg: 'Zoom: Fill');
+          Fluttertoast.showToast(msg: context.l10n.zoomFill);
           break;
         case VideoZoomMode.fill:
           _zoomMode = VideoZoomMode.stretch;
-          Fluttertoast.showToast(msg: 'Zoom: Stretch');
+          Fluttertoast.showToast(msg: context.l10n.zoomStretch);
           break;
         case VideoZoomMode.stretch:
           _zoomMode = VideoZoomMode.fit;
-          Fluttertoast.showToast(msg: 'Zoom: Fit (Default)');
+          Fluttertoast.showToast(msg: context.l10n.zoomFitDefault);
           break;
       }
     });
@@ -90,11 +91,11 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
   String _getZoomModeName() {
     switch (_zoomMode) {
       case VideoZoomMode.fill:
-        return 'Fill';
+        return context.l10n.fill;
       case VideoZoomMode.stretch:
-        return 'Stretch';
+        return context.l10n.stretch;
       case VideoZoomMode.fit:
-        return 'Fit';
+        return context.l10n.fit;
     }
   }
 
@@ -110,7 +111,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
   ExtensionService? _jsEngine;
 
   bool _isLoading = true;
-  String _loadingText = 'Resolving stream links...';
+  bool _isInitializingStage = false;
   String? _errorMessage;
   Duration _currentPosition = Duration.zero;
   Duration _totalDuration = Duration.zero;
@@ -181,8 +182,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
           _isAutoRetrying = false;
           _playerFailed = true;
           _lastFrameBytes = null;
-          _errorMessage =
-              'Unable to load video stream. Please check your internet connection and try again.';
+          _errorMessage = context.l10n.unableToLoadVideoStream;
           _isLoading = false;
         });
       }
@@ -259,7 +259,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
       _currentPosition = Duration.zero;
       _wasPlaybackEstablished = false;
       _isLoading = true;
-      _loadingText = 'Resolving stream links...';
+      _isInitializingStage = false;
     });
 
     _fetchVideoList();
@@ -388,13 +388,16 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
       }
     });
 
-    _pipChannel.invokeMethod<bool>('isInPip').then((inPip) {
-      if (inPip == true && mounted) {
-        setState(() {
-          _isInPip = true;
-        });
-      }
-    }).catchError((_) {});
+    _pipChannel
+        .invokeMethod<bool>('isInPip')
+        .then((inPip) {
+          if (inPip == true && mounted) {
+            setState(() {
+              _isInPip = true;
+            });
+          }
+        })
+        .catchError((_) {});
 
     _pipChannel.setMethodCallHandler((call) async {
       switch (call.method) {
@@ -565,7 +568,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
     if (_autoRetryCount == 0) {
       setState(() {
         _isLoading = true;
-        _loadingText = 'Resolving stream links...';
+        _isInitializingStage = false;
         _errorMessage = null;
       });
     } else {
@@ -659,8 +662,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
           _isAutoRetrying = false;
           _playerFailed = _wasPlaybackEstablished;
           _lastFrameBytes = null;
-          _errorMessage =
-              'No video streams found. Please check your internet connection and try again.';
+          _errorMessage = context.l10n.noVideoStreamsFound;
           _isLoading = false;
         });
         return;
@@ -683,8 +685,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
         _isAutoRetrying = false;
         _playerFailed = _wasPlaybackEstablished;
         _lastFrameBytes = null;
-        _errorMessage =
-            'Unable to load video stream. Please check your internet connection and try again.';
+        _errorMessage = context.l10n.unableToLoadVideoStream;
         _isLoading = false;
       });
     }
@@ -782,7 +783,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
     if (_autoRetryCount == 0) {
       setState(() {
         _isLoading = true;
-        _loadingText = 'Initializing player...';
+        _isInitializingStage = true;
       });
     }
 
@@ -850,8 +851,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
         if (!isValid) {
           if (!mounted) return;
           setState(() {
-            _errorMessage =
-                'The downloaded video file is corrupt or invalid.\n(An HTML error page or incomplete stream was saved instead of video data).\n\nPlease delete this download and try again.';
+            _errorMessage = context.l10n.downloadedVideoCorrupt;
             _isLoading = false;
           });
           return;
@@ -1040,8 +1040,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
           _isAutoRetrying = false;
           _playerFailed = _wasPlaybackEstablished;
           _lastFrameBytes = null;
-          _errorMessage =
-              'Unable to load video stream. Please check your internet connection and try again.';
+          _errorMessage = context.l10n.unableToLoadVideoStream;
           _isLoading = false;
         });
       }
@@ -1525,10 +1524,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
           return LayoutBuilder(
             builder: (context, constraints) {
               final width = constraints.maxWidth;
-              final targetFontSize = (width *
-                      0.045 *
-                      (_subtitleConfig.effectiveFontSize / 20.0))
-                  .clamp(8.5, 13.0);
+              final targetFontSize =
+                  (width * 0.045 * (_subtitleConfig.effectiveFontSize / 20.0))
+                      .clamp(8.5, 13.0);
               final scale = targetFontSize / _subtitleConfig.effectiveFontSize;
 
               return ConstrainedBox(
@@ -1549,10 +1547,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
           );
         }
 
-        return CustomSubtitleView(
-          text: text,
-          config: _subtitleConfig,
-        );
+        return CustomSubtitleView(text: text, config: _subtitleConfig);
       },
     );
 
@@ -1819,11 +1814,11 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
                 label: Text(
                   activeSkip.skipType == 'op' ||
                           activeSkip.skipType == 'mixed-op'
-                      ? 'Skip Opening'
+                      ? context.l10n.skipOpening
                       : activeSkip.skipType == 'ed' ||
                             activeSkip.skipType == 'mixed-ed'
-                      ? 'Skip Ending'
-                      : 'Skip Recap',
+                      ? context.l10n.skipEnding
+                      : context.l10n.skipRecap,
                 ),
               );
             },
@@ -1845,9 +1840,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
             fit: StackFit.expand,
             alignment: Alignment.center,
             children: [
-              RepaintBoundary(
-                child: _buildVideoDisplay(),
-              ),
+              RepaintBoundary(child: _buildVideoDisplay()),
               _buildSubtitleOverlay(isPip: true),
             ],
           ),
@@ -1881,7 +1874,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
                     ),
                     const SizedBox(height: 24),
                     Text(
-                      _loadingText,
+                      _isInitializingStage
+                          ? context.l10n.initializingPlayer
+                          : context.l10n.resolvingStreamLinks,
                       style: const TextStyle(color: Colors.white, fontSize: 16),
                     ),
                   ],

@@ -5,6 +5,7 @@ import 'package:zenbu/components/global/custom_image.dart';
 import 'package:zenbu/components/global/shimmer_placeholder.dart';
 import 'package:zenbu/pages/list_page.dart';
 import 'package:zenbu/services/anilist/anilist.dart';
+import 'package:zenbu/l10n/l10n_extension.dart';
 
 class ProfileListButton extends StatefulWidget {
   final int userId;
@@ -94,7 +95,9 @@ class _ProfileListButtonState extends State<ProfileListButton> {
 
   @override
   Widget build(BuildContext context) {
-    final titleText = widget.isAnime ? "Anime List" : "Manga List";
+    final titleText = widget.isAnime
+        ? context.l10n.animeList
+        : context.l10n.mangaList;
     final iconData = widget.isAnime ? Icons.tv : Icons.menu_book;
 
     return SizedBox(
@@ -191,8 +194,12 @@ class _ProfileListButtonState extends State<ProfileListButton> {
                       MaterialPageRoute(
                         builder: (context) {
                           return ListPage(
-                            title:
-                                "${widget.username}'s ${widget.isAnime ? 'Anime' : 'Manga'} List",
+                            title: context.l10n.userMediaListTitle(
+                              widget.username,
+                              widget.isAnime
+                                  ? context.l10n.anime
+                                  : context.l10n.manga,
+                            ),
                             mediaListType: widget.isAnime
                                 ? MediaType.anime
                                 : MediaType.manga,

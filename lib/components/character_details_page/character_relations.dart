@@ -2,6 +2,7 @@ import 'package:zenbu/components/global/item_card.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:zenbu/state_provider.dart';
+import 'package:zenbu/l10n/l10n_extension.dart';
 
 class CharacterRelations extends StatelessWidget {
   const CharacterRelations({super.key, required this.relations});
@@ -12,17 +13,17 @@ class CharacterRelations extends StatelessWidget {
   Widget build(BuildContext context) {
     final provider = Provider.of<StateProvider>(context);
     return Container(
-      margin: EdgeInsets.only(left: 12, right: 12),
+      margin: const EdgeInsets.only(left: 12, right: 12),
       width: double.infinity,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "Relations",
-            style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+            context.l10n.relations,
+            style: const TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
           ),
           Container(
-            margin: EdgeInsets.only(top: 10),
+            margin: const EdgeInsets.only(top: 10),
             height: 230,
             width: double.infinity,
             child: SizedBox(
@@ -34,7 +35,7 @@ class CharacterRelations extends StatelessWidget {
                 itemBuilder: (context, index) {
                   final resolvedTitle = provider.resolveTitle(
                     relations[index]["node"]["title"] as Map?,
-                    fallback: "N/A",
+                    fallback: context.l10n.na,
                   );
                   final title = resolvedTitle.length > 16
                       ? '${resolvedTitle.substring(0, 16)}...'

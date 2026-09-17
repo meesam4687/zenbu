@@ -30,6 +30,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
   dynamic_color: ^1.6.6
   animations: ^2.0.11
   http: ^1.4.0
@@ -44,7 +46,7 @@ dependencies:
   flutter_js: ^0.8.0
   js_packer: ^0.0.6
   http_interceptor: ^2.0.0
-  intl: ^0.19.0
+  intl: ^0.20.2
   video_player: ^2.8.1
   chewie: ^1.7.5
   cached_network_image: ^3.3.1
@@ -87,6 +89,7 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
+  generate: true
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.

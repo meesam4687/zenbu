@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:zenbu/state_provider.dart';
 import 'package:zenbu/services/anilist/update_user.dart';
+import 'package:zenbu/l10n/l10n_extension.dart';
 
 class AnilistSettingsPage extends StatefulWidget {
   const AnilistSettingsPage({super.key});
@@ -24,7 +25,7 @@ class _AnilistSettingsPageState extends State<AnilistSettingsPage> {
     } catch (e) {
       if (mounted) {
         Fluttertoast.showToast(
-          msg: 'Failed to update title language: $e',
+          msg: context.l10n.failedToUpdateTitleLanguageWithError(e.toString()),
           toastLength: Toast.LENGTH_LONG,
         );
       }
@@ -42,7 +43,7 @@ class _AnilistSettingsPageState extends State<AnilistSettingsPage> {
     } catch (e) {
       if (mounted) {
         Fluttertoast.showToast(
-          msg: 'Failed to update NSFW preference: $e',
+          msg: context.l10n.failedToUpdateNsfwPreferenceWithError(e.toString()),
           toastLength: Toast.LENGTH_LONG,
         );
       }
@@ -58,7 +59,7 @@ class _AnilistSettingsPageState extends State<AnilistSettingsPage> {
     final tt = Theme.of(context).textTheme;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('AniList Settings')),
+      appBar: AppBar(title: Text(context.l10n.aniListSettings)),
       body: Align(
         alignment: Alignment.topCenter,
         child: ConstrainedBox(
@@ -66,7 +67,7 @@ class _AnilistSettingsPageState extends State<AnilistSettingsPage> {
           child: ListView(
             padding: const EdgeInsets.symmetric(vertical: 8),
             children: [
-              _SectionHeader(label: 'Metadata'),
+              _SectionHeader(label: context.l10n.metadata),
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
                 child: Card(
@@ -89,7 +90,7 @@ class _AnilistSettingsPageState extends State<AnilistSettingsPage> {
                             ),
                             const SizedBox(width: 8),
                             Text(
-                              'Title Language',
+                              context.l10n.titleLanguage,
                               style: tt.titleSmall?.copyWith(
                                 fontWeight: FontWeight.w600,
                               ),
@@ -109,25 +110,25 @@ class _AnilistSettingsPageState extends State<AnilistSettingsPage> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'How titles are shown throughout the app. Synced with your AniList account.',
+                          context.l10n.titleLanguageSubtitle,
                           style: tt.bodySmall?.copyWith(
                             color: cs.onSurfaceVariant,
                           ),
                         ),
                         const SizedBox(height: 14),
                         SegmentedButton<String>(
-                          segments: const [
+                          segments: [
                             ButtonSegment(
                               value: 'ROMAJI',
-                              label: Text('Romaji'),
+                              label: Text(context.l10n.romaji),
                             ),
                             ButtonSegment(
                               value: 'ENGLISH',
-                              label: Text('English'),
+                              label: Text(context.l10n.english),
                             ),
                             ButtonSegment(
                               value: 'NATIVE',
-                              label: Text('Native'),
+                              label: Text(context.l10n.native),
                             ),
                           ],
                           selected: {provider.titleLanguage},
@@ -147,7 +148,7 @@ class _AnilistSettingsPageState extends State<AnilistSettingsPage> {
                   ),
                 ),
               ),
-              _SectionHeader(label: 'Content Preferences'),
+              _SectionHeader(label: context.l10n.contentPreferences),
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
                 child: Card(
@@ -159,13 +160,13 @@ class _AnilistSettingsPageState extends State<AnilistSettingsPage> {
                   child: ListTile(
                     leading: Icon(Icons.explicit_rounded, color: cs.primary),
                     title: Text(
-                      'Show NSFW Content',
+                      context.l10n.showNsfwContent,
                       style: tt.titleSmall?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                     subtitle: Text(
-                      'Display adult (18+) anime and manga. Synced with your AniList account.',
+                      context.l10n.showNsfwContentSubtitle,
                       style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
                     ),
                     trailing: _isSavingNsfw

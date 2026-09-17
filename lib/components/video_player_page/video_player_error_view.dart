@@ -1,6 +1,7 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:zenbu/services/download_service.dart';
+import 'package:zenbu/l10n/l10n_extension.dart';
 
 class VideoPlayerErrorView extends StatelessWidget {
   final bool playerFailed;
@@ -35,10 +36,10 @@ class VideoPlayerErrorView extends StatelessWidget {
           children: [
             const Icon(Icons.wifi_off_rounded, size: 54, color: Colors.white54),
             const SizedBox(height: 16),
-            const Text(
-              'Playback Failed',
+            Text(
+              context.l10n.playbackFailed,
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -56,14 +57,17 @@ class VideoPlayerErrorView extends StatelessWidget {
               spacing: 12,
               runSpacing: 12,
               children: [
-                FilledButton(onPressed: onRetry, child: const Text('Retry')),
+                FilledButton(
+                  onPressed: onRetry,
+                  child: Text(context.l10n.retry),
+                ),
                 OutlinedButton(
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.white,
                     side: const BorderSide(color: Colors.white30),
                   ),
                   onPressed: () => _goBack(context),
-                  child: const Text('Go Back'),
+                  child: Text(context.l10n.goBack),
                 ),
               ],
             ),
@@ -106,10 +110,13 @@ class VideoPlayerErrorView extends StatelessWidget {
                       }
                     },
                     icon: const Icon(Icons.delete_outline),
-                    label: const Text('Delete Download'),
+                    label: Text(context.l10n.deleteDownload),
                   ),
                 ] else ...[
-                  FilledButton(onPressed: onRetry, child: const Text('Retry')),
+                  FilledButton(
+                    onPressed: onRetry,
+                    child: Text(context.l10n.retry),
+                  ),
                 ],
                 OutlinedButton(
                   style: OutlinedButton.styleFrom(
@@ -117,7 +124,7 @@ class VideoPlayerErrorView extends StatelessWidget {
                     side: const BorderSide(color: Colors.white30),
                   ),
                   onPressed: () => _goBack(context),
-                  child: const Text('Go Back'),
+                  child: Text(context.l10n.goBack),
                 ),
               ],
             ),

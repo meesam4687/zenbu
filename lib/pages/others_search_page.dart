@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:zenbu/l10n/l10n_extension.dart';
 import 'package:zenbu/components/global/constant_sliver_grid_delegate.dart';
 import 'package:zenbu/components/global/item_card.dart';
 import 'package:zenbu/services/anilist/anilist.dart';
@@ -132,13 +133,13 @@ class _OthersSearchPageState extends State<OthersSearchPage> {
     } catch (_) {}
   }
 
-  String _getItemTitle(dynamic item) {
+  String _getItemTitle(dynamic item, BuildContext context) {
     if (widget.type == 'character' || widget.type == 'staff') {
-      return item["name"]?["full"] ?? "Unknown Name";
+      return item["name"]?["full"] ?? context.l10n.unknownName;
     } else if (widget.type == 'studio') {
-      return item["name"] ?? "Unknown Studio";
+      return item["name"] ?? context.l10n.unknownStudio;
     } else if (widget.type == 'user') {
-      return item["name"] ?? "Unknown User";
+      return item["name"] ?? context.l10n.unknownUser;
     }
     return "";
   }
@@ -178,8 +179,8 @@ class _OthersSearchPageState extends State<OthersSearchPage> {
                 Expanded(
                   child: TextField(
                     controller: _textController,
-                    decoration: const InputDecoration(
-                      hintText: 'Search...',
+                    decoration: InputDecoration(
+                      hintText: context.l10n.search,
                       border: InputBorder.none,
                       isDense: true,
                       contentPadding: EdgeInsets.zero,
@@ -234,7 +235,7 @@ class _OthersSearchPageState extends State<OthersSearchPage> {
                         child: Padding(
                           padding: const EdgeInsets.only(left: 3.0),
                           child: ItemCard(
-                            title: _getItemTitle(item),
+                            title: _getItemTitle(item, context),
                             image: _getItemImage(item),
                             id: item["id"] as int,
                             type: widget.type,
@@ -249,10 +250,10 @@ class _OthersSearchPageState extends State<OthersSearchPage> {
                 physics: const AlwaysScrollableScrollPhysics(),
                 child: SizedBox(
                   height: MediaQuery.of(context).size.height * 0.6,
-                  child: const Center(
+                  child: Center(
                     child: Text(
-                      "No Results",
-                      style: TextStyle(
+                      context.l10n.noResults,
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
                       ),

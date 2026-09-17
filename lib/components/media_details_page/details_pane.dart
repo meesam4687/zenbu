@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/services.dart';
+import 'package:zenbu/l10n/l10n_extension.dart';
 import 'package:zenbu/services/anilist/anilist.dart';
 import 'package:zenbu/components/media_details_page/details.dart';
 import 'package:zenbu/pages/error_page.dart';
@@ -80,49 +81,55 @@ class _DetailsPaneState extends State<DetailsPane>
     super.dispose();
   }
 
-  String _formatTimeRemaining(int seconds) {
+  String _formatTimeRemaining(BuildContext context, int seconds) {
     int days = seconds ~/ 86400;
     int hours = (seconds % 86400) ~/ 3600;
 
     List<String> parts = [];
     if (days > 0) {
-      parts.add("$days ${days == 1 ? 'day' : 'days'}");
+      parts.add(context.l10n.daysCount(days));
     }
     if (hours > 0) {
-      parts.add("$hours ${hours == 1 ? 'hour' : 'hours'}");
+      parts.add(context.l10n.hoursCount(hours));
     }
 
     if (parts.isEmpty) {
-      return "Less than an hour";
+      return context.l10n.lessThanAnHour;
     }
     return parts.join(" ");
   }
 
-  String _formatDate(Map? date, Map<int, String> months) {
-    if (date == null) return "N/A";
+  String _formatDate(BuildContext context, Map? date, Map<int, String> months) {
+    if (date == null) return context.l10n.na;
     final int? year = date["year"] as int?;
     final int? monthNum = date["month"] as int?;
     final int? day = date["day"] as int?;
 
     if (year == null && monthNum == null && day == null) {
-      return "N/A";
+      return context.l10n.na;
     }
 
+    final isUS = Localizations.localeOf(context).countryCode == 'US';
     final String? monthName = monthNum != null ? months[monthNum] : null;
 
     if (monthName != null && day != null && year != null) {
-      return "$monthName $day, $year";
+      return isUS ? "$monthName $day, $year" : "$day $monthName $year";
     }
     if (monthName != null && day != null && year == null) {
-      return "$monthName $day";
+      return isUS ? "$monthName $day" : "$day $monthName";
     }
     if (monthName != null && day == null && year != null) {
-      return "$monthName, $year";
+      return "$monthName $year";
     }
     if (monthName != null && day == null && year == null) {
       return monthName;
     }
     if (monthName == null && day != null && year != null) {
+      final d = day.toString().padLeft(2, '0');
+      final m = monthNum?.toString().padLeft(2, '0');
+      if (m != null) {
+        return isUS ? "$m/$d/$year" : "$d/$m/$year";
+      }
       return "$day, $year";
     }
     if (monthName == null && day != null && year == null) {
@@ -132,7 +139,34 @@ class _DetailsPaneState extends State<DetailsPane>
       return "$year";
     }
 
-    return "N/A";
+    return context.l10n.na;
+  }
+
+  String _formatSeason(
+    BuildContext context,
+    String? season,
+    dynamic seasonYear,
+  ) {
+    if (season == null) return context.l10n.na;
+    final String seasonText;
+    switch (season.toUpperCase()) {
+      case 'WINTER':
+        seasonText = context.l10n.winter;
+        break;
+      case 'SPRING':
+        seasonText = context.l10n.spring;
+        break;
+      case 'SUMMER':
+        seasonText = context.l10n.summer;
+        break;
+      case 'FALL':
+        seasonText = context.l10n.fall;
+        break;
+      default:
+        seasonText =
+            '${season.substring(0, 1).toUpperCase()}${season.substring(1).toLowerCase()}';
+    }
+    return seasonYear != null ? '$seasonText, $seasonYear' : seasonText;
   }
 
   @override
@@ -140,18 +174,18 @@ class _DetailsPaneState extends State<DetailsPane>
     super.build(context);
     final provider = Provider.of<StateProvider>(context);
     Map<int, String> months = {
-      1: "January",
-      2: "February",
-      3: "March",
-      4: "April",
-      5: "May",
-      6: "June",
-      7: "July",
-      8: "August",
-      9: "September",
-      10: "October",
-      11: "November",
-      12: "December",
+      1: context.l10n.january,
+      2: context.l10n.february,
+      3: context.l10n.march,
+      4: context.l10n.april,
+      5: context.l10n.may,
+      6: context.l10n.june,
+      7: context.l10n.july,
+      8: context.l10n.august,
+      9: context.l10n.september,
+      10: context.l10n.october,
+      11: context.l10n.november,
+      12: context.l10n.december,
     };
 
     return FutureBuilder(
@@ -178,11 +212,11 @@ class _DetailsPaneState extends State<DetailsPane>
             ? (data['data']['Media']['tags'] as List)
                   .map((tag) => tag['name'] as String)
                   .toList()
-            : ["N/A"];
+            : [context.l10n.na];
         final List<dynamic> genres =
             (data['data']['Media']['genres'] as List).isNotEmpty
             ? data['data']['Media']['genres']
-            : ["N/A"];
+            : [context.l10n.na];
 
         final media = data["data"]["Media"];
 
@@ -193,79 +227,95 @@ class _DetailsPaneState extends State<DetailsPane>
           final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
           final secondsRemaining = airingAt - now;
           if (secondsRemaining > 0) {
-            final formattedTime = _formatTimeRemaining(secondsRemaining);
+            final formattedTime = _formatTimeRemaining(
+              context,
+              secondsRemaining,
+            );
             final episode = nextEp["episode"];
             detailsItems.add((
-              label: "Episode $episode in",
+              label: context.l10n.episodeIn(episode),
               value: formattedTime,
             ));
           }
         }
         final meanScoreVal = media["meanScore"] != null
             ? "${(media["meanScore"] as int) / 10}/10"
-            : "N/A";
-        detailsItems.add((label: "Mean Score", value: meanScoreVal));
+            : context.l10n.na;
+        detailsItems.add((label: context.l10n.meanScore, value: meanScoreVal));
 
         if (widget.isAnime) {
           final studiosVal = (media["studios"]["nodes"] as List).isNotEmpty
               ? media["studios"]["nodes"][0]["name"] as String
-              : "N/A";
-          detailsItems.add((label: "Studios", value: studiosVal));
+              : context.l10n.na;
+          detailsItems.add((label: context.l10n.studios, value: studiosVal));
         } else {
           final authorVal = (media["staff"]["edges"] as List).isNotEmpty
               ? media["staff"]["edges"][0]["node"]["name"]["full"] as String
-              : "N/A";
-          detailsItems.add((label: "Author", value: authorVal));
+              : context.l10n.na;
+          detailsItems.add((label: context.l10n.author, value: authorVal));
         }
 
         final sourceVal = media["source"] != null
             ? "${(media["source"] as String).substring(0, 1).toUpperCase()}${(media["source"] as String).substring(1).toLowerCase()}"
                   .replaceAll("_", " ")
-            : "N/A";
-        detailsItems.add((label: "Source", value: sourceVal));
+            : context.l10n.na;
+        detailsItems.add((label: context.l10n.source, value: sourceVal));
 
         final formatVal = media["format"] != null
             ? media["format"] as String
-            : "N/A";
-        detailsItems.add((label: "Format", value: formatVal));
+            : context.l10n.na;
+        detailsItems.add((label: context.l10n.format, value: formatVal));
 
         if (widget.isAnime) {
           final episodesVal = media["episodes"] != null
               ? "${media["episodes"]}"
-              : "N/A";
-          detailsItems.add((label: "Episodes", value: episodesVal));
+              : context.l10n.na;
+          detailsItems.add((label: context.l10n.episodes, value: episodesVal));
 
           final durationVal = media["duration"] != null
-              ? "${media["duration"]} mins"
-              : "N/A";
-          detailsItems.add((label: "Episode Duration", value: durationVal));
+              ? "${media["duration"]} ${context.l10n.mins}"
+              : context.l10n.na;
+          detailsItems.add((
+            label: context.l10n.episodeDuration,
+            value: durationVal,
+          ));
         } else {
           final chaptersVal = media["chapters"] != null
               ? "${media["chapters"]}"
-              : "N/A";
-          detailsItems.add((label: "Chapters", value: chaptersVal));
+              : context.l10n.na;
+          detailsItems.add((label: context.l10n.chapters, value: chaptersVal));
         }
 
         final statusVal = media["status"] != null
             ? "${(media["status"] as String).substring(0, 1).toUpperCase()}${(media["status"] as String).substring(1).toLowerCase()}"
-            : "N/A";
+            : context.l10n.na;
         detailsItems.add((
-          label: "Status",
+          label: context.l10n.status,
           value: statusVal.replaceAll("_", " "),
         ));
 
-        final startDateVal = _formatDate(media["startDate"] as Map?, months);
-        detailsItems.add((label: "Start Date", value: startDateVal));
+        final startDateVal = _formatDate(
+          context,
+          media["startDate"] as Map?,
+          months,
+        );
+        detailsItems.add((label: context.l10n.startDate, value: startDateVal));
 
-        final endDateVal = _formatDate(media["endDate"] as Map?, months);
-        detailsItems.add((label: "End Date", value: endDateVal));
+        final endDateVal = _formatDate(
+          context,
+          media["endDate"] as Map?,
+          months,
+        );
+        detailsItems.add((label: context.l10n.endDate, value: endDateVal));
 
         if (widget.isAnime) {
           final seasonYear = media["seasonYear"] ?? media["startDate"]?["year"];
-          final seasonVal = media["season"] != null
-              ? "${(media["season"].toString()).substring(0, 1).toUpperCase()}${(media["season"].toString()).substring(1).toLowerCase()}${seasonYear != null ? ', $seasonYear' : ''}"
-              : "N/A";
-          detailsItems.add((label: "Season", value: seasonVal));
+          final seasonVal = _formatSeason(
+            context,
+            media["season"] as String?,
+            seasonYear,
+          );
+          detailsItems.add((label: context.l10n.season, value: seasonVal));
         }
         return Container(
           width: double.infinity,
@@ -279,9 +329,9 @@ class _DetailsPaneState extends State<DetailsPane>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      "Description",
-                      style: TextStyle(
+                    Text(
+                      context.l10n.description,
+                      style: const TextStyle(
                         fontSize: 25,
                         fontWeight: FontWeight.bold,
                       ),
@@ -331,15 +381,15 @@ class _DetailsPaneState extends State<DetailsPane>
                           );
                           if (fullDescMarkdown.isNotEmpty) {
                             fullDescMarkdown +=
-                                "\n\n**Alternative Titles:**\n$altTitlesFormatted";
+                                "\n\n**${context.l10n.alternativeTitles}:**\n$altTitlesFormatted";
                           } else {
                             fullDescMarkdown =
-                                "**Alternative Titles:**\n$altTitlesFormatted";
+                                "**${context.l10n.alternativeTitles}:**\n$altTitlesFormatted";
                           }
                         }
 
                         if (fullDescMarkdown.isEmpty) {
-                          return const Text("N/A");
+                          return Text(context.l10n.na);
                         }
 
                         return MarkdownBody(
@@ -380,9 +430,9 @@ class _DetailsPaneState extends State<DetailsPane>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      "Genres and Tags",
-                      style: TextStyle(
+                    Text(
+                      context.l10n.genresAndTags,
+                      style: const TextStyle(
                         fontSize: 25,
                         fontWeight: FontWeight.bold,
                       ),
@@ -395,7 +445,7 @@ class _DetailsPaneState extends State<DetailsPane>
                         itemCount: (genres + tags).length,
                         itemBuilder: (context, index) {
                           final item = (genres + tags)[index].toString();
-                          final bool isNA = item == "N/A";
+                          final bool isNA = item == context.l10n.na;
                           final bool isGenre = genres.contains(item);
 
                           return Padding(
@@ -469,9 +519,9 @@ class _DetailsPaneState extends State<DetailsPane>
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            "Characters",
-                            style: TextStyle(
+                          Text(
+                            context.l10n.characters,
+                            style: const TextStyle(
                               fontSize: 25,
                               fontWeight: FontWeight.bold,
                             ),
@@ -513,9 +563,9 @@ class _DetailsPaneState extends State<DetailsPane>
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            "Relations",
-                            style: TextStyle(
+                          Text(
+                            context.l10n.relations,
+                            style: const TextStyle(
                               fontSize: 25,
                               fontWeight: FontWeight.bold,
                             ),
@@ -565,9 +615,9 @@ class _DetailsPaneState extends State<DetailsPane>
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            "Staff",
-                            style: TextStyle(
+                          Text(
+                            context.l10n.staff,
+                            style: const TextStyle(
                               fontSize: 25,
                               fontWeight: FontWeight.bold,
                             ),
@@ -610,9 +660,9 @@ class _DetailsPaneState extends State<DetailsPane>
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            "Recommendations",
-                            style: TextStyle(
+                          Text(
+                            context.l10n.recommendations,
+                            style: const TextStyle(
                               fontSize: 25,
                               fontWeight: FontWeight.bold,
                             ),

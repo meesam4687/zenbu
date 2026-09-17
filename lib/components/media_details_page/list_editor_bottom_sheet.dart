@@ -2,6 +2,7 @@ import 'package:zenbu/services/anilist/anilist.dart';
 import 'package:zenbu/state_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:zenbu/l10n/l10n_extension.dart';
 
 class ListEditorBottomSheet extends StatefulWidget {
   const ListEditorBottomSheet({
@@ -40,8 +41,12 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
   late String selectedStatus;
   DateTime? startDate;
   DateTime? endDate;
-  String? startDateString;
-  String? endDateString;
+  int? startDay;
+  int? startMonth;
+  int? startYear;
+  int? endDay;
+  int? endMonth;
+  int? endYear;
   bool isLoading = false;
   bool isDeleting = false;
 
@@ -49,12 +54,50 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
   void initState() {
     super.initState();
     selectedStatus = widget.status;
-    startDateString = (widget.startDate["day"] != -1)
-        ? '${widget.startDate["day"]}/${widget.startDate["month"]}/${widget.startDate["year"]}'
-        : 'Select Date';
-    endDateString = (widget.endDate["day"] != -1)
-        ? '${widget.endDate["day"]}/${widget.endDate["month"]}/${widget.endDate["year"]}'
-        : 'Select Date';
+    if (widget.startDate["day"] != null && widget.startDate["day"] != -1) {
+      startDay = widget.startDate["day"] as int?;
+      startMonth = widget.startDate["month"] as int?;
+      startYear = widget.startDate["year"] as int?;
+    }
+    if (widget.endDate["day"] != null && widget.endDate["day"] != -1) {
+      endDay = widget.endDate["day"] as int?;
+      endMonth = widget.endDate["month"] as int?;
+      endYear = widget.endDate["year"] as int?;
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant ListEditorBottomSheet oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.startDate != widget.startDate && startDate == null) {
+      if (widget.startDate["day"] != null && widget.startDate["day"] != -1) {
+        startDay = widget.startDate["day"] as int?;
+        startMonth = widget.startDate["month"] as int?;
+        startYear = widget.startDate["year"] as int?;
+      }
+    }
+    if (oldWidget.endDate != widget.endDate && endDate == null) {
+      if (widget.endDate["day"] != null && widget.endDate["day"] != -1) {
+        endDay = widget.endDate["day"] as int?;
+        endMonth = widget.endDate["month"] as int?;
+        endYear = widget.endDate["year"] as int?;
+      }
+    }
+  }
+
+  String? _formatDate(BuildContext context, int? day, int? month, int? year) {
+    if (day == null ||
+        month == null ||
+        year == null ||
+        day == -1 ||
+        month == -1 ||
+        year == -1) {
+      return null;
+    }
+    final isUS = Localizations.localeOf(context).countryCode == 'US';
+    final d = day.toString().padLeft(2, '0');
+    final m = month.toString().padLeft(2, '0');
+    return isUS ? '$m/$d/$year' : '$d/$m/$year';
   }
 
   @override
@@ -69,22 +112,22 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
   Widget build(BuildContext context) {
     Map listStatusToText = widget.isAnime
         ? {
-            "CURRENT": "Watching",
-            "COMPLETED": "Completed",
-            "PLANNING": "Planning",
-            "DROPPED": "Dropped",
-            "REPEATING": "Rewatching",
-            "NONE": "Select",
-            "PAUSED": "Paused",
+            "CURRENT": context.l10n.watching,
+            "COMPLETED": context.l10n.completed,
+            "PLANNING": context.l10n.planning,
+            "DROPPED": context.l10n.dropped,
+            "REPEATING": context.l10n.rewatching,
+            "NONE": context.l10n.select,
+            "PAUSED": context.l10n.paused,
           }
         : {
-            "CURRENT": "Reading",
-            "COMPLETED": "Completed",
-            "PLANNING": "Planning",
-            "DROPPED": "Dropped",
-            "REPEATING": "Rereading",
-            "NONE": "Select",
-            "PAUSED": "Paused",
+            "CURRENT": context.l10n.reading,
+            "COMPLETED": context.l10n.completed,
+            "PLANNING": context.l10n.planning,
+            "DROPPED": context.l10n.dropped,
+            "REPEATING": context.l10n.rereading,
+            "NONE": context.l10n.select,
+            "PAUSED": context.l10n.paused,
           };
 
     return SafeArea(
@@ -111,9 +154,9 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           spacing: 10,
                           children: [
-                            const Text(
-                              "Status",
-                              style: TextStyle(
+                            Text(
+                              context.l10n.status,
+                              style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 20,
                               ),
@@ -126,55 +169,55 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                                 hintText: listStatusToText[widget.status],
                                 dropdownMenuEntries: widget.isAnime
                                     ? [
-                                        const DropdownMenuEntry(
+                                        DropdownMenuEntry(
                                           value: "CURRENT",
-                                          label: "Watching",
+                                          label: context.l10n.watching,
                                         ),
-                                        const DropdownMenuEntry(
+                                        DropdownMenuEntry(
                                           value: "COMPLETED",
-                                          label: "Completed",
+                                          label: context.l10n.completed,
                                         ),
-                                        const DropdownMenuEntry(
+                                        DropdownMenuEntry(
                                           value: "PLANNING",
-                                          label: "Planning",
+                                          label: context.l10n.planning,
                                         ),
-                                        const DropdownMenuEntry(
+                                        DropdownMenuEntry(
                                           value: "DROPPED",
-                                          label: "Dropped",
+                                          label: context.l10n.dropped,
                                         ),
-                                        const DropdownMenuEntry(
+                                        DropdownMenuEntry(
                                           value: "REPEATING",
-                                          label: "Rewatching",
+                                          label: context.l10n.rewatching,
                                         ),
-                                        const DropdownMenuEntry(
+                                        DropdownMenuEntry(
                                           value: "PAUSED",
-                                          label: "Paused",
+                                          label: context.l10n.paused,
                                         ),
                                       ]
                                     : [
-                                        const DropdownMenuEntry(
+                                        DropdownMenuEntry(
                                           value: "CURRENT",
-                                          label: "Reading",
+                                          label: context.l10n.reading,
                                         ),
-                                        const DropdownMenuEntry(
+                                        DropdownMenuEntry(
                                           value: "COMPLETED",
-                                          label: "Completed",
+                                          label: context.l10n.completed,
                                         ),
-                                        const DropdownMenuEntry(
+                                        DropdownMenuEntry(
                                           value: "PLANNING",
-                                          label: "Planning",
+                                          label: context.l10n.planning,
                                         ),
-                                        const DropdownMenuEntry(
+                                        DropdownMenuEntry(
                                           value: "DROPPED",
-                                          label: "Dropped",
+                                          label: context.l10n.dropped,
                                         ),
-                                        const DropdownMenuEntry(
+                                        DropdownMenuEntry(
                                           value: "REPEATING",
-                                          label: "Rereading",
+                                          label: context.l10n.rereading,
                                         ),
-                                        const DropdownMenuEntry(
+                                        DropdownMenuEntry(
                                           value: "PAUSED",
-                                          label: "Paused",
+                                          label: context.l10n.paused,
                                         ),
                                       ],
                                 onSelected: (value) {
@@ -191,9 +234,9 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           spacing: 10,
                           children: [
-                            const Text(
-                              "Progress",
-                              style: TextStyle(
+                            Text(
+                              context.l10n.progress,
+                              style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 20,
                               ),
@@ -221,9 +264,9 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           spacing: 10,
                           children: [
-                            const Text(
-                              "Start Date",
-                              style: TextStyle(
+                            Text(
+                              context.l10n.startDate,
+                              style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 20,
                               ),
@@ -246,30 +289,43 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                                     borderRadius: BorderRadius.circular(4),
                                   ),
                                   child: Text(
-                                    startDateString as String,
+                                    _formatDate(
+                                          context,
+                                          startDay,
+                                          startMonth,
+                                          startYear,
+                                        ) ??
+                                        context.l10n.selectDate,
                                     style: const TextStyle(fontSize: 16),
                                   ),
                                 ),
                               ),
                               onTap: () async {
+                                final now = DateTime.now();
+                                final initial =
+                                    (startDay != null &&
+                                        startMonth != null &&
+                                        startYear != null)
+                                    ? DateTime(
+                                        startYear!,
+                                        startMonth!,
+                                        startDay!,
+                                      )
+                                    : now;
                                 startDate = await showDatePicker(
                                   context: context,
-                                  initialDate: DateTime(
-                                    DateTime.now().year,
-                                    DateTime.now().month,
-                                    DateTime.now().day,
-                                  ),
+                                  locale: Localizations.localeOf(context),
+                                  initialDate: initial.isAfter(now)
+                                      ? now
+                                      : initial,
                                   firstDate: DateTime(1970),
-                                  lastDate: DateTime(
-                                    DateTime.now().year,
-                                    DateTime.now().month,
-                                    DateTime.now().day,
-                                  ),
+                                  lastDate: now,
                                 );
                                 if (startDate != null) {
                                   setState(() {
-                                    startDateString =
-                                        '${startDate!.day.toString()}/${startDate!.month.toString()}/${startDate!.year.toString()}';
+                                    startDay = startDate!.day;
+                                    startMonth = startDate!.month;
+                                    startYear = startDate!.year;
                                   });
                                 }
                               },
@@ -283,9 +339,9 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           spacing: 10,
                           children: [
-                            const Text(
-                              "End Date",
-                              style: TextStyle(
+                            Text(
+                              context.l10n.endDate,
+                              style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 20,
                               ),
@@ -308,30 +364,39 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                                     borderRadius: BorderRadius.circular(4),
                                   ),
                                   child: Text(
-                                    endDateString as String,
+                                    _formatDate(
+                                          context,
+                                          endDay,
+                                          endMonth,
+                                          endYear,
+                                        ) ??
+                                        context.l10n.selectDate,
                                     style: const TextStyle(fontSize: 16),
                                   ),
                                 ),
                               ),
                               onTap: () async {
+                                final now = DateTime.now();
+                                final initial =
+                                    (endDay != null &&
+                                        endMonth != null &&
+                                        endYear != null)
+                                    ? DateTime(endYear!, endMonth!, endDay!)
+                                    : now;
                                 endDate = await showDatePicker(
                                   context: context,
-                                  initialDate: DateTime(
-                                    DateTime.now().year,
-                                    DateTime.now().month,
-                                    DateTime.now().day,
-                                  ),
+                                  locale: Localizations.localeOf(context),
+                                  initialDate: initial.isAfter(now)
+                                      ? now
+                                      : initial,
                                   firstDate: DateTime(1970),
-                                  lastDate: DateTime(
-                                    DateTime.now().year,
-                                    DateTime.now().month,
-                                    DateTime.now().day,
-                                  ),
+                                  lastDate: now,
                                 );
                                 if (endDate != null) {
                                   setState(() {
-                                    endDateString =
-                                        '${endDate!.day.toString()}/${endDate!.month.toString()}/${endDate!.year.toString()}';
+                                    endDay = endDate!.day;
+                                    endMonth = endDate!.month;
+                                    endYear = endDate!.year;
                                   });
                                 }
                               },
@@ -349,9 +414,9 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           spacing: 10,
                           children: [
-                            const Text(
-                              "Score",
-                              style: TextStyle(
+                            Text(
+                              context.l10n.scoreDesc,
+                              style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 20,
                               ),
@@ -377,8 +442,8 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                           children: [
                             Text(
                               widget.isAnime
-                                  ? "Total Rewatches"
-                                  : "Total Rereads",
+                                  ? context.l10n.totalRewatches
+                                  : context.l10n.totalRereads,
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 20,
@@ -563,8 +628,8 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                                   )
                                 : const Icon(Icons.check),
                             label: isLoading
-                                ? const Text(" Loading...")
-                                : const Text("Save"),
+                                ? Text(" ${context.l10n.loading}")
+                                : Text(context.l10n.save),
                           ),
                         ),
                       ],

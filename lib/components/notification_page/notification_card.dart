@@ -4,6 +4,7 @@ import 'package:animations/animations.dart';
 import 'package:zenbu/components/global/custom_image.dart';
 import 'package:provider/provider.dart';
 import 'package:zenbu/state_provider.dart';
+import 'package:zenbu/l10n/l10n_extension.dart';
 
 class NotificationCard extends StatelessWidget {
   const NotificationCard({
@@ -22,15 +23,19 @@ class NotificationCard extends StatelessWidget {
     );
     String notificationText = "";
     if (notificationData["type"] == "AIRING") {
-      notificationText =
-          "Episode ${notificationData["episode"].toString()} of $mediaTitle aired";
+      notificationText = context.l10n.notificationEpisodeAired(
+        notificationData["episode"].toString(),
+        mediaTitle,
+      );
     } else if (notificationData["type"] == "RELATED_MEDIA_ADDITION") {
-      notificationText = "$mediaTitle was recently added to the site.";
+      notificationText = context.l10n.notificationMediaAdded(mediaTitle);
     } else if (notificationData["type"] == "MEDIA_DATA_CHANGE") {
-      notificationText = "$mediaTitle received site data changes";
+      notificationText = context.l10n.notificationMediaDataChanged(mediaTitle);
     } else if (notificationData["type"] == "MEDIA_MERGE") {
-      notificationText =
-          "${notificationData["deletedMediaTitles"][0]} was merged with $mediaTitle";
+      notificationText = context.l10n.notificationMediaMerged(
+        notificationData["deletedMediaTitles"][0].toString(),
+        mediaTitle,
+      );
     }
     return OpenContainer(
       openElevation: 0,

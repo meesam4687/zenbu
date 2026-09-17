@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:zenbu/l10n/l10n_extension.dart';
 import 'package:zenbu/state_provider.dart';
+import 'package:zenbu/pages/language_settings_page.dart';
 
 class AppearanceSettingsPage extends StatelessWidget {
   const AppearanceSettingsPage({super.key});
@@ -12,7 +14,7 @@ class AppearanceSettingsPage extends StatelessWidget {
     final tt = Theme.of(context).textTheme;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Appearance')),
+      appBar: AppBar(title: Text(context.l10n.appearance)),
       body: Align(
         alignment: Alignment.topCenter,
         child: SafeArea(
@@ -21,7 +23,47 @@ class AppearanceSettingsPage extends StatelessWidget {
             child: ListView(
               padding: const EdgeInsets.symmetric(vertical: 8),
               children: [
-                _SectionHeader(label: 'Theme Mode'),
+                _SectionHeader(label: context.l10n.appLanguage),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+                  child: Card(
+                    elevation: 0,
+                    color: cs.surfaceContainerLow,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: ListTile(
+                      title: Text(
+                        context.l10n.appLanguage,
+                        style: tt.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      subtitle: Text(
+                        provider.locale == null
+                            ? context.l10n.systemDefault
+                            : provider.locale?.countryCode == 'GB'
+                            ? context.l10n.englishGB
+                            : context.l10n.englishUS,
+                        style: tt.bodySmall?.copyWith(
+                          color: cs.onSurfaceVariant,
+                        ),
+                      ),
+                      trailing: const Icon(Icons.chevron_right_rounded),
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => const LanguageSettingsPage(),
+                          ),
+                        );
+                      },
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                  ),
+                ),
+                _SectionHeader(label: context.l10n.themeMode),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
                   child: Card(
@@ -36,28 +78,28 @@ class AppearanceSettingsPage extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Choose how Zenbu looks on your device.',
+                            context.l10n.themeModeSubtitle,
                             style: tt.bodySmall?.copyWith(
                               color: cs.onSurfaceVariant,
                             ),
                           ),
                           const SizedBox(height: 16),
                           SegmentedButton<ThemeMode>(
-                            segments: const [
+                            segments: [
                               ButtonSegment(
                                 value: ThemeMode.system,
-                                label: Text('System'),
-                                icon: Icon(Icons.brightness_auto_rounded),
+                                label: Text(context.l10n.system),
+                                icon: const Icon(Icons.brightness_auto_rounded),
                               ),
                               ButtonSegment(
                                 value: ThemeMode.light,
-                                label: Text('Light'),
-                                icon: Icon(Icons.light_mode_rounded),
+                                label: Text(context.l10n.light),
+                                icon: const Icon(Icons.light_mode_rounded),
                               ),
                               ButtonSegment(
                                 value: ThemeMode.dark,
-                                label: Text('Dark'),
-                                icon: Icon(Icons.dark_mode_rounded),
+                                label: Text(context.l10n.dark),
+                                icon: const Icon(Icons.dark_mode_rounded),
                               ),
                             ],
                             selected: {provider.themeMode},
@@ -86,7 +128,7 @@ class AppearanceSettingsPage extends StatelessWidget {
                     ),
                   ),
                 ),
-                _SectionHeader(label: 'Accent Colour'),
+                _SectionHeader(label: context.l10n.accentColor),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
                   child: Card(
@@ -101,7 +143,7 @@ class AppearanceSettingsPage extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Personalise the primary colour scheme.',
+                            context.l10n.personaliseColorScheme,
                             style: tt.bodySmall?.copyWith(
                               color: cs.onSurfaceVariant,
                             ),
@@ -135,7 +177,7 @@ class AppearanceSettingsPage extends StatelessWidget {
                     ),
                   ),
                 ),
-                _SectionHeader(label: 'Home Screen Layout'),
+                _SectionHeader(label: context.l10n.homeScreenLayout),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
                   child: Card(
@@ -172,9 +214,9 @@ class AppearanceSettingsPage extends StatelessWidget {
                                   color: cs.outline,
                                 ),
                               ),
-                              title: const Text('Show Anime List'),
-                              subtitle: const Text(
-                                'Display currently watching anime',
+                              title: Text(context.l10n.showAnimeList),
+                              subtitle: Text(
+                                context.l10n.displayCurrentlyWatchingAnime,
                               ),
                               trailing: Switch.adaptive(
                                 value: provider.showAnimeList,
@@ -192,9 +234,9 @@ class AppearanceSettingsPage extends StatelessWidget {
                                   color: cs.outline,
                                 ),
                               ),
-                              title: const Text('Show Manga List'),
-                              subtitle: const Text(
-                                'Display currently reading manga',
+                              title: Text(context.l10n.showMangaList),
+                              subtitle: Text(
+                                context.l10n.displayCurrentlyReadingManga,
                               ),
                               trailing: Switch.adaptive(
                                 value: provider.showMangaList,
@@ -212,9 +254,9 @@ class AppearanceSettingsPage extends StatelessWidget {
                                   color: cs.outline,
                                 ),
                               ),
-                              title: const Text('Show Recommendations'),
-                              subtitle: const Text(
-                                'Display recommendations based on anime list',
+                              title: Text(context.l10n.showRecommendations),
+                              subtitle: Text(
+                                context.l10n.displayRecommendationsBasedOnAnime,
                               ),
                               trailing: Switch.adaptive(
                                 value: provider.showRecommendationsList,
@@ -282,21 +324,27 @@ class _ColorSwatchRow extends StatelessWidget {
     required this.onSelected,
   });
 
-  static const _swatches = [
-    _Swatch(label: 'System', color: null),
+  static final _swatches = [
+    _Swatch(getLabel: (c) => c.l10n.system, color: null),
     _Swatch(
-      label: 'Midnight',
+      getLabel: (c) => c.l10n.themeMidnight,
       color: Colors.black,
       customThemeName: 'Midnight',
     ),
-    _Swatch(label: 'Purple', color: Color(0xFF6750A4)),
-    _Swatch(label: 'Blue', color: Color(0xFF1565C0)),
-    _Swatch(label: 'Teal', color: Color(0xFF00695C)),
-    _Swatch(label: 'Green', color: Color(0xFF2E7D32)),
-    _Swatch(label: 'Amber', color: Color(0xFFE65100)),
-    _Swatch(label: 'Red', color: Color(0xFFC62828)),
-    _Swatch(label: 'Pink', color: Color(0xFFAD1457)),
-    _Swatch(label: 'Indigo', color: Color(0xFF283593)),
+    _Swatch(
+      getLabel: (c) => c.l10n.colorPurple,
+      color: const Color(0xFF6750A4),
+    ),
+    _Swatch(getLabel: (c) => c.l10n.colorBlue, color: const Color(0xFF1565C0)),
+    _Swatch(getLabel: (c) => c.l10n.colorTeal, color: const Color(0xFF00695C)),
+    _Swatch(getLabel: (c) => c.l10n.colorGreen, color: const Color(0xFF2E7D32)),
+    _Swatch(getLabel: (c) => c.l10n.colorAmber, color: const Color(0xFFE65100)),
+    _Swatch(getLabel: (c) => c.l10n.colorRed, color: const Color(0xFFC62828)),
+    _Swatch(getLabel: (c) => c.l10n.colorPink, color: const Color(0xFFAD1457)),
+    _Swatch(
+      getLabel: (c) => c.l10n.colorIndigo,
+      color: const Color(0xFF283593),
+    ),
   ];
 
   @override
@@ -320,10 +368,10 @@ class _ColorSwatchRow extends StatelessWidget {
 }
 
 class _Swatch {
-  final String label;
+  final String Function(BuildContext) getLabel;
   final Color? color;
   final String? customThemeName;
-  const _Swatch({required this.label, this.color, this.customThemeName});
+  const _Swatch({required this.getLabel, this.color, this.customThemeName});
 }
 
 class _ColorSwatch extends StatelessWidget {
@@ -383,7 +431,7 @@ class _ColorSwatch extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            swatch.label,
+            swatch.getLabel(context),
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
               color: isSelected ? cs.primary : cs.onSurfaceVariant,
               fontWeight: isSelected ? FontWeight.w700 : FontWeight.normal,

@@ -13,6 +13,7 @@ import 'package:zenbu/services/download_service.dart';
 import 'package:zenbu/services/local_source_service.dart';
 import 'package:zenbu/components/global/download_action_button.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:zenbu/l10n/l10n_extension.dart';
 
 class AnimeWatchPane extends StatefulWidget {
   final int mediaId;
@@ -141,7 +142,7 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _errorMessage = 'Failed to load extensions: $e';
+        _errorMessage = context.l10n.failedToLoadExtensions(e.toString());
       });
     } finally {
       if (mounted) {
@@ -292,7 +293,7 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
           _cachedEngine?.lastStatusCode == 503;
       final failedUrl = _cachedEngine?.lastRequestUrl;
       setState(() {
-        _errorMessage = 'An error occurred while loading episodes: $e';
+        _errorMessage = context.l10n.errorLoadingEpisodes(e.toString());
         _is403Error = is403;
         _failedUrl = failedUrl;
       });
@@ -314,9 +315,9 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
       children: [
         Row(
           children: [
-            const Text(
-              'Source: ',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+            Text(
+              '${context.l10n.source}: ',
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
             ),
             const SizedBox(width: 8),
             Expanded(
@@ -325,7 +326,7 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
                 isExpanded: true,
                 items: _installedExtensions.map((ext) {
                   final label = ext.id == -1
-                      ? ext.name
+                      ? context.l10n.localSource
                       : '${ext.name} (${ext.lang.toUpperCase()})';
                   return DropdownMenuItem<ExtSource>(
                     value: ext,
@@ -353,8 +354,8 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
                       : null,
                 ),
                 tooltip: _customLinkActive != null
-                    ? 'Custom Link Active (Tap to edit/reset)'
-                    : 'Wrong Title',
+                    ? context.l10n.customLinkActive
+                    : context.l10n.wrongTitle,
                 onPressed: _showWrongTitleBottomSheet,
               ),
             ],
@@ -379,7 +380,7 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Episodes (${_allRawEpisodes.length})',
+                '${context.l10n.episodes} (${_allRawEpisodes.length})',
                 style: const TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.bold,
@@ -390,7 +391,7 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
                   onPressed: () => _launchEpisode(target.episode),
                   icon: const Icon(Icons.play_arrow),
                   label: Text(
-                    '${target.isResume ? "Resume" : "Start"} Ep. ${target.displayNumber}',
+                    '${target.isResume ? context.l10n.resume : context.l10n.start} ${context.l10n.eps}. ${target.displayNumber}',
                   ),
                   style: TextButton.styleFrom(
                     foregroundColor: Theme.of(context).colorScheme.primary,
@@ -447,16 +448,16 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
           const SizedBox(height: 12),
-          const Text(
-            'Local directory is not configured or does not exist.',
+          Text(
+            context.l10n.localDirectoryNotConfiguredOrNotFound,
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 13),
+            style: const TextStyle(fontSize: 13),
           ),
           const SizedBox(height: 16),
           FilledButton.icon(
             onPressed: _pickAnimeDirectory,
             icon: const Icon(Icons.folder_open),
-            label: const Text('Choose Directory'),
+            label: Text(context.l10n.chooseDirectory),
           ),
         ],
       );
@@ -471,7 +472,7 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
           ),
           const SizedBox(height: 12),
           Text(
-            'No folder matching "${widget.animeTitle}" found in local directory.',
+            context.l10n.noFolderMatchingFound(widget.animeTitle),
             textAlign: TextAlign.center,
             style: const TextStyle(fontSize: 13),
           ),
@@ -479,7 +480,7 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
           FilledButton.icon(
             onPressed: _showWrongTitleBottomSheet,
             icon: const Icon(Icons.link),
-            label: const Text('Map Local Folder'),
+            label: Text(context.l10n.mapLocalFolder),
           ),
         ],
       );
@@ -496,8 +497,8 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
         const SizedBox(height: 12),
         Text(
           _is403Error
-              ? 'Cloudflare might be preventing fetching. Try opening in browser and completing the captcha.'
-              : 'An error occurred while loading episodes.',
+              ? context.l10n.cloudflareCaptchaPrompt
+              : context.l10n.errorLoadingEpisodesShort,
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 13,
@@ -515,11 +516,11 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
               } catch (_) {}
             },
             icon: const Icon(Icons.open_in_browser),
-            label: const Text('Open in Browser'),
+            label: Text(context.l10n.openInBrowser),
           ),
           const SizedBox(height: 12),
         ],
-        FilledButton(onPressed: _loadEpisodes, child: const Text('Retry')),
+        FilledButton(onPressed: _loadEpisodes, child: Text(context.l10n.retry)),
       ],
     );
   }
@@ -691,15 +692,18 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
                   color: Colors.grey,
                 ),
                 const SizedBox(height: 16),
-                const Text(
-                  'No Extensions Installed',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                Text(
+                  context.l10n.noAnimeExtensionsInstalled,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 8),
-                const Text(
-                  'To start watching, add repositories and install an anime extension.',
+                Text(
+                  context.l10n.toStartWatchingPrompt,
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 13, color: Colors.grey),
+                  style: const TextStyle(fontSize: 13, color: Colors.grey),
                 ),
                 const SizedBox(height: 20),
                 ElevatedButton.icon(
@@ -712,7 +716,7 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
                     _loadExtensions();
                   },
                   icon: const Icon(Icons.settings),
-                  label: const Text('Manage Extensions'),
+                  label: Text(context.l10n.manageExtensions),
                 ),
               ],
             ),
@@ -758,10 +762,10 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
         children: [
           _buildHeader(),
           const SizedBox(height: 48),
-          const Center(
+          Center(
             child: Text(
-              'No episodes found for this show.',
-              style: TextStyle(color: Colors.grey),
+              context.l10n.noEpisodesFoundForShow,
+              style: const TextStyle(color: Colors.grey),
             ),
           ),
         ],
@@ -919,7 +923,7 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
       } catch (e) {
         if (mounted) {
           Fluttertoast.showToast(
-            msg: 'Failed to load extension engine: $e',
+            msg: context.l10n.failedToLoadExtensionEngine(e.toString()),
             toastLength: Toast.LENGTH_LONG,
           );
         }
@@ -997,12 +1001,13 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
     if (!await LocalSourceService.checkAndRequestStoragePermission(context)) {
       return;
     }
+    if (!mounted) return;
 
     final downloadService = DownloadService();
     if (downloadService.isDownloading(ep.url)) return;
 
     if (downloadService.isDownloaded(false, ep.url)) {
-      Fluttertoast.showToast(msg: 'Episode already downloaded.');
+      Fluttertoast.showToast(msg: context.l10n.episodeAlreadyDownloaded);
       return;
     }
 
@@ -1071,7 +1076,7 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
         if (!wasCancelled && !e.toString().contains('Cancelled by user.')) {
           debugPrint('$e');
           Fluttertoast.showToast(
-            msg: 'Download failed: $e',
+            msg: context.l10n.downloadFailed(e.toString()),
             toastLength: Toast.LENGTH_LONG,
           );
         }
@@ -1099,18 +1104,16 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
             final confirm = await showDialog<bool>(
               context: context,
               builder: (context) => AlertDialog(
-                title: const Text('Delete Download'),
-                content: Text(
-                  'Are you sure you want to delete the offline file for ${ep.name}?',
-                ),
+                title: Text(context.l10n.deleteDownload),
+                content: Text(context.l10n.areYouSureDelete(ep.name)),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(false),
-                    child: const Text('Cancel'),
+                    child: Text(context.l10n.cancel),
                   ),
                   FilledButton(
                     onPressed: () => Navigator.of(context).pop(true),
-                    child: const Text('Delete'),
+                    child: Text(context.l10n.delete),
                   ),
                 ],
               ),
@@ -1271,7 +1274,7 @@ class _WrongTitleBottomSheetState extends State<_WrongTitleBottomSheet> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Search Alternative Title',
+                  context.l10n.searchAlternativeTitle,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -1283,7 +1286,7 @@ class _WrongTitleBottomSheetState extends State<_WrongTitleBottomSheet> {
                       Navigator.of(context).pop();
                     },
                     icon: const Icon(Icons.clear, size: 16),
-                    label: const Text('Reset'),
+                    label: Text(context.l10n.reset),
                     style: TextButton.styleFrom(
                       foregroundColor: Theme.of(context).colorScheme.error,
                     ),
@@ -1294,7 +1297,7 @@ class _WrongTitleBottomSheetState extends State<_WrongTitleBottomSheet> {
             TextField(
               controller: _controller,
               decoration: InputDecoration(
-                hintText: 'Search title...',
+                hintText: context.l10n.searchTitleEllipsis,
                 prefixIcon: const Icon(Icons.search),
                 suffixIcon: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -1333,7 +1336,7 @@ class _WrongTitleBottomSheetState extends State<_WrongTitleBottomSheet> {
                       ),
                     )
                   : _results.isEmpty
-                  ? const Center(child: Text('No results found.'))
+                  ? Center(child: Text(context.l10n.noResultsFound))
                   : ListView.builder(
                       controller: widget.scrollController,
                       itemCount: _results.length,
@@ -1482,19 +1485,19 @@ class _DownloadResolverDialogState extends State<_DownloadResolverDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Download ${widget.episode.name}'),
+      title: Text(context.l10n.downloadWithEpisode(widget.episode.name)),
       content: Builder(
         builder: (context) {
           if (_isLoading) {
-            return const SizedBox(
+            return SizedBox(
               height: 120,
               child: Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    CircularProgressIndicator(),
-                    SizedBox(height: 16),
-                    Text('Resolving download links...'),
+                    const CircularProgressIndicator(),
+                    const SizedBox(height: 16),
+                    Text(context.l10n.resolvingDownloadLinks),
                   ],
                 ),
               ),
@@ -1528,7 +1531,8 @@ class _DownloadResolverDialogState extends State<_DownloadResolverDialog> {
               itemCount: _streams.length,
               itemBuilder: (context, index) {
                 final stream = _streams[index];
-                final quality = stream['quality'] ?? 'Unknown Quality';
+                final quality =
+                    stream['quality'] ?? context.l10n.unknownQuality;
                 return ListTile(
                   title: Text(quality),
                   trailing: const Icon(Icons.download),
@@ -1542,7 +1546,7 @@ class _DownloadResolverDialogState extends State<_DownloadResolverDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(context.l10n.cancel),
         ),
       ],
     );
@@ -1580,7 +1584,7 @@ class _StreamSelectionDialogState extends State<_StreamSelectionDialog> {
       if (mounted) {
         if (rawList.isEmpty) {
           setState(() {
-            _errorMessage = 'No stream links found.';
+            _errorMessage = context.l10n.noStreamLinksFound;
             _isLoading = false;
           });
         } else {
@@ -1606,12 +1610,12 @@ class _StreamSelectionDialogState extends State<_StreamSelectionDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Choose Download Quality'),
+      title: Text(context.l10n.chooseDownloadQuality),
       content: SizedBox(width: double.maxFinite, child: _buildContent()),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(context.l10n.cancel),
         ),
       ],
     );
@@ -1641,7 +1645,7 @@ class _StreamSelectionDialogState extends State<_StreamSelectionDialog> {
       itemCount: _streams.length,
       itemBuilder: (context, index) {
         final stream = Map<String, dynamic>.from(_streams[index]);
-        final quality = stream['quality'] ?? 'Unknown Quality';
+        final quality = stream['quality'] ?? context.l10n.unknownQuality;
         return ListTile(
           title: Text(quality),
           onTap: () => Navigator.of(context).pop(stream),

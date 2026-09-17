@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:zenbu/l10n/l10n_extension.dart';
 
 class AuthenticationPage extends StatefulWidget {
   const AuthenticationPage({super.key});
@@ -28,22 +29,25 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: [
-              const FittedBox(
+              FittedBox(
                 fit: BoxFit.scaleDown,
                 child: Text(
-                  "Zenbu",
+                  context.l10n.appTitle,
                   maxLines: 1,
                   softWrap: false,
-                  style: TextStyle(fontSize: 50, fontWeight: FontWeight.w100),
+                  style: const TextStyle(
+                    fontSize: 50,
+                    fontWeight: FontWeight.w100,
+                  ),
                 ),
               ),
-              const FittedBox(
+              FittedBox(
                 fit: BoxFit.scaleDown,
                 child: Text(
-                  "*insert some line here*",
+                  context.l10n.insertSomeLineHere,
                   maxLines: 1,
                   softWrap: false,
-                  style: TextStyle(fontWeight: FontWeight.w200),
+                  style: const TextStyle(fontWeight: FontWeight.w200),
                 ),
               ),
               const SizedBox(height: 20),
@@ -66,11 +70,11 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
                     mainAxisSize: MainAxisSize.min,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text(
-                        "Login with",
+                      Text(
+                        context.l10n.loginWith,
                         maxLines: 1,
                         softWrap: false,
-                        style: TextStyle(fontSize: 16),
+                        style: const TextStyle(fontSize: 16),
                       ),
                       const SizedBox(width: 4),
                       SvgPicture.asset(

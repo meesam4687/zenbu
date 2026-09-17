@@ -192,10 +192,7 @@ class CustomSubtitleView extends StatelessWidget {
       alignment: Alignment.bottomCenter,
       child: Container(
         padding: bgOpacity > 0
-            ? EdgeInsets.symmetric(
-                horizontal: 10 * scale,
-                vertical: 4 * scale,
-              )
+            ? EdgeInsets.symmetric(horizontal: 10 * scale, vertical: 4 * scale)
             : EdgeInsets.zero,
         decoration: bgOpacity > 0
             ? BoxDecoration(

@@ -4,6 +4,7 @@ import 'package:zenbu/pages/error_page.dart';
 import 'package:zenbu/pages/review_page.dart';
 import 'package:zenbu/services/anilist/anilist.dart';
 import 'package:zenbu/components/global/custom_image.dart';
+import 'package:zenbu/l10n/l10n_extension.dart';
 
 class ReviewsPane extends StatefulWidget {
   const ReviewsPane({super.key, required this.mediaId});
@@ -95,14 +96,14 @@ class _ReviewsPaneState extends State<ReviewsPane> {
     }
 
     if (_reviews.isEmpty) {
-      return const SingleChildScrollView(
-        physics: AlwaysScrollableScrollPhysics(),
+      return SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
         child: SizedBox(
           height: 300,
           child: Center(
             child: Text(
-              "No reviews available for this media.",
-              style: TextStyle(color: Colors.grey, fontSize: 16),
+              context.l10n.noReviewsAvailable,
+              style: const TextStyle(color: Colors.grey, fontSize: 16),
             ),
           ),
         ),
@@ -181,7 +182,7 @@ class _ReviewsPaneState extends State<ReviewsPane> {
                             ],
                             Expanded(
                               child: Text(
-                                username ?? "Anonymous",
+                                username ?? context.l10n.anonymous,
                                 style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 14,

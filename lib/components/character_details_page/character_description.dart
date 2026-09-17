@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:zenbu/components/global/spoiler.dart';
+import 'package:zenbu/l10n/l10n_extension.dart';
 
 class CharacterDescription extends StatelessWidget {
   const CharacterDescription({
@@ -22,9 +23,12 @@ class CharacterDescription extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Text(
-                "Gender: ",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
+              Text(
+                "${context.l10n.gender} ",
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 17,
+                ),
               ),
               Text(characterGender, style: const TextStyle(fontSize: 17)),
             ],

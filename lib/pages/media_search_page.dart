@@ -1,3 +1,4 @@
+import 'package:zenbu/l10n/l10n_extension.dart';
 import 'package:provider/provider.dart';
 import 'package:zenbu/services/anilist/anilist.dart';
 import 'package:zenbu/components/global/item_card.dart';
@@ -289,11 +290,11 @@ class _SearchPageState extends State<SearchPage> {
                     ),
                   ),
                 )
-              : const SingleChildScrollView(
-                  physics: AlwaysScrollableScrollPhysics(),
+              : SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
                   child: SizedBox(
                     height: 400,
-                    child: Center(child: Text("No Results")),
+                    child: Center(child: Text(context.l10n.noResults)),
                   ),
                 ),
         ),

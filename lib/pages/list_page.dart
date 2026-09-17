@@ -2,6 +2,7 @@ import 'package:zenbu/services/anilist/anilist.dart';
 import 'package:zenbu/components/list_page/list_page_view.dart';
 import 'package:zenbu/pages/error_page.dart';
 import 'package:flutter/material.dart';
+import 'package:zenbu/l10n/l10n_extension.dart';
 
 class ListPage extends StatefulWidget {
   const ListPage({
@@ -77,8 +78,8 @@ class _ListPageState extends State<ListPage> {
               ? TextField(
                   controller: _searchController,
                   autofocus: true,
-                  decoration: const InputDecoration(
-                    hintText: "Search list...",
+                  decoration: InputDecoration(
+                    hintText: context.l10n.searchList,
                     border: InputBorder.none,
                   ),
                   style: TextStyle(
@@ -123,15 +124,15 @@ class _ListPageState extends State<ListPage> {
               TabBar(
                 tabAlignment: TabAlignment.start,
                 isScrollable: true,
-                tabs: const [
-                  Tab(text: "Current"),
-                  Tab(text: "Planning"),
-                  Tab(text: "Completed"),
-                  Tab(text: "Repeating"),
-                  Tab(text: "Paused"),
-                  Tab(text: "Dropped"),
-                  Tab(text: "All"),
-                  Tab(text: "Favourites"),
+                tabs: [
+                  Tab(text: context.l10n.current),
+                  Tab(text: context.l10n.planning),
+                  Tab(text: context.l10n.completed),
+                  Tab(text: context.l10n.repeating),
+                  Tab(text: context.l10n.paused),
+                  Tab(text: context.l10n.dropped),
+                  Tab(text: context.l10n.all),
+                  Tab(text: context.l10n.favorites),
                 ],
               ),
               FutureBuilder(

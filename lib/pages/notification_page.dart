@@ -4,6 +4,7 @@ import 'package:zenbu/components/notification_page/notification_card.dart';
 import 'package:zenbu/pages/error_page.dart';
 import 'package:flutter/material.dart';
 import 'package:zenbu/state_provider.dart';
+import 'package:zenbu/l10n/l10n_extension.dart';
 
 class NotificationPage extends StatefulWidget {
   const NotificationPage({super.key});
@@ -115,7 +116,7 @@ class _NotificationPageState extends State<NotificationPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Notifications")),
+      appBar: AppBar(title: Text(context.l10n.notifications)),
       body: RefreshIndicator(
         onRefresh: _handleRefresh,
         child: _errorMessage != null
@@ -152,7 +153,7 @@ class _NotificationPageState extends State<NotificationPage> {
                               ),
                               const SizedBox(height: 8),
                               Text(
-                                "No Notifications",
+                                context.l10n.noNotifications,
                                 style: TextStyle(
                                   fontSize: 16,
                                   color: Theme.of(context).colorScheme.outline,

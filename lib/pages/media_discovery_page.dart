@@ -8,6 +8,7 @@ import 'package:zenbu/components/media_discovery_page/simulcasts_button.dart';
 import 'package:zenbu/pages/entire_list_view.dart';
 import 'package:zenbu/pages/error_page.dart';
 import 'package:zenbu/state_provider.dart';
+import 'package:zenbu/l10n/l10n_extension.dart';
 
 class MediaDiscoveryPage extends StatefulWidget {
   const MediaDiscoveryPage({super.key, required this.isAnime});
@@ -179,43 +180,43 @@ class _MediaDiscoveryPageState extends State<MediaDiscoveryPage> {
             ],
             if (widget.isAnime) ...[
               HorizontalList(
-                heading: "Trending Now",
+                heading: context.l10n.trendingNow,
                 mediaArray: dataMap["data"]["trending"]["media"],
                 pagetype: PageType.trendingAnime,
               ),
               HorizontalList(
-                heading: "Popular this season",
+                heading: context.l10n.popularThisSeason,
                 mediaArray: dataMap["data"]["popularSeason"]["media"],
                 pagetype: PageType.popularSeasonAnime,
               ),
               HorizontalList(
-                heading: "Upcoming",
+                heading: context.l10n.upcoming,
                 mediaArray: dataMap["data"]["upcoming"]["media"],
                 pagetype: PageType.upcomingAnime,
               ),
               HorizontalList(
-                heading: "All Time Popular",
+                heading: context.l10n.allTimePopular,
                 mediaArray: dataMap["data"]["allTimePopular"]["media"],
                 pagetype: PageType.popularAllTimeAnime,
               ),
               HorizontalList(
-                heading: "Highest Rated",
+                heading: context.l10n.highestRated,
                 mediaArray: dataMap["data"]["highestRated"]["media"],
                 pagetype: PageType.highestRatedAnime,
               ),
             ] else ...[
               HorizontalList(
-                heading: "Trending Now",
+                heading: context.l10n.trendingNow,
                 mediaArray: dataMap["data"]["trending"]["media"],
                 pagetype: PageType.trendingManga,
               ),
               HorizontalList(
-                heading: "All Time Popular",
+                heading: context.l10n.allTimePopular,
                 mediaArray: dataMap["data"]["allTimePopular"]["media"],
                 pagetype: PageType.popularAllTimeManga,
               ),
               HorizontalList(
-                heading: "Highest Rated",
+                heading: context.l10n.highestRated,
                 mediaArray: dataMap["data"]["highestRated"]["media"],
                 pagetype: PageType.highestRatedManga,
               ),

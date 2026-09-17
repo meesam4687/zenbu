@@ -14,6 +14,7 @@ import 'package:zenbu/services/download_service.dart';
 import 'package:zenbu/services/local_source_service.dart';
 import 'package:zenbu/components/global/download_action_button.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:zenbu/l10n/l10n_extension.dart';
 
 class MangaReadPane extends StatefulWidget {
   final int mediaId;
@@ -163,7 +164,7 @@ class _MangaReadPaneState extends State<MangaReadPane> {
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _errorMessage = 'Failed to load extensions: $e';
+        _errorMessage = context.l10n.failedToLoadExtensions(e.toString());
       });
     } finally {
       if (mounted) {
@@ -320,7 +321,7 @@ class _MangaReadPaneState extends State<MangaReadPane> {
           _cachedEngine?.lastStatusCode == 503;
       final failedUrl = _cachedEngine?.lastRequestUrl;
       setState(() {
-        _errorMessage = 'An error occurred while loading chapters: $e';
+        _errorMessage = context.l10n.errorLoadingChapters(e.toString());
         _is403Error = is403;
         _failedUrl = failedUrl;
       });
@@ -342,9 +343,9 @@ class _MangaReadPaneState extends State<MangaReadPane> {
       children: [
         Row(
           children: [
-            const Text(
-              'Source: ',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+            Text(
+              '${context.l10n.source}: ',
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
             ),
             const SizedBox(width: 8),
             Expanded(
@@ -353,7 +354,7 @@ class _MangaReadPaneState extends State<MangaReadPane> {
                 isExpanded: true,
                 items: _installedExtensions.map((ext) {
                   final label = ext.id == -1
-                      ? ext.name
+                      ? context.l10n.localSource
                       : '${ext.name} (${ext.lang.toUpperCase()})';
                   return DropdownMenuItem<ExtSource>(
                     value: ext,
@@ -381,8 +382,8 @@ class _MangaReadPaneState extends State<MangaReadPane> {
                       : null,
                 ),
                 tooltip: _customLinkActive != null
-                    ? 'Custom Link Active (Tap to edit/reset)'
-                    : 'Map Custom Link / Wrong Title',
+                    ? context.l10n.customLinkActive
+                    : context.l10n.mapCustomLinkWrongTitle,
                 onPressed: _showWrongTitleBottomSheet,
               ),
             ],
@@ -407,7 +408,7 @@ class _MangaReadPaneState extends State<MangaReadPane> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Chapters (${_allRawChapters.length})',
+                '${context.l10n.chapters} (${_allRawChapters.length})',
                 style: const TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.bold,
@@ -418,7 +419,7 @@ class _MangaReadPaneState extends State<MangaReadPane> {
                   onPressed: () => _launchChapter(target.episode),
                   icon: const Icon(Icons.chrome_reader_mode),
                   label: Text(
-                    '${target.isResume ? "Resume" : "Start"} Ch. ${target.displayNumber}',
+                    '${target.isResume ? context.l10n.resume : context.l10n.start} ${context.l10n.ch}. ${target.displayNumber}',
                   ),
                   style: TextButton.styleFrom(
                     foregroundColor: Theme.of(context).colorScheme.primary,
@@ -475,16 +476,16 @@ class _MangaReadPaneState extends State<MangaReadPane> {
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
           const SizedBox(height: 12),
-          const Text(
-            'Local directory is not configured or does not exist.',
+          Text(
+            context.l10n.localDirectoryNotConfiguredOrNotFound,
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 13),
+            style: const TextStyle(fontSize: 13),
           ),
           const SizedBox(height: 16),
           FilledButton.icon(
             onPressed: _pickMangaDirectory,
             icon: const Icon(Icons.folder_open),
-            label: const Text('Choose Directory'),
+            label: Text(context.l10n.chooseDirectory),
           ),
         ],
       );
@@ -499,7 +500,7 @@ class _MangaReadPaneState extends State<MangaReadPane> {
           ),
           const SizedBox(height: 12),
           Text(
-            'No folder matching "${widget.mangaTitle}" found in local directory.',
+            context.l10n.noFolderMatchingFound(widget.mangaTitle),
             textAlign: TextAlign.center,
             style: const TextStyle(fontSize: 13),
           ),
@@ -507,7 +508,7 @@ class _MangaReadPaneState extends State<MangaReadPane> {
           FilledButton.icon(
             onPressed: _showWrongTitleBottomSheet,
             icon: const Icon(Icons.link),
-            label: const Text('Map Local Folder'),
+            label: Text(context.l10n.mapLocalFolder),
           ),
         ],
       );
@@ -524,8 +525,8 @@ class _MangaReadPaneState extends State<MangaReadPane> {
         const SizedBox(height: 12),
         Text(
           _is403Error
-              ? 'Cloudflare might be preventing fetching. Try opening in browser and completing the captcha.'
-              : 'An error occurred while loading chapters.',
+              ? context.l10n.cloudflareCaptchaPrompt
+              : context.l10n.errorLoadingChaptersShort,
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 13,
@@ -543,11 +544,11 @@ class _MangaReadPaneState extends State<MangaReadPane> {
               } catch (_) {}
             },
             icon: const Icon(Icons.open_in_browser),
-            label: const Text('Open in Browser'),
+            label: Text(context.l10n.openInBrowser),
           ),
           const SizedBox(height: 12),
         ],
-        FilledButton(onPressed: _loadChapters, child: const Text('Retry')),
+        FilledButton(onPressed: _loadChapters, child: Text(context.l10n.retry)),
       ],
     );
   }
@@ -712,15 +713,18 @@ class _MangaReadPaneState extends State<MangaReadPane> {
                   color: Colors.grey,
                 ),
                 const SizedBox(height: 16),
-                const Text(
-                  'No Manga Extensions Installed',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                Text(
+                  context.l10n.noMangaExtensionsInstalled,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 8),
-                const Text(
-                  'To start reading, add repositories and install a manga extension.',
+                Text(
+                  context.l10n.toStartReadingPrompt,
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 13, color: Colors.grey),
+                  style: const TextStyle(fontSize: 13, color: Colors.grey),
                 ),
                 const SizedBox(height: 20),
                 ElevatedButton.icon(
@@ -733,7 +737,7 @@ class _MangaReadPaneState extends State<MangaReadPane> {
                     _loadExtensions();
                   },
                   icon: const Icon(Icons.settings),
-                  label: const Text('Manage Extensions'),
+                  label: Text(context.l10n.manageExtensions),
                 ),
               ],
             ),
@@ -779,10 +783,10 @@ class _MangaReadPaneState extends State<MangaReadPane> {
         children: [
           _buildHeader(),
           const SizedBox(height: 48),
-          const Center(
+          Center(
             child: Text(
-              'No chapters found for this manga.',
-              style: TextStyle(color: Colors.grey),
+              context.l10n.noChaptersFoundForManga,
+              style: const TextStyle(color: Colors.grey),
             ),
           ),
         ],
@@ -954,7 +958,7 @@ class _MangaReadPaneState extends State<MangaReadPane> {
       } catch (e) {
         if (mounted) {
           Fluttertoast.showToast(
-            msg: 'Failed to load extension engine: $e',
+            msg: context.l10n.failedToLoadExtensionEngine(e.toString()),
             toastLength: Toast.LENGTH_LONG,
           );
         }
@@ -1037,7 +1041,7 @@ class _MangaReadPaneState extends State<MangaReadPane> {
     final int itemType = isNovel ? 2 : 0;
 
     if (downloadService.isDownloaded(itemType, chap.url)) {
-      Fluttertoast.showToast(msg: 'Chapter already downloaded.');
+      Fluttertoast.showToast(msg: context.l10n.chapterAlreadyDownloaded);
       return;
     }
 
@@ -1102,7 +1106,7 @@ class _MangaReadPaneState extends State<MangaReadPane> {
         if (!wasCancelled && !e.toString().contains('Cancelled by user.')) {
           debugPrint('$e');
           Fluttertoast.showToast(
-            msg: 'Download failed: $e',
+            msg: context.l10n.downloadFailed(e.toString()),
             toastLength: Toast.LENGTH_LONG,
           );
         }
@@ -1132,18 +1136,16 @@ class _MangaReadPaneState extends State<MangaReadPane> {
             final confirm = await showDialog<bool>(
               context: context,
               builder: (context) => AlertDialog(
-                title: const Text('Delete Download'),
-                content: Text(
-                  'Are you sure you want to delete the offline files for ${chap.name}?',
-                ),
+                title: Text(context.l10n.deleteDownload),
+                content: Text(context.l10n.areYouSureDelete(chap.name)),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(false),
-                    child: const Text('Cancel'),
+                    child: Text(context.l10n.cancel),
                   ),
                   FilledButton(
                     onPressed: () => Navigator.of(context).pop(true),
-                    child: const Text('Delete'),
+                    child: Text(context.l10n.delete),
                   ),
                 ],
               ),
@@ -1304,7 +1306,7 @@ class _WrongTitleBottomSheetState extends State<_WrongTitleBottomSheet> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Search Alternative Title',
+                  context.l10n.searchAlternativeTitle,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -1316,7 +1318,7 @@ class _WrongTitleBottomSheetState extends State<_WrongTitleBottomSheet> {
                       Navigator.of(context).pop();
                     },
                     icon: const Icon(Icons.clear, size: 16),
-                    label: const Text('Reset'),
+                    label: Text(context.l10n.reset),
                     style: TextButton.styleFrom(
                       foregroundColor: Theme.of(context).colorScheme.error,
                     ),
@@ -1327,7 +1329,7 @@ class _WrongTitleBottomSheetState extends State<_WrongTitleBottomSheet> {
             TextField(
               controller: _controller,
               decoration: InputDecoration(
-                hintText: 'Search title...',
+                hintText: context.l10n.searchTitleEllipsis,
                 prefixIcon: const Icon(Icons.search),
                 suffixIcon: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -1366,7 +1368,7 @@ class _WrongTitleBottomSheetState extends State<_WrongTitleBottomSheet> {
                       ),
                     )
                   : _results.isEmpty
-                  ? const Center(child: Text('No results found.'))
+                  ? Center(child: Text(context.l10n.noResultsFound))
                   : ListView.builder(
                       controller: widget.scrollController,
                       itemCount: _results.length,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:zenbu/l10n/l10n_extension.dart';
 import 'package:provider/provider.dart';
 import 'package:zenbu/services/anilist/anilist.dart';
 import 'package:zenbu/components/media_details_page/details_pane.dart';
@@ -134,10 +135,10 @@ class _MediaDetailsPageState extends State<MediaDetailsPage>
         );
 
         final List<Widget> tabsList = [
-          const Tab(text: "About"),
-          if (showWatchTab) const Tab(text: "Watch"),
-          if (showReadTab) const Tab(text: "Read"),
-          const Tab(text: "Reviews"),
+          Tab(text: context.l10n.about),
+          if (showWatchTab) Tab(text: context.l10n.watch),
+          if (showReadTab) Tab(text: context.l10n.read),
+          Tab(text: context.l10n.reviews),
         ];
 
         final List<Widget> tabViewsList = [
@@ -159,7 +160,10 @@ class _MediaDetailsPageState extends State<MediaDetailsPage>
                       id: widget.id as int,
                       totalEpisodes: progressLimit,
                       title: resolvedTitle,
-                      progress: "Progress: $currentProgress/$progressLimit",
+                      progress: context.l10n.progressWithValues(
+                        currentProgress,
+                        progressLimit,
+                      ),
                       cover: media["coverImage"]["extraLarge"],
                       banner: media["bannerImage"],
                       mediaState: media["mediaListEntry"]?["status"] ?? 'NONE',
@@ -208,7 +212,10 @@ class _MediaDetailsPageState extends State<MediaDetailsPage>
                       id: widget.id as int,
                       totalEpisodes: progressLimit,
                       title: resolvedTitle,
-                      progress: "Progress: $currentProgress/$progressLimit",
+                      progress: context.l10n.progressWithValues(
+                        currentProgress,
+                        progressLimit,
+                      ),
                       cover: media["coverImage"]["extraLarge"],
                       banner: media["bannerImage"],
                       mediaState: media["mediaListEntry"]?["status"] ?? 'NONE',

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:zenbu/l10n/l10n_extension.dart';
 import 'package:zenbu/pages/media_search_page.dart';
 import 'package:zenbu/pages/others_search_page.dart';
 
@@ -69,7 +70,7 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
                       return Padding(
                         padding: const EdgeInsets.all(12.0),
                         child: Text(
-                          'Type to search...',
+                          context.l10n.typeToSearch,
                           style: Theme.of(
                             context,
                           ).textTheme.bodyMedium?.copyWith(color: Colors.grey),
@@ -82,32 +83,32 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
                       children: [
                         _buildOverlayOption(
                           icon: Icons.video_library,
-                          label: 'Search Anime for "$query"',
+                          label: context.l10n.searchAnimeFor(query),
                           onTap: () => _navigate('anime', query),
                         ),
                         _buildOverlayOption(
                           icon: Icons.menu_book,
-                          label: 'Search Manga for "$query"',
+                          label: context.l10n.searchMangaFor(query),
                           onTap: () => _navigate('manga', query),
                         ),
                         _buildOverlayOption(
                           icon: Icons.person,
-                          label: 'Search Characters for "$query"',
+                          label: context.l10n.searchCharactersFor(query),
                           onTap: () => _navigate('character', query),
                         ),
                         _buildOverlayOption(
                           icon: Icons.brush,
-                          label: 'Search Staff for "$query"',
+                          label: context.l10n.searchStaffFor(query),
                           onTap: () => _navigate('staff', query),
                         ),
                         _buildOverlayOption(
                           icon: Icons.business,
-                          label: 'Search Studios for "$query"',
+                          label: context.l10n.searchStudiosFor(query),
                           onTap: () => _navigate('studio', query),
                         ),
                         _buildOverlayOption(
                           icon: Icons.people,
-                          label: 'Search Users for "$query"',
+                          label: context.l10n.searchUsersFor(query),
                           onTap: () => _navigate('user', query),
                         ),
                       ],
@@ -262,8 +263,8 @@ class _GlobalSearchBarState extends State<GlobalSearchBar> {
                             child: TextField(
                               controller: _searchController,
                               focusNode: _searchFocusNode,
-                              decoration: const InputDecoration(
-                                hintText: 'Search...',
+                              decoration: InputDecoration(
+                                hintText: context.l10n.search,
                                 border: InputBorder.none,
                                 isDense: true,
                                 contentPadding: EdgeInsets.zero,

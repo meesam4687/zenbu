@@ -11,6 +11,7 @@ import 'package:zenbu/state_provider.dart';
 import 'package:zenbu/components/home_page/media_list.dart';
 import 'package:zenbu/components/home_page/global_search_bar.dart';
 import 'package:zenbu/services/download_service.dart';
+import 'package:zenbu/l10n/l10n_extension.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -85,7 +86,7 @@ class _HomePageState extends State<HomePage> {
         return Scaffold(
           appBar: AppBar(
             toolbarHeight: 60,
-            title: _isSearching ? const SizedBox() : const Text("Home"),
+            title: _isSearching ? const SizedBox() : Text(context.l10n.home),
             actions: [
               GlobalSearchBar(
                 maxWidth: maxSearchWidth,
@@ -267,7 +268,7 @@ class _HomePageState extends State<HomePage> {
                             MediaList(
                               items: provider.recommendations,
                               isAnime: true,
-                              title: "Recommended for You",
+                              title: context.l10n.recommendedForYou,
                               multiRow: singleListActive,
                             ),
                           );
@@ -335,7 +336,7 @@ class _HomePageState extends State<HomePage> {
                               MediaList(
                                 items: provider.recommendations,
                                 isAnime: true,
-                                title: "Recommended for You",
+                                title: context.l10n.recommendedForYou,
                                 multiRow: singleListActive,
                               ),
                             );
@@ -393,13 +394,13 @@ class _BothDisabledView extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              'Home Screen is empty',
+              context.l10n.homeScreenIsEmpty,
               style: tt.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
             Text(
-              'You put nothing on the homescreen.',
+              context.l10n.youPutNothingOnHomescreen,
               style: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
               textAlign: TextAlign.center,
             ),
@@ -413,7 +414,7 @@ class _BothDisabledView extends StatelessWidget {
                 );
               },
               icon: const Icon(Icons.settings_suggest_rounded),
-              label: const Text('Open Appearance Settings'),
+              label: Text(context.l10n.openAppearanceSettings),
             ),
           ],
         ),
@@ -492,7 +493,7 @@ class _HomeDownloadButtonState extends State<HomeDownloadButton>
             padding: EdgeInsets.zero,
             iconSize: 20,
             icon: iconWidget,
-            tooltip: 'Downloads',
+            tooltip: context.l10n.downloads,
             onPressed: () {
               Navigator.of(context).push(
                 MaterialPageRoute(builder: (context) => const DownloadsPage()),

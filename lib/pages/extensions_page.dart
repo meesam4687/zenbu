@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:zenbu/services/mangayomi/models/extensions_models.dart';
 import 'package:zenbu/services/repo_service.dart';
 import 'package:zenbu/components/global/custom_image.dart';
+import 'package:zenbu/l10n/l10n_extension.dart';
 
 class ExtensionsPage extends StatefulWidget {
   const ExtensionsPage({super.key});
@@ -49,7 +50,11 @@ class _ExtensionsPageState extends State<ExtensionsPage>
         _repos = repos;
       });
     } catch (e) {
-      Fluttertoast.showToast(msg: 'Error loading repos: $e');
+      if (mounted) {
+        Fluttertoast.showToast(
+          msg: context.l10n.errorLoadingRepos(e.toString()),
+        );
+      }
     } finally {
       setState(() => _isLoadingRepos = false);
     }
@@ -65,7 +70,11 @@ class _ExtensionsPageState extends State<ExtensionsPage>
         _allExtensions = all;
       });
     } catch (e) {
-      Fluttertoast.showToast(msg: 'Error loading extensions: $e');
+      if (mounted) {
+        Fluttertoast.showToast(
+          msg: context.l10n.errorLoadingExtensions(e.toString()),
+        );
+      }
     } finally {
       setState(() => _isLoadingExtensions = false);
     }
@@ -74,37 +83,51 @@ class _ExtensionsPageState extends State<ExtensionsPage>
   Future<void> _addRepository(String url) async {
     try {
       await RepoService.addRepo(url);
-      Fluttertoast.showToast(msg: 'Repository added successfully!');
+      if (mounted) {
+        Fluttertoast.showToast(msg: context.l10n.repositoryAddedSuccessfully);
+      }
       _loadRepos();
       _loadExtensions();
     } catch (e) {
-      Fluttertoast.showToast(
-        msg: 'Failed to add repository: $e',
-        toastLength: Toast.LENGTH_LONG,
-      );
+      if (mounted) {
+        Fluttertoast.showToast(
+          msg: context.l10n.failedToAddRepository(e.toString()),
+          toastLength: Toast.LENGTH_LONG,
+        );
+      }
     }
   }
 
   Future<void> _deleteRepository(String url) async {
     try {
       await RepoService.deleteRepo(url);
-      Fluttertoast.showToast(msg: 'Repository removed');
+      if (mounted) {
+        Fluttertoast.showToast(msg: context.l10n.repositoryRemoved);
+      }
       _loadRepos();
       _loadExtensions();
     } catch (e) {
-      Fluttertoast.showToast(msg: 'Error removing repository: $e');
+      if (mounted) {
+        Fluttertoast.showToast(
+          msg: context.l10n.errorRemovingRepository(e.toString()),
+        );
+      }
     }
   }
 
   Future<void> _installExtension(ExtSource ext) async {
     try {
-      Fluttertoast.showToast(msg: 'Installing ${ext.name}...');
+      Fluttertoast.showToast(msg: context.l10n.installingExtension(ext.name));
       await RepoService.installExtension(ext);
-      Fluttertoast.showToast(msg: '${ext.name} installed successfully!');
+      if (!mounted) return;
+      Fluttertoast.showToast(
+        msg: context.l10n.extensionInstalledSuccessfully(ext.name),
+      );
       _loadExtensions();
     } catch (e) {
+      if (!mounted) return;
       Fluttertoast.showToast(
-        msg: 'Failed to install ${ext.name}: $e',
+        msg: context.l10n.failedToInstallExtension(ext.name, e.toString()),
         toastLength: Toast.LENGTH_LONG,
       );
     }
@@ -113,10 +136,14 @@ class _ExtensionsPageState extends State<ExtensionsPage>
   Future<void> _uninstallExtension(ExtSource ext) async {
     try {
       await RepoService.uninstallExtension(ext);
-      Fluttertoast.showToast(msg: '${ext.name} uninstalled');
+      if (!mounted) return;
+      Fluttertoast.showToast(msg: context.l10n.extensionUninstalled(ext.name));
       _loadExtensions();
     } catch (e) {
-      Fluttertoast.showToast(msg: 'Failed to uninstall ${ext.name}: $e');
+      if (!mounted) return;
+      Fluttertoast.showToast(
+        msg: context.l10n.failedToUninstallExtension(ext.name, e.toString()),
+      );
     }
   }
 
@@ -139,21 +166,21 @@ class _ExtensionsPageState extends State<ExtensionsPage>
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return AlertDialog(
-              title: const Text('Add Extension Repo'),
+              title: Text(context.l10n.addExtensionRepo),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text(
-                    'Enter the JSON URL of the repository (e.g. Mangayomi compatible repositories)',
-                    style: TextStyle(fontSize: 14, color: Colors.grey),
+                  Text(
+                    context.l10n.addExtensionRepoDescription,
+                    style: const TextStyle(fontSize: 14, color: Colors.grey),
                   ),
                   const SizedBox(height: 15),
                   TextField(
                     controller: controller,
-                    decoration: const InputDecoration(
-                      labelText: 'Repository URL',
+                    decoration: InputDecoration(
+                      labelText: context.l10n.repositoryUrl,
                       hintText: 'https://example.com/index.json',
-                      border: OutlineInputBorder(),
+                      border: const OutlineInputBorder(),
                     ),
                     keyboardType: TextInputType.url,
                   ),
@@ -164,7 +191,7 @@ class _ExtensionsPageState extends State<ExtensionsPage>
                   onPressed: isAdding
                       ? null
                       : () => Navigator.of(context).pop(),
-                  child: const Text('Cancel'),
+                  child: Text(context.l10n.cancel),
                 ),
                 FilledButton(
                   onPressed: isAdding
@@ -172,7 +199,9 @@ class _ExtensionsPageState extends State<ExtensionsPage>
                       : () async {
                           final url = controller.text.trim();
                           if (url.isEmpty) {
-                            Fluttertoast.showToast(msg: 'URL cannot be empty');
+                            Fluttertoast.showToast(
+                              msg: context.l10n.urlCannotBeEmpty,
+                            );
                             return;
                           }
                           setDialogState(() => isAdding = true);
@@ -190,7 +219,7 @@ class _ExtensionsPageState extends State<ExtensionsPage>
                             ),
                           ),
                         )
-                      : const Text('Add'),
+                      : Text(context.l10n.add),
                 ),
               ],
             );
@@ -204,12 +233,12 @@ class _ExtensionsPageState extends State<ExtensionsPage>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Extensions Manager'),
+        title: Text(context.l10n.extensionsManager),
         bottom: TabBar(
           controller: _tabController,
-          tabs: const [
-            Tab(text: 'Extensions'),
-            Tab(text: 'Repositories'),
+          tabs: [
+            Tab(text: context.l10n.extensions),
+            Tab(text: context.l10n.repositories),
           ],
         ),
       ),
@@ -244,19 +273,19 @@ class _ExtensionsPageState extends State<ExtensionsPage>
               color: Colors.grey.shade400,
             ),
             const SizedBox(height: 16),
-            const Text(
-              'No extensions available.',
-              style: TextStyle(
+            Text(
+              context.l10n.noExtensionsAvailable,
+              style: const TextStyle(
                 fontSize: 18,
                 color: Colors.grey,
                 fontWeight: FontWeight.w500,
               ),
             ),
             const SizedBox(height: 8),
-            const Text(
-              'Add a repository URL in the next tab first!\nMangayomi extensions / repositories can be used.',
+            Text(
+              context.l10n.repoPromptNextTab,
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14, color: Colors.grey),
+              style: const TextStyle(fontSize: 14, color: Colors.grey),
             ),
             const SizedBox(height: 16),
             TextButton(
@@ -266,7 +295,7 @@ class _ExtensionsPageState extends State<ExtensionsPage>
                   mode: LaunchMode.externalApplication,
                 );
               },
-              child: const Text('Need Help?'),
+              child: Text(context.l10n.needHelp),
             ),
           ],
         ),
@@ -324,7 +353,7 @@ class _ExtensionsPageState extends State<ExtensionsPage>
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
           child: SearchBar(
             controller: _searchController,
-            hintText: 'Search extensions...',
+            hintText: context.l10n.searchExtensions,
             elevation: const WidgetStatePropertyAll(1.0),
             backgroundColor: WidgetStatePropertyAll(
               Theme.of(context).colorScheme.onInverseSurface,
@@ -360,21 +389,21 @@ class _ExtensionsPageState extends State<ExtensionsPage>
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 _TypeChip(
-                  label: 'Anime',
+                  label: context.l10n.anime,
                   icon: Icons.tv_rounded,
                   selected: _selectedType == 'anime',
                   onTap: () => setState(() => _selectedType = 'anime'),
                 ),
                 const SizedBox(width: 16),
                 _TypeChip(
-                  label: 'Manga',
+                  label: context.l10n.manga,
                   icon: Icons.menu_book_rounded,
                   selected: _selectedType == 'manga',
                   onTap: () => setState(() => _selectedType = 'manga'),
                 ),
                 const SizedBox(width: 16),
                 _TypeChip(
-                  label: 'Novel',
+                  label: context.l10n.novel,
                   icon: Icons.auto_stories_rounded,
                   selected: _selectedType == 'novel',
                   onTap: () => setState(() => _selectedType = 'novel'),
@@ -399,8 +428,10 @@ class _ExtensionsPageState extends State<ExtensionsPage>
                       const SizedBox(height: 16),
                       Text(
                         _searchQuery.isNotEmpty
-                            ? 'No extensions found.'
-                            : 'No ${_selectedType.toUpperCase()} extensions available.',
+                            ? context.l10n.noExtensionsFound
+                            : context.l10n.noTypeExtensionsAvailable(
+                                _selectedType.toUpperCase(),
+                              ),
                         style: const TextStyle(
                           fontSize: 16,
                           color: Colors.grey,
@@ -472,31 +503,54 @@ class _ExtensionsPageState extends State<ExtensionsPage>
   }
 
   String _langDisplayName(String lang) {
-    const names = {
-      'installed': 'Installed',
-      'all': 'All',
-      'multi': 'Multi-language',
-      'en': 'English',
-      'ja': 'Japanese',
-      'zh': 'Chinese',
-      'ko': 'Korean',
-      'fr': 'French',
-      'de': 'German',
-      'es': 'Spanish',
-      'pt': 'Portuguese',
-      'pt-br': 'Portuguese (Brazil)',
-      'it': 'Italian',
-      'ru': 'Russian',
-      'ar': 'Arabic',
-      'tr': 'Turkish',
-      'pl': 'Polish',
-      'uk': 'Ukrainian',
-      'id': 'Indonesian',
-      'th': 'Thai',
-      'vi': 'Vietnamese',
-      'unknown': 'Unknown',
-    };
-    return names[lang] ?? lang.toUpperCase();
+    switch (lang) {
+      case 'installed':
+        return context.l10n.installed;
+      case 'all':
+        return context.l10n.all;
+      case 'multi':
+        return context.l10n.langMulti;
+      case 'en':
+        return context.l10n.langEnglish;
+      case 'ja':
+        return context.l10n.langJapanese;
+      case 'zh':
+        return context.l10n.langChinese;
+      case 'ko':
+        return context.l10n.langKorean;
+      case 'fr':
+        return context.l10n.langFrench;
+      case 'de':
+        return context.l10n.langGerman;
+      case 'es':
+        return context.l10n.langSpanish;
+      case 'pt':
+        return context.l10n.langPortuguese;
+      case 'pt-br':
+        return context.l10n.langPortugueseBrazil;
+      case 'it':
+        return context.l10n.langItalian;
+      case 'ru':
+        return context.l10n.langRussian;
+      case 'ar':
+        return context.l10n.langArabic;
+      case 'tr':
+        return context.l10n.langTurkish;
+      case 'pl':
+        return context.l10n.langPolish;
+      case 'uk':
+        return context.l10n.langUkrainian;
+      case 'id':
+        return context.l10n.langIndonesian;
+      case 'th':
+        return context.l10n.langThai;
+      case 'vi':
+        return context.l10n.langVietnamese;
+      case 'unknown':
+        return context.l10n.unknown;
+      default:
+        return lang.toUpperCase();
+    }
   }
 
   Widget _buildExtensionCard(ExtSource ext, bool isInst, bool needsUpdate) {
@@ -506,7 +560,7 @@ class _ExtensionsPageState extends State<ExtensionsPage>
         if (isInst) ...[
           IconButton(
             icon: const Icon(Icons.settings),
-            tooltip: 'Settings',
+            tooltip: context.l10n.settings,
             onPressed: () => _showExtensionSettings(ext),
           ),
           const SizedBox(width: 4),
@@ -515,45 +569,32 @@ class _ExtensionsPageState extends State<ExtensionsPage>
           ElevatedButton.icon(
             onPressed: () => _installExtension(ext),
             icon: const Icon(Icons.download, size: 16),
-            label: const Text('Install'),
+            label: Text(context.l10n.install),
             style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 4,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             ),
           )
         else if (needsUpdate)
           FilledButton.icon(
             onPressed: () => _installExtension(ext),
             icon: const Icon(Icons.update, size: 16),
-            label: const Text('Update'),
+            label: Text(context.l10n.update),
             style: FilledButton.styleFrom(
               backgroundColor: Colors.orange,
-              padding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 4,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             ),
           )
         else
           OutlinedButton.icon(
             onPressed: () => _uninstallExtension(ext),
-            icon: const Icon(
-              Icons.delete_outline,
-              size: 16,
-              color: Colors.red,
-            ),
-            label: const Text(
-              'Uninstall',
-              style: TextStyle(color: Colors.red),
+            icon: const Icon(Icons.delete_outline, size: 16, color: Colors.red),
+            label: Text(
+              context.l10n.uninstall,
+              style: const TextStyle(color: Colors.red),
             ),
             style: OutlinedButton.styleFrom(
               side: BorderSide(color: Colors.red.shade200),
-              padding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 4,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             ),
           ),
       ],
@@ -593,10 +634,7 @@ class _ExtensionsPageState extends State<ExtensionsPage>
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 6,
-                vertical: 2,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.primaryContainer,
                 borderRadius: BorderRadius.circular(4),
@@ -612,10 +650,7 @@ class _ExtensionsPageState extends State<ExtensionsPage>
             ),
             if (ext.isNsfw)
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 6,
-                  vertical: 2,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
                   color: Colors.red.shade100,
                   borderRadius: BorderRadius.circular(4),
@@ -634,9 +669,9 @@ class _ExtensionsPageState extends State<ExtensionsPage>
               style: const TextStyle(fontSize: 12, color: Colors.grey),
             ),
             if (isInst && !needsUpdate)
-              const Text(
-                'Installed',
-                style: TextStyle(
+              Text(
+                context.l10n.installed,
+                style: const TextStyle(
                   fontSize: 12,
                   color: Colors.green,
                   fontWeight: FontWeight.bold,
@@ -719,7 +754,7 @@ class _ExtensionsPageState extends State<ExtensionsPage>
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _showAddRepoDialog,
         icon: const Icon(Icons.add),
-        label: const Text('Add Repository'),
+        label: Text(context.l10n.addRepository),
       ),
       body: _isLoadingRepos
           ? Center(
@@ -740,19 +775,19 @@ class _ExtensionsPageState extends State<ExtensionsPage>
                     color: Colors.grey.shade400,
                   ),
                   const SizedBox(height: 16),
-                  const Text(
-                    'No repositories added.',
-                    style: TextStyle(
+                  Text(
+                    context.l10n.noRepositoriesAdded,
+                    style: const TextStyle(
                       fontSize: 18,
                       color: Colors.grey,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
                   const SizedBox(height: 8),
-                  const Text(
-                    'Click the + button to add a source repo!\nMangayomi extensions / repositories can be used.',
+                  Text(
+                    context.l10n.repoPromptAdd,
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 14, color: Colors.grey),
+                    style: const TextStyle(fontSize: 14, color: Colors.grey),
                   ),
                   const SizedBox(height: 16),
                   TextButton(
@@ -762,7 +797,7 @@ class _ExtensionsPageState extends State<ExtensionsPage>
                         mode: LaunchMode.externalApplication,
                       );
                     },
-                    child: const Text('Need Help?'),
+                    child: Text(context.l10n.needHelp),
                   ),
                 ],
               ),
@@ -808,23 +843,23 @@ class _ExtensionsPageState extends State<ExtensionsPage>
                         showDialog(
                           context: context,
                           builder: (context) => AlertDialog(
-                            title: const Text('Remove Repository'),
+                            title: Text(context.l10n.removeRepository),
                             content: Text(
-                              'Are you sure you want to remove the repository "${repo.name}"? This will hide its extensions from the list.',
+                              context.l10n.removeRepoConfirm(repo.name),
                             ),
                             actions: [
                               TextButton(
                                 onPressed: () => Navigator.of(context).pop(),
-                                child: const Text('Cancel'),
+                                child: Text(context.l10n.cancel),
                               ),
                               TextButton(
                                 onPressed: () {
                                   Navigator.of(context).pop();
                                   _deleteRepository(repo.jsonUrl);
                                 },
-                                child: const Text(
-                                  'Remove',
-                                  style: TextStyle(color: Colors.red),
+                                child: Text(
+                                  context.l10n.remove,
+                                  style: const TextStyle(color: Colors.red),
                                 ),
                               ),
                             ],
@@ -938,7 +973,9 @@ class _ExtensionSettingsSheetState extends State<_ExtensionSettingsSheet> {
   void _showTextDialog(String key, Map<String, dynamic> p, String currVal) {
     final controller = TextEditingController(text: currVal);
     final dialogTitle =
-        p['dialogTitle'] as String? ?? p['title'] as String? ?? 'Edit Setting';
+        p['dialogTitle'] as String? ??
+        p['title'] as String? ??
+        context.l10n.editSetting;
     final dialogMessage =
         p['dialogMessage'] as String? ?? p['summary'] as String? ?? '';
     showDialog(
@@ -966,14 +1003,14 @@ class _ExtensionSettingsSheetState extends State<_ExtensionSettingsSheet> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(context.l10n.cancel),
           ),
           FilledButton(
             onPressed: () {
               _updateValue(key, controller.text.trim());
               Navigator.pop(context);
             },
-            child: const Text('Save'),
+            child: Text(context.l10n.save),
           ),
         ],
       ),
@@ -1019,7 +1056,7 @@ class _ExtensionSettingsSheetState extends State<_ExtensionSettingsSheet> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(context.l10n.cancel),
           ),
         ],
       ),
@@ -1067,14 +1104,14 @@ class _ExtensionSettingsSheetState extends State<_ExtensionSettingsSheet> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
+              child: Text(context.l10n.cancel),
             ),
             FilledButton(
               onPressed: () {
                 _updateValue(key, selected);
                 Navigator.pop(context);
               },
-              child: const Text('OK'),
+              child: Text(context.l10n.ok),
             ),
           ],
         ),
@@ -1151,7 +1188,10 @@ class _ExtensionSettingsSheetState extends State<_ExtensionSettingsSheet> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Version ${widget.ext.version} • ${widget.ext.lang.toUpperCase()}',
+                            context.l10n.versionWithLang(
+                              widget.ext.version,
+                              widget.ext.lang.toUpperCase(),
+                            ),
                             style: const TextStyle(
                               fontSize: 12,
                               color: Colors.grey,
@@ -1184,15 +1224,18 @@ class _ExtensionSettingsSheetState extends State<_ExtensionSettingsSheet> {
 
   Widget _buildBody() {
     if (_isLoading) {
-      return const Padding(
-        padding: EdgeInsets.symmetric(vertical: 40),
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 40),
         child: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              CircularProgressIndicator.adaptive(),
-              SizedBox(height: 16),
-              Text('Reading settings...', style: TextStyle(color: Colors.grey)),
+              const CircularProgressIndicator.adaptive(),
+              const SizedBox(height: 16),
+              Text(
+                context.l10n.readingSettings,
+                style: const TextStyle(color: Colors.grey),
+              ),
             ],
           ),
         ),
@@ -1209,7 +1252,7 @@ class _ExtensionSettingsSheetState extends State<_ExtensionSettingsSheet> {
               const Icon(Icons.error_outline, size: 48, color: Colors.red),
               const SizedBox(height: 16),
               Text(
-                'Failed to load settings:\n$_error',
+                context.l10n.failedToLoadSettings(_error!),
                 textAlign: TextAlign.center,
                 style: const TextStyle(color: Colors.red),
               ),
@@ -1220,17 +1263,17 @@ class _ExtensionSettingsSheetState extends State<_ExtensionSettingsSheet> {
     }
 
     if (_preferences.isEmpty) {
-      return const Padding(
-        padding: EdgeInsets.symmetric(vertical: 40),
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 40),
         child: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.tune, size: 48, color: Colors.grey),
-              SizedBox(height: 16),
+              const Icon(Icons.tune, size: 48, color: Colors.grey),
+              const SizedBox(height: 16),
               Text(
-                'This extension has no settings.',
-                style: TextStyle(color: Colors.grey),
+                context.l10n.thisExtensionHasNoSettings,
+                style: const TextStyle(color: Colors.grey),
               ),
             ],
           ),
@@ -1280,7 +1323,7 @@ class _ExtensionSettingsSheetState extends State<_ExtensionSettingsSheet> {
             ),
             subtitle: Text(
               currValue.isEmpty
-                  ? (summary.isNotEmpty ? summary : 'Not configured')
+                  ? (summary.isNotEmpty ? summary : context.l10n.notConfigured)
                   : currValue,
             ),
             trailing: const Icon(Icons.edit_outlined),
@@ -1309,7 +1352,7 @@ class _ExtensionSettingsSheetState extends State<_ExtensionSettingsSheet> {
             ),
             subtitle: Text(
               displayVal.isEmpty
-                  ? (summary.isNotEmpty ? summary : 'Choose setting')
+                  ? (summary.isNotEmpty ? summary : context.l10n.chooseSetting)
                   : displayVal,
             ),
             trailing: const Icon(Icons.arrow_drop_down),
@@ -1342,7 +1385,7 @@ class _ExtensionSettingsSheetState extends State<_ExtensionSettingsSheet> {
             }
           }
           final displayString = displayVals.isEmpty
-              ? (summary.isNotEmpty ? summary : 'None selected')
+              ? (summary.isNotEmpty ? summary : context.l10n.noneSelected)
               : displayVals.join(', ');
 
           return ListTile(

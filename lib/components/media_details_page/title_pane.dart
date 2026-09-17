@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:zenbu/l10n/l10n_extension.dart';
 import 'package:zenbu/components/media_details_page/list_editor_bottom_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -101,8 +102,10 @@ class _TitlePaneState extends State<TitlePane> {
         final savedEntry = response["data"]["SaveMediaListEntry"];
         setState(() {
           mediaState = savedEntry["status"];
-          progress =
-              "Progress: ${savedEntry["progress"]}/${widget.totalEpisodes}";
+          progress = context.l10n.progressWithValues(
+            savedEntry["progress"],
+            widget.totalEpisodes,
+          );
           mediaListEntry = savedEntry;
         });
 
@@ -139,9 +142,12 @@ class _TitlePaneState extends State<TitlePane> {
       if (response["errors"] != null) {
         if (mounted) {
           final errMsg =
-              response["errors"][0]?["message"] ?? "Unknown GraphQL error";
+              response["errors"][0]?["message"] ??
+              context.l10n.unknownGraphQLError;
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Failed to toggle favorite: $errMsg")),
+            SnackBar(
+              content: Text(context.l10n.failedToToggleFavorite(errMsg)),
+            ),
           );
         }
       }
@@ -153,9 +159,9 @@ class _TitlePaneState extends State<TitlePane> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text("Error: $e")));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.errorPrefix(e.toString()))),
+        );
       }
     } finally {
       if (mounted) {
@@ -173,7 +179,10 @@ class _TitlePaneState extends State<TitlePane> {
   ) {
     setState(() {
       mediaState = newStatus;
-      progress = "Progress: $newProgress/${widget.totalEpisodes}";
+      progress = context.l10n.progressWithValues(
+        newProgress,
+        widget.totalEpisodes,
+      );
       mediaListEntry = newMediaListData;
     });
   }
@@ -187,7 +196,7 @@ class _TitlePaneState extends State<TitlePane> {
         const Icon(Icons.edit),
         Flexible(
           child: Text(
-            widget.isAnime ? " Watching" : " Reading",
+            " ${widget.isAnime ? context.l10n.watching : context.l10n.reading}",
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -196,9 +205,9 @@ class _TitlePaneState extends State<TitlePane> {
     } else if (mediaState == 'COMPLETED') {
       elementList = [
         const Icon(Icons.check),
-        const Flexible(
+        Flexible(
           child: Text(
-            " Completed",
+            " ${context.l10n.completed}",
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -207,9 +216,9 @@ class _TitlePaneState extends State<TitlePane> {
     } else if (mediaState == 'PLANNING') {
       elementList = [
         const Icon(Icons.schedule),
-        const Flexible(
+        Flexible(
           child: Text(
-            " Planning",
+            " ${context.l10n.planning}",
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -218,9 +227,9 @@ class _TitlePaneState extends State<TitlePane> {
     } else if (mediaState == 'DROPPED') {
       elementList = [
         const Icon(Icons.cancel),
-        const Flexible(
+        Flexible(
           child: Text(
-            " Dropped",
+            " ${context.l10n.dropped}",
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -229,9 +238,9 @@ class _TitlePaneState extends State<TitlePane> {
     } else if (mediaState == 'PAUSED') {
       elementList = [
         const Icon(Icons.pause),
-        const Flexible(
+        Flexible(
           child: Text(
-            " Paused",
+            " ${context.l10n.paused}",
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -242,7 +251,7 @@ class _TitlePaneState extends State<TitlePane> {
         const Icon(Icons.loop),
         Flexible(
           child: Text(
-            widget.isAnime ? " Rewatching" : " Rereading",
+            " ${widget.isAnime ? context.l10n.rewatching : context.l10n.rereading}",
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -251,9 +260,9 @@ class _TitlePaneState extends State<TitlePane> {
     } else {
       elementList = [
         const Icon(Icons.add),
-        const Flexible(
+        Flexible(
           child: Text(
-            " Add to List",
+            " ${context.l10n.addToList}",
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -559,8 +568,9 @@ class _TitlePaneState extends State<TitlePane> {
                                   HapticFeedback.mediumImpact();
                                 },
                                 child: ConstrainedBox(
-                                  constraints:
-                                      const BoxConstraints(maxWidth: 550),
+                                  constraints: const BoxConstraints(
+                                    maxWidth: 550,
+                                  ),
                                   child: Text(
                                     widget.title,
                                     style: const TextStyle(fontSize: 27),
@@ -579,57 +589,57 @@ class _TitlePaneState extends State<TitlePane> {
                                     ),
                                   ),
                                   if (mediaState == 'CURRENT') ...[
-                                  const SizedBox(width: 8),
-                                  ClipOval(
-                                    child: Material(
-                                      color: _isIncrementing
-                                          ? Colors.grey.shade600
-                                          : Theme.of(
-                                              context,
-                                            ).colorScheme.primaryContainer,
-                                      child: InkWell(
-                                        onTap: _isIncrementing
-                                            ? null
-                                            : _incrementProgress,
-                                        child: SizedBox(
-                                          width: 32,
-                                          height: 32,
-                                          child: Center(
-                                            child: _isIncrementing
-                                                ? const SizedBox(
-                                                    width: 16,
-                                                    height: 16,
-                                                    child: CircularProgressIndicator(
-                                                      strokeWidth: 2,
-                                                      valueColor:
-                                                          AlwaysStoppedAnimation<
-                                                            Color
-                                                          >(Colors.white),
+                                    const SizedBox(width: 8),
+                                    ClipOval(
+                                      child: Material(
+                                        color: _isIncrementing
+                                            ? Colors.grey.shade600
+                                            : Theme.of(
+                                                context,
+                                              ).colorScheme.primaryContainer,
+                                        child: InkWell(
+                                          onTap: _isIncrementing
+                                              ? null
+                                              : _incrementProgress,
+                                          child: SizedBox(
+                                            width: 32,
+                                            height: 32,
+                                            child: Center(
+                                              child: _isIncrementing
+                                                  ? const SizedBox(
+                                                      width: 16,
+                                                      height: 16,
+                                                      child: CircularProgressIndicator(
+                                                        strokeWidth: 2,
+                                                        valueColor:
+                                                            AlwaysStoppedAnimation<
+                                                              Color
+                                                            >(Colors.white),
+                                                      ),
+                                                    )
+                                                  : Text(
+                                                      "+1",
+                                                      style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        fontSize: 14,
+                                                        color: Theme.of(context)
+                                                            .colorScheme
+                                                            .onPrimaryContainer,
+                                                      ),
                                                     ),
-                                                  )
-                                                : Text(
-                                                    "+1",
-                                                    style: TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      fontSize: 14,
-                                                      color: Theme.of(context)
-                                                          .colorScheme
-                                                          .onPrimaryContainer,
-                                                    ),
-                                                  ),
+                                            ),
                                           ),
                                         ),
                                       ),
                                     ),
-                                  ),
+                                  ],
                                 ],
-                              ],
-                            ),
-                          ],
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
                     ],
                   ),
                   Container(

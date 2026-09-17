@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:zenbu/components/video_player_page/custom_subtitle_view.dart';
 import 'package:zenbu/components/video_player_page/subtitle_customization_sheet.dart';
 import 'package:zenbu/services/mangayomi/models/extensions_models.dart';
+import 'package:zenbu/l10n/l10n_extension.dart';
 
 enum _SettingsSubMenu { main, quality, subtitles, speed, customizeSubtitles }
 
@@ -72,8 +73,10 @@ class _VideoPlayerSettingsModalState extends State<VideoPlayerSettingsModal> {
     final theme = Theme.of(context);
     final primaryColor = theme.colorScheme.primary;
 
-    final String qualityText = widget.selectedVideo?.quality ?? 'Default';
-    final String subtitleText = widget.selectedSubtitle?.label ?? 'Off';
+    final String qualityText =
+        widget.selectedVideo?.quality ?? context.l10n.defaultOption;
+    final String subtitleText =
+        widget.selectedSubtitle?.label ?? context.l10n.off;
     final String speedText = '${widget.currentSpeed}x';
 
     final double maxHeight =
@@ -159,16 +162,16 @@ class _VideoPlayerSettingsModalState extends State<VideoPlayerSettingsModal> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
             child: Text(
-              'Playback Settings',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              context.l10n.playbackSettings,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ),
           ListTile(
             leading: const Icon(Icons.high_quality),
-            title: const Text('Quality'),
+            title: Text(context.l10n.quality),
             subtitle: Text(
               qualityText,
               style: TextStyle(
@@ -181,7 +184,7 @@ class _VideoPlayerSettingsModalState extends State<VideoPlayerSettingsModal> {
           ),
           ListTile(
             leading: const Icon(Icons.subtitles),
-            title: const Text('Subtitles'),
+            title: Text(context.l10n.subtitles),
             subtitle: Text(
               subtitleText,
               style: TextStyle(
@@ -194,7 +197,7 @@ class _VideoPlayerSettingsModalState extends State<VideoPlayerSettingsModal> {
           ),
           ListTile(
             leading: const Icon(Icons.speed),
-            title: const Text('Playback Speed'),
+            title: Text(context.l10n.playbackSpeed),
             subtitle: Text(
               speedText,
               style: TextStyle(
@@ -249,15 +252,15 @@ class _VideoPlayerSettingsModalState extends State<VideoPlayerSettingsModal> {
   String _getSubMenuTitle() {
     switch (_activeSubMenu) {
       case _SettingsSubMenu.quality:
-        return 'Select Quality';
+        return context.l10n.selectQuality;
       case _SettingsSubMenu.subtitles:
-        return 'Select Subtitles';
+        return context.l10n.selectSubtitles;
       case _SettingsSubMenu.customizeSubtitles:
-        return 'Customize Subtitles';
+        return context.l10n.customizeSubtitles;
       case _SettingsSubMenu.speed:
-        return 'Playback Speed';
+        return context.l10n.playbackSpeed;
       case _SettingsSubMenu.main:
-        return 'Settings';
+        return context.l10n.settings;
     }
   }
 
@@ -286,7 +289,7 @@ class _VideoPlayerSettingsModalState extends State<VideoPlayerSettingsModal> {
         return [
           ListTile(
             leading: const Icon(Icons.tune),
-            title: const Text('Customize Subtitles'),
+            title: Text(context.l10n.customizeSubtitles),
             trailing: const Icon(Icons.chevron_right),
             onTap: () =>
                 _navigateToSubMenu(_SettingsSubMenu.customizeSubtitles),
@@ -294,7 +297,7 @@ class _VideoPlayerSettingsModalState extends State<VideoPlayerSettingsModal> {
           const Divider(height: 1),
           ListTile(
             title: Text(
-              'Off',
+              context.l10n.off,
               style: TextStyle(
                 fontWeight: widget.selectedSubtitle == null
                     ? FontWeight.bold

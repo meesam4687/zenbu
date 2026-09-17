@@ -8,6 +8,7 @@ import 'package:zenbu/pages/authentication_page.dart';
 import 'package:zenbu/authentication_token_controller.dart';
 import 'package:zenbu/deep_link_controller.dart';
 import 'package:flutter/services.dart';
+import 'package:zenbu/l10n/app_localizations.dart';
 
 String? token;
 void main() async {
@@ -22,6 +23,24 @@ void main() async {
   );
   token = await TokenStorage.getAccessToken();
   runApp(const MyApp());
+}
+
+Locale resolveAppLocale(Locale? locale, Iterable<Locale> supportedLocales) {
+  if (locale != null) {
+    for (final supportedLocale in supportedLocales) {
+      if (supportedLocale.languageCode == locale.languageCode &&
+          supportedLocale.countryCode == locale.countryCode) {
+        return supportedLocale;
+      }
+    }
+    if (locale.languageCode == 'en') {
+      if (locale.countryCode == 'US') {
+        return const Locale('en', 'US');
+      }
+      return const Locale('en', 'GB');
+    }
+  }
+  return const Locale('en', 'GB');
 }
 
 class MyApp extends StatefulWidget {
@@ -120,7 +139,12 @@ class _MyAppState extends State<MyApp> {
               return MaterialApp(
                 navigatorKey: _navigatorKey,
                 debugShowCheckedModeBanner: false,
-                title: 'Zenbu',
+                onGenerateTitle: (context) =>
+                    AppLocalizations.of(context)!.appTitle,
+                locale: provider.locale,
+                localizationsDelegates: AppLocalizations.localizationsDelegates,
+                supportedLocales: AppLocalizations.supportedLocales,
+                localeResolutionCallback: resolveAppLocale,
                 builder: (context, child) {
                   final mediaQuery = MediaQuery.of(context);
                   return MediaQuery(

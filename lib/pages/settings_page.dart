@@ -12,6 +12,7 @@ import 'package:zenbu/pages/appearance_settings_page.dart';
 import 'package:zenbu/pages/extensions_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:zenbu/services/discord_service.dart';
+import 'package:zenbu/l10n/l10n_extension.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -73,7 +74,7 @@ class _SettingsPageState extends State<SettingsPage> {
           _updateInfo = null;
           _isCheckingUpdate = false;
         });
-        Fluttertoast.showToast(msg: 'App is up to date!');
+        Fluttertoast.showToast(msg: context.l10n.appIsUpToDate);
       }
     }
   }
@@ -85,7 +86,7 @@ class _SettingsPageState extends State<SettingsPage> {
     final tt = Theme.of(context).textTheme;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
+      appBar: AppBar(title: Text(context.l10n.settings)),
       body: Align(
         alignment: Alignment.topCenter,
         child: SafeArea(
@@ -94,7 +95,7 @@ class _SettingsPageState extends State<SettingsPage> {
             child: ListView(
               padding: const EdgeInsets.symmetric(vertical: 8),
               children: [
-                _SectionHeader(label: 'AniList'),
+                _SectionHeader(label: context.l10n.aniList),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
                   child: Card(
@@ -114,13 +115,13 @@ class _SettingsPageState extends State<SettingsPage> {
                         ),
                       ),
                       title: Text(
-                        'AniList Settings',
+                        context.l10n.aniListSettings,
                         style: tt.titleSmall?.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
                       ),
                       subtitle: Text(
-                        'Configure metadata language and content preferences.',
+                        context.l10n.aniListSettingsSubtitle,
                         style: tt.bodySmall?.copyWith(
                           color: cs.onSurfaceVariant,
                         ),
@@ -140,7 +141,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                 ),
 
-                _SectionHeader(label: 'Mangayomi'),
+                _SectionHeader(label: context.l10n.mangayomi),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
                   child: Card(
@@ -152,13 +153,13 @@ class _SettingsPageState extends State<SettingsPage> {
                     child: ListTile(
                       leading: Icon(Icons.extension_rounded, color: cs.primary),
                       title: Text(
-                        'Extensions',
+                        context.l10n.extensions,
                         style: tt.titleSmall?.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
                       ),
                       subtitle: Text(
-                        'Manage sources and repositories for anime & manga.',
+                        context.l10n.extensionsSubtitle,
                         style: tt.bodySmall?.copyWith(
                           color: cs.onSurfaceVariant,
                         ),
@@ -178,7 +179,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                 ),
 
-                _SectionHeader(label: 'Appearance'),
+                _SectionHeader(label: context.l10n.appearance),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
                   child: Card(
@@ -190,13 +191,13 @@ class _SettingsPageState extends State<SettingsPage> {
                     child: ListTile(
                       leading: Icon(Icons.palette_rounded, color: cs.primary),
                       title: Text(
-                        'Theme & Colours',
+                        context.l10n.themeAndColors,
                         style: tt.titleSmall?.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
                       ),
                       subtitle: Text(
-                        _themeModeLabel(provider.themeMode),
+                        _themeModeLabel(provider.themeMode, context),
                         style: tt.bodySmall?.copyWith(
                           color: cs.onSurfaceVariant,
                         ),
@@ -217,7 +218,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                 ),
 
-                _SectionHeader(label: 'Integrations'),
+                _SectionHeader(label: context.l10n.integrations),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
                   child: Card(
@@ -240,16 +241,14 @@ class _SettingsPageState extends State<SettingsPage> {
                                 BlendMode.srcIn,
                               ),
                             ),
-                            title: const Text('Discord'),
-                            subtitle: const Text(
-                              'Not linked  •  Tap to connect',
-                            ),
+                            title: Text(context.l10n.discord),
+                            subtitle: Text(context.l10n.notLinkedTapToConnect),
                             trailing: TextButton(
                               onPressed: () async {
                                 await DiscordService.startAuthorizationFlow();
                               },
                               child: Text(
-                                'Link',
+                                context.l10n.link,
                                 style: TextStyle(
                                   color: cs.primary,
                                   fontWeight: FontWeight.w600,
@@ -281,11 +280,11 @@ class _SettingsPageState extends State<SettingsPage> {
                                       BlendMode.srcIn,
                                     ),
                                   ),
-                                  title: const Text('Discord'),
+                                  title: Text(context.l10n.discord),
                                   subtitle: Text(
                                     isEnabled
-                                        ? 'Linked  •  Presence active'
-                                        : 'Linked  •  Presence paused',
+                                        ? context.l10n.linkedPresenceActive
+                                        : context.l10n.linkedPresencePaused,
                                   ),
                                   trailing: Switch(
                                     value: isEnabled,
@@ -318,16 +317,17 @@ class _SettingsPageState extends State<SettingsPage> {
                                     color: cs.error,
                                   ),
                                   title: Text(
-                                    'Unlink Account',
+                                    context.l10n.unlinkAccount,
                                     style: TextStyle(
                                       color: cs.error,
                                       fontWeight: FontWeight.w500,
                                     ),
                                   ),
                                   onTap: () async {
+                                    final l10n = context.l10n;
                                     await DiscordService.unlink();
                                     Fluttertoast.showToast(
-                                      msg: 'Discord account unlinked',
+                                      msg: l10n.discordAccountUnlinked,
                                     );
                                   },
                                   shape: const RoundedRectangleBorder(
@@ -346,7 +346,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                 ),
 
-                _SectionHeader(label: 'About'),
+                _SectionHeader(label: context.l10n.about),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
                   child: Card(
@@ -363,10 +363,8 @@ class _SettingsPageState extends State<SettingsPage> {
                               Icons.system_update_rounded,
                               color: cs.primary,
                             ),
-                            title: const Text('Check for Updates'),
-                            subtitle: const Text(
-                              'Check for a newer version of Zenbu',
-                            ),
+                            title: Text(context.l10n.checkForUpdates),
+                            subtitle: Text(context.l10n.checkForNewerVersion),
                             trailing: _isCheckingUpdate
                                 ? const SizedBox(
                                     width: 20,
@@ -388,13 +386,15 @@ class _SettingsPageState extends State<SettingsPage> {
                               color: cs.primary,
                             ),
                             title: Text(
-                              'Update Available  •  ${_updateInfo?.remoteVersion}',
+                              context.l10n.updateAvailableWithVersion(
+                                _updateInfo?.remoteVersion ?? '',
+                              ),
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 color: cs.primary,
                               ),
                             ),
-                            subtitle: const Text('Tap to view and install'),
+                            subtitle: Text(context.l10n.tapToViewAndInstall),
                             trailing: FilledButton.tonal(
                               style: FilledButton.styleFrom(
                                 visualDensity: VisualDensity.compact,
@@ -407,7 +407,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                   ),
                                 );
                               },
-                              child: const Text('View'),
+                              child: Text(context.l10n.view),
                             ),
                             onTap: _isCheckingUpdate ? null : _checkUpdate,
                             shape: RoundedRectangleBorder(
@@ -430,14 +430,14 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  String _themeModeLabel(ThemeMode mode) {
+  String _themeModeLabel(ThemeMode mode, BuildContext context) {
     switch (mode) {
       case ThemeMode.light:
-        return 'Light';
+        return context.l10n.light;
       case ThemeMode.dark:
-        return 'Dark';
+        return context.l10n.dark;
       case ThemeMode.system:
-        return 'System default';
+        return context.l10n.systemDefault;
     }
   }
 }
@@ -488,14 +488,18 @@ class _AppFooterState extends State<_AppFooter> {
   Future<void> _openGitHub() async {
     final uri = Uri.parse('https://github.com/meesam4687/zenbu');
     if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-      Fluttertoast.showToast(msg: 'Could not open GitHub');
+      if (mounted) {
+        Fluttertoast.showToast(msg: context.l10n.couldNotOpenGitHub);
+      }
     }
   }
 
   Future<void> _openDiscord() async {
     final uri = Uri.parse('https://discord.gg/tJRA5NPQXY');
     if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-      Fluttertoast.showToast(msg: 'Could not open Discord');
+      if (mounted) {
+        Fluttertoast.showToast(msg: context.l10n.couldNotOpenDiscord);
+      }
     }
   }
 

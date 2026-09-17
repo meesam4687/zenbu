@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:zenbu/services/update_service.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:zenbu/state_provider.dart';
+import 'package:zenbu/l10n/l10n_extension.dart';
 
 class UpdatePage extends StatefulWidget {
   final UpdateInfo updateInfo;
@@ -39,7 +40,7 @@ class _UpdatePageState extends State<UpdatePage> {
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
       appBar: AppBar(
-        title: const Text('Update Available'),
+        title: Text(context.l10n.updateAvailable),
         centerTitle: true,
         automaticallyImplyLeading: true,
       ),
@@ -56,7 +57,7 @@ class _UpdatePageState extends State<UpdatePage> {
               ),
               const SizedBox(height: 16),
               Text(
-                'A new version is available!',
+                context.l10n.newVersionAvailable,
                 textAlign: TextAlign.center,
                 style: theme.textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.bold,
@@ -64,7 +65,7 @@ class _UpdatePageState extends State<UpdatePage> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Version: ${widget.updateInfo.remoteVersion}',
+                '${context.l10n.version}: ${widget.updateInfo.remoteVersion}',
                 textAlign: TextAlign.center,
                 style: theme.textTheme.titleMedium?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
@@ -111,7 +112,7 @@ class _UpdatePageState extends State<UpdatePage> {
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 14),
                       ),
-                      child: const Text('Download Later'),
+                      child: Text(context.l10n.downloadLater),
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -136,7 +137,7 @@ class _UpdatePageState extends State<UpdatePage> {
                                   alignment: Alignment.center,
                                   children: [
                                     Text(
-                                      'Stop Update',
+                                      context.l10n.stopUpdate,
                                       style: TextStyle(
                                         color: theme.colorScheme.onSurface
                                             .withValues(alpha: 0.8),
@@ -168,8 +169,11 @@ class _UpdatePageState extends State<UpdatePage> {
                                 try {
                                   await UpdateService.installCachedApk();
                                 } catch (e) {
+                                  if (!context.mounted) return;
                                   Fluttertoast.showToast(
-                                    msg: "Failed to install update: $e",
+                                    msg: context.l10n.failedToInstallUpdate(
+                                      e.toString(),
+                                    ),
                                     toastLength: Toast.LENGTH_LONG,
                                     backgroundColor: Colors.red,
                                     textColor: Colors.white,
@@ -181,8 +185,11 @@ class _UpdatePageState extends State<UpdatePage> {
                                     widget.updateInfo,
                                   );
                                 } catch (e) {
+                                  if (!context.mounted) return;
                                   Fluttertoast.showToast(
-                                    msg: "Failed to download update: $e",
+                                    msg: context.l10n.failedToDownloadUpdate(
+                                      e.toString(),
+                                    ),
                                     toastLength: Toast.LENGTH_LONG,
                                     backgroundColor: Colors.red,
                                     textColor: Colors.white,
@@ -194,7 +201,9 @@ class _UpdatePageState extends State<UpdatePage> {
                               padding: const EdgeInsets.symmetric(vertical: 14),
                             ),
                             child: Text(
-                              isApkDownloaded ? 'Install' : 'Download Now',
+                              isApkDownloaded
+                                  ? context.l10n.install
+                                  : context.l10n.downloadNow,
                             ),
                           ),
                   ),

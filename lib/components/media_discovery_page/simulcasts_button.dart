@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:zenbu/l10n/l10n_extension.dart';
 import 'package:zenbu/pages/simulcasts_page.dart';
 import 'package:zenbu/components/global/custom_image.dart';
 
@@ -73,11 +74,11 @@ class _SimulcastsButtonState extends State<SimulcastsButton> {
               margin: const EdgeInsets.all(10),
               height: 60,
               width: double.infinity,
-              child: const Row(
+              child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Padding(padding: EdgeInsets.only(left: 10)),
-                  Icon(
+                  const Padding(padding: EdgeInsets.only(left: 10)),
+                  const Icon(
                     color: Colors.white,
                     Icons.calendar_month,
                     shadows: [
@@ -88,10 +89,10 @@ class _SimulcastsButtonState extends State<SimulcastsButton> {
                       ),
                     ],
                   ),
-                  Padding(padding: EdgeInsets.only(left: 10)),
+                  const Padding(padding: EdgeInsets.only(left: 10)),
                   Text(
-                    "Simulcasts",
-                    style: TextStyle(
+                    context.l10n.simulcasts,
+                    style: const TextStyle(
                       fontSize: 17,
                       color: Colors.white,
                       shadows: [

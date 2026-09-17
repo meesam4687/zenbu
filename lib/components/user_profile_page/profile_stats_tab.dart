@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:zenbu/l10n/l10n_extension.dart';
 import 'stats_card.dart';
 import 'genre_overview_card.dart';
 import 'bar_chart.dart';
@@ -44,30 +45,34 @@ class ProfileStatsTab extends StatelessWidget {
       final double daysPlanned = (planningCount * 12.0 * 24.0) / 1440.0;
 
       statsItems.addAll([
-        StatsItemData(label: 'Total Anime', value: '$count', icon: Icons.movie),
         StatsItemData(
-          label: 'Episodes',
+          label: context.l10n.totalAnime,
+          value: '$count',
+          icon: Icons.movie,
+        ),
+        StatsItemData(
+          label: context.l10n.episodes,
           value: '$episodes',
           icon: Icons.play_arrow,
         ),
         StatsItemData(
-          label: 'Days Watched',
+          label: context.l10n.daysWatched,
           value: daysWatched.toStringAsFixed(1),
           icon: Icons.timer,
         ),
         StatsItemData(
-          label: 'Days Planned',
+          label: context.l10n.daysPlanned,
           value: daysPlanned.toStringAsFixed(1),
           icon: Icons.calendar_today,
         ),
         StatsItemData(
-          label: 'Mean Score',
-          value: meanScore > 0 ? meanScore.toStringAsFixed(1) : 'N/A',
+          label: context.l10n.meanScore,
+          value: meanScore > 0 ? meanScore.toStringAsFixed(1) : context.l10n.na,
           icon: Icons.star,
         ),
         StatsItemData(
-          label: 'Std Deviation',
-          value: stdDev > 0 ? stdDev.toStringAsFixed(1) : 'N/A',
+          label: context.l10n.stdDeviation,
+          value: stdDev > 0 ? stdDev.toStringAsFixed(1) : context.l10n.na,
           icon: Icons.show_chart,
         ),
       ]);
@@ -76,30 +81,34 @@ class ProfileStatsTab extends StatelessWidget {
       final volumes = statistics['volumesRead'] as int? ?? 0;
 
       statsItems.addAll([
-        StatsItemData(label: 'Total Manga', value: '$count', icon: Icons.book),
         StatsItemData(
-          label: 'Chapters Read',
+          label: context.l10n.totalManga,
+          value: '$count',
+          icon: Icons.book,
+        ),
+        StatsItemData(
+          label: context.l10n.chaptersRead,
           value: '$chapters',
           icon: Icons.chrome_reader_mode,
         ),
         StatsItemData(
-          label: 'Volumes Read',
+          label: context.l10n.volumesRead,
           value: '$volumes',
           icon: Icons.library_books,
         ),
         StatsItemData(
-          label: 'Planned Manga',
+          label: context.l10n.plannedManga,
           value: '$planningCount',
           icon: Icons.calendar_today,
         ),
         StatsItemData(
-          label: 'Mean Score',
-          value: meanScore > 0 ? meanScore.toStringAsFixed(1) : 'N/A',
+          label: context.l10n.meanScore,
+          value: meanScore > 0 ? meanScore.toStringAsFixed(1) : context.l10n.na,
           icon: Icons.star,
         ),
         StatsItemData(
-          label: 'Std Deviation',
-          value: stdDev > 0 ? stdDev.toStringAsFixed(1) : 'N/A',
+          label: context.l10n.stdDeviation,
+          value: stdDev > 0 ? stdDev.toStringAsFixed(1) : context.l10n.na,
           icon: Icons.show_chart,
         ),
       ]);
@@ -214,7 +223,7 @@ class ProfileStatsTab extends StatelessWidget {
     }
     staff.sort((a, b) => b.count.compareTo(a.count));
 
-    final String unit = 'Entries';
+    final String unit = context.l10n.entries;
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 12.0),
@@ -223,7 +232,9 @@ class ProfileStatsTab extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           StatsCard(
-            title: isAnime ? 'Anime Statistics' : 'Manga Statistics',
+            title: isAnime
+                ? context.l10n.animeStatistics
+                : context.l10n.mangaStatistics,
             items: statsItems,
           ),
           ProfileListButton(
@@ -232,47 +243,57 @@ class ProfileStatsTab extends StatelessWidget {
             isAnime: isAnime,
           ),
           if (genres.isNotEmpty)
-            GenreOverviewCard(title: 'Genre Overview', genres: genres),
+            GenreOverviewCard(
+              title: context.l10n.genreOverview,
+              genres: genres,
+            ),
           if (scores.isNotEmpty)
-            BarChart(title: 'Score Distribution', data: scores),
+            BarChart(title: context.l10n.scoreDistribution, data: scores),
           if (lengths.isNotEmpty)
             BarChart(
-              title: isAnime ? 'Episode Distribution' : 'Chapter Distribution',
+              title: isAnime
+                  ? context.l10n.episodeDistribution
+                  : context.l10n.chapterDistribution,
               data: lengths,
             ),
           if (formatDist.isNotEmpty)
-            PieChart(title: 'Format Distribution', data: formatDist),
+            PieChart(title: context.l10n.formatDistribution, data: formatDist),
           if (statusDist.isNotEmpty)
-            PieChart(title: 'Status Distribution', data: statusDist),
+            PieChart(title: context.l10n.statusDistribution, data: statusDist),
           if (countryDist.isNotEmpty)
-            PieChart(title: 'Country Distribution', data: countryDist),
+            PieChart(
+              title: context.l10n.countryDistribution,
+              data: countryDist,
+            ),
           if (releaseYearDist.isNotEmpty)
             LineChart(
-              title: 'Release Year Distribution',
+              title: context.l10n.releaseYearDistribution,
               data: releaseYearDist,
             ),
           if (startYearDist.isNotEmpty)
             LineChart(
               title: isAnime
-                  ? 'Watch Year Distribution'
-                  : 'Read Year Distribution',
+                  ? context.l10n.watchYearDistribution
+                  : context.l10n.readYearDistribution,
               data: startYearDist,
             ),
           if (isAnime && voiceActors.isNotEmpty)
             HorizontalStaffList(
-              title: 'Most Watched Voice Actors',
+              title: context.l10n.mostWatchedVoiceActors,
               items: voiceActors,
               unit: unit,
             ),
           if (isAnime && studios.isNotEmpty)
             HorizontalStaffList(
-              title: 'Most Watched Studios',
+              title: context.l10n.mostWatchedStudios,
               items: studios,
               unit: unit,
             ),
           if (staff.isNotEmpty)
             HorizontalStaffList(
-              title: isAnime ? 'Most Watched Staff' : 'Most Read Staff',
+              title: isAnime
+                  ? context.l10n.mostWatchedStaff
+                  : context.l10n.mostReadStaff,
               items: staff,
               unit: unit,
             ),

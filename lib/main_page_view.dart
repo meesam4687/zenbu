@@ -2,6 +2,7 @@ import 'package:zenbu/pages/media_discovery_page.dart';
 import 'package:zenbu/pages/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:animations/animations.dart';
+import 'package:zenbu/l10n/l10n_extension.dart';
 import 'package:zenbu/services/update_service.dart';
 import 'package:zenbu/pages/update_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -129,24 +130,24 @@ class MainPageViewState extends State<MainPageView> {
                         });
                       },
                       labelType: NavigationRailLabelType.all,
-                      destinations: const [
+                      destinations: [
                         NavigationRailDestination(
-                          padding: EdgeInsets.symmetric(vertical: 8.0),
-                          icon: Icon(Icons.video_collection),
-                          selectedIcon: Icon(Icons.video_collection),
-                          label: Text('Anime'),
+                          padding: const EdgeInsets.symmetric(vertical: 8.0),
+                          icon: const Icon(Icons.video_collection),
+                          selectedIcon: const Icon(Icons.video_collection),
+                          label: Text(context.l10n.anime),
                         ),
                         NavigationRailDestination(
-                          padding: EdgeInsets.symmetric(vertical: 8.0),
-                          icon: Icon(Icons.home),
-                          selectedIcon: Icon(Icons.home),
-                          label: Text('Home'),
+                          padding: const EdgeInsets.symmetric(vertical: 8.0),
+                          icon: const Icon(Icons.home),
+                          selectedIcon: const Icon(Icons.home),
+                          label: Text(context.l10n.home),
                         ),
                         NavigationRailDestination(
-                          padding: EdgeInsets.symmetric(vertical: 8.0),
-                          icon: Icon(Icons.book_rounded),
-                          selectedIcon: Icon(Icons.book_rounded),
-                          label: Text('Manga'),
+                          padding: const EdgeInsets.symmetric(vertical: 8.0),
+                          icon: const Icon(Icons.book_rounded),
+                          selectedIcon: const Icon(Icons.book_rounded),
+                          label: Text(context.l10n.manga),
                         ),
                       ],
                     ),
@@ -169,13 +170,19 @@ class MainPageViewState extends State<MainPageView> {
             selectedIdx = value;
           });
         },
-        destinations: const [
+        destinations: [
           NavigationDestination(
-            icon: Icon(Icons.video_collection),
-            label: 'Anime',
+            icon: const Icon(Icons.video_collection),
+            label: context.l10n.anime,
           ),
-          NavigationDestination(icon: Icon(Icons.home), label: 'Home'),
-          NavigationDestination(icon: Icon(Icons.book_rounded), label: 'Manga'),
+          NavigationDestination(
+            icon: const Icon(Icons.home),
+            label: context.l10n.home,
+          ),
+          NavigationDestination(
+            icon: const Icon(Icons.book_rounded),
+            label: context.l10n.manga,
+          ),
         ],
       ),
       body: bodyContent,

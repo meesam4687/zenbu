@@ -3,6 +3,7 @@ import 'package:zenbu/services/anilist/get_user_profile.dart';
 import 'package:zenbu/components/global/custom_image.dart';
 import 'package:zenbu/components/user_profile_page/profile_stats_tab.dart';
 import 'package:zenbu/pages/error_page.dart';
+import 'package:zenbu/l10n/l10n_extension.dart';
 
 class UserProfilePage extends StatefulWidget {
   const UserProfilePage({super.key, this.username, this.userId});
@@ -113,7 +114,7 @@ class _UserProfilePageState extends State<UserProfilePage>
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: Text(widget.username ?? 'User Profile')),
+      appBar: AppBar(title: Text(widget.username ?? context.l10n.userProfile)),
       body: FutureBuilder<Map<String, dynamic>>(
         future: _profileFuture,
         builder: (context, snapshot) {
@@ -139,7 +140,7 @@ class _UserProfilePageState extends State<UserProfilePage>
           if (user == null) {
             return ErrorPage(
               scaffold: false,
-              message: 'User not found on AniList',
+              message: context.l10n.userNotFoundOnAniList,
               onReload: () {
                 setState(() {
                   _profileFuture = getUserProfile(
@@ -154,7 +155,7 @@ class _UserProfilePageState extends State<UserProfilePage>
           final userId = user['id'] as int? ?? widget.userId ?? 0;
           final bannerImage = user['bannerImage'] as String?;
           final avatarUrl = user['avatar']?['large'] as String? ?? '';
-          final username = user['name'] as String? ?? 'Unknown';
+          final username = user['name'] as String? ?? context.l10n.unknown;
           final statistics = user['statistics'] ?? {};
           final animeStats = statistics['anime'] ?? {};
           final mangaStats = statistics['manga'] ?? {};
@@ -179,9 +180,9 @@ class _UserProfilePageState extends State<UserProfilePage>
                       const SizedBox(height: 16),
                       TabBar(
                         controller: _tabController,
-                        tabs: const [
-                          Tab(text: 'Anime'),
-                          Tab(text: 'Manga'),
+                        tabs: [
+                          Tab(text: context.l10n.anime),
+                          Tab(text: context.l10n.manga),
                         ],
                       ),
                     ],

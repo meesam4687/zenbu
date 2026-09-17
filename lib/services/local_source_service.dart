@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:zenbu/l10n/l10n_extension.dart';
 
 class LocalSourceService {
   static const String _localDirectoryKey = 'local_directory_path';
@@ -28,18 +29,16 @@ class LocalSourceService {
       final bool? grantPressed = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('All Files Access Required'),
-          content: const Text(
-            'To play local videos and read local manga chapters/archives from external directories on Android 11+, Zenbu requires "All Files Access" permission.',
-          ),
+          title: Text(context.l10n.allFilesAccessRequired),
+          content: Text(context.l10n.allFilesAccessPermissionDescription),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Cancel'),
+              child: Text(context.l10n.cancel),
             ),
             FilledButton(
               onPressed: () => Navigator.of(context).pop(true),
-              child: const Text('Grant Permission'),
+              child: Text(context.l10n.grantPermission),
             ),
           ],
         ),
@@ -67,9 +66,11 @@ class LocalSourceService {
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Failed to pick directory: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(context.l10n.failedToPickDirectory(e.toString())),
+          ),
+        );
       }
     }
     return null;

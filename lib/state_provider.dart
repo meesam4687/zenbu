@@ -109,6 +109,7 @@ class StateProvider extends ChangeNotifier {
 
   String _titleLanguage = 'ROMAJI';
   ThemeMode _themeMode = ThemeMode.system;
+  Locale? _locale;
 
   Color? _seedColor;
   bool _displayAdultContent = false;
@@ -133,6 +134,15 @@ class StateProvider extends ChangeNotifier {
         : tm == 'dark'
         ? ThemeMode.dark
         : ThemeMode.system;
+    final localeStr = prefs.getString('setting_locale');
+    if (localeStr != null && localeStr.isNotEmpty) {
+      if (localeStr.contains('_')) {
+        final parts = localeStr.split('_');
+        _locale = Locale(parts[0], parts[1]);
+      } else {
+        _locale = Locale(localeStr);
+      }
+    }
     final seedColorValue = prefs.getInt('setting_seed_color');
     _seedColor = seedColorValue != null ? Color(seedColorValue) : null;
     _displayAdultContent =
@@ -176,6 +186,20 @@ class StateProvider extends ChangeNotifier {
         ? 'dark'
         : 'system';
     _saveString('setting_theme_mode', str);
+    notifyListeners();
+  }
+
+  Locale? get locale => _locale;
+  set locale(Locale? value) {
+    _locale = value;
+    if (value == null) {
+      _saveOptionalString('setting_locale', null);
+    } else {
+      final str = value.countryCode != null && value.countryCode!.isNotEmpty
+          ? '${value.languageCode}_${value.countryCode}'
+          : value.languageCode;
+      _saveString('setting_locale', str);
+    }
     notifyListeners();
   }
 

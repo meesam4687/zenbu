@@ -10,6 +10,7 @@ import 'package:zenbu/services/mangayomi/eval/interface.dart';
 import 'package:zenbu/services/mangayomi/models/extensions_models.dart';
 import 'package:zenbu/services/progress_service.dart';
 import 'package:zenbu/services/repo_service.dart';
+import 'package:zenbu/l10n/l10n_extension.dart';
 
 enum NovelReaderTheme { light, dark, sepia, oled }
 
@@ -238,7 +239,7 @@ class _NovelReaderPageState extends State<NovelReaderPage> {
       if (!mounted) return;
       setState(() {
         _isLoading = false;
-        _errorMessage = 'Failed to load chapter content: $e';
+        _errorMessage = context.l10n.failedToLoadChapterContent(e.toString());
       });
     }
   }
@@ -373,7 +374,7 @@ class _NovelReaderPageState extends State<NovelReaderPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Reader Settings',
+                    context.l10n.readerSettings,
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -382,7 +383,7 @@ class _NovelReaderPageState extends State<NovelReaderPage> {
                   ),
                   const SizedBox(height: 20),
                   Text(
-                    'Theme',
+                    context.l10n.theme,
                     style: TextStyle(
                       fontSize: 14,
                       color: modalTextColor.withValues(alpha: 0.8),
@@ -412,7 +413,7 @@ class _NovelReaderPageState extends State<NovelReaderPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Font Size: ${_fontSize.toInt()}pt',
+                        context.l10n.fontSizePt(_fontSize.toInt()),
                         style: TextStyle(color: modalTextColor),
                       ),
                       Slider(
@@ -432,7 +433,9 @@ class _NovelReaderPageState extends State<NovelReaderPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Line Height: ${_lineHeight.toStringAsFixed(1)}',
+                        context.l10n.lineHeightValue(
+                          _lineHeight.toStringAsFixed(1),
+                        ),
                         style: TextStyle(color: modalTextColor),
                       ),
                       Slider(
@@ -453,18 +456,31 @@ class _NovelReaderPageState extends State<NovelReaderPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Font Family',
+                        context.l10n.fontFamily,
                         style: TextStyle(color: modalTextColor),
                       ),
                       DropdownButton<String>(
                         value: _fontFamily,
                         dropdownColor: modalBgColor,
                         style: TextStyle(color: modalTextColor),
-                        items: ['System', 'Serif', 'Sans-Serif', 'Monospace']
-                            .map(
-                              (f) => DropdownMenuItem(value: f, child: Text(f)),
-                            )
-                            .toList(),
+                        items: [
+                          DropdownMenuItem(
+                            value: 'System',
+                            child: Text(context.l10n.system),
+                          ),
+                          DropdownMenuItem(
+                            value: 'Serif',
+                            child: Text(context.l10n.fontFamilySerif),
+                          ),
+                          DropdownMenuItem(
+                            value: 'Sans-Serif',
+                            child: Text(context.l10n.fontFamilySansSerif),
+                          ),
+                          DropdownMenuItem(
+                            value: 'Monospace',
+                            child: Text(context.l10n.fontFamilyMonospace),
+                          ),
+                        ],
                         onChanged: (val) {
                           if (val != null) {
                             setState(() => _fontFamily = val);
@@ -598,7 +614,7 @@ class _NovelReaderPageState extends State<NovelReaderPage> {
                                       const SizedBox(height: 20),
                                       ElevatedButton(
                                         onPressed: _loadChapterContent,
-                                        child: const Text('Retry'),
+                                        child: Text(context.l10n.retry),
                                       ),
                                     ],
                                   ),
@@ -784,7 +800,7 @@ class _NovelReaderPageState extends State<NovelReaderPage> {
                                 : textColor.withValues(alpha: 0.3),
                           ),
                           label: Text(
-                            'Prev',
+                            context.l10n.prev,
                             style: TextStyle(
                               color: hasPrev
                                   ? textColor
@@ -793,7 +809,11 @@ class _NovelReaderPageState extends State<NovelReaderPage> {
                           ),
                         ),
                         Text(
-                          'Ch. ${_currentChapterIndex + 1} / ${widget.chapters.length} • ${_scrollProgressPct.toInt()}%',
+                          context.l10n.chapterProgress(
+                            _currentChapterIndex + 1,
+                            widget.chapters.length,
+                            _scrollProgressPct.toInt(),
+                          ),
                           style: TextStyle(
                             color: textColor,
                             fontWeight: FontWeight.w600,
@@ -814,7 +834,7 @@ class _NovelReaderPageState extends State<NovelReaderPage> {
                                 : textColor.withValues(alpha: 0.3),
                           ),
                           label: Text(
-                            'Next',
+                            context.l10n.next,
                             style: TextStyle(
                               color: hasNext
                                   ? textColor

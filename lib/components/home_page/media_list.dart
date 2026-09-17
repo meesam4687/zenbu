@@ -1,3 +1,4 @@
+import 'package:zenbu/l10n/l10n_extension.dart';
 import 'package:zenbu/pages/list_page.dart';
 import 'package:flutter/material.dart';
 import 'package:zenbu/components/global/item_card.dart';
@@ -27,90 +28,86 @@ class MediaList extends StatelessWidget {
       child: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.only(
-              left: 12.0,
-              right: 6.0,
-              bottom: 10,
-            ),
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  final String displayTitle =
-                      title ??
-                      (isAnime ? "Currently Watching" : "Currently Reading");
-                  final textScaler = MediaQuery.textScalerOf(context);
-                  final buttonTextPainter = TextPainter(
-                    text: TextSpan(
-                      text: 'View All  ',
-                      style: Theme.of(context).textTheme.labelLarge ??
-                          const TextStyle(fontSize: 14),
-                    ),
-                    maxLines: 1,
-                    textDirection: Directionality.of(context),
-                    textScaler: textScaler,
-                  )..layout();
+            padding: const EdgeInsets.only(left: 12.0, right: 6.0, bottom: 10),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final String displayTitle =
+                    title ??
+                    (isAnime
+                        ? context.l10n.currentlyWatching
+                        : context.l10n.currentlyReading);
+                final textScaler = MediaQuery.textScalerOf(context);
+                final buttonTextPainter = TextPainter(
+                  text: TextSpan(
+                    text: '${context.l10n.viewAll}  ',
+                    style:
+                        Theme.of(context).textTheme.labelLarge ??
+                        const TextStyle(fontSize: 14),
+                  ),
+                  maxLines: 1,
+                  textDirection: Directionality.of(context),
+                  textScaler: textScaler,
+                )..layout();
 
-                  final double fullButtonWidth =
-                      buttonTextPainter.width + 48;
-                  final bool showFullButton =
-                      (constraints.maxWidth - fullButtonWidth) >= 120 &&
-                      constraints.maxWidth >= 280;
+                final double fullButtonWidth = buttonTextPainter.width + 48;
+                final bool showFullButton =
+                    (constraints.maxWidth - fullButtonWidth) >= 120 &&
+                    constraints.maxWidth >= 280;
 
-                  return Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          displayTitle,
-                          style: const TextStyle(fontSize: 20),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        displayTitle,
+                        style: const TextStyle(fontSize: 20),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      if (title == null)
-                        MaterialButton(
-                          minWidth: 0,
-                          padding: showFullButton
-                              ? const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 8,
-                                )
-                              : const EdgeInsets.all(8),
-                          shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.all(
-                              Radius.circular(100),
-                            ),
-                          ),
-                          onPressed: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) {
-                                  return ListPage(
-                                    title: isAnime
-                                        ? "Anime List"
-                                        : "Manga List",
-                                    mediaListType: isAnime
-                                        ? MediaType.anime
-                                        : MediaType.manga,
-                                  );
-                                },
-                              ),
-                            );
-                          },
-                          child: showFullButton
-                              ? const Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text('View All  '),
-                                    Icon(Icons.arrow_forward),
-                                  ],
-                                )
-                              : const Icon(Icons.arrow_forward),
+                    ),
+                    if (title == null)
+                      MaterialButton(
+                        minWidth: 0,
+                        padding: showFullButton
+                            ? const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 8,
+                              )
+                            : const EdgeInsets.all(8),
+                        shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(100)),
                         ),
-                    ],
-                  );
-                },
-              ),
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) {
+                                return ListPage(
+                                  title: isAnime
+                                      ? context.l10n.animeList
+                                      : context.l10n.mangaList,
+                                  mediaListType: isAnime
+                                      ? MediaType.anime
+                                      : MediaType.manga,
+                                );
+                              },
+                            ),
+                          );
+                        },
+                        child: showFullButton
+                            ? Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text('${context.l10n.viewAll}  '),
+                                  const Icon(Icons.arrow_forward),
+                                ],
+                              )
+                            : const Icon(Icons.arrow_forward),
+                      ),
+                  ],
+                );
+              },
             ),
+          ),
           items.isEmpty
               ? Container(
                   width: double.infinity,
@@ -128,7 +125,7 @@ class MediaList extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        "Such empty",
+                        context.l10n.suchEmpty,
                         style: TextStyle(
                           fontSize: 16,
                           color: Theme.of(context).colorScheme.outline,
@@ -161,7 +158,7 @@ class MediaList extends StatelessWidget {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                "Browse",
+                                context.l10n.browse,
                                 style: TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.bold,
@@ -212,7 +209,7 @@ class MediaList extends StatelessWidget {
                                 ? "$progress/$total"
                                 : (item["media"]["meanScore"] != null
                                       ? "${item["media"]["meanScore"]}%"
-                                      : "$total ${isItemAnime ? 'eps' : 'ch'}");
+                                      : "$total ${isItemAnime ? context.l10n.eps : context.l10n.ch}");
 
                             return Padding(
                               padding: const EdgeInsets.only(left: 3),
@@ -256,7 +253,7 @@ class MediaList extends StatelessWidget {
                                 ? "$progress/$total"
                                 : (item["media"]["meanScore"] != null
                                       ? "${item["media"]["meanScore"]}%"
-                                      : "$total ${isItemAnime ? 'eps' : 'ch'}");
+                                      : "$total ${isItemAnime ? context.l10n.eps : context.l10n.ch}");
 
                             return Padding(
                               padding: const EdgeInsets.only(left: 3),

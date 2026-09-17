@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:screen_brightness/screen_brightness.dart';
 import 'package:flutter_volume_controller/flutter_volume_controller.dart';
+import 'package:zenbu/l10n/l10n_extension.dart';
 
 class VideoPlayerGestureHandler extends StatefulWidget {
   final bool isLeft;
@@ -258,8 +259,8 @@ class _VideoPlayerGestureHandlerState extends State<VideoPlayerGestureHandler>
                           const SizedBox(height: 6),
                           Text(
                             widget.isLeft
-                                ? '- $_accumulatedSeconds seconds'
-                                : '+ $_accumulatedSeconds seconds',
+                                ? context.l10n.minusSeconds(_accumulatedSeconds)
+                                : context.l10n.plusSeconds(_accumulatedSeconds),
                             textAlign: TextAlign.center,
                             style: const TextStyle(
                               color: Colors.white,

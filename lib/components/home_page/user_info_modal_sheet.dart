@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:zenbu/components/global/custom_image.dart';
 import 'package:zenbu/pages/settings_page.dart';
 import 'package:zenbu/pages/user_profile_page.dart';
+import 'package:zenbu/l10n/l10n_extension.dart';
 
 class UserInfoModalSheet extends StatelessWidget {
   const UserInfoModalSheet({
@@ -88,12 +89,15 @@ class UserInfoModalSheet extends StatelessWidget {
                   height: 60,
                   margin: const EdgeInsets.only(left: 45),
                   width: double.infinity,
-                  child: const Row(
+                  child: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Icon(Icons.notifications),
-                      Padding(padding: EdgeInsets.only(left: 20)),
-                      Text("Notifications", style: TextStyle(fontSize: 18)),
+                      const Icon(Icons.notifications),
+                      const Padding(padding: EdgeInsets.only(left: 20)),
+                      Text(
+                        context.l10n.notifications,
+                        style: const TextStyle(fontSize: 18),
+                      ),
                     ],
                   ),
                 ),
@@ -112,12 +116,15 @@ class UserInfoModalSheet extends StatelessWidget {
                   height: 60,
                   margin: const EdgeInsets.only(left: 45),
                   width: double.infinity,
-                  child: const Row(
+                  child: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Icon(Icons.settings),
-                      Padding(padding: EdgeInsets.only(left: 20)),
-                      Text("Settings", style: TextStyle(fontSize: 18)),
+                      const Icon(Icons.settings),
+                      const Padding(padding: EdgeInsets.only(left: 20)),
+                      Text(
+                        context.l10n.settings,
+                        style: const TextStyle(fontSize: 18),
+                      ),
                     ],
                   ),
                 ),
@@ -128,12 +135,12 @@ class UserInfoModalSheet extends StatelessWidget {
                     context: context,
                     builder: (context) {
                       return AlertDialog(
-                        title: const Text("Logout"),
-                        content: const Text("Do you want to log out?"),
+                        title: Text(context.l10n.logout),
+                        content: Text(context.l10n.doYouWantToLogout),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.of(context).pop(),
-                            child: const Text('Cancel'),
+                            child: Text(context.l10n.cancel),
                           ),
                           FilledButton(
                             onPressed: () {
@@ -158,7 +165,7 @@ class UserInfoModalSheet extends StatelessWidget {
                                 ),
                               );
                             },
-                            child: const Text("Yes"),
+                            child: Text(context.l10n.yes),
                           ),
                         ],
                       );
@@ -169,12 +176,15 @@ class UserInfoModalSheet extends StatelessWidget {
                   height: 60,
                   margin: const EdgeInsets.only(left: 45),
                   width: double.infinity,
-                  child: const Row(
+                  child: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Icon(Icons.logout),
-                      Padding(padding: EdgeInsets.only(left: 20)),
-                      Text("Logout", style: TextStyle(fontSize: 18)),
+                      const Icon(Icons.logout),
+                      const Padding(padding: EdgeInsets.only(left: 20)),
+                      Text(
+                        context.l10n.logout,
+                        style: const TextStyle(fontSize: 18),
+                      ),
                     ],
                   ),
                 ),

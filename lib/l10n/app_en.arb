@@ -1,0 +1,1054 @@
+{
+    "@@locale": "en",
+    "appTitle": "Zenbu",
+    "anime": "Anime",
+    "home": "Home",
+    "manga": "Manga",
+    "settings": "Settings",
+    "general": "General",
+    "appearance": "Appearance",
+    "appLanguage": "App Language",
+    "appLanguageSubtitle": "Select your preferred application language.",
+    "systemDefault": "System Default",
+    "englishUS": "English (US)",
+    "englishGB": "English (UK)",
+    "loginWith": "Login with",
+    "insertSomeLineHere": "*insert some line here*",
+    "themeMode": "Theme Mode",
+    "themeModeSubtitle": "Choose how Zenbu looks on your device.",
+    "system": "System",
+    "light": "Light",
+    "dark": "Dark",
+    "accentColor": "Accent Color",
+    "personaliseColorScheme": "Personalize the primary color scheme.",
+    "themeAndColors": "Theme & Colors",
+    "chooseThemeColor": "Choose your preferred theme accent color.",
+    "homeScreenLayout": "Home Screen Layout",
+    "customTheme": "Custom Theme",
+    "customThemeSubtitle": "Apply a curated handcrafted theme.",
+    "showAnimeList": "Show Anime List",
+    "showAnimeListSubtitle": "Display currently watching anime",
+    "showMangaList": "Show Manga List",
+    "showMangaListSubtitle": "Display currently reading manga",
+    "showRecommendations": "Show Recommendations",
+    "showRecommendationsSubtitle": "Display recommendations based on anime list",
+    "aniList": "AniList",
+    "aniListSettings": "AniList Settings",
+    "aniListSettingsSubtitle": "Configure metadata language and content preferences.",
+    "titleLanguage": "Title Language",
+    "titleLanguageSubtitle": "How titles are shown throughout the app. Synced with your AniList account.",
+    "showNsfwContent": "Show NSFW Content",
+    "showNsfwContentSubtitle": "Display adult (18+) anime and manga. Synced with your AniList account.",
+    "romaji": "Romaji",
+    "english": "English",
+    "native": "Native",
+    "failedToUpdateTitleLanguage": "Failed to update title language",
+    "failedToUpdateNsfwPreference": "Failed to update NSFW preference",
+    "mangayomi": "Mangayomi",
+    "extensions": "Extensions",
+    "extensionsSubtitle": "Manage sources and repositories for anime & manga.",
+    "extensionsManager": "Extensions Manager",
+    "searchExtensions": "Search extensions...",
+    "installed": "Installed",
+    "install": "Install",
+    "uninstall": "Uninstall",
+    "update": "Update",
+    "installing": "Installing...",
+    "noExtensionsAvailable": "No extensions available.",
+    "addExtensionRepo": "Add Extension Repo",
+    "addRepository": "Add Repository",
+    "removeRepository": "Remove Repository",
+    "repositoryUrl": "Repository URL",
+    "urlCannotBeEmpty": "URL cannot be empty",
+    "repositoryAddedSuccess": "Repository added successfully!",
+    "repositoryRemoved": "Repository removed",
+    "noRepositoriesAdded": "No repositories added.",
+    "needHelp": "Need Help?",
+    "repoPromptAdd": "Click the + button to add a source repo!\nMangayomi extensions / repositories can be used.",
+    "repoPromptNextTab": "Add a repository URL in the next tab first!\nMangayomi extensions / repositories can be used.",
+    "thisExtensionHasNoSettings": "This extension has no settings.",
+    "integrations": "Integrations",
+    "discord": "Discord",
+    "notLinkedTapToConnect": "Not linked  •  Tap to connect",
+    "link": "Link",
+    "unlink": "Unlink",
+    "unlinkAccount": "Unlink Account",
+    "discordAccountUnlinked": "Discord account unlinked",
+    "couldNotOpenDiscord": "Could not open Discord",
+    "couldNotOpenGitHub": "Could not open GitHub",
+    "updates": "Updates",
+    "checkForUpdates": "Check for updates",
+    "checkUpdatesSubtitle": "Check for a newer version of Zenbu",
+    "appIsUpToDate": "App is up to date!",
+    "checkingForUpdates": "Checking for updates...",
+    "updateAvailable": "Update Available",
+    "tapToViewAndInstall": "Tap to view and install",
+    "view": "View",
+    "downloadLater": "Download Later",
+    "stopUpdate": "Stop Update",
+    "newVersionAvailable": "A new version is available!",
+    "about": "About",
+    "version": "Version",
+    "search": "Search...",
+    "searchList": "Search list...",
+    "searchTags": "Search tags...",
+    "searchTitle": "Search title...",
+    "searchAlternativeTitle": "Search Alternative Title",
+    "typeToSearch": "Type to search...",
+    "noResults": "No Results",
+    "noResultsFound": "No results found.",
+    "clearFilters": "Clear Filters",
+    "applyFilters": "Apply Filters",
+    "filter": "Filter",
+    "sort": "Sort",
+    "sortBy": "Sort By",
+    "genresAndTags": "Genres and Tags",
+    "genre": "Genre",
+    "tags": "Tags",
+    "allTags": "All Tags",
+    "format": "Format",
+    "origin": "Origin",
+    "releaseYear": "Release Year",
+    "source": "Source",
+    "sourceMaterial": "Source Material",
+    "expand": "Expand",
+    "homeScreenIsEmpty": "Home Screen is empty",
+    "youPutNothingOnHomescreen": "You put nothing on the homescreen.",
+    "openAppearanceSettings": "Open Appearance Settings",
+    "suchEmpty": "Such empty",
+    "browse": "Browse",
+    "viewAll": "View All",
+    "emptyList": "Empty list",
+    "simulcasts": "Simulcasts",
+    "errorLoadingSimulcasts": "Error loading simulcasts",
+    "details": "Details",
+    "description": "Description",
+    "relations": "Relations",
+    "characters": "Characters",
+    "staff": "Staff",
+    "recommendations": "Recommendations",
+    "reviews": "Reviews",
+    "review": "Review",
+    "noReviewsAvailable": "No reviews available for this media.",
+    "writtenBy": "Written by",
+    "anonymous": "Anonymous",
+    "score": "Score",
+    "status": "Status",
+    "progress": "Progress",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "addToList": "Add to List",
+    "planning": "Planning",
+    "completed": "Completed",
+    "paused": "Paused",
+    "dropped": "Dropped",
+    "save": "Save",
+    "loading": "Loading...",
+    "na": "N/A",
+    "watch": "Watch",
+    "read": "Read",
+    "episodes": "Episodes",
+    "chapters": "Chapters",
+    "noEpisodesFound": "No episodes found for this show.",
+    "noChaptersFound": "No chapters found for this manga.",
+    "noAnimeExtensionsInstalled": "No Extensions Installed",
+    "noMangaExtensionsInstalled": "No Manga Extensions Installed",
+    "toStartWatchingPrompt": "To start watching, add repositories and install an anime extension.",
+    "toStartReadingPrompt": "To start reading, add repositories and install a manga extension.",
+    "manageExtensions": "Manage Extensions",
+    "mapLocalFolder": "Map Local Folder",
+    "chooseDirectory": "Choose Directory",
+    "chooseDownloadQuality": "Choose Download Quality",
+    "episodeAlreadyDownloaded": "Episode already downloaded.",
+    "chapterAlreadyDownloaded": "Chapter already downloaded.",
+    "resolvingDownloadLinks": "Resolving download links...",
+    "openInBrowser": "Open in Browser",
+    "reset": "Reset",
+    "delete": "Delete",
+    "deleteDownload": "Delete Download",
+    "cancel": "Cancel",
+    "ok": "OK",
+    "yes": "Yes",
+    "retry": "Retry",
+    "reload": "Reload",
+    "close": "Close",
+    "downloads": "Downloads",
+    "downloadOptions": "Download Options",
+    "downloading": "Downloading",
+    "readingMode": "Reading Mode",
+    "leftToRightSwipe": "Left to right swipe",
+    "rightToLeftSwipe": "Right to left swipe",
+    "verticalScrolling": "Vertical scrolling",
+    "webnovel": "Webnovel",
+    "pagesLeftToRight": "Pages go from left to right",
+    "pagesRightToLeft": "Pages go from right to left",
+    "next": "Next",
+    "prev": "Prev",
+    "loadingPages": "Loading pages...",
+    "noPagesFound": "No pages found for this chapter.",
+    "failedToLoadImage": "Failed to load image",
+    "readerSettings": "Reader Settings",
+    "fontFamily": "Font Family",
+    "fontSize": "Font Size",
+    "lineHeight": "Line Height",
+    "theme": "Theme",
+    "playbackSettings": "Playback Settings",
+    "playbackSpeed": "Playback Speed",
+    "quality": "Quality",
+    "subtitles": "Subtitles",
+    "customizeSubtitles": "Customize Subtitles",
+    "customizationOptions": "Customization Options",
+    "presetStyle": "Preset Style",
+    "selectCustomToEdit": "Select Custom above to edit",
+    "livePreview": "LIVE PREVIEW",
+    "textColor": "Text Color",
+    "fontWeight": "Font Weight",
+    "dropShadow": "Drop Shadow",
+    "dropShadowSubtitle": "Adds depth and high contrast against bright scenes",
+    "borderOutline": "Border Outline",
+    "backgroundBox": "Background Box",
+    "off": "Off",
+    "playbackFailed": "Playback Failed",
+    "goBack": "Go Back",
+    "rotate": "Rotate",
+    "pictureInPicture": "Picture in Picture",
+    "nextEpisode": "Next Episode",
+    "zoomFill": "Zoom: Fill",
+    "zoomFitDefault": "Zoom: Fit (Default)",
+    "zoomStretch": "Zoom: Stretch",
+    "notifications": "Notifications",
+    "noNotifications": "No Notifications",
+    "logout": "Logout",
+    "doYouWantToLogout": "Do you want to log out?",
+    "gender": "Gender:",
+    "voicedBy": "Voiced By",
+    "charactersVoiced": "Characters Voiced",
+    "metadata": "Metadata",
+    "contentPreferences": "Content Preferences",
+    "downloadNow": "Download Now",
+    "failedToLoad": "Failed to Load",
+    "internetMightNotBeWorking": "Your Internet might not be working",
+    "recommendedForYou": "Recommended for You",
+    "season": "Season",
+    "any": "Any",
+    "currentlyWatching": "Currently Watching",
+    "currentlyReading": "Currently Reading",
+    "animeList": "Anime List",
+    "mangaList": "Manga List",
+    "studios": "Studios",
+    "users": "Users",
+    "monday": "Monday",
+    "tuesday": "Tuesday",
+    "wednesday": "Wednesday",
+    "thursday": "Thursday",
+    "friday": "Friday",
+    "saturday": "Saturday",
+    "sunday": "Sunday",
+    "searchAnimeFor": "Search Anime for \"{query}\"",
+    "@searchAnimeFor": {
+        "placeholders": {
+            "query": {
+                "type": "String"
+            }
+        }
+    },
+    "searchMangaFor": "Search Manga for \"{query}\"",
+    "@searchMangaFor": {
+        "placeholders": {
+            "query": {
+                "type": "String"
+            }
+        }
+    },
+    "searchCharactersFor": "Search Characters for \"{query}\"",
+    "@searchCharactersFor": {
+        "placeholders": {
+            "query": {
+                "type": "String"
+            }
+        }
+    },
+    "searchStaffFor": "Search Staff for \"{query}\"",
+    "@searchStaffFor": {
+        "placeholders": {
+            "query": {
+                "type": "String"
+            }
+        }
+    },
+    "searchStudiosFor": "Search Studios for \"{query}\"",
+    "@searchStudiosFor": {
+        "placeholders": {
+            "query": {
+                "type": "String"
+            }
+        }
+    },
+    "searchUsersFor": "Search Users for \"{query}\"",
+    "@searchUsersFor": {
+        "placeholders": {
+            "query": {
+                "type": "String"
+            }
+        }
+    },
+    "unknownName": "Unknown Name",
+    "unknownStudio": "Unknown Studio",
+    "unknownUser": "Unknown User",
+    "select": "Select",
+    "selectDate": "Select Date",
+    "selectYear": "Select year",
+    "totalRewatches": "Total Rewatches",
+    "totalRereads": "Total Rereads",
+    "watching": "Watching",
+    "reading": "Reading",
+    "rewatching": "Rewatching",
+    "rereading": "Rereading",
+    "meanScore": "Mean Score",
+    "author": "Author",
+    "episodeDuration": "Episode Duration",
+    "alternativeTitles": "Alternative Titles",
+    "episodeIn": "Episode {episode} in",
+    "@episodeIn": {
+        "placeholders": {
+            "episode": {
+                "type": "Object"
+            }
+        }
+    },
+    "episodeWithNumber": "Episode: {number}",
+    "@episodeWithNumber": {
+        "placeholders": {
+            "number": {
+                "type": "Object"
+            }
+        }
+    },
+    "downloadWithEpisode": "Download {episode}",
+    "@downloadWithEpisode": {
+        "placeholders": {
+            "episode": {
+                "type": "String"
+            }
+        }
+    },
+    "episodesCount": "Episodes: {aired}/{total}",
+    "@episodesCount": {
+        "placeholders": {
+            "aired": {
+                "type": "Object"
+            },
+            "total": {
+                "type": "Object"
+            }
+        }
+    },
+    "eps": "eps",
+    "ch": "ch",
+    "mins": "mins",
+    "resume": "Resume",
+    "pause": "Pause",
+    "add": "Add",
+    "spring": "Spring",
+    "summer": "Summer",
+    "fall": "Fall",
+    "winter": "Winter",
+    "china": "China",
+    "japan": "Japan",
+    "korea": "Korea",
+    "tv": "TV",
+    "tvShort": "TV Short",
+    "movie": "Movie",
+    "special": "Special",
+    "ova": "OVA",
+    "ona": "ONA",
+    "music": "Music",
+    "mangaFormat": "Manga",
+    "novel": "Novel",
+    "oneShot": "One Shot",
+    "releasing": "Releasing",
+    "finished": "Finished",
+    "notReleasedYet": "Not released yet",
+    "cancelled": "Cancelled",
+    "hiatus": "Hiatus",
+    "original": "Original",
+    "lightNovel": "Light Novel",
+    "visualNovel": "Visual Novel",
+    "videoGame": "Video Game",
+    "other": "Other",
+    "doujinshi": "Doujinshi",
+    "webNovel": "Web Novel",
+    "liveAction": "Live Action",
+    "game": "Game",
+    "comic": "Comic",
+    "multimediaProject": "Multimedia Project",
+    "pictureBook": "Picture Book",
+    "titleAZ": "Title (A-Z)",
+    "popularity": "Popularity",
+    "scoreDesc": "Score",
+    "trending": "Trending",
+    "favorites": "Favorites",
+    "dateAdded": "Date Added",
+    "releaseDate": "Release Date",
+    "airingStatus": "Airing Status",
+    "lessThanAnHour": "Less than an hour",
+    "january": "January",
+    "february": "February",
+    "march": "March",
+    "april": "April",
+    "may": "May",
+    "june": "June",
+    "july": "July",
+    "august": "August",
+    "september": "September",
+    "october": "October",
+    "november": "November",
+    "december": "December",
+    "areYouSureDelete": "Are you sure you want to delete {name}?",
+    "@areYouSureDelete": {
+        "placeholders": {
+            "name": {
+                "type": "String"
+            }
+        }
+    },
+    "readingSettings": "Reading settings...",
+    "progressWithValues": "Progress: {progress}/{total}",
+    "@progressWithValues": {
+        "placeholders": {
+            "progress": {
+                "type": "Object"
+            },
+            "total": {
+                "type": "Object"
+            }
+        }
+    },
+    "scoreWithMax": "Score: {score} / 100",
+    "@scoreWithMax": {
+        "placeholders": {
+            "score": {
+                "type": "Object"
+            }
+        }
+    },
+    "failedToToggleFavorite": "Failed to toggle favorite: {error}",
+    "@failedToToggleFavorite": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "daysCount": "{count, plural, =1{1 day} other{{count} days}}",
+    "@daysCount": {
+        "placeholders": {
+            "count": {
+                "type": "num"
+            }
+        }
+    },
+    "hoursCount": "{count, plural, =1{1 hour} other{{count} hours}}",
+    "@hoursCount": {
+        "placeholders": {
+            "count": {
+                "type": "num"
+            }
+        }
+    },
+    "failedToLoadVideoClip": "Failed to load video clip",
+    "resolving": "Resolving...",
+    "downloadedChaptersCount": "{count, plural, =1{1 downloaded chapter} other{{count} downloaded chapters}}",
+    "@downloadedChaptersCount": {
+        "placeholders": {
+            "count": {
+                "type": "num"
+            }
+        }
+    },
+    "downloadedEpisodesCount": "{count, plural, =1{1 downloaded episode} other{{count} downloaded episodes}}",
+    "@downloadedEpisodesCount": {
+        "placeholders": {
+            "count": {
+                "type": "num"
+            }
+        }
+    },
+    "noDownloadedMediaFound": "No downloaded {type} found.",
+    "@noDownloadedMediaFound": {
+        "placeholders": {
+            "type": {
+                "type": "String"
+            }
+        }
+    },
+    "downloadingWithCount": "Downloading ({count})",
+    "@downloadingWithCount": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "failedToLoadLocalImage": "Failed to load local image",
+    "failedToLoadChapter": "Failed to load chapter",
+    "chapterIndex": "Chapter {number}",
+    "@chapterIndex": {
+        "placeholders": {
+            "number": {
+                "type": "Object"
+            }
+        }
+    },
+    "selectQuality": "Select Quality",
+    "selectSubtitles": "Select Subtitles",
+    "start": "Start",
+    "pageOutOfTotal": "Page {page} / {total}",
+    "@pageOutOfTotal": {
+        "placeholders": {
+            "page": {
+                "type": "int"
+            },
+            "total": {
+                "type": "int"
+            }
+        }
+    },
+    "chapterOutOfTotal": "Chapter {chapter} of {total}",
+    "@chapterOutOfTotal": {
+        "placeholders": {
+            "chapter": {
+                "type": "int"
+            },
+            "total": {
+                "type": "int"
+            }
+        }
+    },
+    "chapterProgress": "Ch. {chapter} / {total} • {progress}%",
+    "@chapterProgress": {
+        "placeholders": {
+            "chapter": {
+                "type": "int"
+            },
+            "total": {
+                "type": "int"
+            },
+            "progress": {
+                "type": "int"
+            }
+        }
+    },
+    "fontSizePt": "Font Size: {size}pt",
+    "@fontSizePt": {
+        "placeholders": {
+            "size": {
+                "type": "int"
+            }
+        }
+    },
+    "lineHeightValue": "Line Height: {height}",
+    "@lineHeightValue": {
+        "placeholders": {
+            "height": {
+                "type": "String"
+            }
+        }
+    },
+    "subtitlePreviewText": "Subtitles will look like this\nAnime subtitle preview",
+    "defaultOption": "Default",
+    "normal": "Normal",
+    "custom": "Custom",
+    "semiBold": "Semi-Bold",
+    "bold": "Bold",
+    "colorWhite": "White",
+    "colorYellow": "Yellow",
+    "colorCyan": "Cyan",
+    "colorGreen": "Green",
+    "colorCoral": "Coral",
+    "borderNone": "None",
+    "borderThin": "Thin (1.5px)",
+    "borderMedium": "Medium (2.8px)",
+    "borderThick": "Thick (4.0px)",
+    "bgNone": "None",
+    "bgSubtle": "Subtle (30%)",
+    "bgMedium": "Medium (60%)",
+    "bgSolid": "Solid (100%)",
+    "resolvingStreamLinks": "Resolving stream links...",
+    "initializingPlayer": "Initializing player...",
+    "skipOpening": "Skip Opening",
+    "skipEnding": "Skip Ending",
+    "skipRecap": "Skip Recap",
+    "addExtensionRepoDescription": "Enter the JSON URL of the repository (e.g. Mangayomi compatible repositories)",
+    "noTypeExtensionsAvailable": "No {type} extensions available.",
+    "@noTypeExtensionsAvailable": {
+        "placeholders": {
+            "type": {
+                "type": "String"
+            }
+        }
+    },
+    "noExtensionsFound": "No extensions found.",
+    "removeRepoConfirm": "Are you sure you want to remove the repository \"{name}\"? This will hide its extensions from the list.",
+    "@removeRepoConfirm": {
+        "placeholders": {
+            "name": {
+                "type": "String"
+            }
+        }
+    },
+    "failedToLoadSettings": "Failed to load settings:\n{error}",
+    "@failedToLoadSettings": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "notConfigured": "Not configured",
+    "chooseSetting": "Choose setting",
+    "noneSelected": "None selected",
+    "editSetting": "Edit Setting",
+    "repositories": "Repositories",
+    "remove": "Remove",
+    "current": "Current",
+    "repeating": "Repeating",
+    "studioDetails": "Studio Details",
+    "studioDetailsNotFound": "Studio details not found.",
+    "userNotFoundOnAniList": "User not found on AniList",
+    "totalAnime": "Total Anime",
+    "daysWatched": "Days Watched",
+    "daysPlanned": "Days Planned",
+    "stdDeviation": "Std Deviation",
+    "totalManga": "Total Manga",
+    "chaptersRead": "Chapters Read",
+    "volumesRead": "Volumes Read",
+    "plannedManga": "Planned Manga",
+    "entries": "Entries",
+    "animeStatistics": "Anime Statistics",
+    "mangaStatistics": "Manga Statistics",
+    "genreOverview": "Genre Overview",
+    "scoreDistribution": "Score Distribution",
+    "episodeDistribution": "Episode Distribution",
+    "chapterDistribution": "Chapter Distribution",
+    "formatDistribution": "Format Distribution",
+    "statusDistribution": "Status Distribution",
+    "countryDistribution": "Country Distribution",
+    "releaseYearDistribution": "Release Year Distribution",
+    "watchYearDistribution": "Watch Year Distribution",
+    "readYearDistribution": "Read Year Distribution",
+    "mostWatchedVoiceActors": "Most Watched Voice Actors",
+    "mostWatchedStudios": "Most Watched Studios",
+    "mostWatchedStaff": "Most Watched Staff",
+    "mostReadStaff": "Most Read Staff",
+    "userMediaListTitle": "{username}'s {mediaType} List",
+    "@userMediaListTitle": {
+        "placeholders": {
+            "username": {
+                "type": "String"
+            },
+            "mediaType": {
+                "type": "String"
+            }
+        }
+    },
+    "entriesCount": "{count} Entries",
+    "@entriesCount": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "barChartTooltip": "{label}: {count} entries ({percentage}%)",
+    "@barChartTooltip": {
+        "placeholders": {
+            "label": {
+                "type": "String"
+            },
+            "count": {
+                "type": "int"
+            },
+            "percentage": {
+                "type": "String"
+            }
+        }
+    },
+    "entriesInYear": "{count} entries in {year}",
+    "@entriesInYear": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            },
+            "year": {
+                "type": "int"
+            }
+        }
+    },
+    "minusSeconds": "- {seconds} seconds",
+    "@minusSeconds": {
+        "placeholders": {
+            "seconds": {
+                "type": "int"
+            }
+        }
+    },
+    "plusSeconds": "+ {seconds} seconds",
+    "@plusSeconds": {
+        "placeholders": {
+            "seconds": {
+                "type": "int"
+            }
+        }
+    },
+    "failedToInstallUpdate": "Failed to install update: {error}",
+    "@failedToInstallUpdate": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "failedToDownloadUpdate": "Failed to download update: {error}",
+    "@failedToDownloadUpdate": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "searchEllipsis": "Search...",
+    "pip": "Picture in Picture",
+    "zoomMode": "Zoom Mode",
+    "all": "All",
+    "userProfile": "User Profile",
+    "unknown": "Unknown",
+    "linkedPresenceActive": "Linked • Presence active",
+    "linkedPresencePaused": "Linked • Presence paused",
+    "checkForNewerVersion": "Check for a newer version of Zenbu",
+    "updateAvailableWithVersion": "Update Available • {version}",
+    "@updateAvailableWithVersion": {
+        "placeholders": {
+            "version": {
+                "type": "String"
+            }
+        }
+    },
+    "trendingNow": "Trending Now",
+    "popularThisSeason": "Popular this season",
+    "upcoming": "Upcoming",
+    "allTimePopular": "All Time Popular",
+    "highestRated": "Highest Rated",
+    "displayCurrentlyWatchingAnime": "Display currently watching anime",
+    "displayCurrentlyReadingManga": "Display currently reading manga",
+    "displayRecommendationsBasedOnAnime": "Display recommendations based on anime list",
+    "colorPurple": "Purple",
+    "colorBlue": "Blue",
+    "colorTeal": "Teal",
+    "colorAmber": "Amber",
+    "colorRed": "Red",
+    "colorPink": "Pink",
+    "colorIndigo": "Indigo",
+    "fill": "Fill",
+    "stretch": "Stretch",
+    "fit": "Fit",
+    "unableToLoadVideoStream": "Unable to load video stream. Please check your internet connection and try again.",
+    "noVideoStreamsFound": "No video streams found. Please check your internet connection and try again.",
+    "downloadedVideoCorrupt": "The downloaded video file is corrupt or invalid.\n(An HTML error page or incomplete stream was saved instead of video data).\n\nPlease delete this download and try again.",
+    "errorLoadingRepos": "Error loading repos: {error}",
+    "@errorLoadingRepos": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "errorLoadingExtensions": "Error loading extensions: {error}",
+    "@errorLoadingExtensions": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "repositoryAddedSuccessfully": "Repository added successfully!",
+    "failedToAddRepository": "Failed to add repository: {error}",
+    "@failedToAddRepository": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "errorRemovingRepository": "Error removing repository: {error}",
+    "@errorRemovingRepository": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "installingExtension": "Installing {name}...",
+    "@installingExtension": {
+        "placeholders": {
+            "name": {
+                "type": "String"
+            }
+        }
+    },
+    "extensionInstalledSuccessfully": "{name} installed successfully!",
+    "@extensionInstalledSuccessfully": {
+        "placeholders": {
+            "name": {
+                "type": "String"
+            }
+        }
+    },
+    "failedToInstallExtension": "Failed to install {name}: {error}",
+    "@failedToInstallExtension": {
+        "placeholders": {
+            "name": {
+                "type": "String"
+            },
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "extensionUninstalled": "{name} uninstalled",
+    "@extensionUninstalled": {
+        "placeholders": {
+            "name": {
+                "type": "String"
+            }
+        }
+    },
+    "failedToUninstallExtension": "Failed to uninstall {name}: {error}",
+    "@failedToUninstallExtension": {
+        "placeholders": {
+            "name": {
+                "type": "String"
+            },
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "versionWithLang": "Version {version} • {lang}",
+    "@versionWithLang": {
+        "placeholders": {
+            "version": {
+                "type": "String"
+            },
+            "lang": {
+                "type": "String"
+            }
+        }
+    },
+    "langMulti": "Multi-language",
+    "langEnglish": "English",
+    "langJapanese": "Japanese",
+    "langChinese": "Chinese",
+    "langKorean": "Korean",
+    "langFrench": "French",
+    "langGerman": "German",
+    "langSpanish": "Spanish",
+    "langPortuguese": "Portuguese",
+    "langPortugueseBrazil": "Portuguese (Brazil)",
+    "langItalian": "Italian",
+    "langRussian": "Russian",
+    "langArabic": "Arabic",
+    "langTurkish": "Turkish",
+    "langPolish": "Polish",
+    "langUkrainian": "Ukrainian",
+    "langIndonesian": "Indonesian",
+    "langThai": "Thai",
+    "langVietnamese": "Vietnamese",
+    "failedToUpdateTitleLanguageWithError": "Failed to update title language: {error}",
+    "@failedToUpdateTitleLanguageWithError": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "failedToUpdateNsfwPreferenceWithError": "Failed to update NSFW preference: {error}",
+    "@failedToUpdateNsfwPreferenceWithError": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "failedToLoadChapterContent": "Failed to load chapter content: {error}",
+    "@failedToLoadChapterContent": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "fontFamilySerif": "Serif",
+    "fontFamilySansSerif": "Sans-Serif",
+    "fontFamilyMonospace": "Monospace",
+    "failedToLoadPages": "Failed to load pages: {error}",
+    "@failedToLoadPages": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "localSource": "Local Source",
+    "failedToLoadExtensions": "Failed to load extensions: {error}",
+    "@failedToLoadExtensions": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "cloudflareChallengeDetected": "Cloudflare challenge detected.",
+    "errorLoadingChapters": "An error occurred while loading chapters: {error}",
+    "@errorLoadingChapters": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "errorLoadingEpisodes": "An error occurred while loading episodes: {error}",
+    "@errorLoadingEpisodes": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "customLinkActive": "Custom Link Active (Tap to edit/reset)",
+    "mapCustomLinkWrongTitle": "Map Custom Link / Wrong Title",
+    "wrongTitle": "Wrong Title",
+    "localDirectoryNotConfiguredOrNotFound": "Local directory is not configured or does not exist.",
+    "noMatchingMangaFolderFound": "No matching manga folder found.",
+    "noMatchingAnimeFolderFound": "No matching anime folder found.",
+    "noFolderMatchingFound": "No folder matching \"{title}\" found in local directory.",
+    "@noFolderMatchingFound": {
+        "placeholders": {
+            "title": {
+                "type": "String"
+            }
+        }
+    },
+    "cloudflareCaptchaPrompt": "Cloudflare might be preventing fetching. Try opening in browser and completing the captcha.",
+    "errorLoadingChaptersShort": "An error occurred while loading chapters.",
+    "errorLoadingEpisodesShort": "An error occurred while loading episodes.",
+    "noChaptersFoundForManga": "No chapters found for this manga.",
+    "noEpisodesFoundForShow": "No episodes found for this show.",
+    "failedToLoadExtensionEngine": "Failed to load extension engine: {error}",
+    "@failedToLoadExtensionEngine": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "downloadFailed": "Download failed: {error}",
+    "@downloadFailed": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "searchTitleEllipsis": "Search title...",
+    "noStreamLinksFound": "No stream links found.",
+    "unknownQuality": "Unknown Quality",
+    "unknownGraphQLError": "Unknown GraphQL error",
+    "errorPrefix": "Error: {error}",
+    "@errorPrefix": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "notificationEpisodeAired": "Episode {episode} of {title} aired",
+    "@notificationEpisodeAired": {
+        "placeholders": {
+            "episode": {
+                "type": "String"
+            },
+            "title": {
+                "type": "String"
+            }
+        }
+    },
+    "notificationMediaAdded": "{title} was recently added to the site.",
+    "@notificationMediaAdded": {
+        "placeholders": {
+            "title": {
+                "type": "String"
+            }
+        }
+    },
+    "notificationMediaDataChanged": "{title} received site data changes",
+    "@notificationMediaDataChanged": {
+        "placeholders": {
+            "title": {
+                "type": "String"
+            }
+        }
+    },
+    "notificationMediaMerged": "{deletedTitle} was merged with {title}",
+    "@notificationMediaMerged": {
+        "placeholders": {
+            "deletedTitle": {
+                "type": "String"
+            },
+            "title": {
+                "type": "String"
+            }
+        }
+    },
+    "couldNotOpenGitHub": "Could not open GitHub",
+    "couldNotOpenDiscord": "Could not open Discord",
+    "themeMidnight": "Midnight",
+    "noValidExtensionUrlFound": "No valid extension URL found in link.",
+    "communityRepo": "Community Repo",
+    "addedRepository": "Added repository: {name}",
+    "@addedRepository": {
+        "placeholders": {
+            "name": {
+                "type": "String"
+            }
+        }
+    },
+    "loginToViewAndInstallExtensions": "Log in to view and install extensions!",
+    "allFilesAccessRequired": "All Files Access Required",
+    "allFilesAccessPermissionDescription": "To play local videos and read local manga chapters/archives from external directories on Android 11+, Zenbu requires \"All Files Access\" permission.",
+    "grantPermission": "Grant Permission",
+    "failedToPickDirectory": "Failed to pick directory: {error}",
+    "@failedToPickDirectory": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "openingDiscordForAuthorization": "Opening Discord for Authorization...",
+    "couldNotOpenAuthorizationBrowser": "Could not open authorization browser.",
+    "errorOpeningAuthorizationPage": "Error opening authorization page: {error}",
+    "@errorOpeningAuthorizationPage": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "connectingToDiscord": "Connecting to Discord...",
+    "oauth2CodeVerifierMissing": "OAuth2 code verifier missing.",
+    "failedToLinkDiscordAccount": "Failed to link Discord account.",
+    "discordRichPresenceActive": "Discord Rich Presence Active!",
+    "failedToStartDiscordPresenceConnection": "Failed to start Discord presence connection.",
+    "errorConnectingToDiscord": "Error connecting to Discord."
+}
