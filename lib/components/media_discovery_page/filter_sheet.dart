@@ -1121,7 +1121,7 @@ class _FilterSheetState extends State<FilterSheet> {
         : provider.mangaSearchQuery;
 
     final route = PageRouteBuilder(
-      transitionDuration: const Duration(milliseconds: 300),
+      transitionDuration: const Duration(milliseconds: 350),
       pageBuilder: (context, animation, secondaryAnimation) {
         return SearchPage(
           isAnime: widget.isAnime,
@@ -1156,6 +1156,12 @@ class _FilterSheetState extends State<FilterSheet> {
               ? targetFilters["sourceMaterial"]
               : null,
           sortBy: targetFilters["sortBy"],
+        );
+      },
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        return FadeTransition(
+          opacity: animation,
+          child: child,
         );
       },
     );

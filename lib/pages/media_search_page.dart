@@ -223,9 +223,10 @@ class _SearchPageState extends State<SearchPage> {
             child: SearchSegment(
               searchText: widget.query,
               isAnime: widget.isAnime,
+              isSearchPage: true,
             ),
           ),
-          toolbarHeight: 80,
+          toolbarHeight: 85,
         ),
         body: RefreshIndicator(
           onRefresh: _handleRefresh,
