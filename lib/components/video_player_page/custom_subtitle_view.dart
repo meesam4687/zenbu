@@ -161,26 +161,30 @@ class SubtitleConfig {
 class CustomSubtitleView extends StatelessWidget {
   final String text;
   final SubtitleConfig config;
+  final double scale;
 
   const CustomSubtitleView({
     super.key,
     required this.text,
     this.config = const SubtitleConfig(),
+    this.scale = 1.0,
   });
 
   @override
   Widget build(BuildContext context) {
+    final effectiveFontSize = config.effectiveFontSize * scale;
+    final effectiveBorderWidth = config.effectiveBorderWidth * scale;
+
     final textStyleBase = TextStyle(
       fontFamily: config.effectiveFontFamily,
       fontFamilyFallback: config.effectiveFontFamilyFallback,
       fontWeight: config.effectiveFontWeight,
-      fontSize: config.effectiveFontSize,
-      letterSpacing: 0.2,
+      fontSize: effectiveFontSize,
+      letterSpacing: 0.2 * scale,
       height: 1.2,
     );
 
     final bgOpacity = config.effectiveBackgroundOpacity;
-    final borderWidth = config.effectiveBorderWidth;
     final borderColor = config.effectiveBorderColor;
     final hasShadow = config.effectiveHasShadow;
 
@@ -188,14 +192,17 @@ class CustomSubtitleView extends StatelessWidget {
       alignment: Alignment.bottomCenter,
       child: Container(
         padding: bgOpacity > 0
-            ? const EdgeInsets.symmetric(horizontal: 10, vertical: 4)
+            ? EdgeInsets.symmetric(
+                horizontal: 10 * scale,
+                vertical: 4 * scale,
+              )
             : EdgeInsets.zero,
         decoration: bgOpacity > 0
             ? BoxDecoration(
                 color: config.effectiveBackgroundColor.withValues(
                   alpha: bgOpacity,
                 ),
-                borderRadius: BorderRadius.circular(4.0),
+                borderRadius: BorderRadius.circular(4.0 * scale),
               )
             : null,
         child: Stack(
@@ -203,14 +210,16 @@ class CustomSubtitleView extends StatelessWidget {
           children: [
             if (hasShadow)
               Transform.translate(
-                offset: const Offset(1.0, 1.0),
+                offset: Offset(1.0 * scale, 1.0 * scale),
                 child: Text(
                   text,
                   textAlign: TextAlign.center,
                   style: textStyleBase.copyWith(
                     foreground: Paint()
                       ..style = PaintingStyle.stroke
-                      ..strokeWidth = borderWidth > 0 ? borderWidth + 0.4 : 3.4
+                      ..strokeWidth = effectiveBorderWidth > 0
+                          ? effectiveBorderWidth + (0.4 * scale)
+                          : 3.4 * scale
                       ..strokeJoin = StrokeJoin.round
                       ..strokeCap = StrokeCap.round
                       ..color = Colors.black,
@@ -218,14 +227,14 @@ class CustomSubtitleView extends StatelessWidget {
                 ),
               ),
 
-            if (borderWidth > 0)
+            if (effectiveBorderWidth > 0)
               Text(
                 text,
                 textAlign: TextAlign.center,
                 style: textStyleBase.copyWith(
                   foreground: Paint()
                     ..style = PaintingStyle.stroke
-                    ..strokeWidth = borderWidth
+                    ..strokeWidth = effectiveBorderWidth
                     ..strokeJoin = StrokeJoin.round
                     ..strokeCap = StrokeCap.round
                     ..color = borderColor,

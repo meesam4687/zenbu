@@ -388,6 +388,14 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
       }
     });
 
+    _pipChannel.invokeMethod<bool>('isInPip').then((inPip) {
+      if (inPip == true && mounted) {
+        setState(() {
+          _isInPip = true;
+        });
+      }
+    }).catchError((_) {});
+
     _pipChannel.setMethodCallHandler((call) async {
       switch (call.method) {
         case 'onPipModeChanged':
@@ -1496,6 +1504,78 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
     }
   }
 
+  Widget _buildSubtitleOverlay({bool isPip = false}) {
+    if (_activeSubtitleCtrl == null ||
+        _videoPlayerController == null ||
+        !_videoPlayerController!.value.isInitialized) {
+      return const SizedBox.shrink();
+    }
+
+    final subtitleWidget = ValueListenableBuilder<VideoPlayerValue>(
+      valueListenable: _videoPlayerController!,
+      builder: (context, value, child) {
+        final posMs = value.position.inMilliseconds;
+        final text = _activeSubtitleCtrl!.textFromMilliseconds(
+          posMs,
+          _activeSubtitleCtrl!.subtitles,
+        );
+        if (text.isEmpty) return const SizedBox.shrink();
+
+        if (isPip) {
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              final width = constraints.maxWidth;
+              final targetFontSize = (width *
+                      0.045 *
+                      (_subtitleConfig.effectiveFontSize / 20.0))
+                  .clamp(8.5, 13.0);
+              final scale = targetFontSize / _subtitleConfig.effectiveFontSize;
+
+              return ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxHeight: constraints.maxHeight * 0.45,
+                ),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.bottomCenter,
+                  child: CustomSubtitleView(
+                    text: text,
+                    config: _subtitleConfig,
+                    scale: scale,
+                  ),
+                ),
+              );
+            },
+          );
+        }
+
+        return CustomSubtitleView(
+          text: text,
+          config: _subtitleConfig,
+        );
+      },
+    );
+
+    if (isPip) {
+      return Positioned(
+        left: 8.0,
+        right: 8.0,
+        bottom: 6.0,
+        top: 6.0,
+        child: IgnorePointer(child: subtitleWidget),
+      );
+    }
+
+    return AnimatedPositioned(
+      duration: const Duration(milliseconds: 135),
+      curve: _showControls ? Curves.easeOutCubic : Curves.easeInCubic,
+      bottom: _showControls ? 86.0 : 20.0,
+      left: 16.0,
+      right: 16.0,
+      child: IgnorePointer(child: subtitleWidget),
+    );
+  }
+
   Widget _buildPlayerUI() {
     final primaryColor = Theme.of(context).colorScheme.primary;
 
@@ -1706,33 +1786,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
           onLongPressEnd: _onLongPressEnd,
         ),
 
-        if (_activeSubtitleCtrl != null &&
-            _videoPlayerController != null &&
-            _videoPlayerController!.value.isInitialized)
-          AnimatedPositioned(
-            duration: const Duration(milliseconds: 135),
-            curve: _showControls ? Curves.easeOutCubic : Curves.easeInCubic,
-            bottom: _showControls ? 86.0 : 20.0,
-            left: 16.0,
-            right: 16.0,
-            child: IgnorePointer(
-              child: ValueListenableBuilder<VideoPlayerValue>(
-                valueListenable: _videoPlayerController!,
-                builder: (context, value, child) {
-                  final posMs = value.position.inMilliseconds;
-                  final text = _activeSubtitleCtrl!.textFromMilliseconds(
-                    posMs,
-                    _activeSubtitleCtrl!.subtitles,
-                  );
-                  if (text.isEmpty) return const SizedBox.shrink();
-                  return CustomSubtitleView(
-                    text: text,
-                    config: _subtitleConfig,
-                  );
-                },
-              ),
-            ),
-          ),
+        _buildSubtitleOverlay(),
 
         AnimatedPositioned(
           duration: const Duration(milliseconds: 135),
@@ -1787,7 +1841,16 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
           _chewieController != null) {
         return Scaffold(
           backgroundColor: Colors.black,
-          body: _buildVideoDisplay(),
+          body: Stack(
+            fit: StackFit.expand,
+            alignment: Alignment.center,
+            children: [
+              RepaintBoundary(
+                child: _buildVideoDisplay(),
+              ),
+              _buildSubtitleOverlay(isPip: true),
+            ],
+          ),
         );
       }
     }
