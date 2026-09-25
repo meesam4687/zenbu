@@ -10,14 +10,8 @@ class LanguageSettingsPage extends StatelessWidget {
     BuildContext context,
   ) => [
     (name: context.l10n.systemDefault, locale: null),
-    (
-      name: context.l10n.englishGB,
-      locale: const Locale('en', 'GB'),
-    ),
-    (
-      name: context.l10n.englishUS,
-      locale: const Locale('en', 'US'),
-    ),
+    (name: context.l10n.englishGB, locale: const Locale('en', 'GB')),
+    (name: context.l10n.englishUS, locale: const Locale('en', 'US')),
   ];
 
   static String getLanguageName(BuildContext context, Locale? locale) {
