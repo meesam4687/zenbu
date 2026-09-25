@@ -65,7 +65,7 @@ class VideoPlayerPage extends StatefulWidget {
 }
 
 class _VideoPlayerPageState extends State<VideoPlayerPage>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin, WidgetsBindingObserver {
   VideoZoomMode _zoomMode = VideoZoomMode.fit;
 
   void _toggleZoomMode() {
@@ -347,6 +347,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _loadSubtitleConfig();
     _currentEpisode = widget.episode;
     _updateNextEpisode();
@@ -407,6 +408,23 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
             setState(() {
               _isInPip = isInPip;
             });
+            if (!isInPip) {
+              final isPlaying =
+                  _videoPlayerController?.value.isPlaying ?? false;
+              if (isPlaying) {
+                try {
+                  WakelockPlus.enable();
+                } catch (_) {}
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (mounted &&
+                      (_videoPlayerController?.value.isPlaying ?? false)) {
+                    try {
+                      WakelockPlus.enable();
+                    } catch (_) {}
+                  }
+                });
+              }
+            }
           }
           break;
         case 'onPipPlayPausePressed':
@@ -414,9 +432,18 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
               _videoPlayerController!.value.isInitialized) {
             if (_videoPlayerController!.value.isPlaying) {
               await _videoPlayerController!.pause();
+              try {
+                await WakelockPlus.disable();
+              } catch (_) {}
+              _pipChannel.invokeMethod('setVideoPlaying', {'isPlaying': false});
             } else {
               await _videoPlayerController!.play();
+              try {
+                await WakelockPlus.enable();
+              } catch (_) {}
+              _pipChannel.invokeMethod('setVideoPlaying', {'isPlaying': true});
             }
+            if (mounted) setState(() {});
           }
           break;
         case 'onPipRewindPressed':
@@ -445,9 +472,23 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      if (!_isInPip && (_videoPlayerController?.value.isPlaying ?? false)) {
+        try {
+          WakelockPlus.enable();
+        } catch (_) {}
+      }
+    }
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _pipChannel.setMethodCallHandler(null);
-    WakelockPlus.disable();
+    try {
+      WakelockPlus.disable();
+    } catch (_) {}
     _activeSkipTimeNotifier.dispose();
     if (_videoPlayerController != null &&
         _videoPlayerController!.value.isInitialized) {
@@ -472,6 +513,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
     try {
       controller?.pause();
     } catch (_) {}
+    try {
+      WakelockPlus.disable();
+    } catch (_) {}
     _pipChannel.invokeMethod('setVideoPlaying', {'isPlaying': false});
     try {
       chewie?.dispose();
@@ -495,6 +539,15 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
     final isPlaying = _videoPlayerController!.value.isPlaying;
     if (isPlaying != _lastIsPlaying) {
       _lastIsPlaying = isPlaying;
+      if (isPlaying) {
+        try {
+          WakelockPlus.enable();
+        } catch (_) {}
+      } else {
+        try {
+          WakelockPlus.disable();
+        } catch (_) {}
+      }
       _pipChannel.invokeMethod('setVideoPlaying', {'isPlaying': isPlaying});
       if (isPlaying) {
         final curIdx = widget.allEpisodes != null
