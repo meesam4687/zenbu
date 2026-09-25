@@ -932,6 +932,26 @@ class DownloadService extends ChangeNotifier {
           try {
             final sanitizedLabel = sanitizeFilename(subtitle.label);
             String subExt = '.vtt';
+
+            final isRawText =
+                subtitle.file.contains('\n') ||
+                subtitle.file.contains('\r') ||
+                subtitle.file.contains('-->');
+            if (isRawText) {
+              final trimmed = subtitle.file.trim();
+              if (trimmed.startsWith('WEBVTT')) {
+                subExt = '.vtt';
+              } else if (trimmed.startsWith('[Script Info]')) {
+                subExt = '.ass';
+              } else {
+                subExt = '.srt';
+              }
+              final subFileDest = '$videoNameWithoutExt.$sanitizedLabel$subExt';
+              final subFile = File(subFileDest);
+              await subFile.writeAsString(subtitle.file);
+              continue;
+            }
+
             final fileUri = Uri.tryParse(subtitle.file);
             if (fileUri != null) {
               final path = fileUri.path.toLowerCase();

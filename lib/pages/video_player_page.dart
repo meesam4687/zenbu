@@ -1082,7 +1082,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
       } else {
         final ref = base['Referer'] ?? base['referer'] ?? '';
         final refUri = Uri.tryParse(ref);
-        if (refUri != null) {
+        if (refUri != null && refUri.hasScheme && refUri.hasAuthority) {
           base['Origin'] = '${refUri.scheme}://${refUri.host}';
         }
       }
@@ -1091,7 +1091,13 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
     final attempts = [
       () async {
         if (_jsEngine is JsExtensionService) {
-          return await (_jsEngine as JsExtensionService).fetchUrl(url, base);
+          final body = await (_jsEngine as JsExtensionService).fetchUrl(
+            url,
+            base,
+          );
+          if (body != null && body.isNotEmpty) {
+            return body;
+          }
         }
         return null;
       },
@@ -1125,8 +1131,10 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
     ];
 
     for (final attempt in attempts) {
-      final body = await attempt();
-      if (body != null) return body;
+      try {
+        final body = await attempt();
+        if (body != null) return body;
+      } catch (_) {}
     }
     return null;
   }
@@ -1134,8 +1142,14 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
   Future<void> _loadSubtitle(ExtSubtitle sub) async {
     try {
       String? body;
-      if (!sub.file.startsWith('http://') && !sub.file.startsWith('https://')) {
-        final file = File(sub.file);
+      if (sub.file.contains('\n') || sub.file.contains('-->')) {
+        body = sub.file;
+      } else if (!sub.file.startsWith('http://') &&
+          !sub.file.startsWith('https://')) {
+        final filePath = sub.file.startsWith('file://')
+            ? Uri.parse(sub.file).toFilePath()
+            : sub.file;
+        final file = File(filePath);
         if (await file.exists()) {
           final bytes = await file.readAsBytes();
           body = utf8.decode(bytes, allowMalformed: true);
@@ -1152,6 +1166,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
 
       if (body == null) return;
 
+      body = body.replaceAll('\uFEFF', '');
       final format = body.trimLeft().startsWith('WEBVTT')
           ? SubtitleFormat.webvtt
           : SubtitleFormat.srt;
