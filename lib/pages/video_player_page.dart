@@ -1860,33 +1860,52 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
             valueListenable: _activeSkipTimeNotifier,
             builder: (context, activeSkip, child) {
               if (activeSkip == null) return const SizedBox.shrink();
-              return ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.black87,
-                  foregroundColor: Colors.white,
-                  side: const BorderSide(color: Colors.white30),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 12,
+
+              final double currentSec =
+                  _videoPlayerController != null &&
+                      _videoPlayerController!.value.isInitialized
+                  ? _videoPlayerController!.value.position.inMilliseconds /
+                        1000.0
+                  : 0.0;
+              final bool isWithinFirst10Sec =
+                  (currentSec - activeSkip.startTime) <= 10.0;
+              final bool shouldShow = _showControls || isWithinFirst10Sec;
+
+              return AnimatedOpacity(
+                duration: const Duration(milliseconds: 200),
+                opacity: shouldShow ? 1.0 : 0.0,
+                child: IgnorePointer(
+                  ignoring: !shouldShow,
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.black87,
+                      foregroundColor: Colors.white,
+                      side: const BorderSide(color: Colors.white30),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 12,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    onPressed: () {
+                      _startControlsTimer();
+                      _videoPlayerController!.seekTo(
+                        Duration(seconds: activeSkip.endTime.toInt()),
+                      );
+                    },
+                    icon: const Icon(Icons.skip_next),
+                    label: Text(
+                      activeSkip.skipType == 'op' ||
+                              activeSkip.skipType == 'mixed-op'
+                          ? context.l10n.skipOpening
+                          : activeSkip.skipType == 'ed' ||
+                                activeSkip.skipType == 'mixed-ed'
+                          ? context.l10n.skipEnding
+                          : context.l10n.skipRecap,
+                    ),
                   ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                onPressed: () {
-                  _videoPlayerController!.seekTo(
-                    Duration(seconds: activeSkip.endTime.toInt()),
-                  );
-                },
-                icon: const Icon(Icons.skip_next),
-                label: Text(
-                  activeSkip.skipType == 'op' ||
-                          activeSkip.skipType == 'mixed-op'
-                      ? context.l10n.skipOpening
-                      : activeSkip.skipType == 'ed' ||
-                            activeSkip.skipType == 'mixed-ed'
-                      ? context.l10n.skipEnding
-                      : context.l10n.skipRecap,
                 ),
               );
             },
