@@ -142,7 +142,7 @@ class _SearchShuttleState extends State<_SearchShuttle> {
   }
 }
 
-class SearchSegment extends StatelessWidget {
+class SearchSegment extends StatefulWidget {
   const SearchSegment({
     super.key,
     this.searchText,
@@ -154,6 +154,38 @@ class SearchSegment extends StatelessWidget {
   final bool isAnime;
   final bool isSearchPage;
 
+  @override
+  State<SearchSegment> createState() => _SearchSegmentState();
+}
+
+class _SearchSegmentState extends State<SearchSegment> {
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.searchText ?? "");
+  }
+
+  @override
+  void didUpdateWidget(SearchSegment oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.searchText != oldWidget.searchText &&
+        widget.searchText != null &&
+        widget.searchText != _controller.text) {
+      _controller.value = TextEditingValue(
+        text: widget.searchText!,
+        selection: TextSelection.collapsed(offset: widget.searchText!.length),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
   Widget _buildFlightShuttle(
     BuildContext flightContext,
     Animation<double> animation,
@@ -161,8 +193,11 @@ class SearchSegment extends StatelessWidget {
     BuildContext fromHeroContext,
     BuildContext toHeroContext,
   ) {
-    String? queryText = searchText;
+    String? queryText = widget.searchText;
     if (queryText == null || queryText.isEmpty) {
+      queryText = _controller.text;
+    }
+    if (queryText.isEmpty) {
       final toHero = toHeroContext.widget;
       if (toHero is Hero && toHero.child is SearchBar) {
         queryText = (toHero.child as SearchBar).controller?.text;
@@ -182,7 +217,7 @@ class SearchSegment extends StatelessWidget {
     return SizedBox(
       width: 48,
       height: 48,
-      child: isSearchPage
+      child: widget.isSearchPage
           ? IconButton(
               icon: const Icon(Icons.arrow_back),
               onPressed: () => Navigator.of(context).maybePop(),
@@ -194,7 +229,7 @@ class SearchSegment extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<StateProvider>(context);
-    final isFilterActive = isAnime
+    final isFilterActive = widget.isAnime
         ? provider.isAnimeFilterActive
         : provider.isMangaFilterActive;
 
@@ -204,37 +239,39 @@ class SearchSegment extends StatelessWidget {
         children: [
           Expanded(
             child: Hero(
-              tag: 'search_bar_${isAnime ? "anime" : "manga"}',
+              tag: 'search_bar_${widget.isAnime ? "anime" : "manga"}',
               flightShuttleBuilder: _buildFlightShuttle,
               child: SearchBar(
                 leading: _buildLeading(context),
-                hintText: isSearchPage ? "" : context.l10n.searchEllipsis,
+                hintText: widget.isSearchPage
+                    ? ""
+                    : context.l10n.searchEllipsis,
                 backgroundColor: WidgetStatePropertyAll(
                   Theme.of(context).colorScheme.onInverseSurface,
                 ),
-                controller: TextEditingController(text: searchText ?? ""),
+                controller: _controller,
                 onSubmitted: (value) {
                   if (value.isNotEmpty) {
                     final provider = Provider.of<StateProvider>(
                       context,
                       listen: false,
                     );
-                    if (isAnime) {
+                    if (widget.isAnime) {
                       provider.animeSearchQuery = value;
                     } else {
                       provider.mangaSearchQuery = value;
                     }
-                    final filters = isAnime
+                    final filters = widget.isAnime
                         ? provider.currentAnimeFilters
                         : provider.currentMangaFilters;
 
                     final route = PageRouteBuilder(
-                      transitionDuration: isSearchPage
+                      transitionDuration: widget.isSearchPage
                           ? Duration.zero
                           : const Duration(milliseconds: 350),
                       pageBuilder: (context, animation, secondaryAnimation) {
                         return SearchPage(
-                          isAnime: isAnime,
+                          isAnime: widget.isAnime,
                           query: value,
                           genres:
                               (filters["selectedGenres"] as Set)
@@ -264,7 +301,7 @@ class SearchSegment extends StatelessWidget {
                               ? filters["countryOfOrigin"]
                               : null,
                           releaseYear: filters["releaseYear"],
-                          season: isAnime && filters["season"] != ""
+                          season: widget.isAnime && filters["season"] != ""
                               ? filters["season"]
                               : null,
                           format: filters["format"] != ""
@@ -279,7 +316,7 @@ class SearchSegment extends StatelessWidget {
                           sortBy: filters["sortBy"],
                         );
                       },
-                      transitionsBuilder: isSearchPage
+                      transitionsBuilder: widget.isSearchPage
                           ? (context, animation, secondaryAnimation, child) =>
                                 child
                           : (context, animation, secondaryAnimation, child) {
@@ -291,7 +328,12 @@ class SearchSegment extends StatelessWidget {
                     );
 
                     if (!Navigator.of(context).canPop()) {
-                      Navigator.of(context).push(route);
+                      Navigator.of(context).push(route).then((_) {
+                        if (mounted && !widget.isSearchPage) {
+                          _controller.clear();
+                          FocusManager.instance.primaryFocus?.unfocus();
+                        }
+                      });
                     } else {
                       Navigator.of(context).pushReplacement(route);
                     }
@@ -330,7 +372,7 @@ class SearchSegment extends StatelessWidget {
                   builder: (context) {
                     return FilterSheet(
                       maxYear: DateTime.now().year + 1,
-                      isAnime: isAnime,
+                      isAnime: widget.isAnime,
                     );
                   },
                 );
