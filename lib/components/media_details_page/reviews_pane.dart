@@ -152,6 +152,7 @@ class _ReviewsPaneState extends State<ReviewsPane> {
                 borderRadius: BorderRadius.circular(12),
               ),
               closedColor: Theme.of(context).colorScheme.onInverseSurface,
+              middleColor: Theme.of(context).scaffoldBackgroundColor,
               openColor: Theme.of(context).scaffoldBackgroundColor,
               closedBuilder: (context, action) {
                 return InkWell(

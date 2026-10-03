@@ -153,6 +153,9 @@ class _MyAppState extends State<MyApp> {
                 },
                 theme: ThemeData(
                   colorScheme: lightScheme,
+                  canvasColor: (customTheme != null && customTheme.isLightOnly)
+                      ? customTheme.scaffoldBackgroundColor
+                      : lightScheme.surface,
                   scaffoldBackgroundColor:
                       (customTheme != null && customTheme.isLightOnly)
                       ? customTheme.scaffoldBackgroundColor
@@ -161,6 +164,9 @@ class _MyAppState extends State<MyApp> {
                 ),
                 darkTheme: ThemeData(
                   colorScheme: darkScheme,
+                  canvasColor: (customTheme != null && customTheme.isDarkOnly)
+                      ? customTheme.scaffoldBackgroundColor
+                      : darkScheme.surface,
                   scaffoldBackgroundColor:
                       (customTheme != null && customTheme.isDarkOnly)
                       ? customTheme.scaffoldBackgroundColor

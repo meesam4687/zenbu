@@ -80,6 +80,7 @@ class MainPageViewState extends State<MainPageView> {
         return FadeThroughTransition(
           animation: animation,
           secondaryAnimation: secondaryAnimation,
+          fillColor: Colors.transparent,
           child: child,
         );
       },

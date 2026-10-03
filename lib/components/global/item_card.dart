@@ -95,6 +95,7 @@ class _ItemCardState extends State<ItemCard> {
       closedElevation: 0,
       transitionType: ContainerTransitionType.fadeThrough,
       openColor: Theme.of(context).colorScheme.surface,
+      middleColor: Theme.of(context).colorScheme.surface,
       closedColor: Theme.of(context).colorScheme.surface,
       closedShape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10),
