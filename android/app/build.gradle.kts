@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "dev.meesam.zenbu"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 37
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
