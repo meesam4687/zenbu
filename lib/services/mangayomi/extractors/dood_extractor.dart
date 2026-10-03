@@ -24,9 +24,9 @@ class DoodExtractor {
           Uri.parse(doodUrl),
           headers: browserHeaders(doodUrl),
         );
-        return _parse(client, doodUrl, res2.body, quality);
+        return await _parse(client, doodUrl, res2.body, quality);
       }
-      return _parse(client, doodUrl, body, quality);
+      return await _parse(client, doodUrl, body, quality);
     } catch (_) {
       return [];
     } finally {

@@ -5,12 +5,12 @@ import 'dart:io';
 import 'package:http/io_client.dart';
 import 'package:zenbu/services/mangayomi/eval/model/m_source.dart';
 
-class HeaderInterceptor implements InterceptorContract {
+class HeaderInterceptor implements HttpInterceptor {
   @override
-  bool shouldInterceptRequest() => true;
+  bool shouldInterceptRequest({required BaseRequest request}) => true;
 
   @override
-  bool shouldInterceptResponse() => false;
+  bool shouldInterceptResponse({required BaseResponse response}) => false;
 
   @override
   Future<BaseRequest> interceptRequest({required BaseRequest request}) async {
