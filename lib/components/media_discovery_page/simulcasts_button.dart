@@ -17,27 +17,62 @@ class _SimulcastsButtonState extends State<SimulcastsButton> {
   late String randomBanner;
   static String? _cachedBanner;
 
+  String _selectBanner(List medias) {
+    if (medias.isEmpty) return '';
+
+    final validBanners = medias
+        .map((m) => m["bannerImage"]?.toString())
+        .where((b) => b != null && b.trim().isNotEmpty && b != 'null')
+        .cast<String>()
+        .toList();
+
+    if (validBanners.isNotEmpty) {
+      return validBanners[Random().nextInt(validBanners.length)];
+    }
+
+    final validCovers = medias
+        .map(
+          (m) =>
+              m["coverImage"]?["large"]?.toString() ??
+              m["coverImage"]?["medium"]?.toString(),
+        )
+        .where((c) => c != null && c.trim().isNotEmpty && c != 'null')
+        .cast<String>()
+        .toList();
+
+    if (validCovers.isNotEmpty) {
+      return validCovers[Random().nextInt(validCovers.length)];
+    }
+
+    return '';
+  }
+
   @override
   void initState() {
     super.initState();
-    if (_cachedBanner != null) {
+    if (_cachedBanner != null &&
+        _cachedBanner!.trim().isNotEmpty &&
+        _cachedBanner != 'null') {
       randomBanner = _cachedBanner!;
     } else {
-      randomBanner = widget
-          .medias[Random().nextInt(widget.medias.length)]["bannerImage"]
-          .toString();
-      _cachedBanner = randomBanner;
+      randomBanner = _selectBanner(widget.medias);
+      if (randomBanner.isNotEmpty) {
+        _cachedBanner = randomBanner;
+      }
     }
   }
 
   @override
   void didUpdateWidget(SimulcastsButton oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.medias != widget.medias) {
-      randomBanner = widget
-          .medias[Random().nextInt(widget.medias.length)]["bannerImage"]
-          .toString();
-      _cachedBanner = randomBanner;
+    if (oldWidget.medias != widget.medias ||
+        randomBanner.trim().isEmpty ||
+        randomBanner == 'null') {
+      final newBanner = _selectBanner(widget.medias);
+      if (newBanner.isNotEmpty) {
+        randomBanner = newBanner;
+        _cachedBanner = newBanner;
+      }
     }
   }
 

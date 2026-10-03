@@ -30,11 +30,19 @@ class AiringBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final double cardRadius = 15;
+    final bool hasBanner =
+        bannerImage.trim().isNotEmpty && bannerImage != 'null';
+    final bool hasCover = coverImage.trim().isNotEmpty && coverImage != 'null';
+    final String effectiveBackgroundUrl =
+        hasBanner ? bannerImage : (hasCover ? coverImage : '');
+    final BoxFit effectiveFit = hasBanner ? BoxFit.cover : BoxFit.fill;
+
     return OpenContainer(
       openElevation: 0,
       closedElevation: 0,
       transitionType: ContainerTransitionType.fadeThrough,
       openColor: Theme.of(context).colorScheme.surface,
+      middleColor: Theme.of(context).colorScheme.surface,
       closedColor: Theme.of(context).colorScheme.surface,
       closedShape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10),
@@ -59,9 +67,15 @@ class AiringBanner extends StatelessWidget {
                     child: ImageFiltered(
                       imageFilter: ui.ImageFilter.blur(sigmaX: 15, sigmaY: 15),
                       child: CustomImage(
-                        imageUrl: bannerImage,
-                        fit: BoxFit.cover,
-                        errorWidget: Container(),
+                        imageUrl: effectiveBackgroundUrl,
+                        fit: effectiveFit,
+                        errorWidget: hasBanner && hasCover
+                            ? CustomImage(
+                                imageUrl: coverImage,
+                                fit: BoxFit.fill,
+                                errorWidget: Container(),
+                              )
+                            : Container(),
                       ),
                     ),
                   ),
