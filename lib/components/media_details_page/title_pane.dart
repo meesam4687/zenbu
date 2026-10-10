@@ -432,6 +432,9 @@ class _TitlePaneState extends State<TitlePane> {
                           showModalBottomSheet(
                             context: context,
                             isScrollControlled: true,
+                            backgroundColor: Theme.of(
+                              context,
+                            ).colorScheme.surface,
                             useSafeArea: true,
                             builder: (context) {
                               return Padding(
@@ -697,6 +700,9 @@ class _TitlePaneState extends State<TitlePane> {
                                 context: context,
                                 isScrollControlled: true,
                                 useSafeArea: true,
+                                backgroundColor: Theme.of(
+                                  context,
+                                ).colorScheme.surface,
                                 builder: (context) {
                                   return Padding(
                                     padding: EdgeInsets.only(

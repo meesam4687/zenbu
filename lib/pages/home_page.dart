@@ -167,6 +167,9 @@ class _HomePageState extends State<HomePage> {
                                   showModalBottomSheet(
                                     context: context,
                                     useSafeArea: true,
+                                    backgroundColor: Theme.of(
+                                      context,
+                                    ).colorScheme.surface,
                                     builder: (context) {
                                       return UserInfoModalSheet(
                                         profileImage:

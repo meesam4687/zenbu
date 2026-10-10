@@ -44,23 +44,23 @@ class _ShimmerPlaceholderState extends State<ShimmerPlaceholder>
         ? Color.lerp(
             theme.colorScheme.surfaceContainerHighest,
             Colors.black,
-            0.12,
+            0.65,
           )!
         : Color.lerp(
             theme.colorScheme.surfaceContainerHighest,
             Colors.white,
-            0.12,
+            0.65,
           )!;
     final highlightColor = isDark
         ? Color.lerp(
             theme.colorScheme.surfaceContainerHighest,
             Colors.white,
-            0.15,
+            0.42,
           )!
         : Color.lerp(
             theme.colorScheme.surfaceContainerHighest,
             Colors.black,
-            0.15,
+            0.42,
           )!;
 
     return AnimatedBuilder(

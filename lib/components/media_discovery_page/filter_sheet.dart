@@ -83,6 +83,7 @@ class _FilterSheetState extends State<FilterSheet> {
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setModalState) {
@@ -157,6 +158,9 @@ class _FilterSheetState extends State<FilterSheet> {
                                 setModalState(() {});
                               },
                               child: FilterChip(
+                                backgroundColor: Theme.of(
+                                  context,
+                                ).colorScheme.surfaceContainer,
                                 label: Text(
                                   tag,
                                   overflow: TextOverflow.ellipsis,
@@ -304,6 +308,9 @@ class _FilterSheetState extends State<FilterSheet> {
                                   child: GestureDetector(
                                     onLongPress: () => _onGenreLongPress(genre),
                                     child: FilterChip(
+                                      backgroundColor: Theme.of(
+                                        context,
+                                      ).colorScheme.surface,
                                       label: Text(genre),
                                       selected: isIncluded || isExcluded,
                                       showCheckmark: isIncluded,
@@ -357,6 +364,9 @@ class _FilterSheetState extends State<FilterSheet> {
                                   child: GestureDetector(
                                     onLongPress: () => _onTagLongPress(tag),
                                     child: FilterChip(
+                                      backgroundColor: Theme.of(
+                                        context,
+                                      ).colorScheme.surface,
                                       label: Text(tag),
                                       selected: isIncluded || isExcluded,
                                       showCheckmark: isIncluded,

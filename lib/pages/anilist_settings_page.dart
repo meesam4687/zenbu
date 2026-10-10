@@ -72,7 +72,7 @@ class _AnilistSettingsPageState extends State<AnilistSettingsPage> {
                 padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
                 child: Card(
                   elevation: 0,
-                  color: cs.surfaceContainerLow,
+                  color: cs.onInverseSurface,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
                   ),
@@ -153,7 +153,7 @@ class _AnilistSettingsPageState extends State<AnilistSettingsPage> {
                 padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
                 child: Card(
                   elevation: 0,
-                  color: cs.surfaceContainerLow,
+                  color: cs.onInverseSurface,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
                   ),

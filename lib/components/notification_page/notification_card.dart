@@ -37,104 +37,79 @@ class NotificationCard extends StatelessWidget {
         mediaTitle,
       );
     }
-    return OpenContainer(
-      openElevation: 0,
-      closedElevation: 0,
-      transitionType: ContainerTransitionType.fadeThrough,
-      openColor: Theme.of(context).colorScheme.surface,
-      middleColor: Theme.of(context).colorScheme.surface,
-      closedColor: Theme.of(context).colorScheme.surface,
-      closedShape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
+    final cardColor = Theme.of(context).colorScheme.onInverseSurface;
+    return Container(
+      margin: const EdgeInsets.all(5),
+      child: OpenContainer(
+        openElevation: 0,
+        closedElevation: 0,
+        transitionType: ContainerTransitionType.fadeThrough,
+        openColor: Theme.of(context).colorScheme.surface,
+        middleColor: Theme.of(context).colorScheme.surface,
+        closedColor: cardColor,
+        closedShape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        closedBuilder: (context, openContainer) {
+          return SizedBox(
+            height: 250,
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: const BorderRadius.all(Radius.circular(10)),
+                onTap: () {
+                  openContainer();
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(left: 12),
+                      child: SizedBox(
+                        height: 160,
+                        width: 110,
+                        child: Card(
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(10)),
+                          ),
+                          elevation: 5,
+                          clipBehavior: Clip.antiAlias,
+                          child: CustomImage(
+                            imageUrl:
+                                notificationData["media"]["coverImage"]["large"],
+                            fit: BoxFit.cover,
+                            borderRadius: const BorderRadius.all(
+                              Radius.circular(10),
+                            ),
+                            errorWidget: const Icon(Icons.error),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        child: Text(
+                          notificationText,
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+        openBuilder: (context, closeContainer) {
+          final isAnime = notificationData["media"]["type"] == "ANIME";
+          return MediaDetailsPage(
+            id: notificationData["media"]["id"],
+            isAnime: isAnime,
+          );
+        },
       ),
-      closedBuilder: (context, openContainer) {
-        return Container(
-          margin: EdgeInsets.all(5),
-          child: Stack(
-            children: [
-              SizedBox(
-                height: 250,
-                child: Card(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: const BorderRadius.all(Radius.circular(10)),
-                    side: BorderSide(
-                      color: isUnread
-                          ? Color.lerp(
-                              Theme.of(context).colorScheme.onSecondaryFixed,
-                              Colors.white,
-                              0.5,
-                            )!
-                          : Theme.of(context).colorScheme.onSecondaryFixed,
-                      width: isUnread ? 1.5 : 1.0,
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(left: 12),
-                        child: SizedBox(
-                          height: 160,
-                          width: 110,
-                          child: Card(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.all(
-                                Radius.circular(10),
-                              ),
-                            ),
-                            elevation: 5,
-                            clipBehavior: Clip.antiAlias,
-                            child: CustomImage(
-                              imageUrl:
-                                  notificationData["media"]["coverImage"]["large"],
-                              fit: BoxFit.cover,
-                              borderRadius: const BorderRadius.all(
-                                Radius.circular(10),
-                              ),
-                              errorWidget: const Icon(Icons.error),
-                            ),
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 12),
-                          child: Text(
-                            notificationText,
-                            style: TextStyle(fontSize: 16),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              Positioned.fill(
-                child: Padding(
-                  padding: EdgeInsetsGeometry.all(5),
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      borderRadius: BorderRadius.all(Radius.circular(10)),
-                      onTap: () {
-                        openContainer();
-                      },
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-      openBuilder: (context, closeContainer) {
-        final isAnime = notificationData["media"]["type"] == "ANIME";
-        return MediaDetailsPage(
-          id: notificationData["media"]["id"],
-          isAnime: isAnime,
-        );
-      },
     );
   }
 }

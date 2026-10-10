@@ -1257,6 +1257,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       builder: (context) {
         return VideoPlayerSettingsModal(
           videos: _videos,

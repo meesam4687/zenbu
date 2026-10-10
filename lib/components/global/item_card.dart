@@ -41,6 +41,7 @@ class _ItemCardState extends State<ItemCard> {
   void _openListEditor(BuildContext context, Map? entry) {
     HapticFeedback.mediumImpact();
     showModalBottomSheet(
+      backgroundColor: Theme.of(context).colorScheme.surface,
       context: context,
       isScrollControlled: true,
       useSafeArea: true,

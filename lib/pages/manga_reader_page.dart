@@ -198,6 +198,7 @@ class _MangaReaderPageState extends State<MangaReaderPage>
     showModalBottomSheet(
       context: context,
       useSafeArea: true,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       builder: (context) {
         final theme = Theme.of(context);
         final primaryColor = theme.colorScheme.primary;

@@ -87,21 +87,20 @@ class MainPageViewState extends State<MainPageView> {
       child: pages[selectedIdx],
     );
 
+    final ThemeData theme = Theme.of(context);
+    final Color barColor = ElevationOverlay.applySurfaceTint(
+      theme.colorScheme.surface,
+      theme.colorScheme.surfaceTint,
+      3.0,
+    );
+
     if (isTablet) {
-      final ThemeData theme = Theme.of(context);
-
-      final Color railColor = ElevationOverlay.applySurfaceTint(
-        theme.colorScheme.surface,
-        theme.colorScheme.surfaceTint,
-        3.0,
-      );
-
       return Scaffold(
         resizeToAvoidBottomInset: false,
         body: Row(
           children: [
             ColoredBox(
-              color: railColor,
+              color: barColor,
               child: SafeArea(
                 left: true,
                 right: false,
@@ -164,7 +163,8 @@ class MainPageViewState extends State<MainPageView> {
     }
     return Scaffold(
       bottomNavigationBar: NavigationBar(
-        surfaceTintColor: Theme.of(context).colorScheme.surfaceTint,
+        backgroundColor: barColor,
+        surfaceTintColor: Colors.transparent,
         selectedIndex: selectedIdx,
         onDestinationSelected: (value) {
           setState(() {

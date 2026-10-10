@@ -28,7 +28,7 @@ class AppearanceSettingsPage extends StatelessWidget {
                   padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
                   child: Card(
                     elevation: 0,
-                    color: cs.surfaceContainerLow,
+                    color: cs.onInverseSurface,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),
@@ -36,7 +36,7 @@ class AppearanceSettingsPage extends StatelessWidget {
                       title: Text(
                         context.l10n.appLanguage,
                         style: tt.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
+                           fontWeight: FontWeight.w600,
                         ),
                       ),
                       subtitle: Text(
@@ -67,7 +67,7 @@ class AppearanceSettingsPage extends StatelessWidget {
                   padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
                   child: Card(
                     elevation: 0,
-                    color: cs.surfaceContainerLow,
+                    color: cs.onInverseSurface,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),
@@ -132,7 +132,7 @@ class AppearanceSettingsPage extends StatelessWidget {
                   padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
                   child: Card(
                     elevation: 0,
-                    color: cs.surfaceContainerLow,
+                    color: cs.onInverseSurface,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),
@@ -181,7 +181,7 @@ class AppearanceSettingsPage extends StatelessWidget {
                   padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
                   child: Card(
                     elevation: 0,
-                    color: cs.surfaceContainerLow,
+                    color: cs.onInverseSurface,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),

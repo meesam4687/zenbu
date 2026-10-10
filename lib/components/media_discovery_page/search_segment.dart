@@ -366,6 +366,7 @@ class _SearchSegmentState extends State<SearchSegment> {
               ),
               onPressed: () {
                 showModalBottomSheet(
+                  backgroundColor: Theme.of(context).colorScheme.surface,
                   context: context,
                   isScrollControlled: true,
                   useSafeArea: true,

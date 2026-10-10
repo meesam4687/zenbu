@@ -571,6 +571,7 @@ class _ExtensionsPageState extends State<ExtensionsPage>
             icon: const Icon(Icons.download, size: 16),
             label: Text(context.l10n.install),
             style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.transparent,
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             ),
           )
@@ -683,6 +684,7 @@ class _ExtensionsPageState extends State<ExtensionsPage>
     );
 
     return Card(
+      color: Theme.of(context).colorScheme.onInverseSurface,
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       elevation: 1.5,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -808,6 +810,7 @@ class _ExtensionsPageState extends State<ExtensionsPage>
               itemBuilder: (context, index) {
                 final repo = _repos[index];
                 return Card(
+                  color: Theme.of(context).colorScheme.onInverseSurface,
                   margin: const EdgeInsets.symmetric(vertical: 6),
                   elevation: 1,
                   shape: RoundedRectangleBorder(

@@ -4,6 +4,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:zenbu/components/settings_page/settings_item.dart';
 import 'package:zenbu/state_provider.dart';
 import 'package:zenbu/services/update_service.dart';
 import 'package:zenbu/pages/update_page.dart';
@@ -83,7 +84,6 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget build(BuildContext context) {
     final provider = Provider.of<StateProvider>(context);
     final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
 
     return Scaffold(
       appBar: AppBar(title: Text(context.l10n.settings)),
@@ -96,328 +96,199 @@ class _SettingsPageState extends State<SettingsPage> {
               padding: const EdgeInsets.symmetric(vertical: 8),
               children: [
                 _SectionHeader(label: context.l10n.aniList),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
-                  child: Card(
-                    elevation: 0,
-                    color: cs.surfaceContainerLow,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: ListTile(
-                      leading: SvgPicture.asset(
-                        'assets/alLogo.svg',
-                        width: 24,
-                        height: 24,
-                        colorFilter: ColorFilter.mode(
-                          cs.primary,
-                          BlendMode.srcIn,
-                        ),
-                      ),
-                      title: Text(
-                        context.l10n.aniListSettings,
-                        style: tt.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      subtitle: Text(
-                        context.l10n.aniListSettingsSubtitle,
-                        style: tt.bodySmall?.copyWith(
-                          color: cs.onSurfaceVariant,
-                        ),
-                      ),
-                      trailing: const Icon(Icons.chevron_right_rounded),
-                      onTap: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => const AnilistSettingsPage(),
-                          ),
-                        );
-                      },
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                    ),
+                SettingsItem(
+                  icon: SvgPicture.asset(
+                    'assets/alLogo.svg',
+                    width: 24,
+                    height: 24,
+                    colorFilter: ColorFilter.mode(cs.primary, BlendMode.srcIn),
                   ),
+                  titleText: context.l10n.aniListSettings,
+                  subtitleText: context.l10n.aniListSettingsSubtitle,
+                  targetPage: AnilistSettingsPage(),
                 ),
 
                 _SectionHeader(label: context.l10n.mangayomi),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
-                  child: Card(
-                    elevation: 0,
-                    color: cs.surfaceContainerLow,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: ListTile(
-                      leading: Icon(Icons.extension_rounded, color: cs.primary),
-                      title: Text(
-                        context.l10n.extensions,
-                        style: tt.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      subtitle: Text(
-                        context.l10n.extensionsSubtitle,
-                        style: tt.bodySmall?.copyWith(
-                          color: cs.onSurfaceVariant,
-                        ),
-                      ),
-                      trailing: const Icon(Icons.chevron_right_rounded),
-                      onTap: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => const ExtensionsPage(),
-                          ),
-                        );
-                      },
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                    ),
-                  ),
+                SettingsItem(
+                  icon: Icon(Icons.extension_rounded, color: cs.primary),
+                  titleText: context.l10n.extensions,
+                  subtitleText: context.l10n.extensionsSubtitle,
+                  targetPage: const ExtensionsPage(),
                 ),
 
                 _SectionHeader(label: context.l10n.appearance),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
-                  child: Card(
-                    elevation: 0,
-                    color: cs.surfaceContainerLow,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: ListTile(
-                      leading: Icon(Icons.palette_rounded, color: cs.primary),
-                      title: Text(
-                        context.l10n.themeAndColors,
-                        style: tt.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      subtitle: Text(
-                        _themeModeLabel(provider.themeMode, context),
-                        style: tt.bodySmall?.copyWith(
-                          color: cs.onSurfaceVariant,
-                        ),
-                      ),
-                      trailing: const Icon(Icons.chevron_right_rounded),
-                      onTap: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                const AppearanceSettingsPage(),
-                          ),
-                        );
-                      },
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                    ),
-                  ),
+                SettingsItem(
+                  icon: Icon(Icons.palette_rounded, color: cs.primary),
+                  titleText: context.l10n.themeAndColors,
+                  subtitleText: _themeModeLabel(provider.themeMode, context),
+                  targetPage: const AppearanceSettingsPage(),
                 ),
 
                 _SectionHeader(label: context.l10n.integrations),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
-                  child: Card(
-                    elevation: 0,
-                    color: cs.surfaceContainerLow,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: ValueListenableBuilder<bool>(
-                      valueListenable: DiscordService.discordLinked,
-                      builder: (context, isLinked, _) {
-                        if (!isLinked) {
-                          return ListTile(
-                            leading: SvgPicture.asset(
-                              'assets/discord.svg',
-                              width: 24,
-                              height: 24,
-                              colorFilter: ColorFilter.mode(
-                                cs.primary,
-                                BlendMode.srcIn,
-                              ),
-                            ),
-                            title: Text(context.l10n.discord),
-                            subtitle: Text(context.l10n.notLinkedTapToConnect),
-                            trailing: TextButton(
-                              onPressed: () async {
-                                await DiscordService.startAuthorizationFlow();
-                              },
-                              child: Text(
-                                context.l10n.link,
-                                style: TextStyle(
-                                  color: cs.primary,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                            onTap: () async {
-                              await DiscordService.startAuthorizationFlow();
-                            },
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                          );
-                        }
-
-                        return ValueListenableBuilder<bool>(
-                          valueListenable: DiscordService.presenceEnabled,
-                          builder: (context, isEnabled, _) {
-                            return Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                ListTile(
-                                  leading: SvgPicture.asset(
-                                    'assets/discord.svg',
-                                    width: 24,
-                                    height: 24,
-                                    colorFilter: ColorFilter.mode(
-                                      cs.primary,
-                                      BlendMode.srcIn,
-                                    ),
-                                  ),
-                                  title: Text(context.l10n.discord),
-                                  subtitle: Text(
-                                    isEnabled
-                                        ? context.l10n.linkedPresenceActive
-                                        : context.l10n.linkedPresencePaused,
-                                  ),
-                                  trailing: Switch(
-                                    value: isEnabled,
-                                    onChanged: (val) async {
-                                      await DiscordService.setPresenceEnabled(
-                                        val,
-                                      );
-                                    },
-                                  ),
-                                  onTap: () async {
-                                    await DiscordService.setPresenceEnabled(
-                                      !isEnabled,
-                                    );
-                                  },
-                                  shape: const RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.only(
-                                      topLeft: Radius.circular(14),
-                                      topRight: Radius.circular(14),
-                                    ),
-                                  ),
-                                ),
-                                const Divider(
-                                  height: 1,
-                                  indent: 16,
-                                  endIndent: 16,
-                                ),
-                                ListTile(
-                                  leading: Icon(
-                                    Icons.link_off_rounded,
-                                    color: cs.error,
-                                  ),
-                                  title: Text(
-                                    context.l10n.unlinkAccount,
-                                    style: TextStyle(
-                                      color: cs.error,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  onTap: () async {
-                                    final l10n = context.l10n;
-                                    await DiscordService.unlink();
-                                    Fluttertoast.showToast(
-                                      msg: l10n.discordAccountUnlinked,
-                                    );
-                                  },
-                                  shape: const RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.only(
-                                      bottomLeft: Radius.circular(14),
-                                      bottomRight: Radius.circular(14),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            );
+                ValueListenableBuilder<bool>(
+                  valueListenable: DiscordService.discordLinked,
+                  builder: (context, isLinked, _) {
+                    if (!isLinked) {
+                      return SettingsItem(
+                        icon: SvgPicture.asset(
+                          'assets/discord.svg',
+                          width: 24,
+                          height: 24,
+                          colorFilter: ColorFilter.mode(
+                            cs.primary,
+                            BlendMode.srcIn,
+                          ),
+                        ),
+                        titleText: context.l10n.discord,
+                        subtitleText: context.l10n.notLinkedTapToConnect,
+                        trailing: TextButton(
+                          onPressed: () async {
+                            await DiscordService.startAuthorizationFlow();
                           },
+                          child: Text(
+                            context.l10n.link,
+                            style: TextStyle(
+                              color: cs.primary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        onTap: () async {
+                          await DiscordService.startAuthorizationFlow();
+                        },
+                      );
+                    }
+
+                    return ValueListenableBuilder<bool>(
+                      valueListenable: DiscordService.presenceEnabled,
+                      builder: (context, isEnabled, _) {
+                        return SettingsItem(
+                          icon: const SizedBox.shrink(),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              ListTile(
+                                leading: SvgPicture.asset(
+                                  'assets/discord.svg',
+                                  width: 24,
+                                  height: 24,
+                                  colorFilter: ColorFilter.mode(
+                                    cs.primary,
+                                    BlendMode.srcIn,
+                                  ),
+                                ),
+                                title: Text(context.l10n.discord),
+                                subtitle: Text(
+                                  isEnabled
+                                      ? context.l10n.linkedPresenceActive
+                                      : context.l10n.linkedPresencePaused,
+                                ),
+                                trailing: Switch(
+                                  value: isEnabled,
+                                  onChanged: (val) async {
+                                    await DiscordService.setPresenceEnabled(
+                                      val,
+                                    );
+                                  },
+                                ),
+                                onTap: () async {
+                                  await DiscordService.setPresenceEnabled(
+                                    !isEnabled,
+                                  );
+                                },
+                                shape: const RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(14),
+                                    topRight: Radius.circular(14),
+                                  ),
+                                ),
+                              ),
+                              const Divider(
+                                height: 1,
+                                indent: 16,
+                                endIndent: 16,
+                              ),
+                              ListTile(
+                                leading: Icon(
+                                  Icons.link_off_rounded,
+                                  color: cs.error,
+                                ),
+                                title: Text(
+                                  context.l10n.unlinkAccount,
+                                  style: TextStyle(
+                                    color: cs.error,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                onTap: () async {
+                                  final l10n = context.l10n;
+                                  await DiscordService.unlink();
+                                  Fluttertoast.showToast(
+                                    msg: l10n.discordAccountUnlinked,
+                                  );
+                                },
+                                shape: const RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.only(
+                                    bottomLeft: Radius.circular(14),
+                                    bottomRight: Radius.circular(14),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         );
                       },
-                    ),
-                  ),
+                    );
+                  },
                 ),
 
                 _SectionHeader(label: context.l10n.about),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
-                  child: Card(
-                    elevation: 0,
-                    color: cs.surfaceContainerLow,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: Column(
-                      children: [
-                        if (!_hasUpdate)
-                          ListTile(
-                            leading: Icon(
-                              Icons.system_update_rounded,
-                              color: cs.primary,
-                            ),
-                            title: Text(context.l10n.checkForUpdates),
-                            subtitle: Text(context.l10n.checkForNewerVersion),
-                            trailing: _isCheckingUpdate
-                                ? const SizedBox(
-                                    width: 20,
-                                    height: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                    ),
-                                  )
-                                : const Icon(Icons.chevron_right_rounded),
-                            onTap: _isCheckingUpdate ? null : _checkUpdate,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
-                            ),
+                if (!_hasUpdate)
+                  SettingsItem(
+                    icon: Icon(Icons.system_update_rounded, color: cs.primary),
+                    titleText: context.l10n.checkForUpdates,
+                    subtitleText: context.l10n.checkForNewerVersion,
+                    trailing: _isCheckingUpdate
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        else
-                          ListTile(
-                            leading: Icon(
-                              Icons.system_update_alt_rounded,
-                              color: cs.primary,
-                            ),
-                            title: Text(
-                              context.l10n.updateAvailableWithVersion(
-                                _updateInfo?.remoteVersion ?? '',
-                              ),
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: cs.primary,
-                              ),
-                            ),
-                            subtitle: Text(context.l10n.tapToViewAndInstall),
-                            trailing: FilledButton.tonal(
-                              style: FilledButton.styleFrom(
-                                visualDensity: VisualDensity.compact,
-                              ),
-                              onPressed: () {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (_) =>
-                                        UpdatePage(updateInfo: _updateInfo!),
-                                  ),
-                                );
-                              },
-                              child: Text(context.l10n.view),
-                            ),
-                            onTap: _isCheckingUpdate ? null : _checkUpdate,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                          ),
-                      ],
+                        : const Icon(Icons.chevron_right_rounded),
+                    onTap: _isCheckingUpdate ? null : _checkUpdate,
+                  )
+                else
+                  SettingsItem(
+                    icon: Icon(
+                      Icons.system_update_alt_rounded,
+                      color: cs.primary,
                     ),
+                    titleWidget: Text(
+                      context.l10n.updateAvailableWithVersion(
+                        _updateInfo?.remoteVersion ?? '',
+                      ),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: cs.primary,
+                      ),
+                    ),
+                    subtitleText: context.l10n.tapToViewAndInstall,
+                    trailing: FilledButton.tonal(
+                      style: FilledButton.styleFrom(
+                        visualDensity: VisualDensity.compact,
+                      ),
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                UpdatePage(updateInfo: _updateInfo!),
+                          ),
+                        );
+                      },
+                      child: Text(context.l10n.view),
+                    ),
+                    onTap: _isCheckingUpdate ? null : _checkUpdate,
                   ),
-                ),
 
                 const _AppFooter(),
 
