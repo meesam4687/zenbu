@@ -25,6 +25,13 @@ class _NotificationPageState extends State<NotificationPage> {
   @override
   void initState() {
     super.initState();
+    final viewer = Provider.of<StateProvider>(
+      context,
+      listen: false,
+    ).alData["data"]?["Viewer"];
+    if (viewer != null && viewer["unreadNotificationCount"] != null) {
+      _unreadCount = (viewer["unreadNotificationCount"] as num).toInt();
+    }
     _loadMore();
     _scrollController.addListener(_onScroll);
   }
@@ -44,6 +51,18 @@ class _NotificationPageState extends State<NotificationPage> {
     });
     try {
       Map data = await getNotifications(page, 10);
+      if (!_clearedUnread && mounted) {
+        if (_unreadCount == 0) {
+          final viewer = Provider.of<StateProvider>(
+            context,
+            listen: false,
+          ).alData["data"]?["Viewer"];
+          if (viewer != null && viewer["unreadNotificationCount"] != null) {
+            _unreadCount = (viewer["unreadNotificationCount"] as num).toInt();
+          }
+        }
+      }
+
       setState(() {
         for (var item in (data["data"]["Page"]["notifications"] as List)) {
           if (item.isNotEmpty) {
@@ -55,13 +74,6 @@ class _NotificationPageState extends State<NotificationPage> {
       });
 
       if (!_clearedUnread && mounted) {
-        final viewer = Provider.of<StateProvider>(
-          context,
-          listen: false,
-        ).alData["data"]?["Viewer"];
-        if (viewer != null && viewer["unreadNotificationCount"] != null) {
-          _unreadCount = viewer["unreadNotificationCount"];
-        }
         Provider.of<StateProvider>(context, listen: false).clearNotifications();
         _clearedUnread = true;
       }
