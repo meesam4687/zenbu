@@ -422,6 +422,12 @@ abstract class AppLocalizations {
   /// **'Installing...'**
   String get installing;
 
+  /// No description provided for @setAsDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Set as default'**
+  String get setAsDefault;
+
   /// No description provided for @noExtensionsAvailable.
   ///
   /// In en, this message translates to:
@@ -2911,6 +2917,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to uninstall {name}: {error}'**
   String failedToUninstallExtension(String name, String error);
+
+  /// No description provided for @setAsDefaultSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} set as default'**
+  String setAsDefaultSuccess(String name);
 
   /// No description provided for @versionWithLang.
   ///

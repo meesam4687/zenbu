@@ -24,6 +24,7 @@ class _ExtensionsPageState extends State<ExtensionsPage>
   List<ExtRepo> _repos = [];
   List<ExtSource> _allExtensions = [];
   List<ExtSource> _installedExtensions = [];
+  Map<int, int?> _defaultSourceIds = {};
   bool _isLoadingRepos = false;
   bool _isLoadingExtensions = false;
 
@@ -65,9 +66,17 @@ class _ExtensionsPageState extends State<ExtensionsPage>
     try {
       final all = await RepoService.fetchAllExtensions();
       final installed = await RepoService.getInstalledExtensions();
+      final defaultAnime = await RepoService.getDefaultSourceId(1);
+      final defaultManga = await RepoService.getDefaultSourceId(0);
+      final defaultNovel = await RepoService.getDefaultSourceId(2);
       setState(() {
         _installedExtensions = installed;
         _allExtensions = all;
+        _defaultSourceIds = {
+          1: defaultAnime,
+          0: defaultManga,
+          2: defaultNovel,
+        };
       });
     } catch (e) {
       if (mounted) {
@@ -683,6 +692,38 @@ class _ExtensionsPageState extends State<ExtensionsPage>
       ],
     );
 
+    final type = RepoService.getSourceType(ext);
+    final isDefault = _defaultSourceIds[type] == ext.id;
+
+    final defaultButton = TextButton(
+      style: TextButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        minimumSize: Size.zero,
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        disabledForegroundColor: Theme.of(context).disabledColor,
+      ),
+      onPressed: isDefault
+          ? null
+          : () async {
+              await RepoService.setDefaultSourceId(type, ext.id);
+              if (mounted) {
+                setState(() {
+                  _defaultSourceIds[type] = ext.id;
+                });
+                Fluttertoast.showToast(
+                  msg: context.l10n.setAsDefaultSuccess(ext.name),
+                );
+              }
+            },
+      child: Text(
+        isDefault ? context.l10n.defaultOption : context.l10n.setAsDefault,
+        style: TextStyle(
+          fontSize: 13,
+          fontWeight: isDefault ? FontWeight.w600 : FontWeight.normal,
+        ),
+      ),
+    );
+
     return Card(
       color: Theme.of(context).colorScheme.onInverseSurface,
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -725,11 +766,42 @@ class _ExtensionsPageState extends State<ExtensionsPage>
                   ),
                   const SizedBox(height: 10),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [actionButtons],
+                    mainAxisAlignment: isInst
+                        ? MainAxisAlignment.spaceBetween
+                        : MainAxisAlignment.end,
+                    children: [
+                      if (isInst) defaultButton,
+                      actionButtons,
+                    ],
                   ),
                 ],
               ),
+            );
+          }
+
+          if (isInst) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  contentPadding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                  leading: leadingIcon,
+                  title: Text(
+                    ext.name,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                  subtitle: subtitleWidget,
+                  trailing: actionButtons,
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(left: 12, bottom: 8),
+                  child: defaultButton,
+                ),
+              ],
             );
           }
 

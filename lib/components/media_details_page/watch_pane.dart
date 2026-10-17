@@ -120,6 +120,7 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
     try {
       final list = await RepoService.getInstalledExtensions();
       final animeExtensions = list.where((ext) => ext.isAnime).toList();
+      final defaultId = await RepoService.getDefaultSourceId(1);
       if (!mounted) return;
       setState(() {
         _installedExtensions = [...animeExtensions, localSource];
@@ -129,11 +130,27 @@ class _AnimeWatchPaneState extends State<AnimeWatchPane> {
           );
           if (index != -1) {
             _selectedExtension = _installedExtensions[index];
+          } else if (defaultId != null) {
+            final defaultIndex = _installedExtensions.indexWhere(
+              (ext) => ext.id == defaultId,
+            );
+            _selectedExtension = defaultIndex != -1
+                ? _installedExtensions[defaultIndex]
+                : _installedExtensions.firstOrNull;
           } else {
             _selectedExtension = _installedExtensions.firstOrNull;
           }
         } else if (_installedExtensions.isNotEmpty) {
-          _selectedExtension = _installedExtensions.first;
+          if (defaultId != null) {
+            final defaultIndex = _installedExtensions.indexWhere(
+              (ext) => ext.id == defaultId,
+            );
+            _selectedExtension = defaultIndex != -1
+                ? _installedExtensions[defaultIndex]
+                : _installedExtensions.first;
+          } else {
+            _selectedExtension = _installedExtensions.first;
+          }
         }
       });
       if (_selectedExtension != null) {

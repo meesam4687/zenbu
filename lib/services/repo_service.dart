@@ -19,6 +19,28 @@ class RepoService {
   static const String _reposKey = 'ext_repos';
   static const String _installedKey = 'ext_installed';
   static const String _sourceCodePrefix = 'ext_source_code_';
+  static const String _defaultSourceKeyPrefix = 'ext_default_source_';
+
+  static int getSourceType(ExtSource ext) {
+    if (ext.isNovel) return 2;
+    if (ext.isAnime) return 1;
+    return 0;
+  }
+
+  static Future<int?> getDefaultSourceId(int itemType) async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt('$_defaultSourceKeyPrefix$itemType');
+  }
+
+  static Future<void> setDefaultSourceId(int itemType, int sourceId) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('$_defaultSourceKeyPrefix$itemType', sourceId);
+  }
+
+  static Future<void> clearDefaultSourceId(int itemType) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('$_defaultSourceKeyPrefix$itemType');
+  }
 
   static Future<List<ExtRepo>> getRepos() async {
     final prefs = await SharedPreferences.getInstance();
@@ -164,6 +186,12 @@ class RepoService {
       return json.encode(copy);
     }).toList();
     await prefs.setStringList(_installedKey, rawList);
+
+    final type = getSourceType(source);
+    final currentDefault = prefs.getInt('$_defaultSourceKeyPrefix$type');
+    if (currentDefault == source.id) {
+      await prefs.remove('$_defaultSourceKeyPrefix$type');
+    }
   }
 
   static Future<ExtensionService> loadExtensionEngine(ExtSource source) async {

@@ -160,7 +160,7 @@ class _FilterSheetState extends State<FilterSheet> {
                               child: FilterChip(
                                 backgroundColor: Theme.of(
                                   context,
-                                ).colorScheme.surfaceContainer,
+                                ).colorScheme.surface,
                                 label: Text(
                                   tag,
                                   overflow: TextOverflow.ellipsis,

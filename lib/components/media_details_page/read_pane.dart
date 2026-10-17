@@ -131,6 +131,9 @@ class _MangaReadPaneState extends State<MangaReadPane> {
     try {
       final list = await RepoService.getInstalledExtensions();
       final String fmt = (widget.format ?? '').toUpperCase();
+      final bool isNovel = fmt == 'NOVEL';
+      final int targetType = isNovel ? 2 : 0;
+      final defaultId = await RepoService.getDefaultSourceId(targetType);
 
       List<ExtSource> mangaExtensions;
       if (fmt == 'NOVEL') {
@@ -151,11 +154,27 @@ class _MangaReadPaneState extends State<MangaReadPane> {
           );
           if (index != -1) {
             _selectedExtension = _installedExtensions[index];
+          } else if (defaultId != null) {
+            final defaultIndex = _installedExtensions.indexWhere(
+              (ext) => ext.id == defaultId,
+            );
+            _selectedExtension = defaultIndex != -1
+                ? _installedExtensions[defaultIndex]
+                : _installedExtensions.firstOrNull;
           } else {
             _selectedExtension = _installedExtensions.firstOrNull;
           }
         } else if (_installedExtensions.isNotEmpty) {
-          _selectedExtension = _installedExtensions.first;
+          if (defaultId != null) {
+            final defaultIndex = _installedExtensions.indexWhere(
+              (ext) => ext.id == defaultId,
+            );
+            _selectedExtension = defaultIndex != -1
+                ? _installedExtensions[defaultIndex]
+                : _installedExtensions.first;
+          } else {
+            _selectedExtension = _installedExtensions.first;
+          }
         }
       });
       if (_selectedExtension != null) {
