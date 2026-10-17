@@ -109,10 +109,7 @@ class _VideoPlayerSettingsModalState extends State<VideoPlayerSettingsModal> {
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxHeight: maxHeight),
         child: Padding(
-          padding: const EdgeInsets.only(
-            top: 26,
-            bottom: 12,
-          ),
+          padding: const EdgeInsets.only(top: 26, bottom: 12),
           child: AnimatedSwitcher(
             duration: const Duration(milliseconds: 250),
             switchInCurve: Curves.easeOutCubic,
@@ -128,11 +125,11 @@ class _VideoPlayerSettingsModalState extends State<VideoPlayerSettingsModal> {
               final isIncoming = child.key == _getCurrentKey();
               final inOffset = _isGoingBack
                   ? (isIncoming
-                      ? const Offset(-1.0, 0.0)
-                      : const Offset(1.0, 0.0))
+                        ? const Offset(-1.0, 0.0)
+                        : const Offset(1.0, 0.0))
                   : (isIncoming
-                      ? const Offset(1.0, 0.0)
-                      : const Offset(-1.0, 0.0));
+                        ? const Offset(1.0, 0.0)
+                        : const Offset(-1.0, 0.0));
 
               return SlideTransition(
                 position: Tween<Offset>(

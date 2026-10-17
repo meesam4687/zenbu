@@ -866,6 +866,12 @@ abstract class AppLocalizations {
   /// **'Recommendations'**
   String get recommendations;
 
+  /// No description provided for @links.
+  ///
+  /// In en, this message translates to:
+  /// **'Links'**
+  String get links;
+
   /// No description provided for @reviews.
   ///
   /// In en, this message translates to:

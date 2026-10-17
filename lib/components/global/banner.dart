@@ -33,8 +33,9 @@ class AiringBanner extends StatelessWidget {
     final bool hasBanner =
         bannerImage.trim().isNotEmpty && bannerImage != 'null';
     final bool hasCover = coverImage.trim().isNotEmpty && coverImage != 'null';
-    final String effectiveBackgroundUrl =
-        hasBanner ? bannerImage : (hasCover ? coverImage : '');
+    final String effectiveBackgroundUrl = hasBanner
+        ? bannerImage
+        : (hasCover ? coverImage : '');
     final BoxFit effectiveFit = hasBanner ? BoxFit.cover : BoxFit.fill;
 
     return OpenContainer(

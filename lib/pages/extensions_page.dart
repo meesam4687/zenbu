@@ -72,11 +72,7 @@ class _ExtensionsPageState extends State<ExtensionsPage>
       setState(() {
         _installedExtensions = installed;
         _allExtensions = all;
-        _defaultSourceIds = {
-          1: defaultAnime,
-          0: defaultManga,
-          2: defaultNovel,
-        };
+        _defaultSourceIds = {1: defaultAnime, 0: defaultManga, 2: defaultNovel};
       });
     } catch (e) {
       if (mounted) {
@@ -769,10 +765,7 @@ class _ExtensionsPageState extends State<ExtensionsPage>
                     mainAxisAlignment: isInst
                         ? MainAxisAlignment.spaceBetween
                         : MainAxisAlignment.end,
-                    children: [
-                      if (isInst) defaultButton,
-                      actionButtons,
-                    ],
+                    children: [if (isInst) defaultButton, actionButtons],
                   ),
                 ],
               ),

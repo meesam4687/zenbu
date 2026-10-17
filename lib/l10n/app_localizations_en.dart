@@ -401,6 +401,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recommendations => 'Recommendations';
 
   @override
+  String get links => 'Links';
+
+  @override
   String get reviews => 'Reviews';
 
   @override
@@ -2230,6 +2233,9 @@ class AppLocalizationsEnGb extends AppLocalizationsEn {
   String get recommendations => 'Recommendations';
 
   @override
+  String get links => 'Links';
+
+  @override
   String get reviews => 'Reviews';
 
   @override
@@ -4057,6 +4063,9 @@ class AppLocalizationsEnUs extends AppLocalizationsEn {
 
   @override
   String get recommendations => 'Recommendations';
+
+  @override
+  String get links => 'Links';
 
   @override
   String get reviews => 'Reviews';

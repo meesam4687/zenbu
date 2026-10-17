@@ -88,6 +88,17 @@ Future<Map<String, dynamic>> getAnimeData(int id) async {
               }
             }
           }
+        }
+        externalLinks {
+          id
+          url
+          site
+          type
+          language
+          color
+          icon
+          notes
+          isDisabled
         } 
         tags {
           name
@@ -221,6 +232,17 @@ Future<Map<String, dynamic>> getMangaData(int id) async {
               }
             }
           }
+        }
+        externalLinks {
+          id
+          url
+          site
+          type
+          language
+          color
+          icon
+          notes
+          isDisabled
         } 
         tags {
           name

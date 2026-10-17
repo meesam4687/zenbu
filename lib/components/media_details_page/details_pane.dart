@@ -11,6 +11,8 @@ import 'package:zenbu/components/global/item_card.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:html/parser.dart' show parseFragment;
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:zenbu/pages/media_search_page.dart';
 
 String _convertHtmlToMarkdown(String html) {
@@ -99,6 +101,55 @@ class _DetailsPaneState extends State<DetailsPane>
     return parts.join(" ");
   }
 
+  Widget _buildLinkIcon(String? iconUrl) {
+    if (iconUrl == null || iconUrl.trim().isEmpty) {
+      return const Icon(Icons.public, size: 16);
+    }
+    final trimmed = iconUrl.trim();
+    final isSvg = trimmed.toLowerCase().contains('.svg');
+
+    if (isSvg) {
+      return SvgPicture.network(
+        trimmed,
+        width: 16,
+        height: 16,
+        fit: BoxFit.contain,
+        placeholderBuilder: (context) => const SizedBox(
+          width: 16,
+          height: 16,
+          child: Center(
+            child: SizedBox(
+              width: 10,
+              height: 10,
+              child: CircularProgressIndicator(strokeWidth: 1.5),
+            ),
+          ),
+        ),
+        errorBuilder: (context, error, stackTrace) =>
+            const Icon(Icons.public, size: 16),
+      );
+    }
+
+    return CachedNetworkImage(
+      imageUrl: trimmed,
+      width: 16,
+      height: 16,
+      fit: BoxFit.contain,
+      placeholder: (context, url) => const SizedBox(
+        width: 16,
+        height: 16,
+        child: Center(
+          child: SizedBox(
+            width: 10,
+            height: 10,
+            child: CircularProgressIndicator(strokeWidth: 1.5),
+          ),
+        ),
+      ),
+      errorWidget: (context, url, error) => const Icon(Icons.public, size: 16),
+    );
+  }
+
   String _formatDate(BuildContext context, Map? date, Map<int, String> months) {
     if (date == null) return context.l10n.na;
     final int? year = date["year"] as int?;
@@ -167,6 +218,62 @@ class _DetailsPaneState extends State<DetailsPane>
             '${season.substring(0, 1).toUpperCase()}${season.substring(1).toLowerCase()}';
     }
     return seasonYear != null ? '$seasonText, $seasonYear' : seasonText;
+  }
+
+  String _formatState(String state) {
+    if (state.isEmpty) return state;
+    final words = state.replaceAll('_', ' ').split(' ');
+    return words
+        .where((w) => w.isNotEmpty)
+        .map((word) => word[0].toUpperCase() + word.substring(1).toLowerCase())
+        .join(' ');
+  }
+
+  double _calculateListHeight(
+    BuildContext context,
+    List items, {
+    required String Function(dynamic) getTitle,
+    String? Function(dynamic)? getState,
+  }) {
+    if (items.isEmpty) return 0.0;
+    final textScaler = MediaQuery.textScalerOf(context);
+    final themeTextStyle = Theme.of(context).textTheme.bodyMedium;
+    final titleStyle = (themeTextStyle ?? const TextStyle()).copyWith(
+      fontWeight: FontWeight.bold,
+    );
+    final stateStyle = (themeTextStyle ?? const TextStyle()).copyWith(
+      fontWeight: FontWeight.w200,
+    );
+
+    double maxContentHeight = 0.0;
+    for (final item in items) {
+      final title = getTitle(item);
+      final titlePainter = TextPainter(
+        text: TextSpan(text: title, style: titleStyle),
+        maxLines: 2,
+        textDirection: TextDirection.ltr,
+        textScaler: textScaler,
+      )..layout(maxWidth: 110.0);
+
+      double stateHeight = 0.0;
+      final rawState = getState?.call(item);
+      if (rawState != null && rawState.isNotEmpty) {
+        final formattedState = _formatState(rawState);
+        final statePainter = TextPainter(
+          text: TextSpan(text: formattedState, style: stateStyle),
+          maxLines: 1,
+          textDirection: TextDirection.ltr,
+          textScaler: textScaler,
+        )..layout(maxWidth: 110.0);
+        stateHeight = statePainter.height;
+      }
+
+      final double itemHeight = 168.0 + titlePainter.height + stateHeight;
+      if (itemHeight > maxContentHeight) {
+        maxContentHeight = itemHeight;
+      }
+    }
+    return (maxContentHeight + 4.0).ceilToDouble();
   }
 
   @override
@@ -513,200 +620,358 @@ class _DetailsPaneState extends State<DetailsPane>
                 ),
               ),
               (media["characters"]["characters"] as List).isNotEmpty
-                  ? Container(
-                      margin: const EdgeInsets.only(top: 10),
-                      width: double.infinity,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            context.l10n.characters,
-                            style: const TextStyle(
-                              fontSize: 25,
-                              fontWeight: FontWeight.bold,
-                            ),
+                  ? Builder(
+                      builder: (context) {
+                        final charactersList =
+                            media["characters"]["characters"] as List;
+                        final double listHeight = _calculateListHeight(
+                          context,
+                          charactersList,
+                          getTitle: (item) =>
+                              item["node"]?["name"]?["full"] ?? "",
+                          getState: (item) => item["role"] as String?,
+                        );
+                        return Container(
+                          margin: const EdgeInsets.only(top: 10),
+                          width: double.infinity,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                context.l10n.characters,
+                                style: const TextStyle(
+                                  fontSize: 25,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Container(
+                                margin: const EdgeInsets.only(top: 10),
+                                height: listHeight,
+                                width: double.infinity,
+                                child: ListView.builder(
+                                  scrollDirection: Axis.horizontal,
+                                  itemCount: charactersList.length,
+                                  itemBuilder: (context, index) {
+                                    return Padding(
+                                      padding: const EdgeInsets.only(
+                                        right: 3.0,
+                                      ),
+                                      child: ItemCard(
+                                        cardHeight: listHeight,
+                                        title:
+                                            charactersList[index]["node"]["name"]["full"],
+                                        image:
+                                            charactersList[index]["node"]["image"]["large"],
+                                        id: charactersList[index]["node"]["id"],
+                                        type: "character",
+                                        state: charactersList[index]["role"],
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ],
                           ),
-                          Container(
-                            margin: const EdgeInsets.only(top: 10),
-                            height: 260,
-                            width: double.infinity,
-                            child: ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              itemCount:
-                                  (media["characters"]["characters"] as List)
-                                      .length,
-                              itemBuilder: (context, index) {
-                                return Padding(
-                                  padding: const EdgeInsets.only(right: 3.0),
-                                  child: ItemCard(
-                                    title:
-                                        media["characters"]["characters"][index]["node"]["name"]["full"],
-                                    image:
-                                        media["characters"]["characters"][index]["node"]["image"]["large"],
-                                    id: media["characters"]["characters"][index]["node"]["id"],
-                                    type: "character",
-                                    state:
-                                        media["characters"]["characters"][index]["role"],
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
+                        );
+                      },
                     )
                   : Container(),
               (media["relations"]["edges"] as List).isNotEmpty
-                  ? Container(
-                      margin: const EdgeInsets.only(top: 0),
-                      width: double.infinity,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            context.l10n.relations,
-                            style: const TextStyle(
-                              fontSize: 25,
-                              fontWeight: FontWeight.bold,
-                            ),
+                  ? Builder(
+                      builder: (context) {
+                        final relationsList =
+                            media["relations"]["edges"] as List;
+                        final double listHeight = _calculateListHeight(
+                          context,
+                          relationsList,
+                          getTitle: (item) => provider.resolveTitle(
+                            item["node"]?["title"] as Map?,
                           ),
-                          Container(
-                            margin: const EdgeInsets.only(top: 10),
-                            height: 260,
-                            width: double.infinity,
-                            child: ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              itemCount:
-                                  (media["relations"]["edges"] as List).length,
-                              itemBuilder: (context, index) {
-                                return Padding(
-                                  padding: const EdgeInsets.only(right: 3.0),
-                                  child: ItemCard(
-                                    id: media["relations"]["edges"][index]["node"]["id"],
-                                    type:
-                                        media["relations"]["edges"][index]["node"]["type"]
-                                            .toString()
-                                            .toLowerCase(),
-                                    title: provider.resolveTitle(
-                                      media["relations"]["edges"][index]["node"]["title"]
-                                          as Map?,
-                                    ),
-                                    image:
-                                        media["relations"]["edges"][index]["node"]["coverImage"]["extraLarge"],
-                                    state:
-                                        media["relations"]["edges"][index]["relationType"],
-                                    mediaListEntry:
-                                        media["relations"]["edges"][index]["node"]["mediaListEntry"]
-                                            as Map?,
-                                    listDataPreloaded: true,
-                                  ),
-                                );
-                              },
-                            ),
+                          getState: (item) => item["relationType"] as String?,
+                        );
+                        return Container(
+                          margin: const EdgeInsets.only(top: 14),
+                          width: double.infinity,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                context.l10n.relations,
+                                style: const TextStyle(
+                                  fontSize: 25,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Container(
+                                margin: const EdgeInsets.only(top: 10),
+                                height: listHeight,
+                                width: double.infinity,
+                                child: ListView.builder(
+                                  scrollDirection: Axis.horizontal,
+                                  itemCount: relationsList.length,
+                                  itemBuilder: (context, index) {
+                                    return Padding(
+                                      padding: const EdgeInsets.only(
+                                        right: 3.0,
+                                      ),
+                                      child: ItemCard(
+                                        cardHeight: listHeight,
+                                        id: relationsList[index]["node"]["id"],
+                                        type:
+                                            relationsList[index]["node"]["type"]
+                                                .toString()
+                                                .toLowerCase(),
+                                        title: provider.resolveTitle(
+                                          relationsList[index]["node"]["title"]
+                                              as Map?,
+                                        ),
+                                        image:
+                                            relationsList[index]["node"]["coverImage"]["extraLarge"],
+                                        state:
+                                            relationsList[index]["relationType"],
+                                        mediaListEntry:
+                                            relationsList[index]["node"]["mediaListEntry"]
+                                                as Map?,
+                                        listDataPreloaded: true,
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
+                        );
+                      },
                     )
                   : Container(),
               (media["staff"]["edges"] as List).isNotEmpty
-                  ? Container(
-                      margin: const EdgeInsets.only(top: 0),
-                      width: double.infinity,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            context.l10n.staff,
-                            style: const TextStyle(
-                              fontSize: 25,
-                              fontWeight: FontWeight.bold,
-                            ),
+                  ? Builder(
+                      builder: (context) {
+                        final staffList = media["staff"]["edges"] as List;
+                        final double listHeight = _calculateListHeight(
+                          context,
+                          staffList,
+                          getTitle: (item) =>
+                              item["node"]?["name"]?["full"] ?? "",
+                          getState: (item) => item["role"] as String?,
+                        );
+                        return Container(
+                          margin: const EdgeInsets.only(top: 14),
+                          width: double.infinity,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                context.l10n.staff,
+                                style: const TextStyle(
+                                  fontSize: 25,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Container(
+                                margin: const EdgeInsets.only(top: 10),
+                                height: listHeight,
+                                width: double.infinity,
+                                child: ListView.builder(
+                                  scrollDirection: Axis.horizontal,
+                                  itemCount: staffList.length,
+                                  itemBuilder: (context, index) {
+                                    return Padding(
+                                      padding: const EdgeInsets.only(
+                                        right: 3.0,
+                                      ),
+                                      child: ItemCard(
+                                        cardHeight: listHeight,
+                                        id: staffList[index]["node"]["id"],
+                                        type: "staff",
+                                        title:
+                                            (staffList[index]["node"]["name"]["full"]
+                                                as String),
+                                        image:
+                                            staffList[index]["node"]["image"]["large"],
+                                        state:
+                                            (staffList[index]["role"]
+                                                as String),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ],
                           ),
-                          Container(
-                            margin: const EdgeInsets.only(top: 10),
-                            height: 260,
-                            width: double.infinity,
-                            child: ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              itemCount:
-                                  (media["staff"]["edges"] as List).length,
-                              itemBuilder: (context, index) {
-                                return Padding(
-                                  padding: const EdgeInsets.only(right: 3.0),
-                                  child: ItemCard(
-                                    id: media["staff"]["edges"][index]["node"]["id"],
-                                    type: "staff",
-                                    title:
-                                        (media["staff"]["edges"][index]["node"]["name"]["full"]
-                                            as String),
-                                    image:
-                                        media["staff"]["edges"][index]["node"]["image"]["large"],
-                                    state:
-                                        (media["staff"]["edges"][index]["role"]
-                                            as String),
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
+                        );
+                      },
                     )
                   : Container(),
               (media["recommendations"]["edges"] as List).isNotEmpty
-                  ? Container(
-                      margin: const EdgeInsets.only(top: 0),
-                      width: double.infinity,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            context.l10n.recommendations,
-                            style: const TextStyle(
-                              fontSize: 25,
-                              fontWeight: FontWeight.bold,
-                            ),
+                  ? Builder(
+                      builder: (context) {
+                        final recs = (media["recommendations"]["edges"] as List)
+                            .where((e) => e["node"]?["media"] != null)
+                            .toList();
+                        final double listHeight = _calculateListHeight(
+                          context,
+                          recs,
+                          getTitle: (item) => provider.resolveTitle(
+                            item["node"]?["media"]?["title"] as Map?,
                           ),
-                          Container(
-                            margin: const EdgeInsets.only(top: 10),
-                            height: 260,
-                            width: double.infinity,
-                            child: ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              itemCount:
-                                  (media["recommendations"]["edges"] as List)
-                                      .length,
-                              itemBuilder: (context, index) {
-                                final recs =
-                                    (media["recommendations"]["edges"] as List)
-                                        .where(
-                                          (e) => e["node"]["media"] != null,
-                                        )
-                                        .toList();
-                                final nodeMedia = recs[index]["node"]["media"];
-                                return Padding(
-                                  padding: const EdgeInsets.only(right: 3.0),
-                                  child: ItemCard(
-                                    id: nodeMedia["id"],
-                                    type: (nodeMedia["type"] as String)
-                                        .toLowerCase(),
-                                    title: provider.resolveTitle(
-                                      nodeMedia["title"] as Map?,
-                                    ),
-                                    image:
-                                        nodeMedia["coverImage"]["extraLarge"],
-                                    mediaListEntry:
-                                        nodeMedia["mediaListEntry"] as Map?,
-                                    listDataPreloaded: true,
-                                  ),
-                                );
-                              },
-                            ),
+                          getState: null,
+                        );
+                        return Container(
+                          margin: const EdgeInsets.only(top: 14),
+                          width: double.infinity,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                context.l10n.recommendations,
+                                style: const TextStyle(
+                                  fontSize: 25,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Container(
+                                margin: const EdgeInsets.only(top: 10),
+                                height: listHeight,
+                                width: double.infinity,
+                                child: ListView.builder(
+                                  scrollDirection: Axis.horizontal,
+                                  itemCount: recs.length,
+                                  itemBuilder: (context, index) {
+                                    final nodeMedia =
+                                        recs[index]["node"]["media"];
+                                    return Padding(
+                                      padding: const EdgeInsets.only(
+                                        right: 3.0,
+                                      ),
+                                      child: ItemCard(
+                                        cardHeight: listHeight,
+                                        id: nodeMedia["id"],
+                                        type: (nodeMedia["type"] as String)
+                                            .toLowerCase(),
+                                        title: provider.resolveTitle(
+                                          nodeMedia["title"] as Map?,
+                                        ),
+                                        image:
+                                            nodeMedia["coverImage"]["extraLarge"],
+                                        mediaListEntry:
+                                            nodeMedia["mediaListEntry"] as Map?,
+                                        listDataPreloaded: true,
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
+                        );
+                      },
                     )
                   : Container(),
+              Builder(
+                builder: (context) {
+                  final externalLinks = (media["externalLinks"] as List? ?? [])
+                      .where(
+                        (link) =>
+                            link != null &&
+                            link["url"] != null &&
+                            link["url"].toString().isNotEmpty &&
+                            link["isDisabled"] != true,
+                      )
+                      .toList();
+
+                  if (externalLinks.isEmpty) {
+                    return const SizedBox.shrink();
+                  }
+
+                  return Container(
+                    margin: const EdgeInsets.only(top: 10, bottom: 20),
+                    width: double.infinity,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          context.l10n.links,
+                          style: const TextStyle(
+                            fontSize: 25,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: externalLinks.map<Widget>((link) {
+                            final String site =
+                                link["site"]?.toString() ?? context.l10n.link;
+                            final String? iconUrl = link["icon"]?.toString();
+                            final String? url = link["url"]?.toString();
+
+                            return Tooltip(
+                              message: url ?? site,
+                              child: ActionChip(
+                                elevation: 0,
+                                pressElevation: 0,
+                                side: BorderSide.none,
+                                backgroundColor: Theme.of(
+                                  context,
+                                ).colorScheme.onInverseSurface,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  side: BorderSide.none,
+                                ),
+                                materialTapTargetSize:
+                                    MaterialTapTargetSize.shrinkWrap,
+                                avatar: _buildLinkIcon(iconUrl),
+                                label: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      site,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Icon(
+                                      Icons.open_in_new_rounded,
+                                      size: 14,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.onSurfaceVariant,
+                                    ),
+                                  ],
+                                ),
+                                onPressed: () async {
+                                  if (url != null && url.isNotEmpty) {
+                                    final uri = Uri.tryParse(url);
+                                    if (uri != null) {
+                                      try {
+                                        await launchUrl(
+                                          uri,
+                                          mode: LaunchMode.externalApplication,
+                                        );
+                                      } catch (_) {
+                                        try {
+                                          await launchUrl(
+                                            uri,
+                                            mode: LaunchMode.platformDefault,
+                                          );
+                                        } catch (_) {}
+                                      }
+                                    }
+                                  }
+                                },
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
             ],
           ),
         );

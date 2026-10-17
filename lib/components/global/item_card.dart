@@ -107,9 +107,10 @@ class _ItemCardState extends State<ItemCard> {
           onLongPress: isMedia ? () => _onLongPress(context) : null,
           child: Material(
             child: Ink(
-              height: widget.cardHeight ?? 230,
+              height: widget.cardHeight,
               width: 110.0,
               child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Card(
                     shape: RoundedRectangleBorder(

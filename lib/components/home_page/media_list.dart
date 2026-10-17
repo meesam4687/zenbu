@@ -77,7 +77,9 @@ class MediaList extends StatelessWidget {
                                 )
                               : const EdgeInsets.all(8),
                           shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(100)),
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(100),
+                            ),
                           ),
                           onPressed: () {
                             Navigator.of(context).push(

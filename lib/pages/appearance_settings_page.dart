@@ -36,7 +36,7 @@ class AppearanceSettingsPage extends StatelessWidget {
                       title: Text(
                         context.l10n.appLanguage,
                         style: tt.titleSmall?.copyWith(
-                           fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                       subtitle: Text(

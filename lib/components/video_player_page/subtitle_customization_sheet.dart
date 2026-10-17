@@ -90,97 +90,97 @@ class _SubtitleCustomizationSheetState
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildPreviewCard(theme),
+              children: [
+                _buildPreviewCard(theme),
 
-                  const SizedBox(height: 18),
+                const SizedBox(height: 18),
 
-                  Text(
-                    context.l10n.presetStyle,
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                    ),
+                Text(
+                  context.l10n.presetStyle,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
                   ),
-                  const SizedBox(height: 10),
+                ),
+                const SizedBox(height: 10),
 
-                  _buildPresetCards(primaryColor, theme),
+                _buildPresetCards(primaryColor, theme),
 
-                  const SizedBox(height: 20),
+                const SizedBox(height: 20),
 
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      context.l10n.customizationOptions,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    if (!isCustom)
                       Text(
-                        context.l10n.customizationOptions,
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
+                        context.l10n.selectCustomToEdit,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: theme.colorScheme.primary,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
-                      if (!isCustom)
-                        Text(
-                          context.l10n.selectCustomToEdit,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: theme.colorScheme.primary,
-                            fontWeight: FontWeight.w500,
+                  ],
+                ),
+                const SizedBox(height: 10),
+
+                AnimatedOpacity(
+                  duration: const Duration(milliseconds: 200),
+                  opacity: isCustom ? 1.0 : 0.38,
+                  child: IgnorePointer(
+                    ignoring: !isCustom,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildFontSizeSection(theme),
+                        const Divider(height: 24),
+
+                        _buildFontFamilySection(theme),
+                        const Divider(height: 24),
+
+                        _buildFontWeightSection(theme),
+                        const Divider(height: 24),
+
+                        _buildTextColorSection(theme),
+                        const Divider(height: 24),
+
+                        _buildBorderWidthSection(theme),
+                        const Divider(height: 24),
+
+                        _buildBackgroundSection(theme),
+                        const Divider(height: 24),
+
+                        SwitchListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: Text(context.l10n.dropShadow),
+                          subtitle: Text(
+                            context.l10n.dropShadowSubtitle,
+                            style: const TextStyle(fontSize: 12),
                           ),
+                          value: _config.hasShadow,
+                          onChanged: (val) {
+                            _updateConfig(_config.copyWith(hasShadow: val));
+                          },
                         ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-
-                  AnimatedOpacity(
-                    duration: const Duration(milliseconds: 200),
-                    opacity: isCustom ? 1.0 : 0.38,
-                    child: IgnorePointer(
-                      ignoring: !isCustom,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildFontSizeSection(theme),
-                          const Divider(height: 24),
-
-                          _buildFontFamilySection(theme),
-                          const Divider(height: 24),
-
-                          _buildFontWeightSection(theme),
-                          const Divider(height: 24),
-
-                          _buildTextColorSection(theme),
-                          const Divider(height: 24),
-
-                          _buildBorderWidthSection(theme),
-                          const Divider(height: 24),
-
-                          _buildBackgroundSection(theme),
-                          const Divider(height: 24),
-
-                          SwitchListTile(
-                            contentPadding: EdgeInsets.zero,
-                            title: Text(context.l10n.dropShadow),
-                            subtitle: Text(
-                              context.l10n.dropShadowSubtitle,
-                              style: const TextStyle(fontSize: 12),
-                            ),
-                            value: _config.hasShadow,
-                            onChanged: (val) {
-                              _updateConfig(_config.copyWith(hasShadow: val));
-                            },
-                          ),
-                        ],
-                      ),
+                      ],
                     ),
                   ),
+                ),
 
-                  const SizedBox(height: 24),
-                ],
-              ),
+                const SizedBox(height: 24),
+              ],
             ),
           ),
-        ],
-      );
+        ),
+      ],
+    );
   }
 
   Widget _buildPreviewCard(ThemeData theme) {
