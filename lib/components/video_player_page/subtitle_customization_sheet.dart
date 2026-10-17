@@ -7,12 +7,14 @@ class SubtitleCustomizationSheet extends StatefulWidget {
   final SubtitleConfig initialConfig;
   final ValueChanged<SubtitleConfig> onConfigChanged;
   final String? previewImageUrl;
+  final VoidCallback? onBackPressed;
 
   const SubtitleCustomizationSheet({
     super.key,
     required this.initialConfig,
     required this.onConfigChanged,
     this.previewImageUrl,
+    this.onBackPressed,
   });
 
   @override
@@ -59,50 +61,35 @@ class _SubtitleCustomizationSheetState
     final primaryColor = theme.colorScheme.primary;
     final isCustom = _config.preset == SubtitlePreset.custom;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            margin: const EdgeInsets.only(top: 10, bottom: 6),
-            width: 36,
-            height: 4,
-            decoration: BoxDecoration(
-              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  context.l10n.customizeSubtitles,
-                  style: const TextStyle(
-                    fontSize: 19,
-                    fontWeight: FontWeight.bold,
-                  ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+          child: Row(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed:
+                    widget.onBackPressed ?? () => Navigator.of(context).pop(),
+              ),
+              Text(
+                context.l10n.customizeSubtitles,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
                 ),
-                IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: () => Navigator.of(context).pop(),
-                  tooltip: context.l10n.close,
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
+        ),
 
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+        Expanded(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildPreviewCard(theme),
 
@@ -193,8 +180,7 @@ class _SubtitleCustomizationSheetState
             ),
           ),
         ],
-      ),
-    );
+      );
   }
 
   Widget _buildPreviewCard(ThemeData theme) {

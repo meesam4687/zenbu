@@ -278,18 +278,18 @@ class _HomePageState extends State<HomePage> {
                         }
                       }
 
-                      final bool firstIsAnime =
-                          listWidgets.isNotEmpty &&
-                          (listWidgets.first as MediaList).isAnime;
-                      final double topSpacing = firstIsAnime ? 24.0 : 16.0;
+                      const double topSpacing = 24.0;
 
                       return SingleChildScrollView(
                         physics: const AlwaysScrollableScrollPhysics(),
-                        child: Column(
-                          children: [
-                            SizedBox(height: topSpacing),
-                            ...listWidgets,
-                          ],
+                        child: SafeArea(
+                          child: Column(
+                            children: [
+                              const SizedBox(height: topSpacing),
+                              ...listWidgets,
+                              const SizedBox(height: 16),
+                            ],
+                          ),
                         ),
                       );
                     },
@@ -346,15 +346,12 @@ class _HomePageState extends State<HomePage> {
                           }
                         }
 
-                        final bool firstIsAnime =
-                            listWidgets.isNotEmpty &&
-                            (listWidgets.first as MediaList).isAnime;
-                        final double topSpacing = firstIsAnime ? 24.0 : 16.0;
+                        const double topSpacing = 24.0;
 
                         return SafeArea(
                           child: Column(
                             children: [
-                              SizedBox(height: topSpacing),
+                              const SizedBox(height: topSpacing),
                               ...listWidgets,
                               const SizedBox(height: 16),
                             ],

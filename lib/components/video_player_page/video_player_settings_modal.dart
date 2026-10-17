@@ -56,15 +56,39 @@ class _VideoPlayerSettingsModalState extends State<VideoPlayerSettingsModal> {
     2.0,
   ];
 
+  bool _isGoingBack = false;
+
+  Key _getCurrentKey() {
+    switch (_activeSubMenu) {
+      case _SettingsSubMenu.main:
+        return const ValueKey('main_menu');
+      case _SettingsSubMenu.customizeSubtitles:
+        return const ValueKey('customize_subs_menu');
+      case _SettingsSubMenu.quality:
+      case _SettingsSubMenu.subtitles:
+      case _SettingsSubMenu.speed:
+        return ValueKey('sub_menu_${_activeSubMenu.name}');
+    }
+  }
+
   void _navigateToSubMenu(_SettingsSubMenu subMenu) {
     setState(() {
+      _isGoingBack = false;
       _activeSubMenu = subMenu;
     });
   }
 
   void _navigateBackToMain() {
     setState(() {
+      _isGoingBack = true;
       _activeSubMenu = _SettingsSubMenu.main;
+    });
+  }
+
+  void _navigateBackToSubtitles() {
+    setState(() {
+      _isGoingBack = true;
+      _activeSubMenu = _SettingsSubMenu.subtitles;
     });
   }
 
@@ -79,19 +103,14 @@ class _VideoPlayerSettingsModalState extends State<VideoPlayerSettingsModal> {
         widget.selectedSubtitle?.label ?? context.l10n.off;
     final String speedText = '${widget.currentSpeed}x';
 
-    final double maxHeight =
-        _activeSubMenu == _SettingsSubMenu.customizeSubtitles
-        ? MediaQuery.of(context).size.height * 0.85
-        : 320.0;
+    const double maxHeight = 320.0;
 
     return ClipRect(
       child: ConstrainedBox(
-        constraints: BoxConstraints(maxHeight: maxHeight),
+        constraints: const BoxConstraints(maxHeight: maxHeight),
         child: Padding(
-          padding: EdgeInsets.only(
-            top: _activeSubMenu == _SettingsSubMenu.customizeSubtitles
-                ? 10
-                : 26,
+          padding: const EdgeInsets.only(
+            top: 26,
             bottom: 12,
           ),
           child: AnimatedSwitcher(
@@ -106,12 +125,14 @@ class _VideoPlayerSettingsModalState extends State<VideoPlayerSettingsModal> {
                   );
                 },
             transitionBuilder: (Widget child, Animation<double> animation) {
-              final isSubMenu =
-                  child.key == const ValueKey('sub_menu') ||
-                  child.key == const ValueKey('customize_subs_menu');
-              final inOffset = isSubMenu
-                  ? const Offset(1.0, 0.0)
-                  : const Offset(-1.0, 0.0);
+              final isIncoming = child.key == _getCurrentKey();
+              final inOffset = _isGoingBack
+                  ? (isIncoming
+                      ? const Offset(-1.0, 0.0)
+                      : const Offset(1.0, 0.0))
+                  : (isIncoming
+                      ? const Offset(1.0, 0.0)
+                      : const Offset(-1.0, 0.0));
 
               return SlideTransition(
                 position: Tween<Offset>(
@@ -145,6 +166,7 @@ class _VideoPlayerSettingsModalState extends State<VideoPlayerSettingsModal> {
         initialConfig: widget.subtitleConfig,
         onConfigChanged: widget.onSubtitleConfigChanged,
         previewImageUrl: widget.previewImageUrl,
+        onBackPressed: _navigateBackToSubtitles,
       ),
     );
   }
@@ -215,7 +237,7 @@ class _VideoPlayerSettingsModalState extends State<VideoPlayerSettingsModal> {
 
   Widget _buildSubMenu(BuildContext context, Color primaryColor) {
     return Column(
-      key: const ValueKey('sub_menu'),
+      key: ValueKey('sub_menu_${_activeSubMenu.name}'),
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

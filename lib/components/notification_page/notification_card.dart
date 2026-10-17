@@ -49,6 +49,12 @@ class NotificationCard extends StatelessWidget {
         closedColor: cardColor,
         closedShape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
+          side: isUnread
+              ? BorderSide(
+                  color: Color.lerp(cardColor, Colors.white, 0.35)!,
+                  width: 1.5,
+                )
+              : BorderSide.none,
         ),
         closedBuilder: (context, openContainer) {
           return SizedBox(

@@ -177,6 +177,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get installing => 'Installing...';
 
   @override
+  String get setAsDefault => 'Set as default';
+
+  @override
   String get noExtensionsAvailable => 'No extensions available.';
 
   @override
@@ -1552,6 +1555,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String setAsDefaultSuccess(String name) {
+    return '$name set as default';
+  }
+
+  @override
   String versionWithLang(String version, String lang) {
     return 'Version $version • $lang';
   }
@@ -1990,6 +1998,9 @@ class AppLocalizationsEnGb extends AppLocalizationsEn {
 
   @override
   String get installing => 'Installing...';
+
+  @override
+  String get setAsDefault => 'Set as default';
 
   @override
   String get noExtensionsAvailable => 'No extensions available.';
@@ -3367,6 +3378,11 @@ class AppLocalizationsEnGb extends AppLocalizationsEn {
   }
 
   @override
+  String setAsDefaultSuccess(String name) {
+    return '$name set as default';
+  }
+
+  @override
   String versionWithLang(String version, String lang) {
     return 'Version $version • $lang';
   }
@@ -3805,6 +3821,9 @@ class AppLocalizationsEnUs extends AppLocalizationsEn {
 
   @override
   String get installing => 'Installing...';
+
+  @override
+  String get setAsDefault => 'Set as default';
 
   @override
   String get noExtensionsAvailable => 'No extensions available.';
@@ -5179,6 +5198,11 @@ class AppLocalizationsEnUs extends AppLocalizationsEn {
   @override
   String failedToUninstallExtension(String name, String error) {
     return 'Failed to uninstall $name: $error';
+  }
+
+  @override
+  String setAsDefaultSuccess(String name) {
+    return '$name set as default';
   }
 
   @override

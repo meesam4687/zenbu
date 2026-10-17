@@ -54,56 +54,59 @@ class MediaList extends StatelessWidget {
                     (constraints.maxWidth - fullButtonWidth) >= 120 &&
                     constraints.maxWidth >= 280;
 
-                return Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        displayTitle,
-                        style: const TextStyle(fontSize: 20),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    if (title == null)
-                      MaterialButton(
-                        minWidth: 0,
-                        padding: showFullButton
-                            ? const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 8,
-                              )
-                            : const EdgeInsets.all(8),
-                        shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(100)),
+                return ConstrainedBox(
+                  constraints: const BoxConstraints(minHeight: 48.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          displayTitle,
+                          style: const TextStyle(fontSize: 20),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        onPressed: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) {
-                                return ListPage(
-                                  title: isAnime
-                                      ? context.l10n.animeList
-                                      : context.l10n.mangaList,
-                                  mediaListType: isAnime
-                                      ? MediaType.anime
-                                      : MediaType.manga,
-                                );
-                              },
-                            ),
-                          );
-                        },
-                        child: showFullButton
-                            ? Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text('${context.l10n.viewAll}  '),
-                                  const Icon(Icons.arrow_forward),
-                                ],
-                              )
-                            : const Icon(Icons.arrow_forward),
                       ),
-                  ],
+                      if (title == null)
+                        MaterialButton(
+                          minWidth: 0,
+                          padding: showFullButton
+                              ? const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 8,
+                                )
+                              : const EdgeInsets.all(8),
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(100)),
+                          ),
+                          onPressed: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) {
+                                  return ListPage(
+                                    title: isAnime
+                                        ? context.l10n.animeList
+                                        : context.l10n.mangaList,
+                                    mediaListType: isAnime
+                                        ? MediaType.anime
+                                        : MediaType.manga,
+                                  );
+                                },
+                              ),
+                            );
+                          },
+                          child: showFullButton
+                              ? Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text('${context.l10n.viewAll}  '),
+                                    const Icon(Icons.arrow_forward),
+                                  ],
+                                )
+                              : const Icon(Icons.arrow_forward),
+                        ),
+                    ],
+                  ),
                 );
               },
             ),

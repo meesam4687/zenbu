@@ -54,6 +54,7 @@
     "uninstall": "Uninstall",
     "update": "Update",
     "installing": "Installing...",
+    "setAsDefault": "Set as default",
     "noExtensionsAvailable": "No extensions available.",
     "addExtensionRepo": "Add Extension Repo",
     "addRepository": "Add Repository",
@@ -830,6 +831,14 @@
                 "type": "String"
             },
             "error": {
+                "type": "String"
+            }
+        }
+    },
+    "setAsDefaultSuccess": "{name} set as default",
+    "@setAsDefaultSuccess": {
+        "placeholders": {
+            "name": {
                 "type": "String"
             }
         }
