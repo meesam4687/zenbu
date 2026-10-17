@@ -28,10 +28,14 @@ class VideoPlayerControlsOverlay extends StatefulWidget {
   final VoidCallback? onLongPressStart;
   final VoidCallback? onLongPressEnd;
 
+  final bool isLocked;
+  final VoidCallback onLockPressed;
+
   const VideoPlayerControlsOverlay({
     super.key,
     required this.visible,
     this.isHolding = false,
+    this.isLocked = false,
     required this.animeTitle,
     required this.episodeName,
     required this.hasNextEpisode,
@@ -50,6 +54,7 @@ class VideoPlayerControlsOverlay extends StatefulWidget {
     required this.onForwardPressed,
     required this.onSkip85Pressed,
     required this.onRotatePressed,
+    required this.onLockPressed,
     this.onBackgroundTap,
     this.onLongPressStart,
     this.onLongPressEnd,
@@ -61,7 +66,7 @@ class VideoPlayerControlsOverlay extends StatefulWidget {
 }
 
 class _VideoPlayerControlsOverlayState extends State<VideoPlayerControlsOverlay>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _bgOpacity;
   late Animation<double> _centerScale;
@@ -70,6 +75,12 @@ class _VideoPlayerControlsOverlayState extends State<VideoPlayerControlsOverlay>
   late Animation<double> _topOpacity;
   late Animation<double> _bottomOffset;
   late Animation<double> _bottomOpacity;
+
+  late AnimationController _lockController;
+  late Animation<double> _rotateOpacity;
+  late Animation<double> _rotateScale;
+  late Animation<double> _lockSlide;
+  late Animation<double> _otherControlsOpacity;
 
   @override
   void initState() {
@@ -139,6 +150,48 @@ class _VideoPlayerControlsOverlayState extends State<VideoPlayerControlsOverlay>
     if (widget.visible) {
       _controller.value = 1.0;
     }
+
+    _lockController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+      reverseDuration: const Duration(milliseconds: 350),
+    );
+
+    _rotateOpacity = Tween<double>(begin: 1.0, end: 0.0).animate(
+      CurvedAnimation(
+        parent: _lockController,
+        curve: const Interval(0.0, 0.35, curve: Curves.easeOut),
+        reverseCurve: const Interval(0.0, 0.35, curve: Curves.easeIn),
+      ),
+    );
+
+    _rotateScale = Tween<double>(begin: 1.0, end: 0.7).animate(
+      CurvedAnimation(
+        parent: _lockController,
+        curve: const Interval(0.0, 0.35, curve: Curves.easeOut),
+        reverseCurve: const Interval(0.0, 0.35, curve: Curves.easeIn),
+      ),
+    );
+
+    _lockSlide = Tween<double>(begin: 0.0, end: 48.0).animate(
+      CurvedAnimation(
+        parent: _lockController,
+        curve: const Interval(0.35, 1.0, curve: Curves.easeInOutCubic),
+        reverseCurve: const Interval(0.35, 1.0, curve: Curves.easeInOutCubic),
+      ),
+    );
+
+    _otherControlsOpacity = Tween<double>(begin: 1.0, end: 0.0).animate(
+      CurvedAnimation(
+        parent: _lockController,
+        curve: const Interval(0.0, 0.35, curve: Curves.easeOut),
+        reverseCurve: const Interval(0.0, 0.35, curve: Curves.easeIn),
+      ),
+    );
+
+    if (widget.isLocked) {
+      _lockController.value = 1.0;
+    }
   }
 
   @override
@@ -151,11 +204,19 @@ class _VideoPlayerControlsOverlayState extends State<VideoPlayerControlsOverlay>
         _controller.reverse();
       }
     }
+    if (widget.isLocked != oldWidget.isLocked) {
+      if (widget.isLocked) {
+        _lockController.forward();
+      } else {
+        _lockController.reverse();
+      }
+    }
   }
 
   @override
   void dispose() {
     _controller.dispose();
+    _lockController.dispose();
     super.dispose();
   }
 
@@ -174,7 +235,7 @@ class _VideoPlayerControlsOverlayState extends State<VideoPlayerControlsOverlay>
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
-      animation: _controller,
+      animation: Listenable.merge([_controller, _lockController]),
       builder: (context, child) {
         if (_controller.isDismissed && !widget.visible && !widget.isHolding) {
           return const SizedBox.shrink();
@@ -187,9 +248,15 @@ class _VideoPlayerControlsOverlayState extends State<VideoPlayerControlsOverlay>
               Positioned.fill(
                 child: GestureDetector(
                   onTap: widget.onBackgroundTap,
-                  onLongPressStart: (_) => widget.onLongPressStart?.call(),
-                  onLongPressEnd: (_) => widget.onLongPressEnd?.call(),
-                  onLongPressCancel: () => widget.onLongPressEnd?.call(),
+                  onLongPressStart: widget.isLocked
+                      ? null
+                      : (_) => widget.onLongPressStart?.call(),
+                  onLongPressEnd: widget.isLocked
+                      ? null
+                      : (_) => widget.onLongPressEnd?.call(),
+                  onLongPressCancel: widget.isLocked
+                      ? null
+                      : () => widget.onLongPressEnd?.call(),
                   behavior: HitTestBehavior.opaque,
                   child: Opacity(
                     opacity: _bgOpacity.value,
@@ -198,20 +265,32 @@ class _VideoPlayerControlsOverlayState extends State<VideoPlayerControlsOverlay>
                 ),
               ),
 
-              Positioned(
-                top: 24.0,
-                left: 8.0,
-                right: 8.0,
-                child: Transform.translate(
-                  offset: Offset(0, _topOffset.value),
-                  child: Opacity(
-                    opacity: _topOpacity.value,
-                    child: _buildHeader(),
+              if (_otherControlsOpacity.value > 0.0)
+                Positioned(
+                  top: 24.0,
+                  left: 8.0,
+                  right: 8.0,
+                  child: Transform.translate(
+                    offset: Offset(0, _topOffset.value),
+                    child: Opacity(
+                      opacity: (_topOpacity.value * _otherControlsOpacity.value)
+                          .clamp(0.0, 1.0),
+                      child: IgnorePointer(
+                        ignoring: _lockController.value > 0.05,
+                        child: _buildHeader(),
+                      ),
+                    ),
                   ),
                 ),
-              ),
 
-              _buildCenterControls(),
+              if (_otherControlsOpacity.value > 0.0)
+                Opacity(
+                  opacity: _otherControlsOpacity.value,
+                  child: IgnorePointer(
+                    ignoring: _lockController.value > 0.05,
+                    child: _buildCenterControls(),
+                  ),
+                ),
 
               Positioned(
                 bottom: 16.0,
@@ -343,35 +422,98 @@ class _VideoPlayerControlsOverlayState extends State<VideoPlayerControlsOverlay>
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            InkWell(
-              onTap: widget.onSkip85Pressed,
-              borderRadius: BorderRadius.circular(8),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.white, width: 1),
+            Opacity(
+              opacity: _otherControlsOpacity.value,
+              child: IgnorePointer(
+                ignoring: _lockController.value > 0.05,
+                child: InkWell(
+                  onTap: widget.onSkip85Pressed,
                   borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Text(
-                  '+85s',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.white, width: 1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Text(
+                      '+85s',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                 ),
               ),
             ),
-            IconButton(
-              icon: const Icon(
-                Icons.screen_rotation_rounded,
-                color: Colors.white,
+            SizedBox(
+              width: 96,
+              height: 48,
+              child: Stack(
+                alignment: Alignment.centerRight,
+                children: [
+                  Positioned(
+                    right: 0,
+                    top: 0,
+                    bottom: 0,
+                    child: Opacity(
+                      opacity: _rotateOpacity.value,
+                      child: Transform.scale(
+                        scale: _rotateScale.value,
+                        child: IgnorePointer(
+                          ignoring: _lockController.value > 0.05,
+                          child: SizedBox(
+                            width: 48,
+                            height: 48,
+                            child: IconButton(
+                              icon: const Icon(
+                                Icons.screen_rotation_rounded,
+                                color: Colors.white,
+                              ),
+                              tooltip: context.l10n.rotate,
+                              onPressed: widget.onRotatePressed,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 0,
+                    top: 0,
+                    bottom: 0,
+                    child: Transform.translate(
+                      offset: Offset(_lockSlide.value, 0),
+                      child: SizedBox(
+                        width: 48,
+                        height: 48,
+                        child: IconButton(
+                          icon: AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 150),
+                            transitionBuilder: (child, animation) =>
+                                ScaleTransition(scale: animation, child: child),
+                            child: Icon(
+                              _lockController.value >= 0.5
+                                  ? Icons.lock_rounded
+                                  : Icons.lock_outline_rounded,
+                              key: ValueKey(_lockController.value >= 0.5),
+                              color: Colors.white,
+                            ),
+                          ),
+                          tooltip: _lockController.value >= 0.5
+                              ? context.l10n.unlock
+                              : context.l10n.lock,
+                          onPressed: widget.onLockPressed,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              tooltip: context.l10n.rotate,
-              onPressed: widget.onRotatePressed,
             ),
           ],
         ),

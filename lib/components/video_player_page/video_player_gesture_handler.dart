@@ -6,6 +6,7 @@ import 'package:zenbu/l10n/l10n_extension.dart';
 
 class VideoPlayerGestureHandler extends StatefulWidget {
   final bool isLeft;
+  final bool isLocked;
   final VoidCallback onTap;
   final VoidCallback onDoubleTap;
   final VoidCallback? onGestureTriggered;
@@ -15,6 +16,7 @@ class VideoPlayerGestureHandler extends StatefulWidget {
   const VideoPlayerGestureHandler({
     super.key,
     required this.isLeft,
+    this.isLocked = false,
     required this.onTap,
     required this.onDoubleTap,
     this.onGestureTriggered,
@@ -111,6 +113,10 @@ class _VideoPlayerGestureHandlerState extends State<VideoPlayerGestureHandler>
   }
 
   void _handleTap() {
+    if (widget.isLocked) {
+      widget.onTap();
+      return;
+    }
     _singleTapTimer?.cancel();
     final now = DateTime.now().millisecondsSinceEpoch;
     if (now - _lastTapTime < 200) {
@@ -210,19 +216,27 @@ class _VideoPlayerGestureHandlerState extends State<VideoPlayerGestureHandler>
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: _handleTap,
-      onLongPressStart: (_) {
-        widget.onLongPressStart?.call();
-      },
-      onLongPressEnd: (_) {
-        widget.onLongPressEnd?.call();
-      },
-      onLongPressCancel: () {
-        widget.onLongPressEnd?.call();
-      },
-      onVerticalDragStart: _onVerticalDragStart,
-      onVerticalDragUpdate: _onVerticalDragUpdate,
-      onVerticalDragEnd: _onVerticalDragEnd,
-      onVerticalDragCancel: () => _onVerticalDragEnd(DragEndDetails()),
+      onLongPressStart: widget.isLocked
+          ? null
+          : (_) {
+              widget.onLongPressStart?.call();
+            },
+      onLongPressEnd: widget.isLocked
+          ? null
+          : (_) {
+              widget.onLongPressEnd?.call();
+            },
+      onLongPressCancel: widget.isLocked
+          ? null
+          : () {
+              widget.onLongPressEnd?.call();
+            },
+      onVerticalDragStart: widget.isLocked ? null : _onVerticalDragStart,
+      onVerticalDragUpdate: widget.isLocked ? null : _onVerticalDragUpdate,
+      onVerticalDragEnd: widget.isLocked ? null : _onVerticalDragEnd,
+      onVerticalDragCancel: widget.isLocked
+          ? null
+          : () => _onVerticalDragEnd(DragEndDetails()),
       behavior: HitTestBehavior.opaque,
       child: Stack(
         children: [

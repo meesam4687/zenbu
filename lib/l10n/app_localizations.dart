@@ -1370,6 +1370,18 @@ abstract class AppLocalizations {
   /// **'Rotate'**
   String get rotate;
 
+  /// No description provided for @lock.
+  ///
+  /// In en, this message translates to:
+  /// **'Lock'**
+  String get lock;
+
+  /// No description provided for @unlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock'**
+  String get unlock;
+
   /// No description provided for @pictureInPicture.
   ///
   /// In en, this message translates to:

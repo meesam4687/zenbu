@@ -656,6 +656,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rotate => 'Rotate';
 
   @override
+  String get lock => 'Lock';
+
+  @override
+  String get unlock => 'Unlock';
+
+  @override
   String get pictureInPicture => 'Picture in Picture';
 
   @override
@@ -2479,6 +2485,12 @@ class AppLocalizationsEnGb extends AppLocalizationsEn {
   String get rotate => 'Rotate';
 
   @override
+  String get lock => 'Lock';
+
+  @override
+  String get unlock => 'Unlock';
+
+  @override
   String get pictureInPicture => 'Picture in Picture';
 
   @override
@@ -4300,6 +4312,12 @@ class AppLocalizationsEnUs extends AppLocalizationsEn {
 
   @override
   String get rotate => 'Rotate';
+
+  @override
+  String get lock => 'Lock';
+
+  @override
+  String get unlock => 'Unlock';
 
   @override
   String get pictureInPicture => 'Picture in Picture';

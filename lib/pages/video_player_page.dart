@@ -117,6 +117,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
   Duration _totalDuration = Duration.zero;
   bool _isHolding2x = false;
   double _currentPlaybackSpeed = 1.0;
+  bool _isControlsLocked = false;
 
   int _autoRetryCount = 0;
   static const int _maxAutoRetries = 10;
@@ -190,6 +191,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
   }
 
   void _onLongPressStart() {
+    if (_isControlsLocked) return;
     if (_videoPlayerController != null &&
         _videoPlayerController!.value.isInitialized) {
       _hideControls();
@@ -615,6 +617,15 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
         DeviceOrientation.landscapeRight,
       ]);
     }
+  }
+
+  void _toggleControlsLock() {
+    HapticFeedback.lightImpact();
+    setState(() {
+      _isControlsLocked = !_isControlsLocked;
+      _showControls = true;
+    });
+    _startControlsTimer();
   }
 
   Future<void> _fetchVideoList() async {
@@ -1442,8 +1453,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
   Widget _buildSeekBar(
     Duration currentPosition,
     Duration totalDuration,
-    Color primaryColor,
-  ) {
+    Color primaryColor, {
+    bool isLocked = false,
+  }) {
     final double totalSec = totalDuration.inSeconds.toDouble();
     final double currentSec = currentPosition.inSeconds.toDouble().clamp(
       0.0,
@@ -1463,6 +1475,27 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
     final double buffered = totalSec > 0
         ? bufferedSec.clamp(0.0, totalSec) / totalSec
         : 0.0;
+
+    final seekWidget = SizedBox(
+      key: isLocked ? null : _seekBarKey,
+      height: isLocked ? 14 : 28,
+      child: CustomPaint(
+        painter: BufferedSeekBarPainter(
+          played: played,
+          buffered: buffered,
+          playedColor: primaryColor,
+          bufferedColor: primaryColor.withAlpha(100),
+          trackColor: Colors.white24,
+          trackHeight: isLocked ? 2.0 : 4.0,
+          thumbRadius: isLocked ? 0.0 : 8.0,
+        ),
+        child: const SizedBox.expand(),
+      ),
+    );
+
+    if (isLocked) {
+      return seekWidget;
+    }
 
     double fractionFromGlobalX(double globalX) {
       final RenderBox? seekBox =
@@ -1498,22 +1531,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
         setState(() => _isDraggingSlider = false);
         _startControlsTimer();
       },
-      child: SizedBox(
-        key: _seekBarKey,
-        height: 28,
-        child: CustomPaint(
-          painter: BufferedSeekBarPainter(
-            played: played,
-            buffered: buffered,
-            playedColor: primaryColor,
-            bufferedColor: primaryColor.withAlpha(100),
-            trackColor: Colors.white24,
-            trackHeight: 4.0,
-            thumbRadius: 8.0,
-          ),
-          child: const SizedBox.expand(),
-        ),
-      ),
+      child: seekWidget,
     );
   }
 
@@ -1690,6 +1708,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
               Expanded(
                 child: VideoPlayerGestureHandler(
                   isLeft: true,
+                  isLocked: _isControlsLocked,
                   onTap: _toggleControlsVisibility,
                   onDoubleTap: () => _skipSeconds(-10),
                   onGestureTriggered: _hideControls,
@@ -1700,6 +1719,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
               Expanded(
                 child: VideoPlayerGestureHandler(
                   isLeft: false,
+                  isLocked: _isControlsLocked,
                   onTap: _toggleControlsVisibility,
                   onDoubleTap: () => _skipSeconds(10),
                   onGestureTriggered: _hideControls,
@@ -1717,12 +1737,12 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
           right: 0,
           child: Center(
             child: AnimatedScale(
-              scale: _isHolding2x ? 1.0 : 0.0,
+              scale: (!_isControlsLocked && _isHolding2x) ? 1.0 : 0.0,
               duration: const Duration(milliseconds: 200),
               curve: _isHolding2x ? Curves.easeOutBack : Curves.easeIn,
               child: AnimatedOpacity(
                 duration: const Duration(milliseconds: 150),
-                opacity: _isHolding2x ? 1.0 : 0.0,
+                opacity: (!_isControlsLocked && _isHolding2x) ? 1.0 : 0.0,
                 child: Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 14,
@@ -1793,6 +1813,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
         VideoPlayerControlsOverlay(
           visible: _showControls,
           isHolding: _isHolding2x,
+          isLocked: _isControlsLocked,
           animeTitle: widget.animeTitle,
           episodeName: _currentEpisode.name,
           hasNextEpisode: _nextEpisode != null,
@@ -1801,7 +1822,12 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
               (_videoPlayerController?.value.isPlaying ?? false),
           currentPositionText: _formatDuration(currentPosition),
           totalDurationText: _formatDuration(totalDuration),
-          seekBar: _buildSeekBar(currentPosition, totalDuration, primaryColor),
+          seekBar: _buildSeekBar(
+            currentPosition,
+            totalDuration,
+            primaryColor,
+            isLocked: _isControlsLocked,
+          ),
           onZoomPressed: _toggleZoomMode,
           zoomModeName: _getZoomModeName(),
           onBackPressed: () async {
@@ -1845,6 +1871,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
             _skipSeconds(85);
           },
           onRotatePressed: _toggleOrientation,
+          onLockPressed: _toggleControlsLock,
           onBackgroundTap: _toggleControlsVisibility,
           onLongPressStart: _onLongPressStart,
           onLongPressEnd: _onLongPressEnd,
@@ -1860,7 +1887,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
           child: ValueListenableBuilder<SkipTime?>(
             valueListenable: _activeSkipTimeNotifier,
             builder: (context, activeSkip, child) {
-              if (activeSkip == null) return const SizedBox.shrink();
+              if (activeSkip == null || _isControlsLocked) {
+                return const SizedBox.shrink();
+              }
 
               final double currentSec =
                   _videoPlayerController != null &&
@@ -1940,6 +1969,12 @@ class _VideoPlayerPageState extends State<VideoPlayerPage>
       canPop: false,
       onPopInvokedWithResult: (didPop, result) async {
         if (didPop) return;
+        if (_isControlsLocked) {
+          if (!_showControls) {
+            _toggleControlsVisibility();
+          }
+          return;
+        }
         final navigator = Navigator.of(context);
         await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
         await SystemChrome.setPreferredOrientations([

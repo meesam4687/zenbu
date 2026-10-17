@@ -53,11 +53,13 @@ class BufferedSeekBarPainter extends CustomPainter {
       canvas.drawLine(Offset(startX, cy), Offset(playX, cy), playedPaint);
     }
 
-    canvas.drawCircle(
-      Offset(playX, cy),
-      thumbRadius,
-      Paint()..color = playedColor,
-    );
+    if (thumbRadius > 0) {
+      canvas.drawCircle(
+        Offset(playX, cy),
+        thumbRadius,
+        Paint()..color = playedColor,
+      );
+    }
   }
 
   @override
@@ -66,5 +68,7 @@ class BufferedSeekBarPainter extends CustomPainter {
       old.buffered != buffered ||
       old.playedColor != playedColor ||
       old.bufferedColor != bufferedColor ||
-      old.trackColor != trackColor;
+      old.trackColor != trackColor ||
+      old.trackHeight != trackHeight ||
+      old.thumbRadius != thumbRadius;
 }

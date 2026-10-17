@@ -212,6 +212,8 @@
     "playbackFailed": "Playback Failed",
     "goBack": "Go Back",
     "rotate": "Rotate",
+    "lock": "Lock",
+    "unlock": "Unlock",
     "pictureInPicture": "Picture in Picture",
     "nextEpisode": "Next Episode",
     "zoomFill": "Zoom: Fill",
