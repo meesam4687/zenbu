@@ -264,9 +264,11 @@ class _FilterSheetState extends State<FilterSheet> {
           ),
           child: SingleChildScrollView(
             child: SafeArea(
-              child: SizedBox(
-                width: double.infinity,
-                height: 670,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(
+                  minWidth: double.infinity,
+                  minHeight: 670,
+                ),
                 child: Column(
                   children: [
                     const Padding(padding: EdgeInsets.all(10)),
@@ -1064,37 +1066,106 @@ class _FilterSheetState extends State<FilterSheet> {
                               ],
                             ),
                           const Padding(padding: EdgeInsets.all(10)),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          LayoutBuilder(
+                            builder: (context, buttonConstraints) {
+                              if (buttonConstraints.maxWidth < 280) {
+                                return Column(
+                                  children: [
+                                    SizedBox(
+                                      width: double.infinity,
+                                      child: FilledButton(
+                                        style: FilledButton.styleFrom(
+                                          minimumSize: const Size(0, 52),
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 16,
+                                            vertical: 14,
+                                          ),
+                                        ),
+                                        onPressed: _applyFilters,
+                                        child: FittedBox(
+                                          fit: BoxFit.scaleDown,
+                                          child: Text(
+                                            context.l10n.applyFilters,
+                                            maxLines: 1,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    SizedBox(
+                                      width: double.infinity,
+                                      child: TextButton(
+                                        style: TextButton.styleFrom(
+                                          minimumSize: const Size(0, 52),
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 16,
+                                            vertical: 14,
+                                          ),
+                                        ),
+                                        onPressed: () {
+                                          _clearFilters();
+                                          _applyFilters();
+                                        },
+                                        child: FittedBox(
+                                          fit: BoxFit.scaleDown,
+                                          child: Text(
+                                            context.l10n.clearFilters,
+                                            maxLines: 1,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              }
 
-                            children: [
-                              TextButton(
-                                style: TextButton.styleFrom(
-                                  minimumSize: const Size(120, 56),
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 24,
-                                    vertical: 16,
+                              return Row(
+                                children: [
+                                  Expanded(
+                                    child: TextButton(
+                                      style: TextButton.styleFrom(
+                                        minimumSize: const Size(0, 52),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 16,
+                                          vertical: 14,
+                                        ),
+                                      ),
+                                      onPressed: () {
+                                        _clearFilters();
+                                        _applyFilters();
+                                      },
+                                      child: FittedBox(
+                                        fit: BoxFit.scaleDown,
+                                        child: Text(
+                                          context.l10n.clearFilters,
+                                          maxLines: 1,
+                                        ),
+                                      ),
+                                    ),
                                   ),
-                                ),
-                                onPressed: () {
-                                  _clearFilters();
-                                  _applyFilters();
-                                },
-                                child: Text(context.l10n.clearFilters),
-                              ),
-                              const SizedBox(width: 10),
-                              FilledButton(
-                                style: FilledButton.styleFrom(
-                                  minimumSize: const Size(180, 56),
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 24,
-                                    vertical: 16,
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: FilledButton(
+                                      style: FilledButton.styleFrom(
+                                        minimumSize: const Size(0, 52),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 16,
+                                          vertical: 14,
+                                        ),
+                                      ),
+                                      onPressed: _applyFilters,
+                                      child: FittedBox(
+                                        fit: BoxFit.scaleDown,
+                                        child: Text(
+                                          context.l10n.applyFilters,
+                                          maxLines: 1,
+                                        ),
+                                      ),
+                                    ),
                                   ),
-                                ),
-                                onPressed: _applyFilters,
-                                child: Text(context.l10n.applyFilters),
-                              ),
-                            ],
+                                ],
+                              );
+                            },
                           ),
                         ],
                       ),
