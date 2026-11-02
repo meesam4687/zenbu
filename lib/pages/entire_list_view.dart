@@ -201,7 +201,8 @@ class _EntireListViewState extends State<EntireListView> {
                                 ),
                               );
                             }
-                            return Center(
+                            return Align(
+                              alignment: Alignment.topCenter,
                               child: Padding(
                                 padding: const EdgeInsets.only(right: 3.0),
                                 child: ItemCard(

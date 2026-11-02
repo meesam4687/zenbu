@@ -48,7 +48,8 @@ class ListPageView extends StatelessWidget {
               itemHeight: 226.0,
             ),
             itemBuilder: (context, index) {
-              return Center(
+              return Align(
+                alignment: Alignment.topCenter,
                 child: Padding(
                   padding: const EdgeInsets.only(left: 3.0),
                   child: ItemCard(

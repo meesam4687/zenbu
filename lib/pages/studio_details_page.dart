@@ -160,7 +160,8 @@ class _StudioDetailsPageState extends State<StudioDetailsPage> {
                     final media = _medias[index];
                     final mediaListEntry = media['mediaListEntry'] as Map?;
 
-                    return Center(
+                    return Align(
+                      alignment: Alignment.topCenter,
                       child: Padding(
                         padding: const EdgeInsets.only(left: 3.0),
                         child: ItemCard(

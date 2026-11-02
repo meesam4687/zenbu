@@ -66,43 +66,48 @@ class NotificationCard extends StatelessWidget {
                 onTap: () {
                   openContainer();
                 },
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(left: 12),
-                      child: SizedBox(
-                        height: 160,
-                        width: 110,
-                        child: Card(
-                          shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(10)),
-                          ),
-                          elevation: 5,
-                          clipBehavior: Clip.antiAlias,
-                          child: CustomImage(
-                            imageUrl:
-                                notificationData["media"]["coverImage"]["large"],
-                            fit: BoxFit.cover,
-                            borderRadius: const BorderRadius.all(
-                              Radius.circular(10),
+                child: Padding(
+                  padding: EdgeInsetsGeometry.only(top: 12, bottom: 12),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(left: 12),
+                        child: SizedBox(
+                          height: 160,
+                          width: 110,
+                          child: Card(
+                            shape: const RoundedRectangleBorder(
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(10),
+                              ),
                             ),
-                            errorWidget: const Icon(Icons.error),
+                            elevation: 5,
+                            clipBehavior: Clip.antiAlias,
+                            child: CustomImage(
+                              imageUrl:
+                                  notificationData["media"]["coverImage"]["large"],
+                              fit: BoxFit.cover,
+                              borderRadius: const BorderRadius.all(
+                                Radius.circular(10),
+                              ),
+                              errorWidget: const Icon(Icons.error),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        child: Text(
-                          notificationText,
-                          style: const TextStyle(fontSize: 16),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          child: Text(
+                            notificationText,
+                            style: const TextStyle(fontSize: 16),
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),

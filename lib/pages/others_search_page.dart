@@ -231,7 +231,8 @@ class _OthersSearchPageState extends State<OthersSearchPage> {
                         );
                       }
                       final item = _results[index];
-                      return Center(
+                      return Align(
+                        alignment: Alignment.topCenter,
                         child: Padding(
                           padding: const EdgeInsets.only(left: 3.0),
                           child: ItemCard(

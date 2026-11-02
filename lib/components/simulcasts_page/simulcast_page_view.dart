@@ -72,7 +72,8 @@ class _SimulcastPageViewState extends State<SimulcastPageView>
             itemBuilder: (context, index) {
               final schedule = airingSchedules[index];
               final media = schedule["media"] ?? {};
-              return Center(
+              return Align(
+                alignment: Alignment.topCenter,
                 child: Padding(
                   padding: const EdgeInsets.only(left: 3.0),
                   child: ItemCard(

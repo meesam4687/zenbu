@@ -264,7 +264,8 @@ class _SearchPageState extends State<SearchPage> {
                                   ),
                                 );
                               }
-                              return Center(
+                              return Align(
+                                alignment: Alignment.topCenter,
                                 child: Padding(
                                   padding: const EdgeInsets.only(left: 3.0),
                                   child: ItemCard(
