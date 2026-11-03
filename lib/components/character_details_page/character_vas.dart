@@ -35,12 +35,26 @@ class CharacterVAs extends StatelessWidget {
                             ? '${(vas[index]["name"]["full"] as String).substring(0, 16)}...'
                             : (vas[index]["name"]["full"] as String)
                       : context.l10n.na;
-                  return ItemCard(
-                    title: name,
-                    image: vas[index]["image"]["large"],
-                    id: vas[index]["id"],
-                    type: "staff",
-                    state: vas[index]["languageV2"],
+                  final isFirst = index == 0;
+                  final isLast = index == vas.length - 1;
+                  return Padding(
+                    padding: EdgeInsets.only(
+                      left: isFirst ? 0 : 1,
+                      right: isLast ? 0 : 1,
+                    ),
+                    child: ItemCard(
+                      title: name,
+                      image: vas[index]["image"]["large"],
+                      id: vas[index]["id"],
+                      type: "staff",
+                      state: vas[index]["languageV2"],
+                      margin: EdgeInsets.only(
+                        left: isFirst ? 0 : 4,
+                        right: isLast ? 0 : 4,
+                        top: 4,
+                        bottom: 4,
+                      ),
+                    ),
                   );
                 },
               ),

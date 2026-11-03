@@ -42,16 +42,30 @@ class CharacterRelations extends StatelessWidget {
                       : resolvedTitle;
                   final mediaListEntry =
                       relations[index]["node"]["mediaListEntry"] as Map?;
-                  return ItemCard(
-                    title: title,
-                    image: relations[index]["node"]["coverImage"]["extraLarge"],
-                    id: relations[index]["node"]["id"],
-                    type: relations[index]["node"]["type"]
-                        .toString()
-                        .toLowerCase(),
-                    state: relations[index]["staffRole"],
-                    mediaListEntry: mediaListEntry,
-                    listDataPreloaded: true,
+                  final isFirst = index == 0;
+                  final isLast = index == relations.length - 1;
+                  return Padding(
+                    padding: EdgeInsets.only(
+                      left: isFirst ? 0 : 1,
+                      right: isLast ? 0 : 1,
+                    ),
+                    child: ItemCard(
+                      title: title,
+                      image: relations[index]["node"]["coverImage"]["extraLarge"],
+                      id: relations[index]["node"]["id"],
+                      type: relations[index]["node"]["type"]
+                          .toString()
+                          .toLowerCase(),
+                      state: relations[index]["staffRole"],
+                      mediaListEntry: mediaListEntry,
+                      listDataPreloaded: true,
+                      margin: EdgeInsets.only(
+                        left: isFirst ? 0 : 4,
+                        right: isLast ? 0 : 4,
+                        top: 4,
+                        bottom: 4,
+                      ),
+                    ),
                   );
                 },
               ),

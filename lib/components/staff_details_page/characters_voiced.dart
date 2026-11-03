@@ -37,12 +37,26 @@ class CharactersVoiced extends StatelessWidget {
                             ? '${fullName.substring(0, 16)}...'
                             : fullName
                       : context.l10n.na;
-                  return ItemCard(
-                    title: name,
-                    image: character['image']?['large'],
-                    id: character['id'],
-                    type: 'character',
-                    state: character['role'],
+                  final isFirst = index == 0;
+                  final isLast = index == characters.length - 1;
+                  return Padding(
+                    padding: EdgeInsets.only(
+                      left: isFirst ? 0 : 1,
+                      right: isLast ? 0 : 1,
+                    ),
+                    child: ItemCard(
+                      title: name,
+                      image: character['image']?['large'],
+                      id: character['id'],
+                      type: 'character',
+                      state: character['role'],
+                      margin: EdgeInsets.only(
+                        left: isFirst ? 0 : 4,
+                        right: isLast ? 0 : 4,
+                        top: 4,
+                        bottom: 4,
+                      ),
+                    ),
                   );
                 },
               ),

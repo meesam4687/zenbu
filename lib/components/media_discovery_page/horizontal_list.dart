@@ -105,8 +105,13 @@ class HorizontalList extends StatelessWidget {
                   itemCount: mediaArray.length,
                   itemBuilder: (context, index) {
                     final Map media = mediaArray[index];
+                    final isFirst = index == 0;
+                    final isLast = index == mediaArray.length - 1;
                     return Padding(
-                      padding: const EdgeInsets.only(right: 3),
+                      padding: EdgeInsets.only(
+                        left: isFirst ? 0 : 1,
+                        right: isLast ? 0 : 1,
+                      ),
                       child: ItemCard(
                         title: provider.resolveTitle(media["title"] as Map?),
                         image: media["coverImage"]["large"] ?? '',
@@ -114,6 +119,12 @@ class HorizontalList extends StatelessWidget {
                         type: media["type"].toString().toLowerCase(),
                         mediaListEntry: media["mediaListEntry"] as Map?,
                         listDataPreloaded: true,
+                        margin: EdgeInsets.only(
+                          left: isFirst ? 0 : 4,
+                          right: isLast ? 0 : 4,
+                          top: 4,
+                          bottom: 4,
+                        ),
                       ),
                     );
                   },

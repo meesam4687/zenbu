@@ -652,9 +652,12 @@ class _DetailsPaneState extends State<DetailsPane>
                                   scrollDirection: Axis.horizontal,
                                   itemCount: charactersList.length,
                                   itemBuilder: (context, index) {
+                                    final isFirst = index == 0;
+                                    final isLast = index == charactersList.length - 1;
                                     return Padding(
-                                      padding: const EdgeInsets.only(
-                                        right: 3.0,
+                                      padding: EdgeInsets.only(
+                                        left: isFirst ? 0 : 1,
+                                        right: isLast ? 0 : 1,
                                       ),
                                       child: ItemCard(
                                         cardHeight: listHeight,
@@ -665,6 +668,12 @@ class _DetailsPaneState extends State<DetailsPane>
                                         id: charactersList[index]["node"]["id"],
                                         type: "character",
                                         state: charactersList[index]["role"],
+                                        margin: EdgeInsets.only(
+                                          left: isFirst ? 0 : 4,
+                                          right: isLast ? 0 : 4,
+                                          top: 4,
+                                          bottom: 4,
+                                        ),
                                       ),
                                     );
                                   },
@@ -710,9 +719,12 @@ class _DetailsPaneState extends State<DetailsPane>
                                   scrollDirection: Axis.horizontal,
                                   itemCount: relationsList.length,
                                   itemBuilder: (context, index) {
+                                    final isFirst = index == 0;
+                                    final isLast = index == relationsList.length - 1;
                                     return Padding(
-                                      padding: const EdgeInsets.only(
-                                        right: 3.0,
+                                      padding: EdgeInsets.only(
+                                        left: isFirst ? 0 : 1,
+                                        right: isLast ? 0 : 1,
                                       ),
                                       child: ItemCard(
                                         cardHeight: listHeight,
@@ -733,6 +745,12 @@ class _DetailsPaneState extends State<DetailsPane>
                                             relationsList[index]["node"]["mediaListEntry"]
                                                 as Map?,
                                         listDataPreloaded: true,
+                                        margin: EdgeInsets.only(
+                                          left: isFirst ? 0 : 4,
+                                          right: isLast ? 0 : 4,
+                                          top: 4,
+                                          bottom: 4,
+                                        ),
                                       ),
                                     );
                                   },
@@ -776,9 +794,12 @@ class _DetailsPaneState extends State<DetailsPane>
                                   scrollDirection: Axis.horizontal,
                                   itemCount: staffList.length,
                                   itemBuilder: (context, index) {
+                                    final isFirst = index == 0;
+                                    final isLast = index == staffList.length - 1;
                                     return Padding(
-                                      padding: const EdgeInsets.only(
-                                        right: 3.0,
+                                      padding: EdgeInsets.only(
+                                        left: isFirst ? 0 : 1,
+                                        right: isLast ? 0 : 1,
                                       ),
                                       child: ItemCard(
                                         cardHeight: listHeight,
@@ -792,6 +813,12 @@ class _DetailsPaneState extends State<DetailsPane>
                                         state:
                                             (staffList[index]["role"]
                                                 as String),
+                                        margin: EdgeInsets.only(
+                                          left: isFirst ? 0 : 4,
+                                          right: isLast ? 0 : 4,
+                                          top: 4,
+                                          bottom: 4,
+                                        ),
                                       ),
                                     );
                                   },
@@ -840,9 +867,12 @@ class _DetailsPaneState extends State<DetailsPane>
                                   itemBuilder: (context, index) {
                                     final nodeMedia =
                                         recs[index]["node"]["media"];
+                                    final isFirst = index == 0;
+                                    final isLast = index == recs.length - 1;
                                     return Padding(
-                                      padding: const EdgeInsets.only(
-                                        right: 3.0,
+                                      padding: EdgeInsets.only(
+                                        left: isFirst ? 0 : 1,
+                                        right: isLast ? 0 : 1,
                                       ),
                                       child: ItemCard(
                                         cardHeight: listHeight,
@@ -857,6 +887,12 @@ class _DetailsPaneState extends State<DetailsPane>
                                         mediaListEntry:
                                             nodeMedia["mediaListEntry"] as Map?,
                                         listDataPreloaded: true,
+                                        margin: EdgeInsets.only(
+                                          left: isFirst ? 0 : 4,
+                                          right: isLast ? 0 : 4,
+                                          top: 4,
+                                          bottom: 4,
+                                        ),
                                       ),
                                     );
                                   },

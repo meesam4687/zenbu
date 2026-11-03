@@ -21,6 +21,7 @@ class ItemCard extends StatefulWidget {
     this.mediaListEntry,
     this.listDataPreloaded = false,
     this.cardHeight,
+    this.margin,
   });
   final String? title;
   final String? state;
@@ -28,6 +29,7 @@ class ItemCard extends StatefulWidget {
   final int id;
   final String type;
   final double? cardHeight;
+  final EdgeInsetsGeometry? margin;
 
   final Map? mediaListEntry;
 
@@ -113,6 +115,7 @@ class _ItemCardState extends State<ItemCard> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Card(
+                    margin: widget.margin,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),

@@ -39,8 +39,13 @@ class HorizontalStaffList extends StatelessWidget {
               itemCount: items.length,
               itemBuilder: (context, index) {
                 final item = items[index];
+                final isFirst = index == 0;
+                final isLast = index == items.length - 1;
                 return Padding(
-                  padding: const EdgeInsets.only(right: 3.0),
+                  padding: EdgeInsets.only(
+                    left: isFirst ? 0 : 1,
+                    right: isLast ? 0 : 1,
+                  ),
                   child: ItemCard(
                     title: item.name,
                     image: item.imageUrl ?? "",
@@ -49,6 +54,12 @@ class HorizontalStaffList extends StatelessWidget {
                         ? "studio"
                         : "staff",
                     state: "${item.count} $unit",
+                    margin: EdgeInsets.only(
+                      left: isFirst ? 0 : 4,
+                      right: isLast ? 0 : 4,
+                      top: 4,
+                      bottom: 4,
+                    ),
                   ),
                 );
               },

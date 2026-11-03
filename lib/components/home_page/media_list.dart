@@ -216,8 +216,13 @@ class MediaList extends StatelessWidget {
                                       ? "${item["media"]["meanScore"]}%"
                                       : "$total ${isItemAnime ? context.l10n.eps : context.l10n.ch}");
 
+                            final isFirst = index == 0;
+                            final isLast = index == items.length - 1;
                             return Padding(
-                              padding: const EdgeInsets.only(left: 3),
+                              padding: EdgeInsets.only(
+                                left: isFirst ? 0 : 4,
+                                right: isLast ? 0 : 1,
+                              ),
                               child: ItemCard(
                                 type: mediaType,
                                 id: id,
@@ -230,6 +235,12 @@ class MediaList extends StatelessWidget {
                                         as String,
                                 mediaListEntry: mediaListEntry,
                                 listDataPreloaded: true,
+                                margin: EdgeInsets.only(
+                                  left: isFirst ? 0 : 4,
+                                  right: isLast ? 0 : 4,
+                                  top: 4,
+                                  bottom: 4,
+                                ),
                               ),
                             );
                           },
@@ -260,8 +271,13 @@ class MediaList extends StatelessWidget {
                                       ? "${item["media"]["meanScore"]}%"
                                       : "$total ${isItemAnime ? context.l10n.eps : context.l10n.ch}");
 
+                            final isFirst = index == 0;
+                            final isLast = index == items.length - 1;
                             return Padding(
-                              padding: const EdgeInsets.only(left: 3),
+                              padding: EdgeInsets.only(
+                                left: isFirst ? 0 : 1,
+                                right: isLast ? 0 : 1,
+                              ),
                               child: ItemCard(
                                 type: mediaType,
                                 id: id,
@@ -274,6 +290,12 @@ class MediaList extends StatelessWidget {
                                         as String,
                                 mediaListEntry: mediaListEntry,
                                 listDataPreloaded: true,
+                                margin: EdgeInsets.only(
+                                  left: isFirst ? 0 : 4,
+                                  right: isLast ? 0 : 4,
+                                  top: 4,
+                                  bottom: 4,
+                                ),
                               ),
                             );
                           },
