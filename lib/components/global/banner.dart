@@ -65,18 +65,22 @@ class AiringBanner extends StatelessWidget {
                 Positioned.fill(
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(cardRadius),
-                    child: ImageFiltered(
-                      imageFilter: ui.ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-                      child: CustomImage(
-                        imageUrl: effectiveBackgroundUrl,
-                        fit: effectiveFit,
-                        errorWidget: hasBanner && hasCover
-                            ? CustomImage(
-                                imageUrl: coverImage,
-                                fit: BoxFit.fill,
-                                errorWidget: Container(),
-                              )
-                            : Container(),
+                    child: RepaintBoundary(
+                      child: ImageFiltered(
+                        imageFilter: ui.ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+                        child: CustomImage(
+                          imageUrl: effectiveBackgroundUrl,
+                          fit: effectiveFit,
+                          memCacheWidth: 350,
+                          errorWidget: hasBanner && hasCover
+                              ? CustomImage(
+                                  imageUrl: coverImage,
+                                  fit: BoxFit.fill,
+                                  memCacheWidth: 350,
+                                  errorWidget: Container(),
+                                )
+                              : Container(),
+                        ),
                       ),
                     ),
                   ),

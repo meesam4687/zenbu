@@ -10,6 +10,8 @@ class CustomImage extends StatelessWidget {
   final BorderRadius? borderRadius;
   final Widget? errorWidget;
   final Map<String, String>? headers;
+  final int? memCacheWidth;
+  final int? memCacheHeight;
 
   const CustomImage({
     super.key,
@@ -20,6 +22,8 @@ class CustomImage extends StatelessWidget {
     this.borderRadius,
     this.errorWidget,
     this.headers,
+    this.memCacheWidth,
+    this.memCacheHeight,
   });
 
   @override
@@ -34,6 +38,8 @@ class CustomImage extends StatelessWidget {
         width: width,
         height: height,
         fit: fit,
+        memCacheWidth: memCacheWidth,
+        memCacheHeight: memCacheHeight,
         httpHeaders: headers,
         placeholder: (context, url) => ShimmerPlaceholder(
           width: width,

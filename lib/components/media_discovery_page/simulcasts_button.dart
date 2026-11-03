@@ -94,12 +94,15 @@ class _SimulcastsButtonState extends State<SimulcastsButton> {
             Positioned.fill(
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(15),
-                child: ImageFiltered(
-                  imageFilter: ui.ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-                  child: CustomImage(
-                    imageUrl: randomBanner,
-                    fit: BoxFit.cover,
-                    errorWidget: Container(),
+                child: RepaintBoundary(
+                  child: ImageFiltered(
+                    imageFilter: ui.ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+                    child: CustomImage(
+                      imageUrl: randomBanner,
+                      fit: BoxFit.cover,
+                      memCacheWidth: 350,
+                      errorWidget: Container(),
+                    ),
                   ),
                 ),
               ),
