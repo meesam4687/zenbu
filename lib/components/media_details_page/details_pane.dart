@@ -653,7 +653,8 @@ class _DetailsPaneState extends State<DetailsPane>
                                   itemCount: charactersList.length,
                                   itemBuilder: (context, index) {
                                     final isFirst = index == 0;
-                                    final isLast = index == charactersList.length - 1;
+                                    final isLast =
+                                        index == charactersList.length - 1;
                                     return Padding(
                                       padding: EdgeInsets.only(
                                         left: isFirst ? 0 : 1,
@@ -720,7 +721,8 @@ class _DetailsPaneState extends State<DetailsPane>
                                   itemCount: relationsList.length,
                                   itemBuilder: (context, index) {
                                     final isFirst = index == 0;
-                                    final isLast = index == relationsList.length - 1;
+                                    final isLast =
+                                        index == relationsList.length - 1;
                                     return Padding(
                                       padding: EdgeInsets.only(
                                         left: isFirst ? 0 : 1,
@@ -795,7 +797,8 @@ class _DetailsPaneState extends State<DetailsPane>
                                   itemCount: staffList.length,
                                   itemBuilder: (context, index) {
                                     final isFirst = index == 0;
-                                    final isLast = index == staffList.length - 1;
+                                    final isLast =
+                                        index == staffList.length - 1;
                                     return Padding(
                                       padding: EdgeInsets.only(
                                         left: isFirst ? 0 : 1,

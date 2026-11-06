@@ -5,8 +5,8 @@ import 'package:zenbu/pages/studio_details_page.dart';
 import 'package:zenbu/pages/user_profile_page.dart';
 
 import 'package:zenbu/components/media_details_page/list_editor_bottom_sheet.dart';
-import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
+import 'package:zenbu/components/global/custom_open_container.dart';
 import 'package:flutter/services.dart';
 import 'package:zenbu/components/global/custom_image.dart';
 
@@ -93,16 +93,27 @@ class _ItemCardState extends State<ItemCard> {
   Widget build(BuildContext context) {
     final bool isMedia = widget.type == 'anime' || widget.type == 'manga';
 
-    return OpenContainer(
-      openElevation: 0,
-      closedElevation: 0,
-      transitionType: ContainerTransitionType.fadeThrough,
-      openColor: Theme.of(context).colorScheme.surface,
-      middleColor: Theme.of(context).colorScheme.surface,
-      closedColor: Theme.of(context).colorScheme.surface,
-      closedShape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-      ),
+    return CustomOpenContainer(
+      closedBorderRadius: 10.0,
+      openBuilder: (context, closeContainer) {
+        if (widget.type == "anime") {
+          return MediaDetailsPage(id: widget.id, isAnime: true);
+        } else if (widget.type == "manga") {
+          return MediaDetailsPage(id: widget.id, isAnime: false);
+        } else if (widget.type == "character") {
+          return CharacterDetailsPage(id: widget.id);
+        } else if (widget.type == "staff") {
+          return StaffDetailsPage(id: widget.id);
+        } else if (widget.type == "studio") {
+          return StudioDetailsPage(
+            studioId: widget.id,
+            studioName: widget.title,
+          );
+        } else if (widget.type == "user") {
+          return UserProfilePage(userId: widget.id, username: widget.title);
+        }
+        return const Placeholder();
+      },
       closedBuilder: (context, openContainer) {
         return GestureDetector(
           onTap: openContainer,
@@ -191,25 +202,6 @@ class _ItemCardState extends State<ItemCard> {
             ),
           ),
         );
-      },
-      openBuilder: (context, closeContainer) {
-        if (widget.type == "anime") {
-          return MediaDetailsPage(id: widget.id, isAnime: true);
-        } else if (widget.type == "manga") {
-          return MediaDetailsPage(id: widget.id, isAnime: false);
-        } else if (widget.type == "character") {
-          return CharacterDetailsPage(id: widget.id);
-        } else if (widget.type == "staff") {
-          return StaffDetailsPage(id: widget.id);
-        } else if (widget.type == "studio") {
-          return StudioDetailsPage(
-            studioId: widget.id,
-            studioName: widget.title,
-          );
-        } else if (widget.type == "user") {
-          return UserProfilePage(userId: widget.id, username: widget.title);
-        }
-        return const Placeholder();
       },
     );
   }

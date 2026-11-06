@@ -51,7 +51,8 @@ class CharacterRelations extends StatelessWidget {
                     ),
                     child: ItemCard(
                       title: title,
-                      image: relations[index]["node"]["coverImage"]["extraLarge"],
+                      image:
+                          relations[index]["node"]["coverImage"]["extraLarge"],
                       id: relations[index]["node"]["id"],
                       type: relations[index]["node"]["type"]
                           .toString()

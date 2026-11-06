@@ -1,8 +1,8 @@
 import 'dart:ui' as ui;
 import 'package:zenbu/pages/media_details_page.dart';
 import 'package:zenbu/pages/character_details_page.dart';
-import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
+import 'package:zenbu/components/global/custom_open_container.dart';
 import 'package:zenbu/components/global/custom_image.dart';
 import 'package:zenbu/l10n/l10n_extension.dart';
 
@@ -38,16 +38,18 @@ class AiringBanner extends StatelessWidget {
         : (hasCover ? coverImage : '');
     final BoxFit effectiveFit = hasBanner ? BoxFit.cover : BoxFit.fill;
 
-    return OpenContainer(
-      openElevation: 0,
-      closedElevation: 0,
-      transitionType: ContainerTransitionType.fadeThrough,
-      openColor: Theme.of(context).colorScheme.surface,
-      middleColor: Theme.of(context).colorScheme.surface,
-      closedColor: Theme.of(context).colorScheme.surface,
-      closedShape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-      ),
+    return CustomOpenContainer(
+      closedBorderRadius: cardRadius,
+      openBuilder: (context, closeContainer) {
+        if (type == "anime") {
+          return MediaDetailsPage(id: id, isAnime: true);
+        } else if (type == "manga") {
+          return MediaDetailsPage(id: id, isAnime: false);
+        } else if (type == "character") {
+          return CharacterDetailsPage(id: id);
+        }
+        return const Placeholder();
+      },
       closedBuilder: (context, openContainer) {
         return Container(
           height: 240,
@@ -67,7 +69,10 @@ class AiringBanner extends StatelessWidget {
                     borderRadius: BorderRadius.circular(cardRadius),
                     child: RepaintBoundary(
                       child: ImageFiltered(
-                        imageFilter: ui.ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+                        imageFilter: ui.ImageFilter.blur(
+                          sigmaX: 15,
+                          sigmaY: 15,
+                        ),
                         child: CustomImage(
                           imageUrl: effectiveBackgroundUrl,
                           fit: effectiveFit,
@@ -184,16 +189,6 @@ class AiringBanner extends StatelessWidget {
             ),
           ),
         );
-      },
-      openBuilder: (context, closeContainer) {
-        if (type == "anime") {
-          return MediaDetailsPage(id: id, isAnime: true);
-        } else if (type == "manga") {
-          return MediaDetailsPage(id: id, isAnime: false);
-        } else if (type == "character") {
-          return CharacterDetailsPage(id: id);
-        }
-        return const Placeholder();
       },
     );
   }

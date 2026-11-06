@@ -1,4 +1,4 @@
-import 'package:animations/animations.dart';
+import 'package:zenbu/components/global/custom_open_container.dart';
 import 'package:flutter/material.dart';
 import 'package:zenbu/pages/error_page.dart';
 import 'package:zenbu/pages/review_page.dart';
@@ -146,7 +146,7 @@ class _ReviewsPaneState extends State<ReviewsPane> {
 
           return Container(
             margin: const EdgeInsets.symmetric(vertical: 6.0),
-            child: OpenContainer(
+            child: CustomOpenContainer(
               closedElevation: 2,
               closedShape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
