@@ -1,8 +1,7 @@
-import 'package:zenbu/services/anilist/anilist.dart';
-import 'package:zenbu/components/list_page/list_page_view.dart';
-import 'package:zenbu/pages/error_page.dart';
 import 'package:flutter/material.dart';
+import 'package:zenbu/components/list_page/list_page_view.dart';
 import 'package:zenbu/l10n/l10n_extension.dart';
+import 'package:zenbu/services/anilist/anilist.dart';
 
 class ListPage extends StatefulWidget {
   const ListPage({
@@ -23,16 +22,12 @@ class ListPage extends StatefulWidget {
 enum MediaType { anime, manga }
 
 class _ListPageState extends State<ListPage> {
-  late Future<Map<String, dynamic>> mediaLists;
   bool _isSearching = false;
   String _searchQuery = "";
   final TextEditingController _searchController = TextEditingController();
 
-  @override
-  void initState() {
-    mediaLists = getMediaLists(userId: widget.userId);
-    super.initState();
-  }
+  Map<String, dynamic>? _searchDataCache;
+  bool _isSearchLoading = false;
 
   @override
   void dispose() {
@@ -40,10 +35,52 @@ class _ListPageState extends State<ListPage> {
     super.dispose();
   }
 
-  void _reloadData() {
+  Future<void> _ensureSearchDataLoaded(String type) async {
+    if (_searchDataCache != null || _isSearchLoading) return;
     setState(() {
-      mediaLists = getMediaLists(userId: widget.userId);
+      _isSearchLoading = true;
     });
+
+    try {
+      final collection = await getMediaListCollection(
+        type: type,
+        userId: widget.userId,
+      );
+
+      final List allFavNodes = [];
+      int favPage = 1;
+      bool hasNextFav = true;
+      while (hasNextFav && favPage <= 20) {
+        final favData = await getFavourites(
+          page: favPage,
+          perPage: 25,
+          type: type,
+          userId: widget.userId,
+        );
+        final mediaKey = type == "anime" ? "anime" : "manga";
+        final favsObj = favData["data"]?["User"]?["favourites"]?[mediaKey];
+        final nodes = (favsObj?["nodes"] as List?) ?? [];
+        allFavNodes.addAll(nodes);
+        hasNextFav = favsObj?["pageInfo"]?["hasNextPage"] as bool? ?? false;
+        favPage++;
+      }
+
+      if (mounted) {
+        setState(() {
+          _searchDataCache = {
+            "collection": collection,
+            "favourites": allFavNodes,
+          };
+          _isSearchLoading = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _isSearchLoading = false;
+        });
+      }
+    }
   }
 
   List _filterList(List entries, String query) {
@@ -65,11 +102,43 @@ class _ListPageState extends State<ListPage> {
     }).toList();
   }
 
+  List _getFilteredResults(String? status, String mediaType) {
+    if (_searchDataCache == null) return [];
+
+    if (status == "FAVOURITES") {
+      final nodes = (_searchDataCache!["favourites"] as List?) ?? [];
+      final favEntries = nodes.map((n) => {"media": n}).toList();
+      return _filterList(favEntries, _searchQuery);
+    }
+
+    final collection = _searchDataCache!["collection"]?["data"]
+        ?["MediaListCollection"];
+    final lists = (collection?["lists"] as List?) ?? [];
+
+    if (status == null) {
+      final allEntries =
+          lists.expand((l) => (l["entries"] as List?) ?? []).toList();
+      return _filterList(allEntries, _searchQuery);
+    }
+
+    final statusEntries = <dynamic>[];
+    for (final l in lists) {
+      final entries = (l["entries"] as List?) ?? [];
+      for (final entry in entries) {
+        if (entry["status"] == status) {
+          statusEntries.add(entry);
+        }
+      }
+    }
+    return _filterList(statusEntries, _searchQuery);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final String list = widget.mediaListType == MediaType.anime
-        ? "animeList"
-        : "mangaList";
+    final String mediaType =
+        widget.mediaListType == MediaType.anime ? "anime" : "manga";
+    final bool isSearchActive = _isSearching && _searchQuery.isNotEmpty;
+
     return DefaultTabController(
       length: 8,
       child: Scaffold(
@@ -90,6 +159,9 @@ class _ListPageState extends State<ListPage> {
                     setState(() {
                       _searchQuery = value;
                     });
+                    if (value.isNotEmpty) {
+                      _ensureSearchDataLoaded(mediaType);
+                    }
                   },
                 )
               : Text(widget.title),
@@ -112,6 +184,8 @@ class _ListPageState extends State<ListPage> {
                   if (!_isSearching) {
                     _searchController.clear();
                     _searchQuery = "";
+                  } else {
+                    _ensureSearchDataLoaded(mediaType);
                   }
                 });
               },
@@ -135,128 +209,101 @@ class _ListPageState extends State<ListPage> {
                   Tab(text: context.l10n.favorites),
                 ],
               ),
-              FutureBuilder(
-                future: mediaLists,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Expanded(
-                      child: SizedBox(
-                        width: double.infinity,
-                        child: const Center(
-                          child: CircularProgressIndicator.adaptive(),
-                        ),
-                      ),
-                    );
-                  }
-                  if (snapshot.hasError) {
-                    return Expanded(
-                      child: Error(
-                        reload: _reloadData,
-                        message: snapshot.error?.toString(),
-                      ),
-                    );
-                  }
-                  final data = snapshot.data!;
-                  final List combinedEntries =
-                      (data["data"][list]["lists"] as List)
-                          .expand((list) => list["entries"] as List)
-                          .toList();
-                  final lists = data["data"][list]["lists"] as List;
-                  final Map<String, int> listNameIndexMap = {};
-                  for (var i = 0; i < lists.length; i++) {
-                    listNameIndexMap[lists[i]["name"]] = i;
-                  }
-                  return Expanded(
-                    child: TabBarView(
-                      children: [
-                        ListPageView(
-                          list: _filterList(
-                            (listNameIndexMap[(list == "animeList")
-                                        ? "Watching"
-                                        : "Reading"] !=
-                                    null)
-                                ? data["data"][list]["lists"][listNameIndexMap[(list ==
-                                          "animeList")
-                                      ? "Watching"
-                                      : "Reading"]]["entries"]
-                                : [],
-                            _searchQuery,
-                          ),
-                          mediaType: (list == "animeList") ? "anime" : "manga",
-                        ),
-                        ListPageView(
-                          list: _filterList(
-                            (listNameIndexMap['Planning'] != null)
-                                ? data["data"][list]["lists"][listNameIndexMap['Planning']]["entries"]
-                                : [],
-                            _searchQuery,
-                          ),
-                          mediaType: (list == "animeList") ? "anime" : "manga",
-                        ),
-                        ListPageView(
-                          list: _filterList(
-                            (listNameIndexMap['Completed'] != null)
-                                ? data["data"][list]["lists"][listNameIndexMap['Completed']]["entries"]
-                                : [],
-                            _searchQuery,
-                          ),
-                          mediaType: (list == "animeList") ? "anime" : "manga",
-                        ),
-                        ListPageView(
-                          list: _filterList(
-                            (listNameIndexMap[(list == "animeList")
-                                        ? "Rewatching"
-                                        : "Rereading"] !=
-                                    null)
-                                ? data["data"][list]["lists"][listNameIndexMap[(list ==
-                                          "animeList")
-                                      ? "Rewatching"
-                                      : "Rereading"]]["entries"]
-                                : [],
-                            _searchQuery,
-                          ),
-                          mediaType: (list == "animeList") ? "anime" : "manga",
-                        ),
-                        ListPageView(
-                          list: _filterList(
-                            (listNameIndexMap['Paused'] != null)
-                                ? data["data"][list]["lists"][listNameIndexMap['Paused']]["entries"]
-                                : [],
-                            _searchQuery,
-                          ),
-                          mediaType: (list == "animeList") ? "anime" : "manga",
-                        ),
-                        ListPageView(
-                          list: _filterList(
-                            (listNameIndexMap['Dropped'] != null)
-                                ? data["data"][list]["lists"][listNameIndexMap['Dropped']]["entries"]
-                                : [],
-                            _searchQuery,
-                          ),
-                          mediaType: (list == "animeList") ? "anime" : "manga",
-                        ),
-                        ListPageView(
-                          list: _filterList(combinedEntries, _searchQuery),
-                          mediaType: (list == "animeList") ? "anime" : "manga",
-                        ),
-                        ListPageView(
-                          list: _filterList(
-                            (data["data"]?["favourites"]?["favourites"]?[list ==
-                                                "animeList"
-                                            ? "anime"
-                                            : "manga"]?["nodes"]
-                                        as List? ??
-                                    [])
-                                .map((media) => {"media": media})
-                                .toList(),
-                            _searchQuery,
-                          ),
-                          mediaType: (list == "animeList") ? "anime" : "manga",
-                        ),
-                      ],
+              if (_isSearchLoading && isSearchActive)
+                const LinearProgressIndicator(),
+              Expanded(
+                child: TabBarView(
+                  children: [
+                    ListPageView(
+                      key: PageStorageKey("${mediaType}_CURRENT"),
+                      mediaType: mediaType,
+                      userId: widget.userId,
+                      status: "CURRENT",
+                      isSearching: isSearchActive,
+                      searchQuery: _searchQuery,
+                      searchResults: isSearchActive
+                          ? _getFilteredResults("CURRENT", mediaType)
+                          : null,
                     ),
-                  );
-                },
+                    ListPageView(
+                      key: PageStorageKey("${mediaType}_PLANNING"),
+                      mediaType: mediaType,
+                      userId: widget.userId,
+                      status: "PLANNING",
+                      isSearching: isSearchActive,
+                      searchQuery: _searchQuery,
+                      searchResults: isSearchActive
+                          ? _getFilteredResults("PLANNING", mediaType)
+                          : null,
+                    ),
+                    ListPageView(
+                      key: PageStorageKey("${mediaType}_COMPLETED"),
+                      mediaType: mediaType,
+                      userId: widget.userId,
+                      status: "COMPLETED",
+                      isSearching: isSearchActive,
+                      searchQuery: _searchQuery,
+                      searchResults: isSearchActive
+                          ? _getFilteredResults("COMPLETED", mediaType)
+                          : null,
+                    ),
+                    ListPageView(
+                      key: PageStorageKey("${mediaType}_REPEATING"),
+                      mediaType: mediaType,
+                      userId: widget.userId,
+                      status: "REPEATING",
+                      isSearching: isSearchActive,
+                      searchQuery: _searchQuery,
+                      searchResults: isSearchActive
+                          ? _getFilteredResults("REPEATING", mediaType)
+                          : null,
+                    ),
+                    ListPageView(
+                      key: PageStorageKey("${mediaType}_PAUSED"),
+                      mediaType: mediaType,
+                      userId: widget.userId,
+                      status: "PAUSED",
+                      isSearching: isSearchActive,
+                      searchQuery: _searchQuery,
+                      searchResults: isSearchActive
+                          ? _getFilteredResults("PAUSED", mediaType)
+                          : null,
+                    ),
+                    ListPageView(
+                      key: PageStorageKey("${mediaType}_DROPPED"),
+                      mediaType: mediaType,
+                      userId: widget.userId,
+                      status: "DROPPED",
+                      isSearching: isSearchActive,
+                      searchQuery: _searchQuery,
+                      searchResults: isSearchActive
+                          ? _getFilteredResults("DROPPED", mediaType)
+                          : null,
+                    ),
+                    ListPageView(
+                      key: PageStorageKey("${mediaType}_ALL"),
+                      mediaType: mediaType,
+                      userId: widget.userId,
+                      status: null,
+                      isSearching: isSearchActive,
+                      searchQuery: _searchQuery,
+                      searchResults: isSearchActive
+                          ? _getFilteredResults(null, mediaType)
+                          : null,
+                    ),
+                    ListPageView(
+                      key: PageStorageKey("${mediaType}_FAVOURITES"),
+                      mediaType: mediaType,
+                      userId: widget.userId,
+                      isFavourites: true,
+                      isSearching: isSearchActive,
+                      searchQuery: _searchQuery,
+                      searchResults: isSearchActive
+                          ? _getFilteredResults("FAVOURITES", mediaType)
+                          : null,
+                    ),
+                  ],
+                ),
               ),
             ],
           ),

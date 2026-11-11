@@ -43,18 +43,20 @@ class _ProfileListButtonState extends State<ProfileListButton> {
 
   Future<void> _loadBanner() async {
     try {
-      final listData = await getMediaLists(userId: widget.userId);
-      final listKey = widget.isAnime ? "animeList" : "mangaList";
-      final lists = listData["data"]?[listKey]?["lists"] as List? ?? [];
+      final listData = await getMediaList(
+        page: 1,
+        perPage: 20,
+        type: widget.isAnime ? "ANIME" : "MANGA",
+        userId: widget.userId,
+      );
+      final entries =
+          (listData["data"]?["Page"]?["mediaList"] as List?) ?? [];
       final List<String> userBanners = [];
 
-      for (final l in lists) {
-        final entries = l["entries"] as List? ?? [];
-        for (final entry in entries) {
-          final banner = entry["media"]?["bannerImage"] as String?;
-          if (banner != null && banner.isNotEmpty) {
-            userBanners.add(banner);
-          }
+      for (final entry in entries) {
+        final banner = entry["media"]?["bannerImage"] as String?;
+        if (banner != null && banner.isNotEmpty) {
+          userBanners.add(banner);
         }
       }
 
