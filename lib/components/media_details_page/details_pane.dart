@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:zenbu/l10n/l10n_extension.dart';
 import 'package:zenbu/services/anilist/anilist.dart';
 import 'package:zenbu/components/media_details_page/details.dart';
+import 'package:zenbu/components/media_details_page/paginated_horizontal_list.dart';
 import 'package:zenbu/pages/error_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -619,73 +620,51 @@ class _DetailsPaneState extends State<DetailsPane>
                   ],
                 ),
               ),
-              (media["characters"]["characters"] as List).isNotEmpty
-                  ? Builder(
-                      builder: (context) {
-                        final charactersList =
-                            media["characters"]["characters"] as List;
-                        final double listHeight = _calculateListHeight(
-                          context,
-                          charactersList,
-                          getTitle: (item) =>
-                              item["node"]?["name"]?["full"] ?? "",
-                          getState: (item) => item["role"] as String?,
-                        );
-                        return Container(
-                          margin: const EdgeInsets.only(top: 10),
-                          width: double.infinity,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                context.l10n.characters,
-                                style: const TextStyle(
-                                  fontSize: 25,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              Container(
-                                margin: const EdgeInsets.only(top: 10),
-                                height: listHeight,
-                                width: double.infinity,
-                                child: ListView.builder(
-                                  scrollDirection: Axis.horizontal,
-                                  itemCount: charactersList.length,
-                                  itemBuilder: (context, index) {
-                                    final isFirst = index == 0;
-                                    final isLast =
-                                        index == charactersList.length - 1;
-                                    return Padding(
-                                      padding: EdgeInsets.only(
-                                        left: isFirst ? 0 : 1,
-                                        right: isLast ? 0 : 1,
-                                      ),
-                                      child: ItemCard(
-                                        cardHeight: listHeight,
-                                        title:
-                                            charactersList[index]["node"]["name"]["full"],
-                                        image:
-                                            charactersList[index]["node"]["image"]["large"],
-                                        id: charactersList[index]["node"]["id"],
-                                        type: "character",
-                                        state: charactersList[index]["role"],
-                                        margin: EdgeInsets.only(
-                                          left: isFirst ? 0 : 4,
-                                          right: isLast ? 0 : 4,
-                                          top: 4,
-                                          bottom: 4,
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    )
-                  : Container(),
+              PaginatedHorizontalList(
+                title: context.l10n.characters,
+                initialItems:
+                    (media["characters"]?["characters"] as List?) ?? [],
+                initialHasNextPage:
+                    media["characters"]?["pageInfo"]?["hasNextPage"] as bool? ??
+                    false,
+                loadPage: (page) => getMediaCharacters(widget.mediaId, page),
+                extractItems: (data) =>
+                    data["data"]?["Media"]?["characters"]?["characters"]
+                        as List? ??
+                    [],
+                extractHasNext: (data) =>
+                    data["data"]?["Media"]?["characters"]?["pageInfo"]?["hasNextPage"]
+                        as bool? ??
+                    false,
+                calculateHeight: (context, items) => _calculateListHeight(
+                  context,
+                  items,
+                  getTitle: (item) => item["node"]?["name"]?["full"] ?? "",
+                  getState: (item) => item["role"] as String?,
+                ),
+                itemBuilder: (context, item, isFirst, isLast, cardHeight) {
+                  return Padding(
+                    padding: EdgeInsets.only(
+                      left: isFirst ? 0 : 1,
+                      right: isLast ? 0 : 1,
+                    ),
+                    child: ItemCard(
+                      cardHeight: cardHeight,
+                      title: item["node"]["name"]["full"],
+                      image: item["node"]["image"]["large"],
+                      id: item["node"]["id"],
+                      type: "character",
+                      state: item["role"],
+                      margin: EdgeInsets.only(
+                        left: isFirst ? 0 : 4,
+                        right: isLast ? 0 : 4,
+                        top: 4,
+                        bottom: 4,
+                      ),
+                    ),
+                  );
+                },
+              ),
               (media["relations"]["edges"] as List).isNotEmpty
                   ? Builder(
                       builder: (context) {
@@ -764,149 +743,108 @@ class _DetailsPaneState extends State<DetailsPane>
                       },
                     )
                   : Container(),
-              (media["staff"]["edges"] as List).isNotEmpty
-                  ? Builder(
-                      builder: (context) {
-                        final staffList = media["staff"]["edges"] as List;
-                        final double listHeight = _calculateListHeight(
-                          context,
-                          staffList,
-                          getTitle: (item) =>
-                              item["node"]?["name"]?["full"] ?? "",
-                          getState: (item) => item["role"] as String?,
-                        );
-                        return Container(
-                          margin: const EdgeInsets.only(top: 14),
-                          width: double.infinity,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                context.l10n.staff,
-                                style: const TextStyle(
-                                  fontSize: 25,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              Container(
-                                margin: const EdgeInsets.only(top: 10),
-                                height: listHeight,
-                                width: double.infinity,
-                                child: ListView.builder(
-                                  scrollDirection: Axis.horizontal,
-                                  itemCount: staffList.length,
-                                  itemBuilder: (context, index) {
-                                    final isFirst = index == 0;
-                                    final isLast =
-                                        index == staffList.length - 1;
-                                    return Padding(
-                                      padding: EdgeInsets.only(
-                                        left: isFirst ? 0 : 1,
-                                        right: isLast ? 0 : 1,
-                                      ),
-                                      child: ItemCard(
-                                        cardHeight: listHeight,
-                                        id: staffList[index]["node"]["id"],
-                                        type: "staff",
-                                        title:
-                                            (staffList[index]["node"]["name"]["full"]
-                                                as String),
-                                        image:
-                                            staffList[index]["node"]["image"]["large"],
-                                        state:
-                                            (staffList[index]["role"]
-                                                as String),
-                                        margin: EdgeInsets.only(
-                                          left: isFirst ? 0 : 4,
-                                          right: isLast ? 0 : 4,
-                                          top: 4,
-                                          bottom: 4,
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    )
-                  : Container(),
-              (media["recommendations"]["edges"] as List).isNotEmpty
-                  ? Builder(
-                      builder: (context) {
-                        final recs = (media["recommendations"]["edges"] as List)
-                            .where((e) => e["node"]?["media"] != null)
-                            .toList();
-                        final double listHeight = _calculateListHeight(
-                          context,
-                          recs,
-                          getTitle: (item) => provider.resolveTitle(
-                            item["node"]?["media"]?["title"] as Map?,
-                          ),
-                          getState: null,
-                        );
-                        return Container(
-                          margin: const EdgeInsets.only(top: 14),
-                          width: double.infinity,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                context.l10n.recommendations,
-                                style: const TextStyle(
-                                  fontSize: 25,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              Container(
-                                margin: const EdgeInsets.only(top: 10),
-                                height: listHeight,
-                                width: double.infinity,
-                                child: ListView.builder(
-                                  scrollDirection: Axis.horizontal,
-                                  itemCount: recs.length,
-                                  itemBuilder: (context, index) {
-                                    final nodeMedia =
-                                        recs[index]["node"]["media"];
-                                    final isFirst = index == 0;
-                                    final isLast = index == recs.length - 1;
-                                    return Padding(
-                                      padding: EdgeInsets.only(
-                                        left: isFirst ? 0 : 1,
-                                        right: isLast ? 0 : 1,
-                                      ),
-                                      child: ItemCard(
-                                        cardHeight: listHeight,
-                                        id: nodeMedia["id"],
-                                        type: (nodeMedia["type"] as String)
-                                            .toLowerCase(),
-                                        title: provider.resolveTitle(
-                                          nodeMedia["title"] as Map?,
-                                        ),
-                                        image:
-                                            nodeMedia["coverImage"]["extraLarge"],
-                                        mediaListEntry:
-                                            nodeMedia["mediaListEntry"] as Map?,
-                                        listDataPreloaded: true,
-                                        margin: EdgeInsets.only(
-                                          left: isFirst ? 0 : 4,
-                                          right: isLast ? 0 : 4,
-                                          top: 4,
-                                          bottom: 4,
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    )
-                  : Container(),
+              PaginatedHorizontalList(
+                topMargin: 14.0,
+                title: context.l10n.staff,
+                initialItems: (media["staff"]?["edges"] as List?) ?? [],
+                initialHasNextPage:
+                    media["staff"]?["pageInfo"]?["hasNextPage"] as bool? ??
+                    false,
+                loadPage: (page) => getMediaStaff(widget.mediaId, page),
+                extractItems: (data) =>
+                    data["data"]?["Media"]?["staff"]?["edges"] as List? ?? [],
+                extractHasNext: (data) =>
+                    data["data"]?["Media"]?["staff"]?["pageInfo"]?["hasNextPage"]
+                        as bool? ??
+                    false,
+                calculateHeight: (context, items) => _calculateListHeight(
+                  context,
+                  items,
+                  getTitle: (item) => item["node"]?["name"]?["full"] ?? "",
+                  getState: (item) => item["role"] as String?,
+                ),
+                itemBuilder: (context, item, isFirst, isLast, cardHeight) {
+                  return Padding(
+                    padding: EdgeInsets.only(
+                      left: isFirst ? 0 : 1,
+                      right: isLast ? 0 : 1,
+                    ),
+                    child: ItemCard(
+                      cardHeight: cardHeight,
+                      id: item["node"]["id"],
+                      type: "staff",
+                      title: (item["node"]["name"]["full"] as String),
+                      image: item["node"]["image"]["large"],
+                      state: (item["role"] as String),
+                      margin: EdgeInsets.only(
+                        left: isFirst ? 0 : 4,
+                        right: isLast ? 0 : 4,
+                        top: 4,
+                        bottom: 4,
+                      ),
+                    ),
+                  );
+                },
+              ),
+              PaginatedHorizontalList(
+                topMargin: 14.0,
+                title: context.l10n.recommendations,
+                initialItems:
+                    ((media["recommendations"]?["edges"] as List?) ?? [])
+                        .where((e) => e["node"]?["media"] != null)
+                        .toList(),
+                initialHasNextPage:
+                    media["recommendations"]?["pageInfo"]?["hasNextPage"]
+                        as bool? ??
+                    false,
+                loadPage: (page) =>
+                    getMediaRecommendations(widget.mediaId, page),
+                extractItems: (data) {
+                  final edges =
+                      data["data"]?["Media"]?["recommendations"]?["edges"]
+                          as List? ??
+                      [];
+                  return edges
+                      .where((e) => e["node"]?["media"] != null)
+                      .toList();
+                },
+                extractHasNext: (data) =>
+                    data["data"]?["Media"]?["recommendations"]?["pageInfo"]?["hasNextPage"]
+                        as bool? ??
+                    false,
+                calculateHeight: (context, items) => _calculateListHeight(
+                  context,
+                  items,
+                  getTitle: (item) => provider.resolveTitle(
+                    item["node"]?["media"]?["title"] as Map?,
+                  ),
+                  getState: null,
+                ),
+                itemBuilder: (context, item, isFirst, isLast, cardHeight) {
+                  final nodeMedia = item["node"]["media"];
+                  return Padding(
+                    padding: EdgeInsets.only(
+                      left: isFirst ? 0 : 1,
+                      right: isLast ? 0 : 1,
+                    ),
+                    child: ItemCard(
+                      cardHeight: cardHeight,
+                      id: nodeMedia["id"],
+                      type: (nodeMedia["type"] as String).toLowerCase(),
+                      title: provider.resolveTitle(nodeMedia["title"] as Map?),
+                      image: nodeMedia["coverImage"]["extraLarge"],
+                      mediaListEntry: nodeMedia["mediaListEntry"] as Map?,
+                      listDataPreloaded: true,
+                      margin: EdgeInsets.only(
+                        left: isFirst ? 0 : 4,
+                        right: isLast ? 0 : 4,
+                        top: 4,
+                        bottom: 4,
+                      ),
+                    ),
+                  );
+                },
+              ),
               Builder(
                 builder: (context) {
                   final externalLinks = (media["externalLinks"] as List? ?? [])

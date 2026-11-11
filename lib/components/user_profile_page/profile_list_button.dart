@@ -49,8 +49,7 @@ class _ProfileListButtonState extends State<ProfileListButton> {
         type: widget.isAnime ? "ANIME" : "MANGA",
         userId: widget.userId,
       );
-      final entries =
-          (listData["data"]?["Page"]?["mediaList"] as List?) ?? [];
+      final entries = (listData["data"]?["Page"]?["mediaList"] as List?) ?? [];
       final List<String> userBanners = [];
 
       for (final entry in entries) {

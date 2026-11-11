@@ -21,7 +21,8 @@ Future<Map<String, dynamic>> getMediaList({
   final mediaType = type.toUpperCase() == "MANGA" ? "MANGA" : "ANIME";
   final hasStatus = status != null && status.isNotEmpty;
 
-  final String query = '''
+  final String query =
+      '''
     query (\$page: Int, \$perPage: Int, \$userId: Int!, \$type: MediaType!${hasStatus ? ", \$status: MediaListStatus" : ""}) {
       Page(page: \$page, perPage: \$perPage) {
         pageInfo {
@@ -72,7 +73,8 @@ Future<Map<String, dynamic>> getFavourites({
   final targetUserId = await _resolveUserId(userId);
   final mediaTypeKey = type.toLowerCase() == "manga" ? "manga" : "anime";
 
-  final String query = '''
+  final String query =
+      '''
     query (\$userId: Int!, \$page: Int, \$perPage: Int) {
       User(id: \$userId) {
         favourites {
@@ -107,11 +109,7 @@ Future<Map<String, dynamic>> getFavourites({
 
   return executeQuery(
     query,
-    variables: {
-      "userId": targetUserId,
-      "page": page,
-      "perPage": perPage,
-    },
+    variables: {"userId": targetUserId, "page": page, "perPage": perPage},
   );
 }
 

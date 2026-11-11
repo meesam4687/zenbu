@@ -51,6 +51,9 @@ Future<Map<String, dynamic>> getAnimeData(int id) async {
           }
         }
         staff {
+          pageInfo {
+            hasNextPage
+          }
           edges {
             role
             node {
@@ -65,6 +68,9 @@ Future<Map<String, dynamic>> getAnimeData(int id) async {
           }
         }
         recommendations {
+          pageInfo {
+            hasNextPage
+          }
           edges {
             node {
               media: mediaRecommendation {
@@ -128,6 +134,9 @@ Future<Map<String, dynamic>> getAnimeData(int id) async {
           }
         }
         characters(sort: [ROLE]) {
+          pageInfo {
+            hasNextPage
+          }
           characters: edges {
             role
             node {
@@ -204,6 +213,9 @@ Future<Map<String, dynamic>> getMangaData(int id) async {
         genres
         meanScore
         staff {
+          pageInfo {
+            hasNextPage
+          }
           edges {
             role
             node {
@@ -218,6 +230,9 @@ Future<Map<String, dynamic>> getMangaData(int id) async {
           }
         }
         recommendations {
+          pageInfo {
+            hasNextPage
+          }
           edges {
             node {
               media: mediaRecommendation {
@@ -229,6 +244,15 @@ Future<Map<String, dynamic>> getMangaData(int id) async {
                   extraLarge
                 } 
                 type
+                mediaListEntry {
+                  id
+                  status
+                  progress
+                  score
+                  repeat
+                  startedAt { day month year }
+                  completedAt { day month year }
+                }
               }
             }
           }
@@ -263,6 +287,9 @@ Future<Map<String, dynamic>> getMangaData(int id) async {
           }
         }
         characters(sort: [ROLE]) {
+          pageInfo {
+            hasNextPage
+          }
           characters: edges {
             role
             node {
@@ -300,4 +327,100 @@ Future<Map<String, dynamic>> getMangaData(int id) async {
   ''';
 
   return executeQuery(query, variables: {"id": id});
+}
+
+Future<Map<String, dynamic>> getMediaCharacters(int id, int page) async {
+  const String query = '''
+    query(\$id: Int, \$page: Int) {
+      Media(id: \$id) {
+        characters(page: \$page, sort: [ROLE]) {
+          pageInfo {
+            hasNextPage
+          }
+          characters: edges {
+            role
+            node {
+              id
+              name { 
+                full
+                native
+              }
+              image {
+                large
+              } 
+            }
+          }
+        }
+      }
+    }
+  ''';
+
+  return executeQuery(query, variables: {"id": id, "page": page});
+}
+
+Future<Map<String, dynamic>> getMediaStaff(int id, int page) async {
+  const String query = '''
+    query(\$id: Int, \$page: Int) {
+      Media(id: \$id) {
+        staff(page: \$page) {
+          pageInfo {
+            hasNextPage
+          }
+          edges {
+            role
+            node {
+              id
+              name {
+                full
+              }
+              image {
+                large
+              }
+            }
+          }
+        }
+      }
+    }
+  ''';
+
+  return executeQuery(query, variables: {"id": id, "page": page});
+}
+
+Future<Map<String, dynamic>> getMediaRecommendations(int id, int page) async {
+  const String query = '''
+    query(\$id: Int, \$page: Int) {
+      Media(id: \$id) {
+        recommendations(page: \$page) {
+          pageInfo {
+            hasNextPage
+          }
+          edges {
+            node {
+              media: mediaRecommendation {
+                id
+                title {
+                  romaji
+                }
+                coverImage {
+                  extraLarge
+                } 
+                type
+                mediaListEntry {
+                  id
+                  status
+                  progress
+                  score
+                  repeat
+                  startedAt { day month year }
+                  completedAt { day month year }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ''';
+
+  return executeQuery(query, variables: {"id": id, "page": page});
 }

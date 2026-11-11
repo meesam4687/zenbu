@@ -111,13 +111,14 @@ class _ListPageState extends State<ListPage> {
       return _filterList(favEntries, _searchQuery);
     }
 
-    final collection = _searchDataCache!["collection"]?["data"]
-        ?["MediaListCollection"];
+    final collection =
+        _searchDataCache!["collection"]?["data"]?["MediaListCollection"];
     final lists = (collection?["lists"] as List?) ?? [];
 
     if (status == null) {
-      final allEntries =
-          lists.expand((l) => (l["entries"] as List?) ?? []).toList();
+      final allEntries = lists
+          .expand((l) => (l["entries"] as List?) ?? [])
+          .toList();
       return _filterList(allEntries, _searchQuery);
     }
 
@@ -135,8 +136,9 @@ class _ListPageState extends State<ListPage> {
 
   @override
   Widget build(BuildContext context) {
-    final String mediaType =
-        widget.mediaListType == MediaType.anime ? "anime" : "manga";
+    final String mediaType = widget.mediaListType == MediaType.anime
+        ? "anime"
+        : "manga";
     final bool isSearchActive = _isSearching && _searchQuery.isNotEmpty;
 
     return DefaultTabController(
