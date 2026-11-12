@@ -168,16 +168,6 @@ class _ListPageState extends State<ListPage> {
                 )
               : Text(widget.title),
           actions: [
-            if (_isSearching)
-              IconButton(
-                icon: const Icon(Icons.clear),
-                onPressed: () {
-                  setState(() {
-                    _searchController.clear();
-                    _searchQuery = "";
-                  });
-                },
-              ),
             IconButton(
               icon: Icon(_isSearching ? Icons.close : Icons.search),
               onPressed: () {
