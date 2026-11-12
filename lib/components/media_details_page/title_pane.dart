@@ -107,19 +107,24 @@ class _TitlePaneState extends State<TitlePane> {
             widget.totalEpisodes,
           );
           mediaListEntry = savedEntry;
+          _isIncrementing = false;
         });
 
-        final newAlData = await getHomePageData();
         if (mounted) {
-          Provider.of<StateProvider>(
+          final stateProvider = Provider.of<StateProvider>(
             context,
             listen: false,
-          ).updateData(newAlData);
+          );
+          getHomePageData()
+              .then((newAlData) {
+                stateProvider.updateData(newAlData);
+              })
+              .catchError((_) {});
         }
       }
     } catch (_) {
     } finally {
-      if (mounted) {
+      if (mounted && _isIncrementing) {
         setState(() {
           _isIncrementing = false;
         });
@@ -338,7 +343,8 @@ class _TitlePaneState extends State<TitlePane> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(progress, style: const TextStyle(fontSize: 14)),
-                    if (mediaState == 'CURRENT') ...[
+                    if (mediaState == 'CURRENT' ||
+                        mediaState == 'REPEATING') ...[
                       const SizedBox(width: 8),
                       ClipOval(
                         child: Material(
@@ -591,7 +597,8 @@ class _TitlePaneState extends State<TitlePane> {
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
-                                  if (mediaState == 'CURRENT') ...[
+                                  if (mediaState == 'CURRENT' ||
+                                      mediaState == 'REPEATING') ...[
                                     const SizedBox(width: 8),
                                     ClipOval(
                                       child: Material(

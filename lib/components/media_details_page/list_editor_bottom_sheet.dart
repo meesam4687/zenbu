@@ -483,34 +483,42 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                                           isDeleting = true;
                                         });
 
-                                        final response = await deleteListItem(
-                                          widget.entryId!,
-                                        );
+                                        try {
+                                          final response = await deleteListItem(
+                                            widget.entryId!,
+                                          );
 
-                                        if (response["data"] != null &&
-                                            response["data"]["DeleteMediaListEntry"] !=
-                                                null &&
-                                            response["data"]["DeleteMediaListEntry"]["deleted"] ==
-                                                true) {
-                                          widget.onUpdate("NONE", 0, {});
-                                        }
+                                          if (response["data"] != null &&
+                                              response["data"]["DeleteMediaListEntry"] !=
+                                                  null &&
+                                              response["data"]["DeleteMediaListEntry"]["deleted"] ==
+                                                  true) {
+                                            widget.onUpdate("NONE", 0, {});
+                                          }
 
-                                        Map newAlData = await getHomePageData();
-                                        if (context.mounted) {
-                                          Provider.of<StateProvider>(
-                                            context,
-                                            listen: false,
-                                          ).updateData(newAlData);
-                                        }
+                                          if (context.mounted) {
+                                            final stateProvider =
+                                                Provider.of<StateProvider>(
+                                                  context,
+                                                  listen: false,
+                                                );
+                                            Navigator.of(context).pop();
 
-                                        if (context.mounted) {
-                                          Navigator.of(context).pop();
-                                        }
-
-                                        if (mounted) {
-                                          setState(() {
-                                            isDeleting = false;
-                                          });
+                                            getHomePageData()
+                                                .then((newAlData) {
+                                                  stateProvider.updateData(
+                                                    newAlData,
+                                                  );
+                                                })
+                                                .catchError((_) {});
+                                          }
+                                        } catch (_) {
+                                        } finally {
+                                          if (mounted) {
+                                            setState(() {
+                                              isDeleting = false;
+                                            });
+                                          }
                                         }
                                       },
                                 child: SizedBox(
@@ -550,72 +558,82 @@ class _ListEditorBottomSheetState extends State<ListEditorBottomSheet> {
                                       isLoading = true;
                                     });
 
-                                    final response = await updateListItem(
-                                      widget.mediaId,
-                                      selectedStatus,
-                                      (chaptersController.value.text.isEmpty)
-                                          ? widget.progress
-                                          : int.parse(
-                                              chaptersController.value.text,
-                                            ),
-                                      (startDate == null)
-                                          ? widget.startDate
-                                          : {
-                                              "day": startDate!.day,
-                                              "month": startDate!.month,
-                                              "year": startDate!.year,
-                                            },
-                                      (endDate == null)
-                                          ? widget.endDate
-                                          : {
-                                              "day": endDate!.day,
-                                              "month": endDate!.month,
-                                              "year": endDate!.year,
-                                            },
-                                      (scoreController.value.text.isEmpty)
-                                          ? widget.score
-                                          : double.parse(
-                                              scoreController.value.text,
-                                            ),
-                                      (rewatchController.value.text.isEmpty)
-                                          ? widget.repeatCount
-                                          : int.parse(
-                                              rewatchController.value.text,
-                                            ),
-                                    );
-
-                                    if (response["data"] != null &&
-                                        response["data"]["SaveMediaListEntry"] !=
-                                            null) {
-                                      final newStatus =
-                                          response["data"]["SaveMediaListEntry"]["status"];
-                                      final newProgress =
-                                          response["data"]["SaveMediaListEntry"]["progress"];
-                                      final newMediaListData =
-                                          response["data"]["SaveMediaListEntry"];
-
-                                      widget.onUpdate(
-                                        newStatus,
-                                        newProgress,
-                                        newMediaListData,
+                                    try {
+                                      final response = await updateListItem(
+                                        widget.mediaId,
+                                        selectedStatus,
+                                        (chaptersController.value.text.isEmpty)
+                                            ? widget.progress
+                                            : int.parse(
+                                                chaptersController.value.text,
+                                              ),
+                                        (startDate == null)
+                                            ? widget.startDate
+                                            : {
+                                                "day": startDate!.day,
+                                                "month": startDate!.month,
+                                                "year": startDate!.year,
+                                              },
+                                        (endDate == null)
+                                            ? widget.endDate
+                                            : {
+                                                "day": endDate!.day,
+                                                "month": endDate!.month,
+                                                "year": endDate!.year,
+                                              },
+                                        (scoreController.value.text.isEmpty)
+                                            ? widget.score
+                                            : double.parse(
+                                                scoreController.value.text,
+                                              ),
+                                        (rewatchController.value.text.isEmpty)
+                                            ? widget.repeatCount
+                                            : int.parse(
+                                                rewatchController.value.text,
+                                              ),
                                       );
-                                    }
 
-                                    Map newAlData = await getHomePageData();
-                                    if (context.mounted) {
-                                      Provider.of<StateProvider>(
-                                        context,
-                                        listen: false,
-                                      ).updateData(newAlData);
-                                    }
+                                      if (response["data"] != null &&
+                                          response["data"]["SaveMediaListEntry"] !=
+                                              null) {
+                                        final newStatus =
+                                            response["data"]["SaveMediaListEntry"]["status"];
+                                        final newProgress =
+                                            response["data"]["SaveMediaListEntry"]["progress"];
+                                        final newMediaListData =
+                                            response["data"]["SaveMediaListEntry"];
 
-                                    if (context.mounted) {
-                                      Navigator.of(context).pop();
-                                    }
+                                        widget.onUpdate(
+                                          newStatus,
+                                          newProgress,
+                                          newMediaListData,
+                                        );
+                                      }
 
-                                    setState(() {
-                                      isLoading = false;
-                                    });
+                                      if (context.mounted) {
+                                        final stateProvider =
+                                            Provider.of<StateProvider>(
+                                              context,
+                                              listen: false,
+                                            );
+                                        Navigator.of(context).pop();
+
+                                        getHomePageData()
+                                            .then((newAlData) {
+                                              stateProvider.updateData(
+                                                newAlData,
+                                              );
+                                            })
+                                            .catchError((_) {});
+                                      }
+                                    } catch (_) {
+                                    } finally {
+                                      if (mounted) {
+                                        setState(() {
+                                          isLoading = false;
+                                        });
+                                      }
+                                    }
                                   },
                             icon: isLoading
                                 ? const SizedBox(
