@@ -252,7 +252,7 @@ class RepoService {
     if (mSource.sourceCodeLanguage == SourceCodeLanguage.dart) {
       return DartExtensionService(mSource);
     } else if (mSource.sourceCodeLanguage == SourceCodeLanguage.lnreader) {
-      return LNReaderExtensionService(mSource);
+      return LNReaderExtensionService(mSource, userPrefs: userPrefs);
     } else {
       return JsExtensionService(mSource, userPrefs: userPrefs);
     }

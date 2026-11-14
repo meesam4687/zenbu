@@ -1,4 +1,6 @@
 import 'package:d4rt/d4rt.dart';
+import 'package:zenbu/services/mangayomi/eval/dart/bridge/bridge_cast.dart';
+import 'package:zenbu/services/mangayomi/eval/model/m_chapter.dart';
 import 'package:zenbu/services/mangayomi/eval/model/m_manga.dart';
 
 class MMangaBridge {
@@ -11,11 +13,19 @@ class MMangaBridge {
           artist: namedArgs.get<String?>('artist'),
           author: namedArgs.get<String?>('author'),
           description: namedArgs.get<String?>('description'),
-          genre: namedArgs.get<List?>('genre')?.cast(),
+          genre: asBridgedList<String>(
+            namedArgs.get<List?>('genre'),
+            'MManga.genre',
+          ),
           status: namedArgs.get<Status?>('status') ?? Status.unknown,
           imageUrl: namedArgs.get<String?>('imageUrl'),
           link: namedArgs.get<String?>('link'),
-          chapters: namedArgs.get<List?>('chapters')?.cast() ?? [],
+          chapters:
+              asBridgedList<MChapter>(
+                namedArgs.get<List?>('chapters'),
+                'MManga.chapters',
+              ) ??
+              [],
           name: namedArgs.get<String?>('name'),
         );
       },
@@ -40,16 +50,16 @@ class MMangaBridge {
           (target as MManga).author = value as String?,
       'description': (visitor, target, value) =>
           (target as MManga).description = value as String?,
-      'genre': (visitor, target, value) =>
-          (target as MManga).genre = (value as List?)?.cast(),
+      'genre': (visitor, target, value) => (target as MManga).genre =
+          asBridgedList<String>(value, 'MManga.genre'),
       'status': (visitor, target, value) =>
           (target as MManga).status = value as Status?,
       'imageUrl': (visitor, target, value) =>
           (target as MManga).imageUrl = value as String?,
       'link': (visitor, target, value) =>
           (target as MManga).link = value as String,
-      'chapters': (visitor, target, value) =>
-          (target as MManga).chapters = (value as List?)?.cast(),
+      'chapters': (visitor, target, value) => (target as MManga).chapters =
+          asBridgedList<MChapter>(value, 'MManga.chapters'),
     },
   );
   void registerBridgedClasses(D4rt interpreter) {

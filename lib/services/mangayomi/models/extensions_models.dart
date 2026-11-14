@@ -66,15 +66,67 @@ class ExtSource {
   bool get isAnime => itemType == 1;
   bool get isManga => itemType == 0;
 
+  static String convertLnreaderLang(dynamic langOrMap) {
+    final lang = langOrMap is Map ? langOrMap['lang'] : langOrMap;
+    if (lang is String) {
+      final clean = lang.replaceAll('\u200e', '').trim();
+      switch (clean) {
+        case "العربية":
+          return "ar";
+        case "中文, 汉语, 漢語":
+          return "zh";
+        case "English":
+          return "en";
+        case "Français":
+          return "fr";
+        case "Bahasa Indonesia":
+          return "id";
+        case "日本語":
+          return "ja";
+        case "조선말, 한국어":
+          return "ko";
+        case "Polski":
+          return "pl";
+        case "Português":
+          return "pt";
+        case "Русский":
+          return "ru";
+        case "Español":
+          return "es";
+        case "ไทย":
+          return "th";
+        case "Türkçe":
+          return "tr";
+        case "Українська":
+          return "uk";
+        case "Tiếng Việt":
+          return "vi";
+        case "Multi":
+          return "all";
+        default:
+          return clean.length <= 3 ? clean.toLowerCase() : "all";
+      }
+    }
+    return "all";
+  }
+
   factory ExtSource.fromJson(Map<String, dynamic> json) {
-    final int sourceLang = json['sourceCodeLanguage'] is int
-        ? json['sourceCodeLanguage'] as int
-        : (json['sourceCodeLanguage'] != null
-              ? int.tryParse(json['sourceCodeLanguage'].toString()) ?? 1
-              : 1);
+    final bool isLnreaderPlugin =
+        (json['id'] is String && int.tryParse(json['id'].toString()) == null) &&
+        (json['site'] != null || json['url'] != null);
+
+    final int sourceLang = isLnreaderPlugin
+        ? 3
+        : (json['sourceCodeLanguage'] is int
+              ? json['sourceCodeLanguage'] as int
+              : (json['sourceCodeLanguage'] != null
+                    ? int.tryParse(json['sourceCodeLanguage'].toString()) ?? 1
+                    : 1));
 
     int parsedItemType;
-    if (json['itemType'] is int) {
+    if (isLnreaderPlugin) {
+      parsedItemType = 2;
+    } else if (json['itemType'] is int) {
       parsedItemType = json['itemType'] as int;
     } else if (json['itemType'] != null &&
         int.tryParse(json['itemType'].toString()) != null) {
@@ -93,15 +145,22 @@ class ExtSource {
       parsedItemType = 0;
     }
 
+    final int id = json['id'] is int
+        ? json['id'] as int
+        : (int.tryParse(json['id']?.toString() ?? '') ??
+              'lnreader-plugin-"${json['name']}"."${json['lang']}"'.hashCode);
+
+    final String lang = isLnreaderPlugin
+        ? convertLnreaderLang(json['lang'])
+        : (json['lang']?.toString() ?? '');
+
     return ExtSource(
       name: json['name'] ?? '',
-      id: json['id'] is int
-          ? json['id'] as int
-          : int.parse(json['id'].toString()),
-      baseUrl: json['baseUrl'] ?? '',
-      lang: json['lang'] ?? '',
+      id: id,
+      baseUrl: json['baseUrl'] ?? json['site'] ?? '',
+      lang: lang,
       version: json['version'] ?? '',
-      sourceCodeUrl: json['sourceCodeUrl'] ?? '',
+      sourceCodeUrl: json['sourceCodeUrl'] ?? json['url'] ?? '',
       sourceCode: json['sourceCode'],
       iconUrl: json['iconUrl'] ?? json['icon'] ?? '',
       itemType: parsedItemType,

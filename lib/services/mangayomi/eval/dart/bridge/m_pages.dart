@@ -9,7 +9,9 @@ class MPagesBridge {
     constructors: {
       '': (visitor, positionalArgs, namedArgs) {
         return MPages(
-          list: (positionalArgs[0] as List).map((e) => e as MManga).toList(),
+          list: (positionalArgs[0] as List)
+              .map((e) => (e is BridgedInstance ? e.nativeObject : e) as MManga)
+              .toList(),
           hasNextPage: positionalArgs[1] as bool,
         );
       },
@@ -20,7 +22,9 @@ class MPagesBridge {
     },
     setters: {
       'list': (visitor, target, value) =>
-          (target as MPages).list = (value as List).cast<MManga>(),
+          (target as MPages).list = (value as List)
+              .map((e) => (e is BridgedInstance ? e.nativeObject : e) as MManga)
+              .toList(),
       'hasNextPage': (visitor, target, value) =>
           (target as MPages).hasNextPage = value as bool,
     },

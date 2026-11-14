@@ -5,6 +5,7 @@ import 'package:flutter_js/flutter_js.dart';
 import 'package:http/http.dart' as http;
 import 'package:js_packer/js_packer.dart';
 import 'package:zenbu/services/mangayomi/eval/model/m_bridge.dart';
+import 'package:zenbu/services/mangayomi/hls_proxy.dart';
 import 'package:zenbu/services/mangayomi/webview_server.dart';
 
 class JsUtils {
@@ -54,6 +55,23 @@ class JsUtils {
       } catch (_) {
         return "";
       }
+    });
+
+    runtime.onMessage('decryptAESGCM', (dynamic args) {
+      return MBridge.decryptAESGCM(
+        args[0] as String,
+        args[1] as String,
+        args[2] as String,
+        (args.length > 3 ? args[3] as String? : null) ?? '',
+      );
+    });
+
+    runtime.onMessage('createHlsProxyUrl', (dynamic args) async {
+      final url = args[0]?.toString() ?? '';
+      final headers = (args.length > 1 && args[1] is Map)
+          ? (args[1] as Map).map((k, v) => MapEntry(k.toString(), v.toString()))
+          : const <String, String>{};
+      return await HlsProxyService.instance.createUrl(url, headers);
     });
 
     runtime.onMessage('parseDates', (dynamic args) {
@@ -186,6 +204,14 @@ class JsUtils {
 
       function decryptAESCryptoJS(encrypted, passphrase) {
         return sendMessage("decryptAESCryptoJS", JSON.stringify([encrypted, passphrase]));
+      }
+
+      function decryptAESGCM(encrypted, keyHex, ivHex, tagHex = "") {
+        return sendMessage("decryptAESGCM", JSON.stringify([encrypted, keyHex, ivHex, tagHex]));
+      }
+
+      async function createHlsProxyUrl(url, headers = {}) {
+        return await sendMessage("createHlsProxyUrl", JSON.stringify([url, headers]));
       }
 
       function deobfuscateJsPassword(inputString) {

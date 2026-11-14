@@ -4,6 +4,7 @@ class ChapterItem {
   String? releaseTime;
   int? chapterNumber;
   String? page;
+  String? scanlator;
 
   ChapterItem({
     required this.name,
@@ -11,6 +12,7 @@ class ChapterItem {
     this.releaseTime,
     this.chapterNumber,
     this.page,
+    this.scanlator,
   });
 
   factory ChapterItem.fromJson(Map<String, dynamic> json) {
@@ -19,10 +21,12 @@ class ChapterItem {
       path: json['path']?.toString() ?? '',
       releaseTime: json['releaseTime']?.toString(),
       chapterNumber: json['chapterNumber'] != null
-          ? (json['chapterNumber'] as num?)?.toInt() ??
-                int.tryParse(json['chapterNumber'].toString())
+          ? int.tryParse(json['chapterNumber'].toString())
           : null,
       page: json['page']?.toString(),
+      scanlator: json['scanlator'] is List
+          ? (json['scanlator'] as List).join(', ')
+          : json['scanlator']?.toString(),
     );
   }
 
@@ -33,6 +37,7 @@ class ChapterItem {
       'releaseTime': releaseTime,
       'chapterNumber': chapterNumber,
       'page': page,
+      'scanlator': scanlator,
     };
   }
 }
@@ -57,7 +62,10 @@ class NovelItem {
   }
 }
 
-class SourceNovel extends NovelItem {
+class SourceNovel {
+  String name;
+  String path;
+  String? cover;
   String? genres;
   String? summary;
   String? author;
@@ -65,11 +73,12 @@ class SourceNovel extends NovelItem {
   String? status;
   double? rating;
   List<ChapterItem>? chapters;
+  int? totalPages;
 
   SourceNovel({
-    required super.name,
-    required super.path,
-    super.cover,
+    required this.name,
+    required this.path,
+    this.cover,
     this.genres,
     this.summary,
     this.author,
@@ -77,11 +86,16 @@ class SourceNovel extends NovelItem {
     this.status,
     this.rating,
     this.chapters,
+    this.totalPages,
   });
 
   factory SourceNovel.fromJson(Map<String, dynamic> json) {
     if (json['path'] == null) {
-      throw 'path is null';
+      throw Exception(
+        'The source returned a novel with no path, so it cannot be opened. '
+        'This is the extension rather than Zenbu'
+        '${json['name'] is String ? ' (while reading "${json['name']}")' : ''}.',
+      );
     }
     return SourceNovel(
       name: json['name']?.toString() ?? '',
@@ -96,12 +110,17 @@ class SourceNovel extends NovelItem {
           ? json['rating']
           : double.tryParse(json['rating']?.toString() ?? ''),
       chapters: (json['chapters'] as List<dynamic>?)
-          ?.map((item) => ChapterItem.fromJson(Map<String, dynamic>.from(item)))
+          ?.map(
+            (item) =>
+                ChapterItem.fromJson(Map<String, dynamic>.from(item as Map)),
+          )
           .toList(),
+      totalPages: json['totalPages'] is int
+          ? json['totalPages'] as int
+          : int.tryParse(json['totalPages']?.toString() ?? ''),
     );
   }
 
-  @override
   Map<String, dynamic> toJson() {
     return {
       'name': name,
@@ -114,6 +133,7 @@ class SourceNovel extends NovelItem {
       'status': status,
       'rating': rating,
       'chapters': chapters?.map((item) => item.toJson()).toList(),
+      'totalPages': totalPages,
     };
   }
 }
@@ -128,7 +148,9 @@ class SourcePage {
       chapters:
           (json['chapters'] as List<dynamic>?)
               ?.map(
-                (item) => ChapterItem.fromJson(Map<String, dynamic>.from(item)),
+                (item) => ChapterItem.fromJson(
+                  Map<String, dynamic>.from(item as Map),
+                ),
               )
               .toList() ??
           [],

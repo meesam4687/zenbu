@@ -20,6 +20,10 @@ class JsLibs {
     });
 
     runtime.evaluate('''
+async function jsonStringify(fn) {
+    return JSON.stringify(await fn());
+}
+
 console.log = function (message) {
     if (typeof message === "object") {
          message = JSON.stringify(message);

@@ -86,6 +86,15 @@ class MProviderBridged {
       ),
     );
     interpreter.registertopLevelFunction(
+      'decryptAESGCM',
+      (visitor, positionalArgs, namedArgs, _) => MBridge.decryptAESGCM(
+        positionalArgs[0] as String,
+        positionalArgs[1] as String,
+        positionalArgs[2] as String,
+        positionalArgs.length > 3 ? positionalArgs[3] as String : '',
+      ),
+    );
+    interpreter.registertopLevelFunction(
       'encryptAESCryptoJS',
       (visitor, positionalArgs, namedArgs, _) => MBridge.encryptAESCryptoJS(
         positionalArgs[0] as String,

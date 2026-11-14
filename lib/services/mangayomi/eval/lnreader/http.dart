@@ -64,14 +64,19 @@ class Response {
   }
 }
 
-async function fetchApi(url, init) {
+globalThis.fetchApi = async function(url, init) {
   const method = init?.method ? init.method.toLowerCase() : "get";
   const result = await sendMessage(
     "http_" + method,
     JSON.stringify([url, init?.headers, init?.body])
   );
   return new Response(url, result);
-}
+};
+
+globalThis.fetchText = async function(url, init, encoding) {
+  const res = await globalThis.fetchApi(url, init);
+  return await res.text();
+};
 ''');
   }
 }
