@@ -124,8 +124,8 @@ class _MediaDiscoveryPageState extends State<MediaDiscoveryPage> {
 
   Widget _buildContent(Map dataMap) {
     final mediaList = widget.isAnime
-        ? (dataMap["data"]["popularSeason"]["media"] as List)
-        : (dataMap["data"]["trending"]["media"] as List);
+        ? ((dataMap["data"]?["popularSeason"]?["media"] as List?) ?? [])
+        : ((dataMap["data"]?["trending"]?["media"] as List?) ?? []);
 
     return SingleChildScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
@@ -181,43 +181,54 @@ class _MediaDiscoveryPageState extends State<MediaDiscoveryPage> {
             if (widget.isAnime) ...[
               HorizontalList(
                 heading: context.l10n.trendingNow,
-                mediaArray: dataMap["data"]["trending"]["media"],
+                mediaArray:
+                    (dataMap["data"]?["trending"]?["media"] as List?) ?? [],
                 pagetype: PageType.trendingAnime,
               ),
               HorizontalList(
                 heading: context.l10n.popularThisSeason,
-                mediaArray: dataMap["data"]["popularSeason"]["media"],
+                mediaArray:
+                    (dataMap["data"]?["popularSeason"]?["media"] as List?) ??
+                    [],
                 pagetype: PageType.popularSeasonAnime,
               ),
               HorizontalList(
                 heading: context.l10n.upcoming,
-                mediaArray: dataMap["data"]["upcoming"]["media"],
+                mediaArray:
+                    (dataMap["data"]?["upcoming"]?["media"] as List?) ?? [],
                 pagetype: PageType.upcomingAnime,
               ),
               HorizontalList(
                 heading: context.l10n.allTimePopular,
-                mediaArray: dataMap["data"]["allTimePopular"]["media"],
+                mediaArray:
+                    (dataMap["data"]?["allTimePopular"]?["media"] as List?) ??
+                    [],
                 pagetype: PageType.popularAllTimeAnime,
               ),
               HorizontalList(
                 heading: context.l10n.highestRated,
-                mediaArray: dataMap["data"]["highestRated"]["media"],
+                mediaArray:
+                    (dataMap["data"]?["highestRated"]?["media"] as List?) ?? [],
                 pagetype: PageType.highestRatedAnime,
               ),
             ] else ...[
               HorizontalList(
                 heading: context.l10n.trendingNow,
-                mediaArray: dataMap["data"]["trending"]["media"],
+                mediaArray:
+                    (dataMap["data"]?["trending"]?["media"] as List?) ?? [],
                 pagetype: PageType.trendingManga,
               ),
               HorizontalList(
                 heading: context.l10n.allTimePopular,
-                mediaArray: dataMap["data"]["allTimePopular"]["media"],
+                mediaArray:
+                    (dataMap["data"]?["allTimePopular"]?["media"] as List?) ??
+                    [],
                 pagetype: PageType.popularAllTimeManga,
               ),
               HorizontalList(
                 heading: context.l10n.highestRated,
-                mediaArray: dataMap["data"]["highestRated"]["media"],
+                mediaArray:
+                    (dataMap["data"]?["highestRated"]?["media"] as List?) ?? [],
                 pagetype: PageType.highestRatedManga,
               ),
             ],

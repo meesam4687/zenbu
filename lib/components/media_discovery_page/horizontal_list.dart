@@ -14,11 +14,14 @@ class HorizontalList extends StatelessWidget {
   });
 
   final String heading;
-  final List mediaArray;
+  final List? mediaArray;
   final PageType pagetype;
 
   @override
   Widget build(BuildContext context) {
+    final effectiveMediaArray = mediaArray ?? [];
+    final bool isAnime = pagetype.name.toLowerCase().contains('anime');
+
     return Container(
       height: 290,
       width: double.infinity,
@@ -98,39 +101,65 @@ class HorizontalList extends StatelessWidget {
             margin: const EdgeInsets.only(top: 12),
             width: double.infinity,
             height: 230,
-            child: Consumer<StateProvider>(
-              builder: (context, provider, _) {
-                return ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: mediaArray.length,
-                  itemBuilder: (context, index) {
-                    final Map media = mediaArray[index];
-                    final isFirst = index == 0;
-                    final isLast = index == mediaArray.length - 1;
-                    return Padding(
-                      padding: EdgeInsets.only(
-                        left: isFirst ? 0 : 1,
-                        right: isLast ? 0 : 1,
-                      ),
-                      child: ItemCard(
-                        title: provider.resolveTitle(media["title"] as Map?),
-                        image: media["coverImage"]["large"] ?? '',
-                        id: media["id"],
-                        type: media["type"].toString().toLowerCase(),
-                        mediaListEntry: media["mediaListEntry"] as Map?,
-                        listDataPreloaded: true,
-                        margin: EdgeInsets.only(
-                          left: isFirst ? 0 : 4,
-                          right: isLast ? 0 : 4,
-                          top: 4,
-                          bottom: 4,
+            child: effectiveMediaArray.isEmpty
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          isAnime
+                              ? Icons.tv_off_outlined
+                              : Icons.menu_book_outlined,
+                          size: 40,
+                          color: Theme.of(context).colorScheme.outline,
                         ),
-                      ),
-                    );
-                  },
-                );
-              },
-            ),
+                        const SizedBox(height: 8),
+                        Text(
+                          context.l10n.emptyList,
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Theme.of(context).colorScheme.outline,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : Consumer<StateProvider>(
+                    builder: (context, provider, _) {
+                      return ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: effectiveMediaArray.length,
+                        itemBuilder: (context, index) {
+                          final Map media = effectiveMediaArray[index];
+                          final isFirst = index == 0;
+                          final isLast =
+                              index == effectiveMediaArray.length - 1;
+                          return Padding(
+                            padding: EdgeInsets.only(
+                              left: isFirst ? 0 : 1,
+                              right: isLast ? 0 : 1,
+                            ),
+                            child: ItemCard(
+                              title: provider.resolveTitle(
+                                media["title"] as Map?,
+                              ),
+                              image: media["coverImage"]["large"] ?? '',
+                              id: media["id"],
+                              type: media["type"].toString().toLowerCase(),
+                              mediaListEntry: media["mediaListEntry"] as Map?,
+                              listDataPreloaded: true,
+                              margin: EdgeInsets.only(
+                                left: isFirst ? 0 : 4,
+                                right: isLast ? 0 : 4,
+                                top: 4,
+                                bottom: 4,
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
           ),
         ],
       ),
